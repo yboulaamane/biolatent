@@ -223,7 +223,18 @@ export default function Home() {
     <div className="app-container">
       {/* HEADER SECTION */}
       <header className="header">
-        <div className="logo-container">
+        <div 
+          className="logo-container" 
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            setActiveTab('directory');
+            setSearchQuery('');
+            setSelectedModality('All');
+            setSelectedInputType('All');
+            setSelectedLicense('All');
+            setSelectedRepType('All');
+          }}
+        >
           <svg width="38" height="38" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-indigo)', filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))' }}>
             <polygon points="50,8 88,30 88,74 50,96 12,74 12,30" />
             <circle cx="50" cy="53" r="20" strokeWidth="4" strokeDasharray="6,5" />
@@ -682,6 +693,17 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* FOOTER */}
+      <footer style={{ marginTop: '4rem', padding: '2rem 0 1rem', borderTop: '1px solid var(--border-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+        <div>
+          © {new Date().getFullYear()} BioLatent • Open Source Registry.
+        </div>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <a href="https://github.com/yboulaamane/biolatent" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
+          <span>Curated by <a href="https://github.com/yboulaamane" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none', fontWeight: 600 }}>yboulaamane</a></span>
+        </div>
+      </footer>
 
       {/* ==================== DETAIL INSPECTOR MODAL ==================== */}
       {selectedEmbedding && (
