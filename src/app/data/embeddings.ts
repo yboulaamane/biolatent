@@ -1,557 +1,893 @@
-export interface EmbeddingEntry {
+export type RepresentationType = 'learned_embedding' | 'fixed_descriptor' | 'hybrid_representation';
+
+export interface BaseRepresentation {
   id: string;
   name: string;
-  developer: string;
-  modality: 'Molecule' | 'Protein' | 'Complex';
-  inputType: 'SMILES' | 'Amino Acid Sequence' | '3D Coordinates' | 'Graph' | 'Pocket/3D' | 'Substructure';
-  dimension: number;
-  trainingData: {
-    name: string;
-    size: string;
-  };
-  pretrainingObjective: string;
+  aliases?: string[];
+  version?: string;
+  yearReleased?: number;
+  maintainer?: string;
+  developer?: string;
+  representationType: RepresentationType;
+  modality: 'molecule' | 'protein' | 'complex' | 'reaction';
+  inputRepresentation: 'SMILES' | 'graph' | 'sequence' | '3D' | 'engineered_features' | 'Pocket/3D';
   license: string;
-  links: {
-    huggingface?: string;
-    github?: string;
-    paper?: string;
-  };
-  typicalTasks: string[];
+  
+  // Availability
+  weightsUrl?: string;
+  codeRepositoryUrl?: string;
+  librarySupport?: string;
+
+  // Usage constraints
+  inferenceRequirements?: string;
+  computeProfile: 'cpu' | 'gpu' | 'mixed';
+
+  // Evaluation & Utility
+  dataLeakageRisk: 'low' | 'medium' | 'high' | 'unknown';
+  reproducibilityScore: number; // 0 to 1
+  domainGeneralization: 'low' | 'medium' | 'high';
+  smallDataPerformance: 'low' | 'medium' | 'high';
+  
+  // Downstream task scores
   benchmarks: {
     dataset: string;
     metric: string;
     score: string;
   }[];
+
+  tags: string[];
   codeSnippet: string;
 }
 
-export const EMBEDDINGS: EmbeddingEntry[] = [
+export interface LearnedEmbedding extends BaseRepresentation {
+  representationType: 'learned_embedding';
+  architectureType: string; // Transformer, GNN, VAE, etc.
+  pretrainingObjective: string;
+  parameterCount?: string;
+  embeddingDimension: number;
+  
+  // Training data
+  trainingData: {
+    name: string;
+    size: string;
+    preprocessingSteps?: string;
+    license: string;
+  };
+}
+
+export interface FixedDescriptor extends BaseRepresentation {
+  representationType: 'fixed_descriptor';
+  descriptorFamily: string; // ECFP, MACCS, RDKit2D, etc.
+  algorithmType: 'hashed' | 'rule-based' | 'physicochemical';
+  vectorType: 'binary' | 'count' | 'continuous';
+  dimensionality: number | string;
+}
+
+export interface HybridRepresentation extends BaseRepresentation {
+  representationType: 'hybrid_representation';
+  embeddingDimension: number;
+  components: {
+    learnedModel: string;
+    descriptorsUsed: string[];
+    fusionMethod: 'concatenation' | 'projection' | 'attention' | 'ensemble';
+  };
+  // Optional training data if learned elements require it
+  trainingData?: {
+    name: string;
+    size: string;
+    license: string;
+  };
+}
+
+export type RepresentationEntry = LearnedEmbedding | FixedDescriptor | HybridRepresentation;
+
+export const EMBEDDINGS: RepresentationEntry[] = [
+  // ==================== 1. SMALL MOLECULES ====================
   {
-    id: "chemberta-2",
-    name: "ChemBERTa-2 (77M MLM)",
-    developer: "DeepChem & Duvenaud Lab",
-    modality: "Molecule",
-    inputType: "SMILES",
-    dimension: 384,
-    trainingData: {
-      name: "PubChem10M / ZINC15",
-      size: "77M molecules"
-    },
-    pretrainingObjective: "Masked Language Modeling (MLM) on SMILES tokens",
+    id: "chemberta_v1",
+    name: "ChemBERTa-v1 (MLM)",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
     license: "MIT",
-    links: {
-      huggingface: "https://huggingface.co/deepchem/ChemBERTa-77M-MLM",
-      github: "https://github.com/deepchem/deepchem",
-      paper: "https://arxiv.org/abs/2209.01712"
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked Language Modeling (MLM)",
+    embeddingDimension: 768,
+    yearReleased: 2020,
+    trainingData: {
+      name: "ZINC15 subset",
+      size: "10M molecules",
+      license: "Restrictive (ZINC)"
     },
-    typicalTasks: ["QSAR regression", "ADMET screening", "Molecular toxicity classification"],
+    codeRepositoryUrl: "https://github.com/deepchem/deepchem",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.85,
+    domainGeneralization: "medium",
+    smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.690" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "1.120" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.780" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.760" }
     ],
+    tags: ["Transformer", "SMILES", "BERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
 import torch
 
-# Load the pretrained ChemBERTa-2 tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained("deepchem/chemberta-77m-mlm") # v1 fallback
+model = AutoModel.from_pretrained("deepchem/chemberta-77m-mlm")
+model.eval()
+
+inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
+  },
+  {
+    id: "chemberta_77m",
+    name: "ChemBERTa-2 (77M MLM)",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
+    license: "MIT",
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked Language Modeling (MLM) on SMILES tokens",
+    embeddingDimension: 384,
+    yearReleased: 2022,
+    trainingData: {
+      name: "PubChem10M / ZINC15",
+      size: "77M molecules",
+      license: "CC0 / Mixed"
+    },
+    codeRepositoryUrl: "https://github.com/deepchem/deepchem",
+    weightsUrl: "https://huggingface.co/deepchem/ChemBERTa-77M-MLM",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.95,
+    domainGeneralization: "medium",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.690" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" }
+    ],
+    tags: ["BERT", "SMILES", "Transformers"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModel
 tokenizer = AutoTokenizer.from_pretrained("deepchem/ChemBERTa-77M-MLM")
 model = AutoModel.from_pretrained("deepchem/ChemBERTa-77M-MLM")
-model.eval()
-
-# Example SMILES string (Aspirin)
-smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-
-# Tokenize and run model
-inputs = tokenizer(smiles, return_tensors="pt", padding=True, truncation=True)
-with torch.no_grad():
-    outputs = model(**inputs)
-
-# Mean pooling over token embeddings
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (384,)`
+inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
   },
   {
-    id: "molformer-xl",
-    name: "MolFormer-XL",
-    developer: "IBM Research & MILA",
-    modality: "Molecule",
-    inputType: "SMILES",
-    dimension: 768,
-    trainingData: {
-      name: "ZINC20 & PubChem",
-      size: "1.1 Billion molecules"
-    },
-    pretrainingObjective: "Linear attention-based Transformer with masking on SMILES",
+    id: "smiles_transformer",
+    name: "SMILES Transformer",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
     license: "MIT",
-    links: {
-      huggingface: "https://huggingface.co/ibm/MoLFormer-XL-Cperceiver-10pct",
-      github: "https://github.com/IBM/molformer",
-      paper: "https://www.nature.com/articles/s42256-022-00580-7"
+    architectureType: "Transformer",
+    pretrainingObjective: "Seq2Seq SMILES reconstruction",
+    embeddingDimension: 1024,
+    yearReleased: 2019,
+    trainingData: {
+      name: "ChEMBL24",
+      size: "1.7M molecules",
+      license: "CC BY-SA 3.0"
     },
-    typicalTasks: ["Molecular property prediction", "Chemical similarity", "Virtual screening"],
+    codeRepositoryUrl: "https://github.com/honda-research-institute/smiles-transformer",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.70,
+    domainGeneralization: "low",
+    smallDataPerformance: "low",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.742" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "0.582" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.540" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620" }
     ],
-    codeSnippet: `from transformers import AutoModel, AutoTokenizer
-import torch
-
-# Load MolFormer-XL with trust_remote_code=True for custom architecture
-tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
-model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
-model.eval()
-
-# Example SMILES string
-smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-
-inputs = tokenizer(smiles, return_tensors="pt", padding=True, truncation=True)
-with torch.no_grad():
-    outputs = model(**inputs)
-
-# Use pooler output for general downstream tasks
-embeddings = outputs.pooler_output.squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (768,)`
+    tags: ["Seq2Seq", "SMILES", "Autoencoder"],
+    codeSnippet: `# Requires custom repository implementation cloning smiles-transformer.
+# import smiles_transformer as st
+# model = st.load_model("weights.pt")
+# embedding = model.embed("CC(=O)OC1=CC=CC=C1C(=O)O")`
   },
   {
-    id: "uni-mol",
-    name: "Uni-Mol",
-    developer: "DP Technology & Peking University",
-    modality: "Molecule",
-    inputType: "3D Coordinates",
-    dimension: 512,
-    trainingData: {
-      name: "ZINC15 3D conformers",
-      size: "19M molecules (multiple 3D conformers)"
-    },
-    pretrainingObjective: "3D spatial coordinates prediction and masked atom modeling",
-    license: "Apache-2.0",
-    links: {
-      github: "https://github.com/dptech-corp/Uni-Mol",
-      paper: "https://openreview.net/forum?id=9T4Z3_2ODa"
-    },
-    typicalTasks: ["3D property prediction", "Conformation generation", "Protein-ligand docking"],
-    benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "0.510" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.525" }
-    ],
-    codeSnippet: `# Uni-Mol requires generating 3D conformers first (e.g. using RDKit ETKDG)
-# and installing the 'unimol' python library.
-import torch
-from unimol.models import UniMolModel
-
-# Load the Uni-Mol model checkpoint (downloaded from Uni-Mol repo)
-# model = UniMolModel.from_pretrained("path/to/checkpoint.pt")
-
-# Raw representation loading pseudocode:
-# inputs = {
-#     "atoms": torch.tensor([[6, 8, 8, 6, ...]]), # Atomic numbers
-#     "coordinates": torch.tensor([[[0.1, 0.2, 0.3], ...]]) # 3D positions
-# }
-# with torch.no_grad():
-#     embeddings = model.extract_features(inputs) # Shape: [1, 512]`
-  },
-  {
-    id: "mol2vec",
-    name: "Mol2Vec",
-    developer: "Jaeger et al. (University of Hamburg)",
-    modality: "Molecule",
-    inputType: "Substructure",
-    dimension: 300,
-    trainingData: {
-      name: "ZINC / ChEMBL",
-      size: "20M molecules"
-    },
-    pretrainingObjective: "Word2Vec (Skip-gram) on Morgan substructure identifiers",
+    id: "molclr",
+    name: "MolCLR (GNN Contrastive)",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
     license: "MIT",
-    links: {
-      github: "https://github.com/samoturk/mol2vec",
-      paper: "https://pubs.acs.org/doi/10.1021/acs.jcim.7b00614"
+    architectureType: "GNN (GIN / GCN)",
+    pretrainingObjective: "Molecular Contrastive Learning (MolCLR)",
+    embeddingDimension: 512,
+    yearReleased: 2021,
+    trainingData: {
+      name: "PubChem10M subset",
+      size: "10M molecules",
+      license: "CC0"
     },
-    typicalTasks: ["Chemical similarity search", "Fast baseline QSAR models"],
+    codeRepositoryUrl: "https://github.com/yuyangw/MolCLR",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.88,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.672" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.755" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "1.250" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.850" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.736" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" }
     ],
-    codeSnippet: `from rdkit import Chem
-from mol2vec.features import sentences2vec, MoleculeSentence
-from gensim.models import Word2Vec
-
-# Load pre-trained Mol2Vec Word2Vec model
-model = Word2Vec.load("model_300dim.pkl")
-
-# Generate embedding for Aspirin
-mol = Chem.MolFromSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")
-sentence = MoleculeSentence(mol)
-# Extract 300d molecular embedding
-embedding = sentences2vec([sentence], model, unseen="UNK")[0]
-print("Embedding shape:", embedding.shape) # Output: (300,)`
+    tags: ["Contrastive", "Graph", "GIN", "PyG"],
+    codeSnippet: `# Clone and import from MolCLR repository:
+# from models.ginet_finetune import GINet
+# model = GINet(num_layer=5, emb_dim=300, feat_dim=512)
+# model.load_state_dict(torch.load("pretrained_weights.pth"))
+# model.eval()
+# out_emb = model(molecular_graph)`
   },
   {
-    id: "grover",
-    name: "GROVER",
-    developer: "Tencent AI Lab",
-    modality: "Molecule",
-    inputType: "Graph",
-    dimension: 1000,
+    id: "grover_base",
+    name: "GROVER Base",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
+    license: "MIT",
+    architectureType: "GNN + Transformer",
+    pretrainingObjective: "Masked subgraph node/edge classification",
+    embeddingDimension: 1000,
+    yearReleased: 2020,
     trainingData: {
       name: "ZINC15 & ChEMBL",
-      size: "11M molecules"
+      size: "11M molecules",
+      license: "Mixed"
     },
-    pretrainingObjective: "Node/edge/subgraph masked attribute prediction on graphs",
+    codeRepositoryUrl: "https://github.com/tencent-ailab/grover",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.80,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.722" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" }
+    ],
+    tags: ["Graph", "Self-Supervised", "Grover"],
+    codeSnippet: `# Extracted via terminal using GROVER argument parser:
+# python main.py fingerprint --data_path smiles.csv \\
+#     --checkpoint_path checkpoints/grover_base.pt \\
+#     --output_path embeddings.npz`
+  },
+  {
+    id: "grover_large",
+    name: "GROVER Large",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
     license: "MIT",
-    links: {
-      github: "https://github.com/tencent-ailab/grover",
-      paper: "https://arxiv.org/abs/2007.01211"
+    architectureType: "GNN + Transformer",
+    pretrainingObjective: "Masked subgraph node/edge classification (Larger params)",
+    embeddingDimension: 2000,
+    yearReleased: 2020,
+    trainingData: {
+      name: "ZINC15 & ChEMBL",
+      size: "11M molecules",
+      license: "Mixed"
     },
-    typicalTasks: ["Large-scale Graph QSAR", "Molecular similarity", "ADMET prediction"],
+    codeRepositoryUrl: "https://github.com/tencent-ailab/grover",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.80,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.735" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "0.680" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.612" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" }
     ],
-    codeSnippet: `# GROVER requires loading via their custom codebase and downloading weights.
-# Code snippet shows extraction using the GROVER argument parser.
-# Run following in terminal to extract representations:
-# python main.py fingerprint \\
-#     --data_path data/smiles.csv \\
-#     --features_generator rdkit_2d \\
+    tags: ["Graph", "Self-Supervised", "Grover-Large"],
+    codeSnippet: `# Run in shell terminal to output large 2000d fingerprint files:
+# python main.py fingerprint --data_path smiles.csv \\
 #     --checkpoint_path checkpoints/grover_large.pt \\
 #     --output_path embeddings.npz`
   },
   {
-    id: "chemgpt",
-    name: "ChemGPT (1.2B)",
-    developer: "Valence Labs & Recursion",
-    modality: "Molecule",
-    inputType: "SMILES",
-    dimension: 2048,
-    trainingData: {
-      name: "PubChem",
-      size: "10M molecules"
-    },
-    pretrainingObjective: "Autoregressive generative pretraining on SMILES strings",
+    id: "gin_supervised_contextpred",
+    name: "GIN Supervised + ContextPred",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
     license: "MIT",
-    links: {
-      huggingface: "https://huggingface.co/ncfrey/ChemGPT-1.2B",
-      github: "https://github.com/valencelabs/ChemGPT",
-      paper: "https://arxiv.org/abs/2210.01776"
+    architectureType: "GIN (Graph Isomorphism Network)",
+    pretrainingObjective: "Contextual topology matching + supervised molecular task pretraining",
+    embeddingDimension: 300,
+    yearReleased: 2019,
+    trainingData: {
+      name: "ZINC15 (unlabeled) + MoleculeNet (labeled)",
+      size: "2M molecules + 450K supervised targets",
+      license: "CC0 / Public Domain"
     },
-    typicalTasks: ["De novo molecule generation", "Molecular property classification"],
+    codeRepositoryUrl: "https://github.com/snap-stanford/pretrain-gnns",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.685" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "1.080" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.790" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.710" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.850" }
     ],
-    codeSnippet: `from transformers import AutoTokenizer, GPT2Model
-import torch
-
-tokenizer = AutoTokenizer.from_pretrained("ncfrey/ChemGPT-1.2B")
-model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")
-model.eval()
-
-smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-inputs = tokenizer(smiles, return_tensors="pt")
-
-with torch.no_grad():
-    outputs = model(**inputs)
-
-# Use final token representation or average pooling
-embeddings = outputs.last_hidden_state[:, -1, :].squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (2048,)`
+    tags: ["GNN", "GIN", "Context-Prediction"],
+    codeSnippet: `# Uses snap-stanford torchGNN pipelines
+# from models import GNN_drug
+# model = GNN_drug(num_layer=5, emb_dim=300, GNN_type='gin')
+# model.load_state_dict(torch.load('supervised_contextpred.pth'))`
   },
   {
-    id: "bartsmiles",
-    name: "BARTSmiles",
-    developer: "University of Maryland & Meta AI",
-    modality: "Molecule",
-    inputType: "SMILES",
-    dimension: 1024,
-    trainingData: {
-      name: "ZINC20",
-      size: "1 Billion molecules"
-    },
-    pretrainingObjective: "Sequence-to-sequence denoising BART (masking/rotation/deletion)",
+    id: "graphormer_mol",
+    name: "Graphormer Molecule",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
     license: "MIT",
-    links: {
-      github: "https://github.com/BorealisAI/BARTSmiles",
-      paper: "https://arxiv.org/abs/2211.16349"
+    architectureType: "Graph Transformer",
+    pretrainingObjective: "Atom/node type prediction and shortest-path distance encoding",
+    embeddingDimension: 512,
+    yearReleased: 2021,
+    trainingData: {
+      name: "PCBA / PubChem",
+      size: "10M molecules",
+      license: "MIT"
     },
-    typicalTasks: ["Chemical reaction prediction", "Optimization", "Property screening"],
+    codeRepositoryUrl: "https://github.com/microsoft/Graphormer",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.85,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.755" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.925" },
-      { dataset: "ESOL (Solubility)", metric: "RMSE", score: "0.550" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.512" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.725" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.895" }
     ],
-    codeSnippet: `# BARTSmiles is integrated via fairseq.
-# To extract representations:
-# from fairseq.models.bart import BARTModel
-# bart = BARTModel.from_pretrained('checkpoints/', checkpoint_file='bart_large.pt')
-# smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
-# tokens = bart.encode(smiles)
-# features = bart.extract_features(tokens) # Shape: [1, seq_len, 1024]`
+    tags: ["Microsoft", "Graph-Transformer", "Attention"],
+    codeSnippet: `# Graphormer runs using the fairseq interface or MS-Graphormer API
+# from graphormer.models.graphormer import GraphormerModel
+# model = GraphormerModel.from_pretrained('graphormer_base')`
   },
   {
-    id: "esm-2-650m",
+    id: "dmpnn_chemprop",
+    name: "D-MPNN (Chemprop)",
+    representationType: "hybrid_representation",
+    modality: "molecule",
+    inputRepresentation: "engineered_features",
+    license: "MIT",
+    components: {
+      learnedModel: "Directed MPNN (graph-encoder)",
+      descriptorsUsed: ["200 RDKit molecular descriptors", "Morgan Fingerprints (ECFP4)"],
+      fusionMethod: "concatenation"
+    },
+    embeddingDimension: 500,
+    yearReleased: 2019,
+    codeRepositoryUrl: "https://github.com/chemprop/chemprop",
+    computeProfile: "mixed",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.98,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.905" }
+    ],
+    tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
+    codeSnippet: `import chemprop
+# Chemprop runs via CLI or python API:
+# arguments = ['--data_path', 'data.csv', '--dataset_type', 'regression', '--save_dir', 'checkpoints']
+# args = chemprop.args.TrainArgs().parse_args(arguments)
+# chemprop.train.run_training(args)`
+  },
+  {
+    id: "mpnn_dti",
+    name: "MPNN DTI",
+    representationType: "learned_embedding",
+    modality: "complex",
+    inputRepresentation: "graph",
+    license: "Academic/Restrictive",
+    architectureType: "Message Passing Neural Network",
+    pretrainingObjective: "Supervised drug-target interaction affinity regression",
+    embeddingDimension: 128,
+    yearReleased: 2018,
+    trainingData: {
+      name: "KIBA / Davis",
+      size: "120,000+ binding affinities",
+      license: "Academic Use"
+    },
+    codeRepositoryUrl: "https://github.com/lifesciencetrust/deep-dti",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.75,
+    domainGeneralization: "low",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.880" }
+    ],
+    tags: ["DTI", "Binding", "Affinity", "MPNN"],
+    codeSnippet: `# MPNN is usually integrated as a sub-model in target binding pipelines:
+# from models import MPNN
+# model = MPNN(num_edge_features=10, num_node_features=40)`
+  },
+  {
+    id: "uni_mol",
+    name: "Uni-Mol (3D)",
+    representationType: "hybrid_representation",
+    modality: "molecule",
+    inputRepresentation: "3D",
+    license: "Apache-2.0",
+    components: {
+      learnedModel: "3D Spatial Transformer",
+      descriptorsUsed: ["RDKit conformation 3D atomic coordinates", "Pairwise spatial matrices"],
+      fusionMethod: "concatenation"
+    },
+    embeddingDimension: 512,
+    yearReleased: 2022,
+    trainingData: {
+      name: "ZINC15 3D conformers",
+      size: "19M molecules (multiple conformers)",
+      license: "Academic/Commercial"
+    },
+    codeRepositoryUrl: "https://github.com/dptech-corp/Uni-Mol",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" }
+    ],
+    tags: ["3D", "Transformer", "Conformation"],
+    codeSnippet: `# Conformer input representation extraction:
+# atoms = torch.tensor([[6, 8, 8, 6]]) # Aspirin skeleton
+# coordinates = torch.tensor([[[0.1, 0.2, 0.3], [1.1, 1.2, 1.3], ...]])
+# features = unimol_model.extract_features(atoms, coordinates)`
+  },
+  {
+    id: "ecfp4_fingerprint",
+    name: "ECFP4 (Extended-Connectivity Fingerprint)",
+    representationType: "fixed_descriptor",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
+    license: "MIT",
+    descriptorFamily: "ECFP",
+    algorithmType: "hashed",
+    vectorType: "binary",
+    dimensionality: 2048,
+    yearReleased: 2010,
+    codeRepositoryUrl: "https://github.com/rdkit/rdkit",
+    computeProfile: "cpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 1.0,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.720" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810" }
+    ],
+    tags: ["Classical", "Fingerprint", "RDKit", "Baseline"],
+    codeSnippet: `from rdkit import Chem
+from rdkit.ChemicalFeatures import GetMorganFingerprintAsBitVect
+
+mol = Chem.MolFromSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")
+# Radius 2 matches ECFP4 fingerprint specification
+fp = GetMorganFingerprintAsBitVect(mol, radius=2, nBits=2048)
+fingerprint_array = list(fp)
+print("Vector size:", len(fingerprint_array)) # Output: 2048`
+  },
+  {
+    id: "rdkit_descriptors",
+    name: "RDKit 2D Physical Descriptors",
+    representationType: "fixed_descriptor",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
+    license: "MIT",
+    descriptorFamily: "RDKit2D",
+    algorithmType: "physicochemical",
+    vectorType: "continuous",
+    dimensionality: 200,
+    yearReleased: 2006,
+    codeRepositoryUrl: "https://github.com/rdkit/rdkit",
+    computeProfile: "cpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 1.0,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.680" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785" }
+    ],
+    tags: ["Classical", "Descriptors", "Physicochemical", "RDKit"],
+    codeSnippet: `from rdkit import Chem
+from rdkit.Chem.Descriptors import CalcMolDescriptors
+
+mol = Chem.MolFromSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")
+descriptors = CalcMolDescriptors(mol) # Returns dictionary of 200+ features
+values = list(descriptors.values())
+print("Descriptor count:", len(values))`
+  },
+
+  // ==================== 2. PROTEINS ====================
+  {
+    id: "esm2_t33_650M",
     name: "ESM-2 (650M parameter)",
-    developer: "Meta AI",
-    modality: "Protein",
-    inputType: "Amino Acid Sequence",
-    dimension: 1280,
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked Language Modeling (MLM)",
+    embeddingDimension: 1280,
+    yearReleased: 2022,
     trainingData: {
       name: "UniRef50 / ESM Atlas",
-      size: "250M protein sequences"
+      size: "250M protein sequences",
+      license: "MIT"
     },
-    pretrainingObjective: "Masked Language Modeling (MLM) on amino acid characters",
-    license: "MIT",
-    links: {
-      huggingface: "https://huggingface.co/facebook/esm2_t33_650M_UR50D",
-      github: "https://github.com/facebookresearch/esm",
-      paper: "https://www.science.org/doi/10.1126/science.ade2597"
-    },
-    typicalTasks: ["Protein structure prediction (ESMFold)", "Mutational effect prediction", "Function annotation"],
+    codeRepositoryUrl: "https://github.com/facebookresearch/esm",
+    weightsUrl: "https://huggingface.co/facebook/esm2_t33_650M_UR50D",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.98,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
       { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.840" },
-      { dataset: "Thermostability (FLIP)", metric: "Spearman r", score: "0.680" },
       { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.895" }
     ],
+    tags: ["Meta", "Protein-LM", "Transformer", "ESM"],
     codeSnippet: `from transformers import AutoTokenizer, EsmModel
 import torch
 
-# Load ESM-2 650M model
 tokenizer = AutoTokenizer.from_pretrained("facebook/esm2_t33_650M_UR50D")
 model = EsmModel.from_pretrained("facebook/esm2_t33_650M_UR50D")
-model.eval()
-
-# GFP sequence
-sequence = "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICT"
-
-inputs = tokenizer(sequence, return_tensors="pt")
+inputs = tokenizer("MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGD", return_tensors="pt")
 with torch.no_grad():
     outputs = model(**inputs)
-
-# Mean pooling over amino acid token embeddings
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (1280,)`
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
   },
   {
-    id: "esm-2-3b",
-    name: "ESM-2 (3B parameter)",
-    developer: "Meta AI",
-    modality: "Protein",
-    inputType: "Amino Acid Sequence",
-    dimension: 2560,
+    id: "esm2_t6_8M",
+    name: "ESM-2 (8M parameter)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked Language Modeling (MLM) (Lightweight)",
+    embeddingDimension: 320,
+    yearReleased: 2022,
     trainingData: {
       name: "UniRef50 / ESM Atlas",
-      size: "250M protein sequences"
+      size: "250M protein sequences",
+      license: "MIT"
     },
-    pretrainingObjective: "High-capacity Masked Language Modeling",
-    license: "MIT",
-    links: {
-      huggingface: "https://huggingface.co/facebook/esm2_t36_3B_UR50D",
-      github: "https://github.com/facebookresearch/esm",
-      paper: "https://www.science.org/doi/10.1126/science.ade2597"
-    },
-    typicalTasks: ["Zero-shot fitness prediction", "De novo protein design", "Contact map extraction"],
+    codeRepositoryUrl: "https://github.com/facebookresearch/esm",
+    weightsUrl: "https://huggingface.co/facebook/esm2_t6_8M_UR50D",
+    computeProfile: "cpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.98,
+    domainGeneralization: "medium",
+    smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.865" },
-      { dataset: "Thermostability (FLIP)", metric: "Spearman r", score: "0.710" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.912" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.710" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.780" }
     ],
+    tags: ["Meta", "Protein-LM", "ESM-Light"],
     codeSnippet: `from transformers import AutoTokenizer, EsmModel
-import torch
-
-# Load ESM-2 3B model (requires GPU / high RAM)
-tokenizer = AutoTokenizer.from_pretrained("facebook/esm2_t36_3B_UR50D")
-model = EsmModel.from_pretrained("facebook/esm2_t36_3B_UR50D")
-model.eval()
-
-sequence = "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICT"
-inputs = tokenizer(sequence, return_tensors="pt")
-with torch.no_grad():
-    outputs = model(**inputs)
-
-# Mean pooling over sequence
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (2560,)`
+tokenizer = AutoTokenizer.from_pretrained("facebook/esm2_t6_8M_UR50D")
+model = EsmModel.from_pretrained("facebook/esm2_t6_8M_UR50D")
+inputs = tokenizer("MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGD", return_tensors="pt")
+outputs = model(**inputs)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
   },
   {
-    id: "prott5-xl",
+    id: "prot_bert_bfd",
+    name: "ProtBERT BFD",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "Academic/Restrictive",
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked Language Modeling (MLM)",
+    embeddingDimension: 1024,
+    yearReleased: 2020,
+    trainingData: {
+      name: "BFD (Big Fantastic Database)",
+      size: "2.1 Billion sequences",
+      license: "Academic Use"
+    },
+    codeRepositoryUrl: "https://github.com/agemf/prot_t5_xl_uniref50",
+    weightsUrl: "https://huggingface.co/Rostlab/prot_bert_bfd",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.95,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.825" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.875" }
+    ],
+    tags: ["Rostlab", "BERT", "Protein-LM"],
+    codeSnippet: `from transformers import AutoTokenizer, BertModel
+import torch
+
+# Sequence must be spaced
+tokenizer = AutoTokenizer.from_pretrained("Rostlab/prot_bert_bfd", do_lower_case=False)
+model = BertModel.from_pretrained("Rostlab/prot_bert_bfd")
+seq = "M S K G E E L F T"
+inputs = tokenizer(seq, return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
+  },
+  {
+    id: "prot_t5_xl_uniref50",
     name: "ProtT5-XL-UniRef50",
-    developer: "Rost Lab",
-    modality: "Protein",
-    inputType: "Amino Acid Sequence",
-    dimension: 1024,
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "Academic/Commercial",
+    architectureType: "Transformer (T5 encoder)",
+    pretrainingObjective: "Span Denoising Autoencoding",
+    embeddingDimension: 1024,
+    yearReleased: 2021,
     trainingData: {
       name: "UniRef50 & BFD",
-      size: "2.1 Billion protein sequences"
+      size: "2.1 Billion sequences",
+      license: "Academic/Commercial"
     },
-    pretrainingObjective: "Seq2Seq Span Denoising (T5 framework)",
-    license: "Academic/Commercial",
-    links: {
-      huggingface: "https://huggingface.co/Rostlab/prot_t5_xl_uniref50",
-      github: "https://github.com/agemf/prot_t5_xl_uniref50",
-      paper: "https://ieeexplore.ieee.org/document/9477085"
-    },
-    typicalTasks: ["Secondary structure prediction", "Localization", "Binding site detection"],
+    codeRepositoryUrl: "https://github.com/agemf/prot_t5_xl_uniref50",
+    weightsUrl: "https://huggingface.co/Rostlab/prot_t5_xl_uniref50",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.96,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
       { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.852" },
-      { dataset: "Thermostability (FLIP)", metric: "Spearman r", score: "0.695" },
       { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.902" }
     ],
+    tags: ["Rostlab", "T5", "Protein-LM"],
     codeSnippet: `from transformers import T5EncoderModel, T5Tokenizer
 import torch
 import re
 
-# Load ProtT5-XL
 tokenizer = T5Tokenizer.from_pretrained("Rostlab/prot_t5_xl_uniref50", do_lower_case=False)
 model = T5EncoderModel.from_pretrained("Rostlab/prot_t5_xl_uniref50")
-model.eval()
-
-# Sequence must be space-separated and 'U,Z,O,B' replaced
-seq = "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICT"
-seq_spaced = " ".join(list(re.sub(r"[UZOB]", "X", seq)))
-
-inputs = tokenizer(seq_spaced, return_tensors="pt")
+seq = " ".join(list(re.sub(r"[UZOB]", "X", "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGD")))
+inputs = tokenizer(seq, return_tensors="pt")
 with torch.no_grad():
     outputs = model(**inputs)
-
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (1024,)`
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
   },
   {
-    id: "ankh",
-    name: "Ankh (Large)",
-    developer: "Oxford Protein Informatics Group",
-    modality: "Protein",
-    inputType: "Amino Acid Sequence",
-    dimension: 1536,
+    id: "seqvec",
+    name: "SeqVec",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "Academic/Restrictive",
+    architectureType: "Bi-directional LSTM (ELMo)",
+    pretrainingObjective: "Autoregressive language modeling (Next token prediction)",
+    embeddingDimension: 1024,
+    yearReleased: 2019,
     trainingData: {
       name: "UniRef50",
-      size: "200M+ protein sequences"
+      size: "93M protein sequences",
+      license: "Academic Use"
     },
-    pretrainingObjective: "Highly optimized MLM and Sequence Contrastive learning",
+    codeRepositoryUrl: "https://github.com/rostlab/SeqVec",
+    computeProfile: "cpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.85,
+    domainGeneralization: "low",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.785" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.840" }
+    ],
+    tags: ["ELMo", "LSTM", "Rostlab"],
+    codeSnippet: `# SeqVec requires the allennlp implementation from RostLab
+# from seqvec import SeqVecEmbedder
+# embedder = SeqVecEmbedder()
+# embedding = embedder.embed_sentence("MSKGEELFTGVVPIL") # Returns [seq_len, 1024]`
+  },
+  {
+    id: "ankh_base",
+    name: "Ankh Base",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
     license: "Apache-2.0",
-    links: {
-      huggingface: "https://huggingface.co/Elana/ankh-large",
-      github: "https://github.com/Rostlab/Ankh",
-      paper: "https://arxiv.org/abs/2301.06568"
+    architectureType: "Transformer",
+    pretrainingObjective: "MLM and Sequence-level contrastive alignment",
+    embeddingDimension: 768,
+    yearReleased: 2023,
+    trainingData: {
+      name: "UniRef50",
+      size: "200M sequences",
+      license: "Apache-2.0"
     },
-    typicalTasks: ["Protein-protein interactions", "Thermostability", "Zero-shot protein engineering"],
+    codeRepositoryUrl: "https://github.com/Rostlab/Ankh",
+    weightsUrl: "https://huggingface.co/Elana/ankh-base",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.94,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.858" },
-      { dataset: "Thermostability (FLIP)", metric: "Spearman r", score: "0.715" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.908" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.842" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.890" }
     ],
+    tags: ["Ankh", "Contrastive", "Oxford"],
     codeSnippet: `import ankh
-import torch
-
-# Load the pretrained Ankh model and tokenizer
-model, tokenizer = ankh.load_large_model()
+model, tokenizer = ankh.load_base_model()
 model.eval()
-
-sequence = "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICT"
-inputs = tokenizer([list(sequence)], is_split_into_words=True, return_tensors="pt")
-
-with torch.no_grad():
-    outputs = model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'])
-
-# Pool embedding
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-print("Embedding shape:", embeddings.shape) # Output: (1536,)`
+inputs = tokenizer([list("MSKGEELFTG")], is_split_into_words=True, return_tensors="pt")
+outputs = model(input_ids=inputs['input_ids'], attention_mask=inputs['attention_mask'])
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
   },
   {
-    id: "gearnet",
-    name: "GearNet",
-    developer: "Mila & Valence Labs",
-    modality: "Protein",
-    inputType: "3D Coordinates",
-    dimension: 512,
-    trainingData: {
-      name: "PDB (Protein Data Bank)",
-      size: "80,000+ protein structures"
-    },
-    pretrainingObjective: "Contrastive learning and spatial coordinate denoising on graphs",
+    id: "msa_transformer",
+    name: "MSA Transformer",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
     license: "MIT",
-    links: {
-      github: "https://github.com/DeepGraphLearning/torchdrug",
-      paper: "https://arxiv.org/abs/2203.06125"
+    architectureType: "Transformer (Axial Attention)",
+    pretrainingObjective: "Masked language modeling on Multiple Sequence Alignments",
+    embeddingDimension: 768,
+    yearReleased: 2021,
+    trainingData: {
+      name: "UniRef50 alignments",
+      size: "26M MSAs",
+      license: "MIT"
     },
-    typicalTasks: ["Protein structure representation", "Ligand binding prediction", "Enzyme classification"],
+    codeRepositoryUrl: "https://github.com/facebookresearch/esm",
+    weightsUrl: "https://huggingface.co/facebook/esm-msa",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812" },
-      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
+      { dataset: "Contact Prediction", metric: "Top-L Precision", score: "0.810" }
     ],
-    codeSnippet: `# GearNet runs via the TorchDrug library.
-# Below is TorchDrug instantiation pseudocode:
-# from torchdrug import datasets, models, tasks
-# model = models.GearNet(input_dim=21, hidden_dims=[512, 512, 512], 
-#                        num_relation=7, edge_input_dim=59)
-# checkpoint = torch.load("gearnet_weights.pth")
-# model.load_state_dict(checkpoint)`
+    tags: ["MSA", "Multiple-Sequence-Alignment", "Meta"],
+    codeSnippet: `# Requires a list of aligned homologous sequences
+# import esm
+# model, alphabet = esm.pretrained.esm_msa1b_t12_100M_UR50S()
+# batch_converter = alphabet.get_batch_converter()
+# data = [("msa1", ["M-KTV", "MK-TV", "MKT-V"])]
+# labels, strs, tokens = batch_converter(data)`
+  },
+
+  // ==================== 3. STRUCTURE / 3D MODELS ====================
+  {
+    id: "alphafold2_representations",
+    name: "AlphaFold 2 Evoformer Latents",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "3D",
+    license: "Apache-2.0",
+    architectureType: "Evoformer (Spatial Transformer)",
+    pretrainingObjective: "Supervised 3D coordinate structure regression",
+    embeddingDimension: 256,
+    yearReleased: 2021,
+    trainingData: {
+      name: "PDB structures + self-distillation",
+      size: "100,000 PDB structures + 350,000 predictions",
+      license: "Apache-2.0"
+    },
+    codeRepositoryUrl: "https://github.com/google-deepmind/alphafold",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.92,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "GDT-TS (CASP14)", metric: "Average GDT", score: "0.924" }
+    ],
+    tags: ["DeepMind", "AlphaFold2", "Evoformer", "3D"],
+    codeSnippet: `# AlphaFold latents can be extracted from custom OpenFold or AlphaFold runs.
+# From the results dictionary:
+# representation = results['representations']['evoformer'] # Shape: [N_res, N_res, 256]`
   },
   {
-    id: "diffdock",
-    name: "DiffDock Pocket Embeddings",
-    developer: "MIT Jameel Clinic (Corso et al.)",
-    modality: "Complex",
-    inputType: "Pocket/3D",
-    dimension: 1024,
+    id: "openfold_single_chain",
+    name: "OpenFold Single Chain",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    architectureType: "Evoformer - Single Chain Variant",
+    pretrainingObjective: "Structural prediction of single protein chains without MSAs",
+    embeddingDimension: 384,
+    yearReleased: 2022,
     trainingData: {
-      name: "PDBBind v2020",
-      size: "19,000+ protein-ligand structures"
+      name: "PDB + CAMEO",
+      size: "120,000 structures",
+      license: "Apache-2.0"
     },
-    pretrainingObjective: "Equivariant GNN representations representing ligand docking poses and pocket coordinates",
+    codeRepositoryUrl: "https://github.com/aqlaboratory/openfold",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "TM-score", metric: "TM-score", score: "0.780" }
+    ],
+    tags: ["OpenFold", "Single-Chain", "Evoformer", "3D"],
+    codeSnippet: `# Extracted from OpenFold runner without MSA queries:
+# from openfold.model.model import AlphaFold
+# openfold_runner = AlphaFold(config)`
+  },
+
+  // ==================== 4. INTERACTION / PROTEIN-LIGAND MODELS ====================
+  {
+    id: "proteinmpnn_embedding",
+    name: "ProteinMPNN Encoder Representations",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "3D",
     license: "MIT",
-    links: {
-      github: "https://github.com/gcorso/DiffDock",
-      paper: "https://arxiv.org/abs/2210.01776"
+    architectureType: "Message Passing GNN (Structural)",
+    pretrainingObjective: "Sequence generation given 3D structural backbone (Inverse Folding)",
+    embeddingDimension: 128,
+    yearReleased: 2022,
+    trainingData: {
+      name: "PDB structures (backbone coords)",
+      size: "80,000 structures",
+      license: "MIT"
     },
-    typicalTasks: ["Blind docking", "Binding affinity prediction", "Ligand-protein classification"],
+    codeRepositoryUrl: "https://github.com/dauparas/ProteinMPNN",
+    computeProfile: "mixed",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.99,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "PDBBind (Affinity)", metric: "RMSE", score: "1.450" }
+      { dataset: "Inverse Folding Recovery", metric: "Sequence Recovery", score: "0.524" }
     ],
-    codeSnippet: `# DiffDock extracts ligand and pocket embeddings during the docking process.
-# Pseudocode for extracting representations using DiffDock's Equivariant GNN:
-# from utils.parsing import parse_pdb, parse_sdf
-# from models.score_model import TensorProductScoreModel
-# ...
-# ligand_emb, pocket_emb = model.extract_complex_embeddings(ligand_graph, pocket_graph)`
+    tags: ["ProteinMPNN", "Baker-Lab", "Inverse-Folding", "3D"],
+    codeSnippet: `# Requires ProteinMPNN helper parser (parse_PDB.py)
+# from protein_mpnn_utils import ProteinMPNN
+# model = ProteinMPNN(node_features=128, edge_features=128)
+# encoder_latents = model.encode(backbone_coordinates, mask)`
   },
   {
-    id: "pocket-transformer",
-    name: "PocketTransformer",
-    developer: "Xie et al.",
-    modality: "Complex",
-    inputType: "Pocket/3D",
-    dimension: 768,
+    id: "ligandmpnn_embedding",
+    name: "LigandMPNN",
+    representationType: "learned_embedding",
+    modality: "complex",
+    inputRepresentation: "Pocket/3D",
+    license: "MIT",
+    architectureType: "Heterogeneous Message Passing GNN",
+    pretrainingObjective: "Protein design and sequence recovery conditioned on ligand pocket complexes",
+    embeddingDimension: 256,
+    yearReleased: 2023,
     trainingData: {
-      name: "ScPDB / PDBBind",
-      size: "16,000+ druggable pockets"
+      name: "PDB complexes + small molecule coordinates",
+      size: "95,000 protein-ligand structures",
+      license: "MIT"
     },
-    pretrainingObjective: "Geometric transformer encoding pocket spatial geometries and atomic descriptors",
-    license: "Academic/Restrictive",
-    links: {
-      github: "https://github.com/xielab/pocket-transformer",
-      paper: "https://doi.org/10.1093/bioinformatics/btac512"
-    },
-    typicalTasks: ["Pocket similarity", "Ligand binding specificity", "Druggability prediction"],
+    codeRepositoryUrl: "https://github.com/dauparas/LigandMPNN",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.95,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "ScPDB (Similarity)", metric: "Mean AP", score: "0.820" }
+      { dataset: "Sequence Recovery (Complexes)", metric: "Recovery", score: "0.570" }
     ],
-    codeSnippet: `# PocketTransformer processes PDB pocket files directly into embeddings.
-# from pocket_transformer import PocketEncoder
-# encoder = PocketEncoder.from_pretrained("pocket_transformer_768d")
-# pocket_features = encoder.embed_pocket("pocket.pdb") # Shape: [1, 768]`
+    tags: ["LigandMPNN", "Baker-Lab", "Drug-Design", "Inverse-Folding"],
+    codeSnippet: `# LigandMPNN design and representation loader
+# from ligand_mpnn_utils import LigandMPNN
+# model = LigandMPNN(node_features=256, edge_features=256)
+# embedding = model.encode(protein_coords, ligand_coords, ligand_types)`
   }
 ];
-

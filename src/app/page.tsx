@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { EMBEDDINGS, EmbeddingEntry } from './data/embeddings';
+import { EMBEDDINGS, RepresentationEntry, FixedDescriptor, LearnedEmbedding, HybridRepresentation } from './data/embeddings';
 
 export default function Home() {
   // Navigation Tabs
@@ -11,10 +11,11 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModality, setSelectedModality] = useState<string>('All');
   const [selectedInputType, setSelectedInputType] = useState<string>('All');
+  const [selectedRepType, setSelectedRepType] = useState<string>('All');
   const [selectedLicense, setSelectedLicense] = useState<string>('All');
 
   // Details Modal State
-  const [selectedEmbedding, setSelectedEmbedding] = useState<EmbeddingEntry | null>(null);
+  const [selectedEmbedding, setSelectedEmbedding] = useState<RepresentationEntry | null>(null);
   const [modalTab, setModalTab] = useState<'details' | 'code'>('details');
   const [copied, setCopied] = useState(false);
 
@@ -23,8 +24,9 @@ export default function Home() {
   const [submitForm, setSubmitForm] = useState({
     name: '',
     developer: '',
-    modality: 'Molecule',
-    inputType: 'SMILES',
+    representationType: 'learned_embedding',
+    modality: 'molecule',
+    inputRepresentation: 'SMILES',
     dimension: '',
     datasetName: '',
     datasetSize: '',
@@ -47,20 +49,46 @@ export default function Home() {
   });
 
   // Unique options for dropdowns/filters
-  const modalities = ['All', 'Molecule', 'Protein', 'Complex'];
-  const inputTypes = ['All', 'SMILES', 'Amino Acid Sequence', '3D Coordinates', 'Graph', 'Substructure', 'Pocket/3D'];
+  const modalities = ['All', 'molecule', 'protein', 'complex'];
+  const inputTypes = ['All', 'SMILES', 'graph', 'sequence', '3D', 'engineered_features', 'Pocket/3D'];
+  const repTypes = ['All', 'learned_embedding', 'fixed_descriptor', 'hybrid_representation'];
   const licenses = ['All', 'MIT', 'Apache-2.0', 'Academic/Restrictive'];
+
+  // Helper to extract dimensionality from any representation entry
+  const getDim = (emb: RepresentationEntry): string | number => {
+    if (emb.representationType === 'fixed_descriptor') {
+      return (emb as FixedDescriptor).dimensionality;
+    }
+    return (emb as LearnedEmbedding | HybridRepresentation).embeddingDimension;
+  };
+
+  // Helper to format labels
+  const formatLabel = (val: string) => {
+    if (val === 'learned_embedding') return 'Learned Embedding';
+    if (val === 'fixed_descriptor') return 'Fixed Descriptor';
+    if (val === 'hybrid_representation') return 'Hybrid Representation';
+    if (val === 'engineered_features') return 'Engineered Features';
+    if (val === 'molecule') return 'Molecule';
+    if (val === 'protein') return 'Protein';
+    if (val === 'complex') return 'Complex';
+    return val;
+  };
 
   // Filtered embeddings selector
   const filteredEmbeddings = useMemo(() => {
     return EMBEDDINGS.filter((emb) => {
       const matchesSearch =
         emb.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emb.developer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        emb.pretrainingObjective.toLowerCase().includes(searchQuery.toLowerCase());
+        (emb.developer?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (emb.representationType === 'learned_embedding' &&
+          (emb as LearnedEmbedding).pretrainingObjective.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        emb.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesModality = selectedModality === 'All' || emb.modality === selectedModality;
-      const matchesInputType = selectedInputType === 'All' || emb.inputType === selectedInputType;
+      
+      const matchesInputType = selectedInputType === 'All' || emb.inputRepresentation === selectedInputType;
+      
+      const matchesRepType = selectedRepType === 'All' || emb.representationType === selectedRepType;
       
       let matchesLicense = true;
       if (selectedLicense !== 'All') {
@@ -71,9 +99,9 @@ export default function Home() {
         }
       }
 
-      return matchesSearch && matchesModality && matchesInputType && matchesLicense;
+      return matchesSearch && matchesModality && matchesInputType && matchesRepType && matchesLicense;
     });
-  }, [searchQuery, selectedModality, selectedInputType, selectedLicense]);
+  }, [searchQuery, selectedModality, selectedInputType, selectedRepType, selectedLicense]);
 
   // Code Copy Action
   const copyToClipboard = (text: string) => {
@@ -87,30 +115,31 @@ export default function Home() {
     if (wizardStep !== 5) return [];
 
     return EMBEDDINGS.filter((emb) => {
-      // Modality match (Molecule / Protein)
-      if (wizardAnswers.modality && emb.modality !== wizardAnswers.modality) {
+      // Modality match
+      if (wizardAnswers.modality && emb.modality !== wizardAnswers.modality.toLowerCase()) {
         return false;
       }
       
       // Input type compatibility
-      if (wizardAnswers.inputType === 'Graph' && emb.inputType !== 'Graph' && emb.inputType !== '3D Coordinates') {
+      if (wizardAnswers.inputType === 'Graph' && emb.inputRepresentation !== 'graph' && emb.inputRepresentation !== '3D') {
         return false;
       }
-      if (wizardAnswers.inputType === 'SMILES' && emb.inputType !== 'SMILES' && emb.inputType !== 'Substructure') {
+      if (wizardAnswers.inputType === 'SMILES' && emb.inputRepresentation !== 'SMILES' && emb.inputRepresentation !== 'engineered_features') {
         return false;
       }
-      if (wizardAnswers.inputType === '3D' && emb.inputType !== '3D Coordinates') {
+      if (wizardAnswers.inputType === '3D' && emb.inputRepresentation !== '3D') {
         return false;
       }
-      if (wizardAnswers.inputType === 'Sequence' && emb.inputType !== 'Amino Acid Sequence') {
+      if (wizardAnswers.inputType === 'Sequence' && emb.inputRepresentation !== 'sequence') {
         return false;
       }
-      if (wizardAnswers.inputType === 'Pocket/3D' && emb.inputType !== 'Pocket/3D') {
+      if (wizardAnswers.inputType === 'Pocket/3D' && emb.inputRepresentation !== 'Pocket/3D') {
         return false;
       }
 
-      // Hardware/resource filters (e.g. low-resource cannot run massive model ESM-2 3B easily)
-      if (wizardAnswers.resourceBudget === 'Low (Local CPU)' && emb.dimension > 1500) {
+      // Hardware/resource filters (dimension check)
+      const dim = getDim(emb);
+      if (wizardAnswers.resourceBudget === 'Low (Local CPU)' && typeof dim === 'number' && dim > 1200) {
         return false;
       }
 
@@ -133,28 +162,50 @@ export default function Home() {
   // Generate community JSON pull request snippet
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formatted = {
-      id: submitForm.name.toLowerCase().replace(/\s+/g, '-'),
+    const isLearned = submitForm.representationType === 'learned_embedding';
+    const isFixed = submitForm.representationType === 'fixed_descriptor';
+    
+    let formatted: any = {
+      id: submitForm.name.toLowerCase().replace(/\s+/g, '_'),
       name: submitForm.name,
       developer: submitForm.developer,
+      representationType: submitForm.representationType,
       modality: submitForm.modality,
-      inputType: submitForm.inputType,
-      dimension: parseInt(submitForm.dimension) || 300,
-      trainingData: {
+      inputRepresentation: submitForm.inputRepresentation,
+      yearReleased: new Date().getFullYear(),
+      computeProfile: isFixed ? 'cpu' : 'gpu',
+      dataLeakageRisk: 'unknown',
+      reproducibilityScore: 1.0,
+      domainGeneralization: 'medium',
+      smallDataPerformance: 'medium',
+      benchmarks: [],
+      tags: [submitForm.inputRepresentation, submitForm.modality],
+      codeSnippet: `# Python load code for ${submitForm.name}`,
+    };
+
+    if (isLearned) {
+      formatted.architectureType = 'Transformer';
+      formatted.pretrainingObjective = submitForm.objective;
+      formatted.embeddingDimension = parseInt(submitForm.dimension) || 512;
+      formatted.trainingData = {
         name: submitForm.datasetName,
         size: submitForm.datasetSize,
-      },
-      pretrainingObjective: submitForm.objective,
-      license: submitForm.license,
-      links: {
-        huggingface: submitForm.huggingface || undefined,
-        github: submitForm.github || undefined,
-        paper: submitForm.paper || undefined,
-      },
-      typicalTasks: submitForm.typicalTasks.split(',').map(t => t.trim()).filter(Boolean),
-      benchmarks: [],
-      codeSnippet: `# Loading code for ${submitForm.name}`,
-    };
+        license: submitForm.license,
+      };
+    } else if (isFixed) {
+      formatted.descriptorFamily = submitForm.name;
+      formatted.algorithmType = 'hashed';
+      formatted.vectorType = 'binary';
+      formatted.dimensionality = parseInt(submitForm.dimension) || 2048;
+    } else {
+      formatted.components = {
+        learnedModel: 'Transformer',
+        descriptorsUsed: [submitForm.inputRepresentation],
+        fusionMethod: 'concatenation',
+      };
+      formatted.embeddingDimension = parseInt(submitForm.dimension) || 512;
+    }
+
     setGeneratedJson(JSON.stringify(formatted, null, 2));
   };
 
@@ -176,13 +227,16 @@ export default function Home() {
           <div className="logo-icon">B</div>
           <div>
             <div className="logo-text">BioLatent</div>
-            <div className="logo-tagline">Registry of Biological Latent Vectors</div>
+            <div className="logo-tagline">Biological & Chemical Vector Registry</div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button className="badge-btn active" onClick={() => setShowSubmitModal(true)}>
-            + Submit Embedding
+          <button className="badge-btn active" onClick={() => {
+            setShowSubmitModal(true);
+            setGeneratedJson(null);
+          }}>
+            + Add Representation
           </button>
           
           <div className="tabs-nav">
@@ -190,7 +244,7 @@ export default function Home() {
               className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
               onClick={() => setActiveTab('directory')}
             >
-              Catalog
+              Registry
             </button>
             <button
               className={`tab-btn ${activeTab === 'wizard' ? 'active' : ''}`}
@@ -199,7 +253,7 @@ export default function Home() {
                 resetWizard();
               }}
             >
-              Rec Engine
+              Latent Finder
             </button>
             <button
               className={`tab-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
@@ -211,7 +265,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ==================== TAB 1: DIRECTORY ==================== */}
+      {/* ==================== TAB 1: REGISTRY DIRECTORY ==================== */}
       {activeTab === 'directory' && (
         <div className="layout-grid">
           {/* SIDEBAR FILTERS */}
@@ -227,14 +281,29 @@ export default function Home() {
                     className={`badge-btn ${selectedModality === m ? 'active' : ''}`}
                     onClick={() => setSelectedModality(m)}
                   >
-                    {m}
+                    {m === 'All' ? 'All' : formatLabel(m)}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="filter-group">
-              <span className="filter-label">Input Representation</span>
+              <span className="filter-label">Representation Type</span>
+              <div className="filter-options">
+                {repTypes.map(rt => (
+                  <button
+                    key={rt}
+                    className={`badge-btn ${selectedRepType === rt ? 'active' : ''}`}
+                    onClick={() => setSelectedRepType(rt)}
+                  >
+                    {rt === 'All' ? 'All' : formatLabel(rt)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <span className="filter-label">Input Type</span>
               <div className="filter-options">
                 {inputTypes.map(i => (
                   <button
@@ -242,7 +311,7 @@ export default function Home() {
                     className={`badge-btn ${selectedInputType === i ? 'active' : ''}`}
                     onClick={() => setSelectedInputType(i)}
                   >
-                    {i === 'Amino Acid Sequence' ? 'Sequence' : i}
+                    {i === 'All' ? 'All' : formatLabel(i)}
                   </button>
                 ))}
               </div>
@@ -264,11 +333,11 @@ export default function Home() {
             </div>
             
             <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Showing {filteredEmbeddings.length} of {EMBEDDINGS.length} registered embeddings.
+              Showing {filteredEmbeddings.length} of {EMBEDDINGS.length} indices.
             </div>
           </aside>
 
-          {/* CATALOG MAIN GRID */}
+          {/* MAIN GRID */}
           <main>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
               <div className="search-wrapper">
@@ -277,7 +346,7 @@ export default function Home() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search embeddings by name, developer, objective..."
+                  placeholder="Search representations by name, developer, framework, tags..."
                   className="search-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -287,7 +356,7 @@ export default function Home() {
 
             {filteredEmbeddings.length === 0 ? (
               <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                No embeddings match your filter criteria. Try expanding your search queries.
+                No chemical representations match your filter criteria. Try expanding your search queries.
               </div>
             ) : (
               <div className="embeddings-list">
@@ -295,34 +364,47 @@ export default function Home() {
                   <div key={emb.id} className="glass-card embedding-card">
                     <div>
                       <div className="card-header">
-                        <span className={`modality-badge ${emb.modality.toLowerCase()}`}>
-                          {emb.modality}
+                        <span className={`modality-badge ${emb.modality}`}>
+                          {formatLabel(emb.modality)}
                         </span>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-indigo)' }}>
-                          {emb.dimension} dims
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                          {formatLabel(emb.representationType)}
                         </span>
                       </div>
                       
                       <h4 className="card-title">{emb.name}</h4>
-                      <span className="card-developer">by {emb.developer}</span>
+                      <span className="card-developer">by {emb.developer || 'Open Source Contributors'}</span>
                       
                       <div className="card-meta-grid">
                         <div className="meta-item">
-                          <span className="meta-label">Input</span>
-                          <span className="meta-value">{emb.inputType}</span>
+                          <span className="meta-label">Input Format</span>
+                          <span className="meta-value">{formatLabel(emb.inputRepresentation)}</span>
                         </div>
                         <div className="meta-item">
-                          <span className="meta-label">Pretrained Size</span>
-                          <span className="meta-value">{emb.trainingData.size}</span>
+                          <span className="meta-label">Dimensions</span>
+                          <span className="meta-value" style={{ color: 'var(--accent-indigo)' }}>
+                            {getDim(emb)}d
+                          </span>
                         </div>
                       </div>
-                      
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4, margin: '0.5rem 0 1rem 0' }}>
-                        {emb.pretrainingObjective.substring(0, 75)}...
-                      </p>
+
+                      <div className="card-meta-grid" style={{ marginTop: '0', borderTop: 'none', borderBottom: 'none' }}>
+                        <div className="meta-item">
+                          <span className="meta-label">Pretrained Size</span>
+                          <span className="meta-value">
+                            {emb.representationType === 'fixed_descriptor' ? 'N/A (Hashed)' : (emb as any).trainingData?.size || 'N/A'}
+                          </span>
+                        </div>
+                        <div className="meta-item">
+                          <span className="meta-label">Repro Score</span>
+                          <span className="meta-value" style={{ color: emb.reproducibilityScore > 0.9 ? 'var(--accent-emerald)' : 'var(--text-secondary)' }}>
+                            {(emb.reproducibilityScore * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="card-footer">
+                    <div className="card-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
                       <span className="card-license">
                         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ display: 'inline' }}>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -348,7 +430,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ==================== TAB 2: RECOMMENDATION WIZARD ==================== */}
+      {/* ==================== TAB 2: LATENT FINDER WIZARD ==================== */}
       {activeTab === 'wizard' && (
         <div style={{ maxWidth: '700px', margin: '2rem auto' }} className="glass-card">
           <div className="wizard-header">
@@ -390,7 +472,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* STEP 2: Input Data Format */}
+          {/* STEP 2: Input Format */}
           {wizardStep === 2 && (
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
@@ -446,13 +528,10 @@ export default function Home() {
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
                 3. What is the size of your downstream screening dataset?
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1.5rem' }}>
-                Large pre-trained representations perform differently depending on the available supervision size.
-              </p>
               <div className="wizard-option-grid">
                 <div className="wizard-option-card" onClick={() => selectWizardOption('datasetSize', 'Low')}>
                   <div className="wizard-option-title">Low (&lt; 200 data points)</div>
-                  <div className="wizard-option-desc">High risk of overfitting. Simpler embeddings with high regularization or zero-shot recommended.</div>
+                  <div className="wizard-option-desc">High risk of overfitting. Fixed descriptors or small learned models recommended.</div>
                 </div>
                 <div className="wizard-option-card" onClick={() => selectWizardOption('datasetSize', 'Medium')}>
                   <div className="wizard-option-title">Medium (1k - 10k data points)</div>
@@ -480,11 +559,11 @@ export default function Home() {
               <div className="wizard-option-grid">
                 <div className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'Low (Local CPU)')}>
                   <div className="wizard-option-title">Low (Local CPU)</div>
-                  <div className="wizard-option-desc">Requires fast inference, lightweight models (dimension &lt; 800, small parameter size).</div>
+                  <div className="wizard-option-desc">Requires fast inference, lightweight models (dimension &lt; 1200, small parameter size).</div>
                 </div>
                 <div className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'High (GPU Server)')}>
                   <div className="wizard-option-title">High (V100/A100 GPU)</div>
-                  <div className="wizard-option-desc">Can host large ESM language models, large graph networks, and high dimensional vectors.</div>
+                  <div className="wizard-option-desc">Can host large language models, large graph networks, and high dimensional vectors.</div>
                 </div>
               </div>
               <div className="wizard-actions">
@@ -495,11 +574,11 @@ export default function Home() {
             </div>
           )}
 
-          {/* STEP 5: Recommendation Results */}
+          {/* STEP 5: Results */}
           {wizardStep === 5 && (
             <div className="wizard-results">
               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', color: '#fff', marginBottom: '1.5rem', textAlign: 'center' }}>
-                Recommended Embeddings
+                Recommended Representations
               </h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
@@ -525,7 +604,7 @@ export default function Home() {
                         )}
                       </div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Input: {emb.inputType} • Dimension: {emb.dimension} • License: {emb.license}
+                        Type: {formatLabel(emb.representationType)} • Input: {formatLabel(emb.inputRepresentation)} • Dim: {getDim(emb)}d
                       </span>
                     </div>
 
@@ -543,12 +622,12 @@ export default function Home() {
 
                 {recommendedEmbeddings.length === 0 && (
                   <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No exact matches found. Reset filters and try less restrictive parameters.
+                    No exact matches found. Reset parameters and try less restrictive inputs.
                   </div>
                 )}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'center' }}>
                 <button className="btn-wizard-back" onClick={resetWizard}>
                   Restart Wizard
                 </button>
@@ -563,36 +642,32 @@ export default function Home() {
         <div className="glass-card">
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>MoleculeNet Downstream Benchmarks</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-            Comparison of public benchmark scores achieved using the embedding vectors directly in linear probing or simple random forest models.
+            Comparison of reported benchmark scores across molecular representations.
           </p>
 
           <div style={{ overflowX: 'auto' }}>
             <table className="benchmark-table">
               <thead>
                 <tr>
-                  <th>Embedding Model</th>
-                  <th>Input Representation</th>
+                  <th>Model / Fingerprint</th>
+                  <th>Representation Type</th>
+                  <th>Input Format</th>
                   <th>BBBP (ROC-AUC) ↑</th>
                   <th>ClinTox (ROC-AUC) ↑</th>
-                  <th>ESOL Solubility (RMSE) ↓</th>
-                  <th>Lipophilicity (RMSE) ↓</th>
                 </tr>
               </thead>
               <tbody>
-                {EMBEDDINGS.filter(e => e.modality === 'Molecule').map((emb) => {
+                {EMBEDDINGS.filter(e => e.modality === 'molecule').map((emb) => {
                   const bbbp = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'))?.score || 'N/A';
                   const clintox = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'))?.score || 'N/A';
-                  const esol = emb.benchmarks.find(b => b.dataset.startsWith('ESOL'))?.score || 'N/A';
-                  const lipo = emb.benchmarks.find(b => b.dataset.startsWith('Lipophilicity'))?.score || 'N/A';
 
                   return (
                     <tr key={emb.id}>
                       <td style={{ fontWeight: 700, color: '#fff' }}>{emb.name}</td>
-                      <td>{emb.inputType}</td>
+                      <td>{formatLabel(emb.representationType)}</td>
+                      <td>{formatLabel(emb.inputRepresentation)}</td>
                       <td><span className="score-badge">{bbbp}</span></td>
                       <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{clintox}</span></td>
-                      <td><span className="score-badge" style={{ color: 'var(--accent-emerald)', background: 'rgba(16,185,129,0.1)' }}>{esol}</span></td>
-                      <td><span className="score-badge" style={{ color: '#f59e0b', background: 'rgba(245,158,11,0.1)' }}>{lipo}</span></td>
                     </tr>
                   );
                 })}
@@ -602,7 +677,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ==================== EMBEDDING INSPECTOR MODAL ==================== */}
+      {/* ==================== DETAIL INSPECTOR MODAL ==================== */}
       {selectedEmbedding && (
         <div className="modal-overlay" onClick={() => setSelectedEmbedding(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -611,15 +686,15 @@ export default function Home() {
             <div className="modal-body">
               <div className="modal-title-row">
                 <div>
-                  <span className={`modality-badge ${selectedEmbedding.modality.toLowerCase()}`} style={{ marginBottom: '0.5rem', display: 'inline-block' }}>
-                    {selectedEmbedding.modality}
+                  <span className={`modality-badge ${selectedEmbedding.modality}`} style={{ marginBottom: '0.5rem', display: 'inline-block' }}>
+                    {formatLabel(selectedEmbedding.modality)}
                   </span>
                   <h2 className="modal-title-main">{selectedEmbedding.name}</h2>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Developed by {selectedEmbedding.developer}</span>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Developed by {selectedEmbedding.maintainer || 'Open Source / Authors'}</span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-indigo)' }}>
-                    {selectedEmbedding.dimension}d
+                    {getDim(selectedEmbedding)}d
                   </span>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Dimension</div>
                 </div>
@@ -631,73 +706,138 @@ export default function Home() {
                   className={`modal-tab-btn ${modalTab === 'details' ? 'active' : ''}`}
                   onClick={() => setModalTab('details')}
                 >
-                  Model Profile
+                  Representation Profile
                 </button>
                 <button
                   className={`modal-tab-btn ${modalTab === 'code' ? 'active' : ''}`}
                   onClick={() => setModalTab('code')}
                 >
-                  Python Loader Snippet
+                  Integration Hook
                 </button>
               </div>
 
-              {/* MODAL TAB 1: DETAILS */}
+              {/* DETAILS TAB */}
               {modalTab === 'details' && (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                    <div>
-                      <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700, letterSpacing: '0.05em' }}>Pretraining Objective</h4>
-                      <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{selectedEmbedding.pretrainingObjective}</p>
+                  {/* Categorical Details */}
+                  {selectedEmbedding.representationType === 'learned_embedding' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Pretraining Objective</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{(selectedEmbedding as LearnedEmbedding).pretrainingObjective}</p>
+                      </div>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Architecture Type</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{(selectedEmbedding as LearnedEmbedding).architectureType}</p>
+                      </div>
                     </div>
+                  )}
 
-                    <div>
-                      <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700, letterSpacing: '0.05em' }}>Pretraining Dataset</h4>
+                  {selectedEmbedding.representationType === 'fixed_descriptor' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Descriptor Family</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{(selectedEmbedding as FixedDescriptor).descriptorFamily}</p>
+                      </div>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Algorithm Type</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{formatLabel((selectedEmbedding as FixedDescriptor).algorithmType)}</p>
+                      </div>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Vector Type</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{formatLabel((selectedEmbedding as FixedDescriptor).vectorType)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedEmbedding.representationType === 'hybrid_representation' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Fusion Method</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{formatLabel((selectedEmbedding as HybridRepresentation).components.fusionMethod)}</p>
+                      </div>
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Components Integrated</h4>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                          Learned: <strong>{(selectedEmbedding as HybridRepresentation).components.learnedModel}</strong> <br />
+                          Fixed Features: <strong>{(selectedEmbedding as HybridRepresentation).components.descriptorsUsed.join(', ')}</strong>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pretrained Metadata */}
+                  {selectedEmbedding.representationType !== 'fixed_descriptor' && (selectedEmbedding as any).trainingData && (
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginBottom: '2.0rem' }}>
+                      <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Training Dataset</h4>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                        <strong>{selectedEmbedding.trainingData.name}</strong> ({selectedEmbedding.trainingData.size})
+                        Pretrained on <strong>{(selectedEmbedding as any).trainingData.name}</strong> containing <strong>{(selectedEmbedding as any).trainingData.size}</strong>.
                       </p>
                     </div>
-                  </div>
+                  )}
 
-                  <div style={{ marginBottom: '2rem' }}>
-                    <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700, letterSpacing: '0.05em' }}>Typical Downstream Targets</h4>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      {selectedEmbedding.typicalTasks.map((t) => (
-                        <span
-                          key={t}
-                          style={{
-                            fontSize: '0.8rem',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.06)',
-                            color: 'var(--text-secondary)',
-                            padding: '0.3rem 0.6rem',
-                            borderRadius: '6px'
-                          }}
-                        >
-                          {t}
+                  {/* Utility & Quality Scores */}
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginBottom: '2rem' }}>
+                    <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 700 }}>Reproduction & Safety Profile</h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Leakage Risk</div>
+                        <span style={{
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          color: selectedEmbedding.dataLeakageRisk === 'high' ? 'var(--accent-purple)' : selectedEmbedding.dataLeakageRisk === 'low' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
+                        }}>
+                          {selectedEmbedding.dataLeakageRisk.toUpperCase()}
                         </span>
-                      ))}
+                      </div>
+
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Repro Index</div>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-indigo)' }}>
+                          {(selectedEmbedding.reproducibilityScore * 100).toFixed(0)}%
+                        </span>
+                      </div>
+
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Generalization</div>
+                        <span style={{
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          color: selectedEmbedding.domainGeneralization === 'high' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
+                        }}>
+                          {selectedEmbedding.domainGeneralization.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Low-data QSAR</div>
+                        <span style={{
+                          fontWeight: 700,
+                          fontSize: '0.9rem',
+                          color: selectedEmbedding.smallDataPerformance === 'high' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
+                        }}>
+                          {selectedEmbedding.smallDataPerformance.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
+                  {/* Links / Download buttons */}
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                       License Constraints: <strong style={{ color: 'var(--text-secondary)' }}>{selectedEmbedding.license}</strong>
                     </div>
                     
                     <div style={{ display: 'flex', gap: '0.75rem', marginLeft: 'auto' }}>
-                      {selectedEmbedding.links.paper && (
-                        <a href={selectedEmbedding.links.paper} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none' }}>
-                          Read Paper
+                      {selectedEmbedding.codeRepositoryUrl && (
+                        <a href={selectedEmbedding.codeRepositoryUrl} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none' }}>
+                          Source Code
                         </a>
                       )}
-                      {selectedEmbedding.links.github && (
-                        <a href={selectedEmbedding.links.github} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none' }}>
-                          GitHub Code
-                        </a>
-                      )}
-                      {selectedEmbedding.links.huggingface && (
-                        <a href={selectedEmbedding.links.huggingface} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none', background: 'var(--gradient-latent)', borderColor: 'transparent' }}>
-                          HF Weights
+                      {selectedEmbedding.weightsUrl && (
+                        <a href={selectedEmbedding.weightsUrl} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none', background: 'var(--gradient-latent)', borderColor: 'transparent' }}>
+                          HF / Weight Hub
                         </a>
                       )}
                     </div>
@@ -705,11 +845,11 @@ export default function Home() {
                 </div>
               )}
 
-              {/* MODAL TAB 2: CODE */}
+              {/* CODE HOOK TAB */}
               {modalTab === 'code' && (
                 <div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                    Copy this minimal code snippet to load the weights and embed molecular structures or amino acid sequences.
+                    Standardized copy-paste code hooks to load and compute chemical representations.
                   </p>
 
                   <div className="code-container">
@@ -730,53 +870,63 @@ export default function Home() {
         </div>
       )}
 
-      {/* ==================== SUBMISSION Drawer / Overlay ==================== */}
+      {/* ==================== PR SUBMISSION DIALOG ==================== */}
       {showSubmitModal && (
         <div className="modal-overlay" onClick={() => setShowSubmitModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
             <button className="modal-close" onClick={() => setShowSubmitModal(false)}>×</button>
             <div className="modal-body">
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>Submit an Embedding</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>Submit a Representation</h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                Fill out the metadata schema below to generate a standardized catalog entry suitable for a GitHub Pull Request.
+                Fill out the metadata schema below to generate a standardized registry payload suitable for a GitHub Pull Request.
               </p>
 
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Model Name</label>
-                    <input type="text" name="name" required placeholder="e.g. ESM-3" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.name} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Representation Name</label>
+                    <input type="text" name="name" required placeholder="e.g. ChemBERTa-3" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.name} onChange={handleFormChange} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Developer/Team</label>
-                    <input type="text" name="developer" required placeholder="e.g. EvolutionaryScale" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.developer} onChange={handleFormChange} />
+                    <input type="text" name="developer" required placeholder="e.g. Stanford / Mila" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.developer} onChange={handleFormChange} />
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Representation Type</label>
+                    <select name="representationType" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.representationType} onChange={handleFormChange}>
+                      <option value="learned_embedding">Learned Embedding</option>
+                      <option value="fixed_descriptor">Fixed Descriptor</option>
+                      <option value="hybrid_representation">Hybrid Representation</option>
+                    </select>
+                  </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Modality</label>
                     <select name="modality" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.modality} onChange={handleFormChange}>
-                      <option value="Molecule">Molecule</option>
-                      <option value="Protein">Protein</option>
-                      <option value="Complex">Complex</option>
+                      <option value="molecule">Molecule</option>
+                      <option value="protein">Protein</option>
+                      <option value="complex">Complex</option>
+                      <option value="reaction">Reaction</option>
                     </select>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Input Type</label>
-                    <select name="inputType" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.inputType} onChange={handleFormChange}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Input Format</label>
+                    <select name="inputRepresentation" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.inputRepresentation} onChange={handleFormChange}>
                       <option value="SMILES">SMILES</option>
-                      <option value="Amino Acid Sequence">Amino Acid Sequence</option>
-                      <option value="3D Coordinates">3D Coordinates</option>
-                      <option value="Graph">Graph</option>
+                      <option value="sequence">Sequence</option>
+                      <option value="3D">3D Coordinates</option>
+                      <option value="graph">2D Graph</option>
+                      <option value="engineered_features">Engineered Features</option>
                     </select>
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dimension</label>
-                    <input type="number" name="dimension" required placeholder="e.g. 1024" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.dimension} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dimension / Length</label>
+                    <input type="number" name="dimension" required placeholder="e.g. 768" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.dimension} onChange={handleFormChange} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>License</label>
@@ -788,30 +938,35 @@ export default function Home() {
                   </div>
                 </div>
 
+                {submitForm.representationType === 'learned_embedding' && (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Dataset Name</label>
+                        <input type="text" name="datasetName" placeholder="e.g. PubChem10M" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetName} onChange={handleFormChange} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Dataset Size</label>
+                        <input type="text" name="datasetSize" placeholder="e.g. 10M molecules" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetSize} onChange={handleFormChange} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Objective</label>
+                      <input type="text" name="objective" placeholder="e.g. Masked atom reconstruction" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.objective} onChange={handleFormChange} />
+                    </div>
+                  </>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dataset Name</label>
-                    <input type="text" name="datasetName" required placeholder="e.g. UniRef90" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetName} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>GitHub Link</label>
+                    <input type="text" name="github" placeholder="https://github.com/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.github} onChange={handleFormChange} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dataset Size</label>
-                    <input type="text" name="datasetSize" required placeholder="e.g. 120M sequences" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetSize} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Paper Link</label>
+                    <input type="text" name="paper" placeholder="https://arxiv.org/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.paper} onChange={handleFormChange} />
                   </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Objective</label>
-                  <input type="text" name="objective" required placeholder="e.g. Masked language modeling on protein sequence strings" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.objective} onChange={handleFormChange} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>HuggingFace Checkpoint URL (Optional)</label>
-                  <input type="text" name="huggingface" placeholder="e.g. https://huggingface.co/evolutionaryscale/esm-3" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.huggingface} onChange={handleFormChange} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Typical Tasks (Comma separated)</label>
-                  <input type="text" name="typicalTasks" placeholder="e.g. Mutational effect, secondary structure prediction" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.typicalTasks} onChange={handleFormChange} />
                 </div>
 
                 <button type="submit" className="btn-wizard-next" style={{ width: '100%', marginTop: '0.5rem' }}>
@@ -827,13 +982,13 @@ export default function Home() {
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
-                  <div className="code-container" style={{ maxHeight: '200px' }}>
-                    <pre className="code-block">
+                  <div className="code-container" style={{ maxHeight: '180px' }}>
+                    <pre className="code-block" style={{ fontSize: '0.8rem' }}>
                       <code>{generatedJson}</code>
                     </pre>
                   </div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
-                    Submit this JSON payload by opening a Pull Request on our GitHub repository.
+                    Copy this payload and submit a Pull Request to our repository inside `/src/app/data/embeddings.ts`.
                   </p>
                 </div>
               )}
