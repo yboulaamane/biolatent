@@ -224,8 +224,7 @@ export default function Home() {
       {/* HEADER SECTION */}
       <header className="header">
         <div className="logo-container">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="BioLatent Logo" width="42" height="42" style={{ borderRadius: '12px', border: '1px solid var(--border-card)' }} />
+          <div className="logo-icon">B</div>
           <div>
             <div className="logo-text">BioLatent</div>
             <div className="logo-tagline">Biological & Chemical Vector Registry</div>
