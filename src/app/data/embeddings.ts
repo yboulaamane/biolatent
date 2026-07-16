@@ -1120,5 +1120,40 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
     codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
+  },
+  {
+    id: "vilya_1",
+    name: "Vilya-1 (Macrocycles)",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "3D",
+    license: "Academic/Restrictive",
+    developer: "Vilya Research",
+    architectureType: "Unified Transformer Diffusion",
+    pretrainingObjective: "All-atom coordinate prediction, conformer sampling, and sequence-structure co-design",
+    embeddingDimension: 1024,
+    yearReleased: 2026,
+    trainingData: {
+      name: "All-atom physical structures + synthetic macrocycle space",
+      size: "Multi-million macrocycle conformations",
+      license: "Proprietary"
+    },
+    codeRepositoryUrl: "https://github.com/vilyatx",
+    weightsUrl: "https://arxiv.org/abs/2607.09998",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.75,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
+    codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
+# from vilya1 import Vilya1Transformer, ConformerSampler
+# model = Vilya1Transformer.from_pretrained("vilya-1-base")
+# sampler = ConformerSampler(model)
+# conformers = sampler.sample_conformers(smiles="C1CCCCC1...", num_samples=100)`
   }
 ];
