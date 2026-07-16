@@ -889,5 +889,262 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
 # from ligand_mpnn_utils import LigandMPNN
 # model = LigandMPNN(node_features=256, edge_features=256)
 # embedding = model.encode(protein_coords, ligand_coords, ligand_types)`
+  },
+  {
+    id: "esm3_1.4b",
+    name: "ESM-3 (1.4B parameter)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "3D",
+    license: "Academic/Restrictive",
+    architectureType: "Transformer",
+    pretrainingObjective: "Generative masked language modeling on sequence, structure, and function coordinates",
+    embeddingDimension: 1536,
+    yearReleased: 2024,
+    trainingData: {
+      name: "ESM-Atlas (UniRef + structures)",
+      size: "2.7 Billion sequences / structures",
+      license: "Non-commercial Research License"
+    },
+    codeRepositoryUrl: "https://github.com/evolutionaryscale/esm",
+    weightsUrl: "https://huggingface.co/EvolutionaryScale/esm3-open-1.4b",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Structure Recovery (TM-score)", metric: "TM-score", score: "0.830" }
+    ],
+    tags: ["ESM-3", "EvolutionaryScale", "Multimodal", "Protein-Design"],
+    codeSnippet: `from esm.models.esm3 import ESM3
+from esm.sdk.api import ESM3InferenceClient, GenerationConfig
+import torch
+
+# Load the open 1.4B parameter model
+model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")
+
+# Sequence-structure-function generation pseudocode:
+# protein = model.generate(GenerationConfig(temperature=0.7))
+# print(protein.sequence)`
+  },
+  {
+    id: "molformer_xl",
+    name: "MolFormer-XL",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
+    license: "MIT",
+    architectureType: "Transformer (Linear Attention)",
+    pretrainingObjective: "MLM with relative positional embeddings on SMILES",
+    embeddingDimension: 768,
+    yearReleased: 2022,
+    trainingData: {
+      name: "ZINC20 & PubChem",
+      size: "1.1 Billion molecules",
+      license: "CC0 / Mixed"
+    },
+    codeRepositoryUrl: "https://github.com/IBM/molformer",
+    weightsUrl: "https://huggingface.co/ibm/MoLFormer-XL-Cperceiver-10pct",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.95,
+    domainGeneralization: "medium",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.742" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" }
+    ],
+    tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
+    codeSnippet: `from transformers import AutoModel, AutoTokenizer
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
+model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
+inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+embeddings = outputs.pooler_output.squeeze().numpy()`
+  },
+  {
+    id: "prost_t5",
+    name: "ProstT5 (Bilingual Seq-Struct)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "Academic/Commercial",
+    architectureType: "Transformer (T5 Encoder)",
+    pretrainingObjective: "Translation translation of sequence to 3Di structural strings",
+    embeddingDimension: 1024,
+    yearReleased: 2023,
+    trainingData: {
+      name: "UniRef50 & Foldseek 3Di strings",
+      size: "19M protein structures",
+      license: "Academic/Commercial"
+    },
+    codeRepositoryUrl: "https://github.com/agemf/ProstT5",
+    weightsUrl: "https://huggingface.co/Rostlab/ProstT5",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.94,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.858" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.910" }
+    ],
+    tags: ["Rostlab", "T5", "Structure-Sequence", "3Di"],
+    codeSnippet: `from transformers import T5EncoderModel, T5Tokenizer
+import torch
+import re
+
+tokenizer = T5Tokenizer.from_pretrained("Rostlab/ProstT5", do_lower_case=False)
+model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")
+model.eval()
+
+# Sequence must be marked with <AA2fold> tag for structural prediction
+seq = "<AA2fold> M S K G E E L F T"
+inputs = tokenizer(seq, return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
+  },
+  {
+    id: "gearnet_structure",
+    name: "GearNet",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "3D",
+    license: "MIT",
+    architectureType: "Relational GNN",
+    pretrainingObjective: "Multi-relational spatial graph contrastive learning",
+    embeddingDimension: 512,
+    yearReleased: 2022,
+    trainingData: {
+      name: "PDB (Protein Data Bank)",
+      size: "80,000+ protein structures",
+      license: "MIT"
+    },
+    codeRepositoryUrl: "https://github.com/DeepGraphLearning/torchdrug",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812" },
+      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
+    ],
+    tags: ["Mila", "TorchDrug", "GNN", "Protein-Structure"],
+    codeSnippet: `# GearNet runs via the TorchDrug library
+# from torchdrug import models
+# model = models.GearNet(input_dim=21, hidden_dims=[512, 512, 512],
+#                        num_relation=7, edge_input_dim=59)
+# checkpoint = torch.load("gearnet_weights.pth")
+# model.load_state_dict(checkpoint)`
+  },
+  {
+    id: "antiberty",
+    name: "AntiBERTy (Antibody Model)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Transformer",
+    pretrainingObjective: "MLM on immunoglobulin variable region sequences",
+    embeddingDimension: 512,
+    yearReleased: 2022,
+    trainingData: {
+      name: "OAS (Observed Antibody Space)",
+      size: "350M antibody sequences",
+      license: "Creative Commons Attribution 4.0"
+    },
+    codeRepositoryUrl: "https://github.com/jerryji1993/antiBERTy",
+    weightsUrl: "https://huggingface.co/jerryji1993/antiBERTy",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.95,
+    domainGeneralization: "medium",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Antibody Binding Affinity", metric: "Spearman r", score: "0.620" }
+    ],
+    tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
+    codeSnippet: `from antiberty import AntiBERTyRunner
+import torch
+
+runner = AntiBERTyRunner()
+# Embed heavy/light antibody sequence strings
+sequences = ["EVQLVESGGGLVQPGGSLRLSCAASGFTFSDYYMSWIRQAPGKGLEWVA"]
+embeddings = runner.embed(sequences) # List of embeddings [1, seq_len, 512]`
+  },
+  {
+    id: "chemgpt",
+    name: "ChemGPT (1.2B)",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "SMILES",
+    license: "MIT",
+    architectureType: "GPT-2 (Autoregressive)",
+    pretrainingObjective: "Autoregressive generation on SMILES strings",
+    embeddingDimension: 2048,
+    yearReleased: 2022,
+    trainingData: {
+      name: "PubChem",
+      size: "10M molecules",
+      license: "MIT"
+    },
+    codeRepositoryUrl: "https://github.com/valencelabs/ChemGPT",
+    weightsUrl: "https://huggingface.co/ncfrey/ChemGPT-1.2B",
+    computeProfile: "gpu",
+    dataLeakageRisk: "high",
+    reproducibilityScore: 0.85,
+    domainGeneralization: "medium",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.685" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" }
+    ],
+    tags: ["Generative", "GPT", "SMILES", "Valence-Labs"],
+    codeSnippet: `from transformers import AutoTokenizer, GPT2Model
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained("ncfrey/ChemGPT-1.2B")
+model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")
+inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+# Last token activation
+embeddings = outputs.last_hidden_state[:, -1, :].squeeze().numpy()`
+  },
+  {
+    id: "diffdock",
+    name: "DiffDock Pocket Embeddings",
+    representationType: "learned_embedding",
+    modality: "complex",
+    inputRepresentation: "Pocket/3D",
+    license: "MIT",
+    architectureType: "Equivariant GNN",
+    pretrainingObjective: "Score-based diffusion on binding coordinate distributions",
+    embeddingDimension: 1024,
+    yearReleased: 2022,
+    trainingData: {
+      name: "PDBBind v2020",
+      size: "19,000 protein-ligand structures",
+      license: "MIT"
+    },
+    codeRepositoryUrl: "https://github.com/gcorso/DiffDock",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "PDBBind (Binding Affinity)", metric: "RMSE", score: "1.450" }
+    ],
+    tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
+    codeSnippet: `# Extract pocket features from coordinates inside the diffusion score model:
+# from models.score_model import TensorProductScoreModel
+# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
   }
 ];
