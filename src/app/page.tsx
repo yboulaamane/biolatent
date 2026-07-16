@@ -224,7 +224,10 @@ export default function Home() {
       {/* HEADER SECTION */}
       <header className="header">
         <div className="logo-container">
-          <div className="logo-icon">B</div>
+          <svg width="38" height="38" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-indigo)', filter: 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))' }}>
+            <polygon points="50,8 88,30 88,74 50,96 12,74 12,30" />
+            <circle cx="50" cy="53" r="20" strokeWidth="4" strokeDasharray="6,5" />
+          </svg>
           <div>
             <div className="logo-text">BioLatent</div>
             <div className="logo-tagline">Biological & Chemical Vector Registry</div>
