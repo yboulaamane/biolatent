@@ -48,7 +48,7 @@ export default function Home() {
 
   // Unique options for dropdowns/filters
   const modalities = ['All', 'Molecule', 'Protein', 'Complex'];
-  const inputTypes = ['All', 'SMILES', 'Amino Acid Sequence', '3D Coordinates', 'Graph', 'Substructure'];
+  const inputTypes = ['All', 'SMILES', 'Amino Acid Sequence', '3D Coordinates', 'Graph', 'Substructure', 'Pocket/3D'];
   const licenses = ['All', 'MIT', 'Apache-2.0', 'Academic/Restrictive'];
 
   // Filtered embeddings selector
@@ -103,6 +103,9 @@ export default function Home() {
         return false;
       }
       if (wizardAnswers.inputType === 'Sequence' && emb.inputType !== 'Amino Acid Sequence') {
+        return false;
+      }
+      if (wizardAnswers.inputType === 'Pocket/3D' && emb.inputType !== 'Pocket/3D') {
         return false;
       }
 
@@ -379,6 +382,10 @@ export default function Home() {
                   <div className="wizard-option-title">Proteins / Enzymes</div>
                   <div className="wizard-option-desc">Amino acid sequences, structural graphs, active pockets.</div>
                 </div>
+                <div className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Complex')}>
+                  <div className="wizard-option-title">Complexes / Pockets</div>
+                  <div className="wizard-option-desc">3D binding site structures and ligand-protein interaction complexes.</div>
+                </div>
               </div>
             </div>
           )}
@@ -403,6 +410,13 @@ export default function Home() {
                     <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
                       <div className="wizard-option-title">3D Conformers</div>
                       <div className="wizard-option-desc">Atomic coordinates (requires prior conformer generation).</div>
+                    </div>
+                  </>
+                ) : wizardAnswers.modality === 'Complex' ? (
+                  <>
+                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Pocket/3D')}>
+                      <div className="wizard-option-title">Pocket / 3D Complex</div>
+                      <div className="wizard-option-desc">3D spatial pocket coordinates and bounding box structures.</div>
                     </div>
                   </>
                 ) : (

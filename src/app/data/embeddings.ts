@@ -498,5 +498,60 @@ print("Embedding shape:", embeddings.shape) # Output: (1536,)`
 #                        num_relation=7, edge_input_dim=59)
 # checkpoint = torch.load("gearnet_weights.pth")
 # model.load_state_dict(checkpoint)`
+  },
+  {
+    id: "diffdock",
+    name: "DiffDock Pocket Embeddings",
+    developer: "MIT Jameel Clinic (Corso et al.)",
+    modality: "Complex",
+    inputType: "Pocket/3D",
+    dimension: 1024,
+    trainingData: {
+      name: "PDBBind v2020",
+      size: "19,000+ protein-ligand structures"
+    },
+    pretrainingObjective: "Equivariant GNN representations representing ligand docking poses and pocket coordinates",
+    license: "MIT",
+    links: {
+      github: "https://github.com/gcorso/DiffDock",
+      paper: "https://arxiv.org/abs/2210.01776"
+    },
+    typicalTasks: ["Blind docking", "Binding affinity prediction", "Ligand-protein classification"],
+    benchmarks: [
+      { dataset: "PDBBind (Affinity)", metric: "RMSE", score: "1.450" }
+    ],
+    codeSnippet: `# DiffDock extracts ligand and pocket embeddings during the docking process.
+# Pseudocode for extracting representations using DiffDock's Equivariant GNN:
+# from utils.parsing import parse_pdb, parse_sdf
+# from models.score_model import TensorProductScoreModel
+# ...
+# ligand_emb, pocket_emb = model.extract_complex_embeddings(ligand_graph, pocket_graph)`
+  },
+  {
+    id: "pocket-transformer",
+    name: "PocketTransformer",
+    developer: "Xie et al.",
+    modality: "Complex",
+    inputType: "Pocket/3D",
+    dimension: 768,
+    trainingData: {
+      name: "ScPDB / PDBBind",
+      size: "16,000+ druggable pockets"
+    },
+    pretrainingObjective: "Geometric transformer encoding pocket spatial geometries and atomic descriptors",
+    license: "Academic/Restrictive",
+    links: {
+      github: "https://github.com/xielab/pocket-transformer",
+      paper: "https://doi.org/10.1093/bioinformatics/btac512"
+    },
+    typicalTasks: ["Pocket similarity", "Ligand binding specificity", "Druggability prediction"],
+    benchmarks: [
+      { dataset: "ScPDB (Similarity)", metric: "Mean AP", score: "0.820" }
+    ],
+    codeSnippet: `# PocketTransformer processes PDB pocket files directly into embeddings.
+# from pocket_transformer import PocketEncoder
+# encoder = PocketEncoder.from_pretrained("pocket_transformer_768d")
+# pocket_features = encoder.embed_pocket("pocket.pdb") # Shape: [1, 768]`
   }
 ];
+
