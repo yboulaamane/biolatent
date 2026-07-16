@@ -654,12 +654,14 @@ export default function Home() {
                   <th>Input Format</th>
                   <th>BBBP (ROC-AUC) ↑</th>
                   <th>ClinTox (ROC-AUC) ↑</th>
+                  <th>CYP3A4 Substrate (ROC-AUC) ↑</th>
                 </tr>
               </thead>
               <tbody>
                 {EMBEDDINGS.filter(e => e.modality === 'molecule').map((emb) => {
                   const bbbp = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'))?.score || 'N/A';
                   const clintox = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'))?.score || 'N/A';
+                  const cyp3a4 = emb.benchmarks.find(b => b.dataset.startsWith('CYP3A4'))?.score || 'N/A';
 
                   return (
                     <tr key={emb.id}>
@@ -668,6 +670,7 @@ export default function Home() {
                       <td>{formatLabel(emb.inputRepresentation)}</td>
                       <td><span className="score-badge">{bbbp}</span></td>
                       <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{clintox}</span></td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{cyp3a4}</span></td>
                     </tr>
                   );
                 })}

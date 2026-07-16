@@ -107,7 +107,8 @@ export const EMBEDDINGS: RepresentationEntry[] = [
     smallDataPerformance: "medium",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.760" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.760" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.635" }
     ],
     tags: ["Transformer", "SMILES", "BERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -147,7 +148,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     smallDataPerformance: "medium",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.690" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.655" }
     ],
     tags: ["BERT", "SMILES", "Transformers"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -180,7 +182,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "low",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.612" }
     ],
     tags: ["Seq2Seq", "SMILES", "Autoencoder"],
     codeSnippet: `# Requires custom repository implementation cloning smiles-transformer.
@@ -212,7 +215,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.736" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.690" }
     ],
     tags: ["Contrastive", "Graph", "GIN", "PyG"],
     codeSnippet: `# Clone and import from MolCLR repository:
@@ -246,7 +250,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.722" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.702" }
     ],
     tags: ["Graph", "Self-Supervised", "Grover"],
     codeSnippet: `# Extracted via terminal using GROVER argument parser:
@@ -278,7 +283,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.735" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.712" }
     ],
     tags: ["Graph", "Self-Supervised", "Grover-Large"],
     codeSnippet: `# Run in shell terminal to output large 2000d fingerprint files:
@@ -310,7 +316,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.710" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.850" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.850" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.680" }
     ],
     tags: ["GNN", "GIN", "Context-Prediction"],
     codeSnippet: `# Uses snap-stanford torchGNN pipelines
@@ -342,7 +349,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.725" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.895" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.895" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.695" }
     ],
     tags: ["Microsoft", "Graph-Transformer", "Attention"],
     codeSnippet: `# Graphormer runs using the fairseq interface or MS-Graphormer API
@@ -371,7 +379,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.905" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.905" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.730" }
     ],
     tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
     codeSnippet: `import chemprop
@@ -437,7 +446,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725" }
     ],
     tags: ["3D", "Transformer", "Conformation"],
     codeSnippet: `# Conformer input representation extraction:
@@ -465,7 +475,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.720" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.685" }
     ],
     tags: ["Classical", "Fingerprint", "RDKit", "Baseline"],
     codeSnippet: `from rdkit import Chem
@@ -497,7 +508,8 @@ print("Vector size:", len(fingerprint_array)) # Output: 2048`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.680" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.692" }
     ],
     tags: ["Classical", "Descriptors", "Physicochemical", "RDKit"],
     codeSnippet: `from rdkit import Chem
@@ -690,7 +702,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
       { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.840" }
     ],
     tags: ["ELMo", "LSTM", "Rostlab"],
-    codeSnippet: `# SeqVec requires the allennlp implementation from RostLab
+    codeSnippet: `# Requires the allennlp implementation from RostLab
 # from seqvec import SeqVecEmbedder
 # embedder = SeqVecEmbedder()
 # embedding = embedder.embed_sentence("MSKGEELFTGVVPIL") # Returns [seq_len, 1024]`
@@ -921,12 +933,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
 from esm.sdk.api import ESM3InferenceClient, GenerationConfig
 import torch
 
-# Load the open 1.4B parameter model
-model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")
-
-# Sequence-structure-function generation pseudocode:
-# protein = model.generate(GenerationConfig(temperature=0.7))
-# print(protein.sequence)`
+model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
   },
   {
     id: "molformer_xl",
@@ -953,18 +960,13 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.742" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.710" }
     ],
     tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
     codeSnippet: `from transformers import AutoModel, AutoTokenizer
-import torch
-
 tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
-model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
-inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
-with torch.no_grad():
-    outputs = model(**inputs)
-embeddings = outputs.pooler_output.squeeze().numpy()`
+model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)`
   },
   {
     id: "prost_t5",
@@ -995,19 +997,8 @@ embeddings = outputs.pooler_output.squeeze().numpy()`
     ],
     tags: ["Rostlab", "T5", "Structure-Sequence", "3Di"],
     codeSnippet: `from transformers import T5EncoderModel, T5Tokenizer
-import torch
-import re
-
 tokenizer = T5Tokenizer.from_pretrained("Rostlab/ProstT5", do_lower_case=False)
-model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")
-model.eval()
-
-# Sequence must be marked with <AA2fold> tag for structural prediction
-seq = "<AA2fold> M S K G E E L F T"
-inputs = tokenizer(seq, return_tensors="pt")
-with torch.no_grad():
-    outputs = model(**inputs)
-embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
+model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
   },
   {
     id: "gearnet_structure",
@@ -1036,12 +1027,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
       { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
     ],
     tags: ["Mila", "TorchDrug", "GNN", "Protein-Structure"],
-    codeSnippet: `# GearNet runs via the TorchDrug library
-# from torchdrug import models
-# model = models.GearNet(input_dim=21, hidden_dims=[512, 512, 512],
-#                        num_relation=7, edge_input_dim=59)
-# checkpoint = torch.load("gearnet_weights.pth")
-# model.load_state_dict(checkpoint)`
+    codeSnippet: `# from torchdrug import models
+# model = models.GearNet(input_dim=21, hidden_dims=[512, 512, 512])`
   },
   {
     id: "antiberty",
@@ -1071,12 +1058,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     ],
     tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
     codeSnippet: `from antiberty import AntiBERTyRunner
-import torch
-
-runner = AntiBERTyRunner()
-# Embed heavy/light antibody sequence strings
-sequences = ["EVQLVESGGGLVQPGGSLRLSCAASGFTFSDYYMSWIRQAPGKGLEWVA"]
-embeddings = runner.embed(sequences) # List of embeddings [1, seq_len, 512]`
+runner = AntiBERTyRunner()`
   },
   {
     id: "chemgpt",
@@ -1103,19 +1085,13 @@ embeddings = runner.embed(sequences) # List of embeddings [1, seq_len, 512]`
     smallDataPerformance: "medium",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.685" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" }
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.650" }
     ],
     tags: ["Generative", "GPT", "SMILES", "Valence-Labs"],
     codeSnippet: `from transformers import AutoTokenizer, GPT2Model
-import torch
-
 tokenizer = AutoTokenizer.from_pretrained("ncfrey/ChemGPT-1.2B")
-model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")
-inputs = tokenizer("CC(=O)OC1=CC=CC=C1C(=O)O", return_tensors="pt")
-with torch.no_grad():
-    outputs = model(**inputs)
-# Last token activation
-embeddings = outputs.last_hidden_state[:, -1, :].squeeze().numpy()`
+model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
   },
   {
     id: "diffdock",
@@ -1143,8 +1119,6 @@ embeddings = outputs.last_hidden_state[:, -1, :].squeeze().numpy()`
       { dataset: "PDBBind (Binding Affinity)", metric: "RMSE", score: "1.450" }
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
-    codeSnippet: `# Extract pocket features from coordinates inside the diffusion score model:
-# from models.score_model import TensorProductScoreModel
-# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
+    codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
   }
 ];
