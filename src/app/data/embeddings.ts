@@ -1181,11 +1181,12 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.750" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.930" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.720" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.520" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.480" }
+      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" },
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "N/A" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "N/A" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "N/A" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "N/A" }
     ],
     tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
     codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
