@@ -53,6 +53,10 @@ export default function Home() {
   const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
   const [showMethodology, setShowMethodology] = useState(false);
 
+  // Sorting States
+  const [molSortConfig, setMolSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'bbbp', direction: 'desc' });
+  const [protSortConfig, setProtSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'cb513', direction: 'desc' });
+
   // Unique options for dropdowns/filters
   const modalities = ['All', 'molecule', 'protein', 'complex', 'nucleic_acid', 'reaction'];
   const inputTypes = ['All', 'SMILES', 'graph', 'sequence', '3D', 'engineered_features', 'Pocket/3D', 'reaction_smiles'];
@@ -155,6 +159,67 @@ export default function Home() {
 
     return { points, margin, plotWidth, plotHeight, yMin, yMax, svgWidth, svgHeight };
   }, [chartMetric]);
+
+  // Sorting Logic for Leaderboards
+  const sortData = (data: RepresentationEntry[], config: { key: string; direction: 'asc' | 'desc' } | null) => {
+    if (!config) return data;
+
+    return [...data].sort((a, b) => {
+      let valA: any = '';
+      let valB: any = '';
+
+      if (config.key === 'name') {
+        valA = a.name.toLowerCase();
+        valB = b.name.toLowerCase();
+      } else if (config.key === 'representationType') {
+        valA = a.representationType.toLowerCase();
+        valB = b.representationType.toLowerCase();
+      } else if (config.key === 'inputRepresentation') {
+        valA = a.inputRepresentation.toLowerCase();
+        valB = b.inputRepresentation.toLowerCase();
+      } else {
+        // Benchmark dataset keys
+        const metricA = a.benchmarks.find(b => b.dataset.toLowerCase().includes(config.key.toLowerCase()))?.score || 'N/A';
+        const metricB = b.benchmarks.find(b => b.dataset.toLowerCase().includes(config.key.toLowerCase()))?.score || 'N/A';
+
+        if (metricA === 'N/A' && metricB === 'N/A') return 0;
+        if (metricA === 'N/A') return 1;
+        if (metricB === 'N/A') return -1;
+
+        valA = parseFloat(metricA);
+        valB = parseFloat(metricB);
+      }
+
+      if (valA < valB) {
+        return config.direction === 'asc' ? -1 : 1;
+      }
+      if (valA > valB) {
+        return config.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const requestSortMols = (key: string) => {
+    let direction: 'asc' | 'desc' = 'desc';
+    if (molSortConfig && molSortConfig.key === key && molSortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setMolSortConfig({ key, direction });
+  };
+
+  const requestSortProts = (key: string) => {
+    let direction: 'asc' | 'desc' = 'desc';
+    if (protSortConfig && protSortConfig.key === key && protSortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setProtSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (config: { key: string; direction: 'asc' | 'desc' } | null, key: string) => {
+    if (!config || config.key !== key) return ' ⇅';
+    return config.direction === 'asc' ? ' ▲' : ' ▼';
+  };
 
   // Code Copy Action
   const copyToClipboard = (text: string) => {
@@ -915,18 +980,34 @@ export default function Home() {
             <table className="benchmark-table">
               <thead>
                 <tr>
-                  <th>Model / Fingerprint</th>
-                  <th>Representation Type</th>
-                  <th>Input Format</th>
-                  <th>BBBP (ROC-AUC) ↑</th>
-                  <th>ClinTox (ROC-AUC) ↑</th>
-                  <th>CYP3A4 Sub (ROC-AUC) ↑</th>
-                  <th>ESOL (RMSE) ↓</th>
-                  <th>Lipo (RMSE) ↓</th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('name')}>
+                    Model / Fingerprint{getSortIcon(molSortConfig, 'name')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('representationType')}>
+                    Type{getSortIcon(molSortConfig, 'representationType')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('inputRepresentation')}>
+                    Input Format{getSortIcon(molSortConfig, 'inputRepresentation')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('BBBP')}>
+                    BBBP (ROC-AUC) ↑{getSortIcon(molSortConfig, 'BBBP')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('ClinTox')}>
+                    ClinTox (ROC-AUC) ↑{getSortIcon(molSortConfig, 'ClinTox')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('CYP3A4')}>
+                    CYP3A4 Sub (ROC-AUC) ↑{getSortIcon(molSortConfig, 'CYP3A4')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('ESOL')}>
+                    ESOL (RMSE) ↓{getSortIcon(molSortConfig, 'ESOL')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortMols('Lipophilicity')}>
+                    Lipo (RMSE) ↓{getSortIcon(molSortConfig, 'Lipophilicity')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {EMBEDDINGS.filter(e => e.modality === 'molecule').map((emb) => {
+                {sortData(EMBEDDINGS.filter(e => e.modality === 'molecule'), molSortConfig).map((emb) => {
                   const bbbp = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'))?.score || 'N/A';
                   const clintox = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'))?.score || 'N/A';
                   const cyp3a4 = emb.benchmarks.find(b => b.dataset.startsWith('CYP3A4'))?.score || 'N/A';
@@ -956,15 +1037,25 @@ export default function Home() {
             <table className="benchmark-table">
               <thead>
                 <tr>
-                  <th>Model / Model Family</th>
-                  <th>Representation Type</th>
-                  <th>Input Format</th>
-                  <th>CB513 Sec Structure (Acc) ↑</th>
-                  <th>DeepLoc Localization (Acc) ↑</th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortProts('name')}>
+                    Model / Model Family{getSortIcon(protSortConfig, 'name')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortProts('representationType')}>
+                    Type{getSortIcon(protSortConfig, 'representationType')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortProts('inputRepresentation')}>
+                    Input Format{getSortIcon(protSortConfig, 'inputRepresentation')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortProts('CB513')}>
+                    CB513 Sec Structure (Acc) ↑{getSortIcon(protSortConfig, 'CB513')}
+                  </th>
+                  <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => requestSortProts('DeepLoc')}>
+                    DeepLoc Localization (Acc) ↑{getSortIcon(protSortConfig, 'DeepLoc')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {EMBEDDINGS.filter(e => e.modality === 'protein' || e.modality === 'nucleic_acid' || e.modality === 'complex').map((emb) => {
+                {sortData(EMBEDDINGS.filter(e => e.modality === 'protein' || e.modality === 'nucleic_acid' || e.modality === 'complex'), protSortConfig).map((emb) => {
                   const cb513 = emb.benchmarks.find(b => b.dataset.includes('CB513'))?.score || 'N/A';
                   const deeploc = emb.benchmarks.find(b => b.dataset.includes('DeepLoc'))?.score || 'N/A';
 
