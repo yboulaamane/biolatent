@@ -108,7 +108,9 @@ export const EMBEDDINGS: RepresentationEntry[] = [
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.760" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.635" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.635" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.950" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.750" }
     ],
     tags: ["Transformer", "SMILES", "BERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -149,7 +151,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.690" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.655" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.655" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.850" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.680" }
     ],
     tags: ["BERT", "SMILES", "Transformers"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -183,7 +187,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     smallDataPerformance: "low",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.612" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.612" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.020" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.880" }
     ],
     tags: ["Seq2Seq", "SMILES", "Autoencoder"],
     codeSnippet: `# Requires custom repository implementation cloning smiles-transformer.
@@ -216,7 +222,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.736" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.690" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.690" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.780" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.640" }
     ],
     tags: ["Contrastive", "Graph", "GIN", "PyG"],
     codeSnippet: `# Clone and import from MolCLR repository:
@@ -251,7 +259,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.722" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.702" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.702" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.720" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.600" }
     ],
     tags: ["Graph", "Self-Supervised", "Grover"],
     codeSnippet: `# Extracted via terminal using GROVER argument parser:
@@ -284,7 +294,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.735" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.712" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.712" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.680" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.580" }
     ],
     tags: ["Graph", "Self-Supervised", "Grover-Large"],
     codeSnippet: `# Run in shell terminal to output large 2000d fingerprint files:
@@ -317,7 +329,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.710" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.850" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.680" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.680" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.820" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.660" }
     ],
     tags: ["GNN", "GIN", "Context-Prediction"],
     codeSnippet: `# Uses snap-stanford torchGNN pipelines
@@ -350,7 +364,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.725" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.895" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.695" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.695" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.740" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.620" }
     ],
     tags: ["Microsoft", "Graph-Transformer", "Attention"],
     codeSnippet: `# Graphormer runs using the fairseq interface or MS-Graphormer API
@@ -380,7 +396,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.905" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.730" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.730" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.610" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.550" }
     ],
     tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
     codeSnippet: `import chemprop
@@ -447,7 +465,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.550" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.510" }
     ],
     tags: ["3D", "Transformer", "Conformation"],
     codeSnippet: `# Conformer input representation extraction:
@@ -476,7 +496,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.720" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.685" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.685" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.080" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.820" }
     ],
     tags: ["Classical", "Fingerprint", "RDKit", "Baseline"],
     codeSnippet: `from rdkit import Chem
@@ -509,7 +531,9 @@ print("Vector size:", len(fingerprint_array)) # Output: 2048`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.680" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.692" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.692" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.890" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.710" }
     ],
     tags: ["Classical", "Descriptors", "Physicochemical", "RDKit"],
     codeSnippet: `from rdkit import Chem
@@ -766,7 +790,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Contact Prediction", metric: "Top-L Precision", score: "0.810" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.800" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.860" }
     ],
     tags: ["MSA", "Multiple-Sequence-Alignment", "Meta"],
     codeSnippet: `# Requires a list of aligned homologous sequences
@@ -801,7 +826,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GDT-TS (CASP14)", metric: "Average GDT", score: "0.924" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.835" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.880" }
     ],
     tags: ["DeepMind", "AlphaFold2", "Evoformer", "3D"],
     codeSnippet: `# AlphaFold latents can be extracted from custom OpenFold or AlphaFold runs.
@@ -831,7 +857,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "TM-score", metric: "TM-score", score: "0.780" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.780" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.820" }
     ],
     tags: ["OpenFold", "Single-Chain", "Evoformer", "3D"],
     codeSnippet: `# Extracted from OpenFold runner without MSA queries:
@@ -863,7 +890,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Inverse Folding Recovery", metric: "Sequence Recovery", score: "0.524" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.760" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.810" }
     ],
     tags: ["ProteinMPNN", "Baker-Lab", "Inverse-Folding", "3D"],
     codeSnippet: `# Requires ProteinMPNN helper parser (parse_PDB.py)
@@ -894,7 +922,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Sequence Recovery (Complexes)", metric: "Recovery", score: "0.570" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.770" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.835" }
     ],
     tags: ["LigandMPNN", "Baker-Lab", "Drug-Design", "Inverse-Folding"],
     codeSnippet: `# LigandMPNN design and representation loader
@@ -926,7 +955,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Structure Recovery (TM-score)", metric: "TM-score", score: "0.830" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.855" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.915" }
     ],
     tags: ["ESM-3", "EvolutionaryScale", "Multimodal", "Protein-Design"],
     codeSnippet: `from esm.models.esm3 import ESM3
@@ -961,7 +991,9 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.742" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.710" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.710" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.580" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.530" }
     ],
     tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
     codeSnippet: `from transformers import AutoModel, AutoTokenizer
@@ -1023,8 +1055,8 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812" },
-      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.795" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.830" }
     ],
     tags: ["Mila", "TorchDrug", "GNN", "Protein-Structure"],
     codeSnippet: `# from torchdrug import models
@@ -1054,7 +1086,8 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Antibody Binding Affinity", metric: "Spearman r", score: "0.620" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.775" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.825" }
     ],
     tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
     codeSnippet: `from antiberty import AntiBERTyRunner
@@ -1086,7 +1119,9 @@ runner = AntiBERTyRunner()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.685" },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.650" }
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.650" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.920" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.740" }
     ],
     tags: ["Generative", "GPT", "SMILES", "Valence-Labs"],
     codeSnippet: `from transformers import AutoTokenizer, GPT2Model
@@ -1116,7 +1151,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "PDBBind (Binding Affinity)", metric: "RMSE", score: "1.450" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
     codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
@@ -1146,8 +1181,11 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.750" },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.930" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.720" },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.520" },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.480" }
     ],
     tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
     codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
@@ -1181,8 +1219,8 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Genomic Fitness Prediction", metric: "Log-likelihood ratio", score: "0.820" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.820" },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.880" }
     ],
     tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
     codeSnippet: `from evo import Evo
@@ -1226,8 +1264,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.785" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
     ],
     tags: ["Genomics", "DNA", "BERT", "DNABERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -1266,8 +1303,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Genomic Fitness Prediction", metric: "Accuracy", score: "0.740" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
     ],
     tags: ["DNA", "Hyena", "Long-Context", "Stanford"],
     codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
@@ -1298,8 +1334,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "USPTO Yield Prediction", metric: "R-squared", score: "0.815" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
     ],
     tags: ["Reaction", "Synthesis", "BART", "USPTO"],
     codeSnippet: `# Rxnformer runs yield prediction on chemical reactions
@@ -1330,8 +1365,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Atom Mapping Accuracy", metric: "Accuracy", score: "0.982" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
     ],
     tags: ["Reaction", "Atom-Mapping", "Attention", "IBM"],
     codeSnippet: `from rxnmapper import RXNMapper

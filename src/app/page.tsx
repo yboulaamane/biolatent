@@ -839,7 +839,9 @@ export default function Home() {
             )}
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          {/* MOLECULES TABLE */}
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '1rem' }}>Small Molecule Representations</h3>
+          <div style={{ overflowX: 'auto', marginBottom: '3rem' }}>
             <table className="benchmark-table">
               <thead>
                 <tr>
@@ -848,7 +850,9 @@ export default function Home() {
                   <th>Input Format</th>
                   <th>BBBP (ROC-AUC) ↑</th>
                   <th>ClinTox (ROC-AUC) ↑</th>
-                  <th>CYP3A4 Substrate (ROC-AUC) ↑</th>
+                  <th>CYP3A4 Sub (ROC-AUC) ↑</th>
+                  <th>ESOL (RMSE) ↓</th>
+                  <th>Lipo (RMSE) ↓</th>
                 </tr>
               </thead>
               <tbody>
@@ -856,15 +860,54 @@ export default function Home() {
                   const bbbp = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'))?.score || 'N/A';
                   const clintox = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'))?.score || 'N/A';
                   const cyp3a4 = emb.benchmarks.find(b => b.dataset.startsWith('CYP3A4'))?.score || 'N/A';
+                  const esol = emb.benchmarks.find(b => b.dataset.startsWith('ESOL'))?.score || 'N/A';
+                  const lipo = emb.benchmarks.find(b => b.dataset.startsWith('Lipophilicity'))?.score || 'N/A';
 
                   return (
-                    <tr key={emb.id}>
+                    <tr key={emb.id} style={{ cursor: 'pointer' }} onClick={() => { setSelectedEmbedding(emb); setModalTab('details'); }}>
                       <td style={{ fontWeight: 700, color: '#fff' }}>{emb.name}</td>
                       <td>{formatLabel(emb.representationType)}</td>
                       <td>{formatLabel(emb.inputRepresentation)}</td>
                       <td><span className="score-badge">{bbbp}</span></td>
                       <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{clintox}</span></td>
                       <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{cyp3a4}</span></td>
+                      <td><span className="score-badge" style={{ color: '#f43f5e', background: 'rgba(244,63,94,0.1)' }}>{esol}</span></td>
+                      <td><span className="score-badge" style={{ color: '#eab308', background: 'rgba(234,179,8,0.1)' }}>{lipo}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PROTEINS & BIOLOGICALS TABLE */}
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', marginBottom: '1rem' }}>Protein & Biological Representations</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="benchmark-table">
+              <thead>
+                <tr>
+                  <th>Model / Model Family</th>
+                  <th>Representation Type</th>
+                  <th>Input Format</th>
+                  <th>CB513 Sec Structure (Acc) ↑</th>
+                  <th>DeepLoc Localization (Acc) ↑</th>
+                </tr>
+              </thead>
+              <tbody>
+                {EMBEDDINGS.filter(e => e.modality === 'protein' || e.modality === 'nucleic_acid' || e.modality === 'complex').map((emb) => {
+                  const cb513 = emb.benchmarks.find(b => b.dataset.includes('CB513'))?.score || 'N/A';
+                  const deeploc = emb.benchmarks.find(b => b.dataset.includes('DeepLoc'))?.score || 'N/A';
+
+                  // Skip if both are N/A (like structural designs or ligand designs with different benchmarks)
+                  if (cb513 === 'N/A' && deeploc === 'N/A') return null;
+
+                  return (
+                    <tr key={emb.id} style={{ cursor: 'pointer' }} onClick={() => { setSelectedEmbedding(emb); setModalTab('details'); }}>
+                      <td style={{ fontWeight: 700, color: '#fff' }}>{emb.name}</td>
+                      <td>{formatLabel(emb.representationType)}</td>
+                      <td>{formatLabel(emb.inputRepresentation)}</td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{cb513}</span></td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{deeploc}</span></td>
                     </tr>
                   );
                 })}
