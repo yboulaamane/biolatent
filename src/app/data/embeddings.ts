@@ -33,6 +33,11 @@ export interface BaseRepresentation {
     dataset: string;
     metric: string;
     score: string;
+    citation?: {
+      shortRef: string;   // e.g. "Chithrananda et al., 2020"
+      doi?: string;       // DOI URL e.g. "https://doi.org/10.48550/arXiv.2010.09885"
+      note?: string;      // e.g. "Table 1, scaffold split" or "TDC leaderboard"
+    };
   }[];
 
   tags: string[];
@@ -106,11 +111,8 @@ export const EMBEDDINGS: RepresentationEntry[] = [
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.760" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.635" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.950" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.750" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Table 3, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.733", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Table 3, scaffold split" } }
     ],
     tags: ["Transformer", "SMILES", "BERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -149,11 +151,10 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.690" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.805" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.655" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.850" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.680" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.735", citation: { shortRef: "Ahmad et al., 2022", doi: "https://doi.org/10.48550/arXiv.2209.01712", note: "Table 2, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.239", citation: { shortRef: "Ahmad et al., 2022", doi: "https://doi.org/10.48550/arXiv.2209.01712", note: "Table 2, scaffold split — MLM variant known to underperform on ClinTox" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.025", citation: { shortRef: "Ahmad et al., 2022", doi: "https://doi.org/10.48550/arXiv.2209.01712", note: "Table 3, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.987", citation: { shortRef: "Ahmad et al., 2022", doi: "https://doi.org/10.48550/arXiv.2209.01712", note: "Table 3, scaffold split" } }
     ],
     tags: ["BERT", "SMILES", "Transformers"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -186,10 +187,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "low",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.612" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.020" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.880" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.620", citation: { shortRef: "Honda et al., 2019", doi: "https://doi.org/10.48550/arXiv.1911.04738", note: "Table 2, scaffold split" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.020", citation: { shortRef: "Honda et al., 2019", doi: "https://doi.org/10.48550/arXiv.1911.04738", note: "Table 3" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.880", citation: { shortRef: "Honda et al., 2019", doi: "https://doi.org/10.48550/arXiv.1911.04738", note: "Table 3" } }
     ],
     tags: ["Seq2Seq", "SMILES", "Autoencoder"],
     codeSnippet: `# Requires custom repository implementation cloning smiles-transformer.
@@ -220,11 +220,10 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.736" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.690" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.780" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.640" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.736", citation: { shortRef: "Wang et al., 2022", doi: "https://doi.org/10.48550/arXiv.2102.10056", note: "Table 1, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890", citation: { shortRef: "Wang et al., 2022", doi: "https://doi.org/10.48550/arXiv.2102.10056", note: "Table 1, scaffold split" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.780", citation: { shortRef: "Wang et al., 2022", doi: "https://doi.org/10.48550/arXiv.2102.10056", note: "Table 2, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.640", citation: { shortRef: "Wang et al., 2022", doi: "https://doi.org/10.48550/arXiv.2102.10056", note: "Table 2, scaffold split" } }
     ],
     tags: ["Contrastive", "Graph", "GIN", "PyG"],
     codeSnippet: `# Clone and import from MolCLR repository:
@@ -257,11 +256,10 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.722" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.890" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.702" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.720" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.600" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.936", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 2, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.925", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 2, scaffold split" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.888", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 3, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.563", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 3, scaffold split" } }
     ],
     tags: ["Graph", "Self-Supervised", "Grover"],
     codeSnippet: `# Extracted via terminal using GROVER argument parser:
@@ -292,11 +290,10 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.735" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.908" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.712" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.680" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.580" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.940", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 2, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.944", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 2, scaffold split" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.831", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 3, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.560", citation: { shortRef: "Rong et al., 2020", doi: "https://doi.org/10.48550/arXiv.2007.02835", note: "Table 3, scaffold split" } }
     ],
     tags: ["Graph", "Self-Supervised", "Grover-Large"],
     codeSnippet: `# Run in shell terminal to output large 2000d fingerprint files:
@@ -327,11 +324,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.710" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.850" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.680" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.820" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.660" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.706", citation: { shortRef: "Hu et al., 2020", doi: "https://doi.org/10.48550/arXiv.1905.12265", note: "Table 3, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.788", citation: { shortRef: "Hu et al., 2020", doi: "https://doi.org/10.48550/arXiv.1905.12265", note: "Table 3, scaffold split" } }
     ],
     tags: ["GNN", "GIN", "Context-Prediction"],
     codeSnippet: `# Uses snap-stanford torchGNN pipelines
@@ -362,11 +356,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.725" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.895" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.695" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.740" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.620" }
+      { dataset: "ogbg-molhiv (HIV Classification)", metric: "ROC-AUC", score: "0.8645", citation: { shortRef: "Ying et al., 2021", doi: "https://doi.org/10.48550/arXiv.2106.05234", note: "Table 3, OGB leaderboard" } },
+      { dataset: "PCQM4M (Quantum Chemistry)", metric: "MAE", score: "0.1234", citation: { shortRef: "Ying et al., 2021", doi: "https://doi.org/10.48550/arXiv.2106.05234", note: "Table 1, OGB-LSC" } }
     ],
     tags: ["Microsoft", "Graph-Transformer", "Attention"],
     codeSnippet: `# Graphormer runs using the fairseq interface or MS-Graphormer API
@@ -394,11 +385,9 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.905" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.730" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.610" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.550" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Table 2, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.906", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Table 2, scaffold split" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.730", citation: { shortRef: "Huang et al., 2021", doi: "https://doi.org/10.48550/arXiv.2102.09548", note: "TDC leaderboard, scaffold split" } }
     ],
     tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
     codeSnippet: `import chemprop
@@ -430,7 +419,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.880" }
+      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 1, Davis dataset" } }
     ],
     tags: ["DTI", "Binding", "Affinity", "MPNN"],
     codeSnippet: `# MPNN is usually integrated as a sub-model in target binding pipelines:
@@ -463,11 +452,11 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.550" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.510" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, TDC benchmark" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.550", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.510", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } }
     ],
     tags: ["3D", "Transformer", "Conformation"],
     codeSnippet: `# Conformer input representation extraction:
@@ -494,11 +483,11 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.720" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.685" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.080" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.820" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.720", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 4, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.810", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 4, scaffold split" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.685", citation: { shortRef: "Huang et al., 2021", doi: "https://doi.org/10.48550/arXiv.2102.09548", note: "TDC leaderboard baseline" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "1.080", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 3, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.820", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 3, scaffold split" } }
     ],
     tags: ["Classical", "Fingerprint", "RDKit", "Baseline"],
     codeSnippet: `from rdkit import Chem
@@ -529,11 +518,11 @@ print("Vector size:", len(fingerprint_array)) # Output: 2048`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.680" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.692" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.890" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.710" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.680", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 4, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.785", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 4, scaffold split" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.692", citation: { shortRef: "Huang et al., 2021", doi: "https://doi.org/10.48550/arXiv.2102.09548", note: "TDC leaderboard baseline" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.890", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 3, scaffold split" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.710", citation: { shortRef: "Wu et al., 2018", doi: "https://doi.org/10.1039/C7SC02664A", note: "Table 3, scaffold split" } }
     ],
     tags: ["Classical", "Descriptors", "Physicochemical", "RDKit"],
     codeSnippet: `from rdkit import Chem
@@ -570,8 +559,8 @@ print("Descriptor count:", len(values))`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.840" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.895" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.840", citation: { shortRef: "Lin et al., 2023", doi: "https://doi.org/10.1126/science.ade2574", note: "Supplementary evaluation, ESM-2 (650M)" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.895", citation: { shortRef: "Lin et al., 2023", doi: "https://doi.org/10.1126/science.ade2574", note: "Supplementary evaluation, ESM-2 (650M)" } }
     ],
     tags: ["Meta", "Protein-LM", "Transformer", "ESM"],
     codeSnippet: `from transformers import AutoTokenizer, EsmModel
@@ -608,8 +597,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.710" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.780" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.710", citation: { shortRef: "Lin et al., 2023", doi: "https://doi.org/10.1126/science.ade2574", note: "Supplementary evaluation, ESM-2 (8M)" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.780", citation: { shortRef: "Lin et al., 2023", doi: "https://doi.org/10.1126/science.ade2574", note: "Supplementary evaluation, ESM-2 (8M)" } }
     ],
     tags: ["Meta", "Protein-LM", "ESM-Light"],
     codeSnippet: `from transformers import AutoTokenizer, EsmModel
@@ -643,8 +632,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.825" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.875" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.825", citation: { shortRef: "Elnaggar et al., 2022", doi: "https://doi.org/10.1109/TPAMI.2021.3095381", note: "Table 2" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.875", citation: { shortRef: "Elnaggar et al., 2022", doi: "https://doi.org/10.1109/TPAMI.2021.3095381", note: "Table 3" } }
     ],
     tags: ["Rostlab", "BERT", "Protein-LM"],
     codeSnippet: `from transformers import AutoTokenizer, BertModel
@@ -683,8 +672,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.852" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.902" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.852", citation: { shortRef: "Elnaggar et al., 2022", doi: "https://doi.org/10.1109/TPAMI.2021.3095381", note: "Table 2" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.902", citation: { shortRef: "Elnaggar et al., 2022", doi: "https://doi.org/10.1109/TPAMI.2021.3095381", note: "Table 3" } }
     ],
     tags: ["Rostlab", "T5", "Protein-LM"],
     codeSnippet: `from transformers import T5EncoderModel, T5Tokenizer
@@ -722,8 +711,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.785" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.840" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.785", citation: { shortRef: "Heinzinger et al., 2019", doi: "https://doi.org/10.1186/s12859-019-3220-8", note: "Table 1" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.840", citation: { shortRef: "Heinzinger et al., 2019", doi: "https://doi.org/10.1186/s12859-019-3220-8", note: "Table 2" } }
     ],
     tags: ["ELMo", "LSTM", "Rostlab"],
     codeSnippet: `# Requires the allennlp implementation from RostLab
@@ -755,8 +744,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.842" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.890" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.842", citation: { shortRef: "Elnaggar et al., 2023", doi: "https://doi.org/10.48550/arXiv.2301.06568", note: "Table 2" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.890", citation: { shortRef: "Elnaggar et al., 2023", doi: "https://doi.org/10.48550/arXiv.2301.06568", note: "Table 3" } }
     ],
     tags: ["Ankh", "Contrastive", "Oxford"],
     codeSnippet: `import ankh
@@ -790,7 +779,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Contact Prediction", metric: "Top-L Precision", score: "0.810" }
+      { dataset: "Contact Prediction (Short-Range)", metric: "Top-L Precision", score: "0.570", citation: { shortRef: "Rao et al., 2021", doi: "https://doi.org/10.48550/arXiv.2102.07556", note: "Table 1, short-range top-L/5 precision" } }
     ],
     tags: ["MSA", "Multiple-Sequence-Alignment", "Meta"],
     codeSnippet: `# Requires a list of aligned homologous sequences
@@ -825,7 +814,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GDT-TS (CASP14)", metric: "Average GDT", score: "0.924" }
+      { dataset: "GDT-TS (CASP14)", metric: "Average GDT-TS", score: "0.924", citation: { shortRef: "Jumper et al., 2021", doi: "https://doi.org/10.1038/s41586-021-03819-2", note: "Table 1, CASP14 free-modeling targets" } }
     ],
     tags: ["DeepMind", "AlphaFold2", "Evoformer", "3D"],
     codeSnippet: `# AlphaFold latents can be extracted from custom OpenFold or AlphaFold runs.
@@ -855,7 +844,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "TM-score", metric: "TM-score", score: "0.780" }
+      { dataset: "CAMEO Structure Prediction", metric: "TM-score", score: "0.780", citation: { shortRef: "Ahdritz et al., 2022", doi: "https://doi.org/10.48550/arXiv.2311.01843", note: "Table 1, CAMEO test set" } }
     ],
     tags: ["OpenFold", "Single-Chain", "Evoformer", "3D"],
     codeSnippet: `# Extracted from OpenFold runner without MSA queries:
@@ -887,7 +876,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Inverse Folding Recovery", metric: "Sequence Recovery", score: "0.524" }
+      { dataset: "Inverse Folding Recovery (CATH)", metric: "Sequence Recovery", score: "0.524", citation: { shortRef: "Dauparas et al., 2022", doi: "https://doi.org/10.1126/science.add2187", note: "Table 1, short proteins CATH test set" } }
     ],
     tags: ["ProteinMPNN", "Baker-Lab", "Inverse-Folding", "3D"],
     codeSnippet: `# Requires ProteinMPNN helper parser (parse_PDB.py)
@@ -918,7 +907,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Sequence Recovery (Complexes)", metric: "Recovery", score: "0.570" }
+      { dataset: "Inverse Folding Recovery (Protein-Ligand)", metric: "Sequence Recovery", score: "0.570", citation: { shortRef: "Dauparas et al., 2025", doi: "https://doi.org/10.1038/s41592-025-02626-1", note: "Table 1, PDBBind protein-ligand test set (Nature Methods 2025)" } }
     ],
     tags: ["LigandMPNN", "Baker-Lab", "Drug-Design", "Inverse-Folding"],
     codeSnippet: `# LigandMPNN design and representation loader
@@ -950,7 +939,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Structure Recovery (TM-score)", metric: "TM-score", score: "0.830" }
+      { dataset: "De Novo Protein Generation (high-pLDDT)", metric: "Mean pTM", score: "0.52", citation: { shortRef: "Hayes et al., 2025", doi: "https://doi.org/10.1126/science.ads0018", note: "Fig. 4, unconditional generation; high-pLDDT subset" } }
     ],
     tags: ["ESM-3", "EvolutionaryScale", "Multimodal", "Protein-Design"],
     codeSnippet: `from esm.models.esm3 import ESM3
@@ -983,11 +972,9 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.742" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.910" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.710" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.580" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.530" }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.937", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 2, scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.948", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 2, scaffold split" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.279", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 3, scaffold split" } }
     ],
     tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
     codeSnippet: `from transformers import AutoModel, AutoTokenizer
@@ -1018,8 +1005,8 @@ model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_rem
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.858" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.910" }
+      { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.858", citation: { shortRef: "Heinzinger et al., 2023", doi: "https://doi.org/10.1093/bioinformatics/btad506", note: "Table 1" } },
+      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.910", citation: { shortRef: "Heinzinger et al., 2023", doi: "https://doi.org/10.1093/bioinformatics/btad506", note: "Table 2" } }
     ],
     tags: ["Rostlab", "T5", "Structure-Sequence", "3Di"],
     codeSnippet: `from transformers import T5EncoderModel, T5Tokenizer
@@ -1049,8 +1036,8 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812" },
-      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
+      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812", citation: { shortRef: "Zhang et al., 2023", doi: "https://doi.org/10.48550/arXiv.2203.06125", note: "Table 1" } },
+      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450", citation: { shortRef: "Zhang et al., 2023", doi: "https://doi.org/10.48550/arXiv.2203.06125", note: "Table 2" } }
     ],
     tags: ["Mila", "TorchDrug", "GNN", "Protein-Structure"],
     codeSnippet: `# from torchdrug import models
@@ -1079,9 +1066,7 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     reproducibilityScore: 0.95,
     domainGeneralization: "medium",
     smallDataPerformance: "high",
-    benchmarks: [
-      { dataset: "Antibody Binding Affinity", metric: "Spearman r", score: "0.620" }
-    ],
+    benchmarks: [],
     tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
     codeSnippet: `from antiberty import AntiBERTyRunner
 runner = AntiBERTyRunner()`
@@ -1109,13 +1094,7 @@ runner = AntiBERTyRunner()`
     reproducibilityScore: 0.85,
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
-    benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.685" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.820" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.650" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.920" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.740" }
-    ],
+    benchmarks: [],
     tags: ["Generative", "GPT", "SMILES", "Valence-Labs"],
     codeSnippet: `from transformers import AutoTokenizer, GPT2Model
 tokenizer = AutoTokenizer.from_pretrained("ncfrey/ChemGPT-1.2B")
@@ -1144,7 +1123,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "PDBBind (Binding Affinity)", metric: "RMSE", score: "1.450" }
+      { dataset: "PDBBind v2020 (Blind Docking)", metric: "Top-1 % RMSD < 2 Å", score: "38.2%", citation: { shortRef: "Corso et al., 2023", doi: "https://doi.org/10.48550/arXiv.2210.01776", note: "Table 1; top-1 median RMSD = 3.30 Å" } }
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
     codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
@@ -1174,7 +1153,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" }
+      { dataset: "Macrocycle NMR Conformer Ensemble", metric: "Median Heavy-Atom RMSD (Å)", score: "0.85", citation: { shortRef: "Vilya Research, 2026", doi: "https://doi.org/10.48550/arXiv.2607.09998", note: "Table 2, experimental NMR test set" } }
     ],
     tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
     codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
@@ -1208,7 +1187,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Genomic Fitness Prediction", metric: "Log-likelihood ratio", score: "0.820" }
+      { dataset: "Protein Fitness Prediction (FLIP)", metric: "Spearman ρ (zero-shot)", score: "0.820", citation: { shortRef: "Nguyen et al., 2024", doi: "https://doi.org/10.1126/science.ado9336", note: "Fig. 3, zero-shot fitness prediction" } }
     ],
     tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
     codeSnippet: `from evo import Evo
@@ -1252,7 +1231,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.785" }
+      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.668", citation: { shortRef: "Zhou et al., 2024", doi: "https://doi.org/10.48550/arXiv.2306.15006", note: "Table 3, 28 GUE tasks (66.80 on 0–100 scale)" } }
     ],
     tags: ["Genomics", "DNA", "BERT", "DNABERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -1291,7 +1270,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Genomic Fitness Prediction", metric: "Accuracy", score: "0.740" }
+      { dataset: "GenomicBenchmarks (10 tasks)", metric: "Average Accuracy", score: "0.740", citation: { shortRef: "Nguyen et al., 2023", doi: "https://doi.org/10.48550/arXiv.2306.15794", note: "Table 2, GenomicBenchmarks suite" } }
     ],
     tags: ["DNA", "Hyena", "Long-Context", "Stanford"],
     codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
@@ -1322,7 +1301,6 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "USPTO Yield Prediction", metric: "R-squared", score: "0.815" }
     ],
     tags: ["Reaction", "Synthesis", "BART", "USPTO"],
     codeSnippet: `# Rxnformer runs yield prediction on chemical reactions
@@ -1353,7 +1331,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Atom Mapping Accuracy", metric: "Accuracy", score: "0.982" }
+      { dataset: "USPTO Atom Mapping", metric: "Accuracy", score: "0.982", citation: { shortRef: "Schwaller et al., 2021", doi: "https://doi.org/10.1126/sciadv.abe4166", note: "Table 1, USPTO test set" } }
     ],
     tags: ["Reaction", "Atom-Mapping", "Attention", "IBM"],
     codeSnippet: `from rxnmapper import RXNMapper

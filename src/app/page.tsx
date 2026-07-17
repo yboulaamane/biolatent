@@ -1008,22 +1008,25 @@ export default function Home() {
               </thead>
               <tbody>
                 {sortData(EMBEDDINGS.filter(e => e.modality === 'molecule'), molSortConfig).map((emb) => {
-                  const bbbp = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'))?.score || 'N/A';
-                  const clintox = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'))?.score || 'N/A';
-                  const cyp3a4 = emb.benchmarks.find(b => b.dataset.startsWith('CYP3A4'))?.score || 'N/A';
-                  const esol = emb.benchmarks.find(b => b.dataset.startsWith('ESOL'))?.score || 'N/A';
-                  const lipo = emb.benchmarks.find(b => b.dataset.startsWith('Lipophilicity'))?.score || 'N/A';
+                  const bbbpE = emb.benchmarks.find(b => b.dataset.startsWith('BBBP'));
+                  const clintoxE = emb.benchmarks.find(b => b.dataset.startsWith('ClinTox'));
+                  const cyp3a4E = emb.benchmarks.find(b => b.dataset.startsWith('CYP3A4'));
+                  const esolE = emb.benchmarks.find(b => b.dataset.startsWith('ESOL'));
+                  const lipoE = emb.benchmarks.find(b => b.dataset.startsWith('Lipophilicity'));
+                  const citLink = (e: typeof bbbpE) => e?.citation?.doi
+                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ' — ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
+                    : null;
 
                   return (
                     <tr key={emb.id} style={{ cursor: 'pointer' }} onClick={() => { setSelectedEmbedding(emb); setModalTab('details'); }}>
                       <td style={{ fontWeight: 700, color: '#fff' }}>{emb.name}</td>
                       <td>{formatLabel(emb.representationType)}</td>
                       <td>{formatLabel(emb.inputRepresentation)}</td>
-                      <td><span className="score-badge">{bbbp}</span></td>
-                      <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{clintox}</span></td>
-                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{cyp3a4}</span></td>
-                      <td><span className="score-badge" style={{ color: '#f43f5e', background: 'rgba(244,63,94,0.1)' }}>{esol}</span></td>
-                      <td><span className="score-badge" style={{ color: '#eab308', background: 'rgba(234,179,8,0.1)' }}>{lipo}</span></td>
+                      <td><span className="score-badge">{bbbpE?.score || 'N/A'}</span>{citLink(bbbpE)}</td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{clintoxE?.score || 'N/A'}</span>{citLink(clintoxE)}</td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{cyp3a4E?.score || 'N/A'}</span>{citLink(cyp3a4E)}</td>
+                      <td><span className="score-badge" style={{ color: '#f43f5e', background: 'rgba(244,63,94,0.1)' }}>{esolE?.score || 'N/A'}</span>{citLink(esolE)}</td>
+                      <td><span className="score-badge" style={{ color: '#eab308', background: 'rgba(234,179,8,0.1)' }}>{lipoE?.score || 'N/A'}</span>{citLink(lipoE)}</td>
                     </tr>
                   );
                 })}
@@ -1056,19 +1059,23 @@ export default function Home() {
               </thead>
               <tbody>
                 {sortData(EMBEDDINGS.filter(e => e.modality === 'protein' || e.modality === 'nucleic_acid' || e.modality === 'complex'), protSortConfig).map((emb) => {
-                  const cb513 = emb.benchmarks.find(b => b.dataset.includes('CB513'))?.score || 'N/A';
-                  const deeploc = emb.benchmarks.find(b => b.dataset.includes('DeepLoc'))?.score || 'N/A';
+                  const cb513E = emb.benchmarks.find(b => b.dataset.includes('CB513'));
+                  const deeplocE = emb.benchmarks.find(b => b.dataset.includes('DeepLoc'));
 
                   // Skip if both are N/A (like structural designs or ligand designs with different benchmarks)
-                  if (cb513 === 'N/A' && deeploc === 'N/A') return null;
+                  if (!cb513E && !deeplocE) return null;
+
+                  const citLink = (e: typeof cb513E) => e?.citation?.doi
+                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ' — ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
+                    : null;
 
                   return (
                     <tr key={emb.id} style={{ cursor: 'pointer' }} onClick={() => { setSelectedEmbedding(emb); setModalTab('details'); }}>
                       <td style={{ fontWeight: 700, color: '#fff' }}>{emb.name}</td>
                       <td>{formatLabel(emb.representationType)}</td>
                       <td>{formatLabel(emb.inputRepresentation)}</td>
-                      <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{cb513}</span></td>
-                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{deeploc}</span></td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-purple)', background: 'rgba(168,85,247,0.1)' }}>{cb513E?.score || 'N/A'}</span>{citLink(cb513E)}</td>
+                      <td><span className="score-badge" style={{ color: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.1)' }}>{deeplocE?.score || 'N/A'}</span>{citLink(deeplocE)}</td>
                     </tr>
                   );
                 })}
@@ -1234,6 +1241,43 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Reported Benchmarks */}
+                  {selectedEmbedding.benchmarks.length > 0 && (
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginBottom: '2rem' }}>
+                      <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.75rem', fontWeight: 700 }}>Reported Benchmarks</h4>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                            <th style={{ textAlign: 'left', padding: '0.4rem 0.5rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>Dataset</th>
+                            <th style={{ textAlign: 'left', padding: '0.4rem 0.5rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>Metric</th>
+                            <th style={{ textAlign: 'center', padding: '0.4rem 0.5rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>Score</th>
+                            <th style={{ textAlign: 'left', padding: '0.4rem 0.5rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>Source</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedEmbedding.benchmarks.map((b, i) => (
+                            <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '0.4rem 0.5rem', color: 'var(--text-secondary)' }}>{b.dataset}</td>
+                              <td style={{ padding: '0.4rem 0.5rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{b.metric}</td>
+                              <td style={{ padding: '0.4rem 0.5rem', textAlign: 'center' }}>
+                                <span style={{ fontWeight: 700, color: 'var(--accent-indigo)', fontFamily: 'var(--font-mono)' }}>{b.score}</span>
+                              </td>
+                              <td style={{ padding: '0.4rem 0.5rem' }}>
+                                {b.citation ? (
+                                  <a href={b.citation.doi || '#'} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none', fontSize: '0.75rem' }} title={b.citation.note}>
+                                    {b.citation.shortRef} ↗
+                                  </a>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
 
                   {/* Links / Download buttons */}
                   <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem' }}>
