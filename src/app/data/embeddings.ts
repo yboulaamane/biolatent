@@ -419,7 +419,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     embeddingDimension: 128,
     yearReleased: 2018,
     trainingData: {
-      name: "KIBA / Davis",
+      name: "Davis / KIBA",
       size: "120,000+ binding affinities",
       license: "Academic Use"
     },
@@ -790,8 +790,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.800" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.860" }
+      { dataset: "Contact Prediction", metric: "Top-L Precision", score: "0.810" }
     ],
     tags: ["MSA", "Multiple-Sequence-Alignment", "Meta"],
     codeSnippet: `# Requires a list of aligned homologous sequences
@@ -826,8 +825,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.835" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.880" }
+      { dataset: "GDT-TS (CASP14)", metric: "Average GDT", score: "0.924" }
     ],
     tags: ["DeepMind", "AlphaFold2", "Evoformer", "3D"],
     codeSnippet: `# AlphaFold latents can be extracted from custom OpenFold or AlphaFold runs.
@@ -857,8 +855,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.780" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.820" }
+      { dataset: "TM-score", metric: "TM-score", score: "0.780" }
     ],
     tags: ["OpenFold", "Single-Chain", "Evoformer", "3D"],
     codeSnippet: `# Extracted from OpenFold runner without MSA queries:
@@ -890,8 +887,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.760" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.810" }
+      { dataset: "Inverse Folding Recovery", metric: "Sequence Recovery", score: "0.524" }
     ],
     tags: ["ProteinMPNN", "Baker-Lab", "Inverse-Folding", "3D"],
     codeSnippet: `# Requires ProteinMPNN helper parser (parse_PDB.py)
@@ -922,8 +918,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.770" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.835" }
+      { dataset: "Sequence Recovery (Complexes)", metric: "Recovery", score: "0.570" }
     ],
     tags: ["LigandMPNN", "Baker-Lab", "Drug-Design", "Inverse-Folding"],
     codeSnippet: `# LigandMPNN design and representation loader
@@ -955,8 +950,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.855" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.915" }
+      { dataset: "Structure Recovery (TM-score)", metric: "TM-score", score: "0.830" }
     ],
     tags: ["ESM-3", "EvolutionaryScale", "Multimodal", "Protein-Design"],
     codeSnippet: `from esm.models.esm3 import ESM3
@@ -1055,8 +1049,8 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.795" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.830" }
+      { dataset: "EC (Enzyme Commission)", metric: "F1-max", score: "0.812" },
+      { dataset: "GO (Gene Ontology - BP)", metric: "F1-max", score: "0.450" }
     ],
     tags: ["Mila", "TorchDrug", "GNN", "Protein-Structure"],
     codeSnippet: `# from torchdrug import models
@@ -1086,8 +1080,7 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.775" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.825" }
+      { dataset: "Antibody Binding Affinity", metric: "Spearman r", score: "0.620" }
     ],
     tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
     codeSnippet: `from antiberty import AntiBERTyRunner
@@ -1151,7 +1144,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
+      { dataset: "PDBBind (Binding Affinity)", metric: "RMSE", score: "1.450" }
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
     codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
@@ -1181,12 +1174,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" },
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "N/A" },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "N/A" },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "N/A" },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "N/A" }
+      { dataset: "Conformer Sampling (experimental NMR)", metric: "RMSD", score: "0.85 Å" }
     ],
     tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
     codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
@@ -1220,8 +1208,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "0.820" },
-      { dataset: "Subcellular Localization (DeepLoc)", metric: "Accuracy", score: "0.880" }
+      { dataset: "Genomic Fitness Prediction", metric: "Log-likelihood ratio", score: "0.820" }
     ],
     tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
     codeSnippet: `from evo import Evo
@@ -1265,7 +1252,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
+      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.785" }
     ],
     tags: ["Genomics", "DNA", "BERT", "DNABERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -1304,7 +1291,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
+      { dataset: "Genomic Fitness Prediction", metric: "Accuracy", score: "0.740" }
     ],
     tags: ["DNA", "Hyena", "Long-Context", "Stanford"],
     codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
@@ -1335,7 +1322,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
+      { dataset: "USPTO Yield Prediction", metric: "R-squared", score: "0.815" }
     ],
     tags: ["Reaction", "Synthesis", "BART", "USPTO"],
     codeSnippet: `# Rxnformer runs yield prediction on chemical reactions
@@ -1366,7 +1353,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Secondary Structure (CB513)", metric: "Accuracy", score: "N/A" }
+      { dataset: "Atom Mapping Accuracy", metric: "Accuracy", score: "0.982" }
     ],
     tags: ["Reaction", "Atom-Mapping", "Attention", "IBM"],
     codeSnippet: `from rxnmapper import RXNMapper
