@@ -9,8 +9,8 @@ export interface BaseRepresentation {
   maintainer?: string;
   developer?: string;
   representationType: RepresentationType;
-  modality: 'molecule' | 'protein' | 'complex' | 'reaction';
-  inputRepresentation: 'SMILES' | 'graph' | 'sequence' | '3D' | 'engineered_features' | 'Pocket/3D';
+  modality: 'molecule' | 'protein' | 'complex' | 'reaction' | 'nucleic_acid';
+  inputRepresentation: 'SMILES' | 'graph' | 'sequence' | '3D' | 'engineered_features' | 'Pocket/3D' | 'reaction_smiles';
   license: string;
   
   // Availability
@@ -1155,5 +1155,191 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
 # model = Vilya1Transformer.from_pretrained("vilya-1-base")
 # sampler = ConformerSampler(model)
 # conformers = sampler.sample_conformers(smiles="C1CCCCC1...", num_samples=100)`
+  },
+  {
+    id: "evo_foundation",
+    name: "Evo (7B Genomics Model)",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    developer: "Arc Institute",
+    architectureType: "StripedHyena (Transformer/CNN Hybrid)",
+    pretrainingObjective: "Autoregressive character-level sequence language modeling",
+    embeddingDimension: 4096,
+    yearReleased: 2024,
+    trainingData: {
+      name: "Prokaryotic and viral whole-genome sequences",
+      size: "300 Billion tokens",
+      license: "Apache-2.0"
+    },
+    codeRepositoryUrl: "https://github.com/a16z-infra/evo",
+    weightsUrl: "https://huggingface.co/arc-institute/evo-1-7b-base",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Genomic Fitness Prediction", metric: "Log-likelihood ratio", score: "0.820" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
+    codeSnippet: `from evo import Evo
+import torch
+
+# Load the 7B foundation model
+device = "cuda" if torch.cuda.is_available() else "cpu"
+evo_model = Evo("evo-1-7b-base")
+model = evo_model.model.to(device)
+model.eval()
+
+# Embed DNA sequence
+sequence = "ATGCTAGCTAGCTAGCTAGCTAGCTAGC"
+input_ids = evo_model.tokenizer.tokenize(sequence, return_tensors="pt").to(device)
+with torch.no_grad():
+    outputs = model(input_ids)
+embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
+  },
+  {
+    id: "dnabert_2",
+    name: "DNABERT-2",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    developer: "Zhiqing Xiao et al.",
+    architectureType: "Transformer (BERT with FlashAttention)",
+    pretrainingObjective: "Masked language modeling on multi-mer DNA spans",
+    embeddingDimension: 768,
+    yearReleased: 2023,
+    trainingData: {
+      name: "Multi-species reference genome assemblies",
+      size: "32 Billion base pairs",
+      license: "Academic/Commercial"
+    },
+    codeRepositoryUrl: "https://github.com/jerryji1993/DNABERT2",
+    weightsUrl: "https://huggingface.co/zhihan1996/DNABERT2-117M",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.92,
+    domainGeneralization: "medium",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.785" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["Genomics", "DNA", "BERT", "DNABERT"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModel
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT2-117M", trust_remote_code=True)
+model = AutoModel.from_pretrained("zhihan1996/DNABERT2-117M", trust_remote_code=True)
+
+inputs = tokenizer("ACGTTGCA", return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs)
+embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
+  },
+  {
+    id: "hyenadna",
+    name: "HyenaDNA (Long Context)",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    developer: "Stanford Hazy Research",
+    architectureType: "Implicit CNN / Hyena Operator",
+    pretrainingObjective: "Autoregressive long-context character pretraining",
+    embeddingDimension: 256,
+    yearReleased: 2023,
+    trainingData: {
+      name: "Human Reference Genome (HG38)",
+      size: "3 Billion base pairs",
+      license: "Apache-2.0"
+    },
+    codeRepositoryUrl: "https://github.com/HazyResearch/hyena-dna",
+    weightsUrl: "https://huggingface.co/LongSafari/hyenadna-medium-160k-seqlen",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.88,
+    domainGeneralization: "high",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "Genomic Fitness Prediction", metric: "Accuracy", score: "0.740" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["DNA", "Hyena", "Long-Context", "Stanford"],
+    codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
+# from hyena_dna.model import HyenaDNAModel
+# model = HyenaDNAModel.from_pretrained("hyenadna-medium-160k")`
+  },
+  {
+    id: "rxnformer",
+    name: "Rxnformer",
+    representationType: "learned_embedding",
+    modality: "reaction",
+    inputRepresentation: "reaction_smiles",
+    license: "MIT",
+    developer: "Bayer / IBM Research",
+    architectureType: "Transformer (BART-like)",
+    pretrainingObjective: "Sequence-to-sequence reaction prediction and yield classification",
+    embeddingDimension: 768,
+    yearReleased: 2022,
+    trainingData: {
+      name: "USPTO reaction database",
+      size: "2.5 Million reactions",
+      license: "CC0 / Public Domain"
+    },
+    codeRepositoryUrl: "https://github.com/Bayer-Group/rxnformer",
+    computeProfile: "gpu",
+    dataLeakageRisk: "medium",
+    reproducibilityScore: 0.82,
+    domainGeneralization: "medium",
+    smallDataPerformance: "medium",
+    benchmarks: [
+      { dataset: "USPTO Yield Prediction", metric: "R-squared", score: "0.815" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["Reaction", "Synthesis", "BART", "USPTO"],
+    codeSnippet: `# Rxnformer runs yield prediction on chemical reactions
+# from rxnformer import RxnformerModel
+# model = RxnformerModel.from_pretrained("rxnformer-yield")`
+  },
+  {
+    id: "rxnmapper",
+    name: "RXNMapper",
+    representationType: "learned_embedding",
+    modality: "reaction",
+    inputRepresentation: "reaction_smiles",
+    license: "MIT",
+    developer: "IBM Research / University of Bern",
+    architectureType: "Transformer (BERT Attention Mapping)",
+    pretrainingObjective: "Unsupervised atom-mapping of chemical reactions",
+    embeddingDimension: 256,
+    yearReleased: 2020,
+    trainingData: {
+      name: "USPTO mapped reaction subsets",
+      size: "1 Million reactions",
+      license: "MIT"
+    },
+    codeRepositoryUrl: "https://github.com/rxn4chemistry/rxnmapper",
+    computeProfile: "cpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.98,
+    domainGeneralization: "high",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "Atom Mapping Accuracy", metric: "Accuracy", score: "0.982" },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "N/A" }
+    ],
+    tags: ["Reaction", "Atom-Mapping", "Attention", "IBM"],
+    codeSnippet: `from rxnmapper import RXNMapper
+
+rxn_mapper = RXNMapper()
+# Map atoms from reactant to product SMILES
+rxn_smiles = "CC(=O)O.CCN>>CCOC(=O)C"
+results = rxn_mapper.get_attention_guided_maps([rxn_smiles])
+print("Mapped reaction:", results[0]['mapped_rxn'])`
   }
 ];

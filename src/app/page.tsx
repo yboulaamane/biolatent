@@ -48,9 +48,13 @@ export default function Home() {
     resourceBudget: '',
   });
 
+  // Chart Visualization States
+  const [chartMetric, setChartMetric] = useState<'bbbp' | 'cb513'>('bbbp');
+  const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
+
   // Unique options for dropdowns/filters
-  const modalities = ['All', 'molecule', 'protein', 'complex'];
-  const inputTypes = ['All', 'SMILES', 'graph', 'sequence', '3D', 'engineered_features', 'Pocket/3D'];
+  const modalities = ['All', 'molecule', 'protein', 'complex', 'nucleic_acid', 'reaction'];
+  const inputTypes = ['All', 'SMILES', 'graph', 'sequence', '3D', 'engineered_features', 'Pocket/3D', 'reaction_smiles'];
   const repTypes = ['All', 'learned_embedding', 'fixed_descriptor', 'hybrid_representation'];
   const licenses = ['All', 'MIT', 'Apache-2.0', 'Academic/Restrictive'];
 
@@ -71,6 +75,9 @@ export default function Home() {
     if (val === 'molecule') return 'Molecule';
     if (val === 'protein') return 'Protein';
     if (val === 'complex') return 'Complex';
+    if (val === 'nucleic_acid') return 'Nucleic Acid (DNA/RNA)';
+    if (val === 'reaction') return 'Chemical Reaction';
+    if (val === 'reaction_smiles') return 'Reaction SMILES';
     return val;
   };
 
@@ -102,6 +109,51 @@ export default function Home() {
       return matchesSearch && matchesModality && matchesInputType && matchesRepType && matchesLicense;
     });
   }, [searchQuery, selectedModality, selectedInputType, selectedRepType, selectedLicense]);
+
+  // Interactive Chart Coordinate mapping
+  const chartData = useMemo(() => {
+    const minLog = Math.log(128);
+    const maxLog = Math.log(4096);
+    const svgWidth = 680;
+    const svgHeight = 280;
+    const margin = { top: 25, right: 30, bottom: 45, left: 55 };
+    const plotWidth = svgWidth - margin.left - margin.right;
+    const plotHeight = svgHeight - margin.top - margin.bottom;
+
+    const datasetName = chartMetric === 'bbbp' ? 'BBBP' : 'Secondary Structure (CB513)';
+    const yMin = chartMetric === 'bbbp' ? 0.55 : 0.65;
+    const yMax = chartMetric === 'bbbp' ? 0.80 : 0.90;
+
+    const points: any[] = [];
+
+    EMBEDDINGS.forEach((emb) => {
+      const benchmark = emb.benchmarks.find((b) => b.dataset.startsWith(chartMetric === 'bbbp' ? 'BBBP' : 'Secondary Structure'));
+      if (!benchmark) return;
+
+      const scoreNum = parseFloat(benchmark.score);
+      if (isNaN(scoreNum)) return;
+
+      // Extract dimension
+      const dim = parseInt(getDim(emb) as string) || 512;
+      const logDim = Math.log(dim);
+
+      // Map to SVG coordinates
+      const x = margin.left + ((logDim - minLog) / (maxLog - minLog)) * plotWidth;
+      const y = margin.top + plotHeight - ((scoreNum - yMin) / (yMax - yMin)) * plotHeight;
+
+      points.push({
+        id: emb.id,
+        name: emb.name,
+        type: emb.representationType,
+        dim,
+        score: scoreNum,
+        x,
+        y
+      });
+    });
+
+    return { points, margin, plotWidth, plotHeight, yMin, yMax, svgWidth, svgHeight };
+  }, [chartMetric]);
 
   // Code Copy Action
   const copyToClipboard = (text: string) => {
@@ -654,10 +706,138 @@ export default function Home() {
       {/* ==================== TAB 3: BENCHMARKS ==================== */}
       {activeTab === 'benchmarks' && (
         <div className="glass-card">
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>MoleculeNet Downstream Benchmarks</h2>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>MoleculeNet & Protein Downstream Benchmarks</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-            Comparison of reported benchmark scores across molecular representations.
+            Comparison of reported benchmark scores across molecular and biological representations.
           </p>
+
+          {/* Chart Metric Selector */}
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Visualize Dimension vs. Score:</span>
+            <button
+              className={`badge-btn ${chartMetric === 'bbbp' ? 'active' : ''}`}
+              onClick={() => setChartMetric('bbbp')}
+            >
+              Molecules: BBBP (ROC-AUC)
+            </button>
+            <button
+              className={`badge-btn ${chartMetric === 'cb513' ? 'active' : ''}`}
+              onClick={() => setChartMetric('cb513')}
+            >
+              Proteins: CB513 (Accuracy)
+            </button>
+          </div>
+
+          {/* Interactive SVG Chart */}
+          <div style={{ position: 'relative', marginBottom: '2.5rem', background: 'rgba(15, 23, 42, 0.3)', border: '1px solid var(--border-card)', borderRadius: '12px', padding: '1rem', overflow: 'hidden' }}>
+            <svg viewBox={`0 0 ${chartData.svgWidth} ${chartData.svgHeight}`} width="100%" height="auto" style={{ overflow: 'visible' }}>
+              {/* Grid Lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                const y = chartData.margin.top + ratio * chartData.plotHeight;
+                const scoreValue = chartData.yMax - ratio * (chartData.yMax - chartData.yMin);
+                return (
+                  <g key={ratio} opacity="0.15">
+                    <line x1={chartData.margin.left} y1={y} x2={chartData.svgWidth - chartData.margin.right} y2={y} stroke="#fff" strokeWidth="1" strokeDasharray="4,4" />
+                    <text x={chartData.margin.left - 8} y={y + 4} fill="#fff" fontSize="10" textAnchor="end" fontFamily="var(--font-mono)">
+                      {scoreValue.toFixed(2)}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* X Axis Grid Lines & Labels (Log Scale dimensions) */}
+              {[128, 256, 512, 1024, 2048, 4096].map((dim) => {
+                const logDim = Math.log(dim);
+                const minLog = Math.log(128);
+                const maxLog = Math.log(4096);
+                const x = chartData.margin.left + ((logDim - minLog) / (maxLog - minLog)) * chartData.plotWidth;
+                return (
+                  <g key={dim} opacity="0.15">
+                    <line x1={x} y1={chartData.margin.top} x2={x} y2={chartData.svgHeight - chartData.margin.bottom} stroke="#fff" strokeWidth="1" strokeDasharray="4,4" />
+                    <text x={x} y={chartData.svgHeight - chartData.margin.bottom + 16} fill="#fff" fontSize="10" textAnchor="middle" fontFamily="var(--font-mono)">
+                      {dim}d
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* X Axis Title */}
+              <text x={chartData.margin.left + chartData.plotWidth / 2} y={chartData.svgHeight - 10} fill="var(--text-muted)" fontSize="10" fontWeight="700" textAnchor="middle">
+                EMBEDDING DIMENSION (LOG SCALE)
+              </text>
+
+              {/* Y Axis Title */}
+              <text transform={`rotate(-90) translate(${-chartData.margin.top - chartData.plotHeight / 2}, 15)`} fill="var(--text-muted)" fontSize="10" fontWeight="700" textAnchor="middle">
+                {chartMetric === 'bbbp' ? 'BBBP ROC-AUC SCORE' : 'CB513 SECONDARY STRUCTURE ACCURACY'}
+              </text>
+
+              {/* Chart Points */}
+              {chartData.points.map((pt) => {
+                const isHovered = hoveredPoint?.id === pt.id;
+                let color = '#8b5cf6'; // default learned
+                if (pt.type === 'fixed_descriptor') color = '#10b981';
+                if (pt.type === 'hybrid_representation') color = '#06b6d4';
+
+                return (
+                  <g key={pt.id}>
+                    {/* Hover Glow */}
+                    {isHovered && (
+                      <circle cx={pt.x} cy={pt.y} r="12" fill={color} opacity="0.25" style={{ pointerEvents: 'none' }} />
+                    )}
+                    {/* Main Point */}
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isHovered ? 8 : 6}
+                      fill={color}
+                      stroke="#0f172a"
+                      strokeWidth="2"
+                      style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+                      onMouseEnter={() => setHoveredPoint(pt)}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                      onClick={() => {
+                        const original = EMBEDDINGS.find(e => e.id === pt.id);
+                        if (original) {
+                          setSelectedEmbedding(original);
+                          setModalTab('details');
+                        }
+                      }}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Hover Tooltip Overlay */}
+            {hoveredPoint && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${hoveredPoint.x + 10}px`,
+                  top: `${hoveredPoint.y - 10}px`,
+                  transform: 'translateY(-100%)',
+                  background: '#090d1a',
+                  border: '1px solid var(--border-card)',
+                  borderRadius: '8px',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.8rem',
+                  boxShadow: '0 10px 15px -3px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                  animation: 'fadeIn 0.15s ease-out'
+                }}
+              >
+                <div style={{ fontWeight: 700, color: '#fff', marginBottom: '0.25rem' }}>{hoveredPoint.name}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                  Dimension: <span style={{ color: '#fff', fontFamily: 'var(--font-mono)' }}>{hoveredPoint.dim}d</span>
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                  Score: <span style={{ color: 'var(--accent-cyan)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{hoveredPoint.score}</span>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.25rem', fontStyle: 'italic' }}>Click point to inspect details</div>
+              </div>
+            )}
+          </div>
 
           <div style={{ overflowX: 'auto' }}>
             <table className="benchmark-table">
