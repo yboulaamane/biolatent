@@ -51,6 +51,7 @@ export default function Home() {
   // Chart Visualization States
   const [chartMetric, setChartMetric] = useState<'bbbp' | 'cb513'>('bbbp');
   const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
+  const [showMethodology, setShowMethodology] = useState(false);
 
   // Unique options for dropdowns/filters
   const modalities = ['All', 'molecule', 'protein', 'complex', 'nucleic_acid', 'reaction'];
@@ -710,6 +711,75 @@ export default function Home() {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
             Comparison of reported benchmark scores across molecular and biological representations.
           </p>
+
+          {/* Scientific Methodology Card */}
+          <div style={{ marginBottom: '2rem' }}>
+            <button
+              onClick={() => setShowMethodology(!showMethodology)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid var(--border-card)',
+                color: '#fff',
+                padding: '0.75rem 1.25rem',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                width: '100%',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
+            >
+              <span>🔬 Scientific Methodology, Splits & Literature References</span>
+              <span>{showMethodology ? 'Hide ▲' : 'Show Details ▼'}</span>
+            </button>
+
+            {showMethodology && (
+              <div className="glass-card" style={{ marginTop: '0.75rem', background: 'rgba(9, 13, 26, 0.6)', padding: '1.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', borderLeft: '3px solid var(--accent-indigo)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div>
+                    <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Molecule Benchmarking Protocols</h4>
+                    <p style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                      All molecular evaluations are reported under standardized <strong>Bemis-Murcko Scaffold Splits (80/10/10)</strong>, ensuring the test set contains entirely novel chemical scaffolds to test model generalization.
+                    </p>
+                    <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <li><strong>BBBP, ClinTox, CYP3A4 Substrate</strong>: Evaluated using Classification Area Under the ROC Curve (ROC-AUC) ↑.</li>
+                      <li><strong>ESOL (Solubility), Lipophilicity</strong>: Evaluated using Regression Root Mean Square Error (RMSE) ↓.</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Protein & Genomics Protocols</h4>
+                    <p style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>
+                      Protein benchmarks follow standard homology-split protocols (such as sequence identity clusters or CATH topology limits) to prevent data leakage from homologous training structures.
+                    </p>
+                    <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <li><strong>CB513 Secondary Structure</strong>: Predicts 3-state or 8-state amino acid structure, reported in 3-state Accuracy (Q3) ↑.</li>
+                      <li><strong>DeepLoc</strong>: Predicts subcellular localization of proteins, reported in multi-class classification Accuracy ↑.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '1rem' }}>
+                  <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.5rem' }}>Literature References & Benchmarking Suites</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.8rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span>• <strong>TDC (Therapeutic Data Commons)</strong>: <a href="https://arxiv.org/abs/2102.09548" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Huang et al. (2021)</a></span>
+                      <span>• <strong>MoleculeNet QSAR Suite</strong>: <a href="https://doi.org/10.1039/C7SC02664A" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Wu et al. (2018)</a></span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span>• <strong>FLIP (Functional Landscapes)</strong>: <a href="https://doi.org/10.1101/2021.11.09.467895" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Dallago et al. (2021)</a></span>
+                      <span>• <strong>DeepLoc Architecture</strong>: <a href="https://doi.org/10.1093/bioinformatics/btx431" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Almagro Armenteros et al. (2017)</a></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Chart Metric Selector */}
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
