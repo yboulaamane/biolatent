@@ -834,3 +834,44 @@ All three bad DOIs were for papers with **no arXiv version** (MSA Transformer, O
 published via bioRxiv/journal routes). Two were plausible-looking but fabricated arXiv IDs; the third was
 a real DOI belonging to an unrelated paper in a nearby journal. **A quick sanity check worth keeping:
 before trusting a `10.48550/arXiv.*` DOI, confirm the paper was ever on arXiv at all.**
+
+---
+
+## 16. ChemBERTa-v1 (Chithrananda et al., 2020) — 2 entries ✅ VERIFIED — BOTH CORRECT
+
+Paper: <https://doi.org/10.48550/arXiv.2010.09885> · arXiv PDF extracted
+
+Results table, ChemBERTa 10M row:
+
+| | BBBP ROC | BBBP PRC | ClinTox ROC | ClinTox PRC |
+|---|---|---|---|---|
+| ChemBERTa 10M | **0.643** | 0.620 | **0.733** | 0.975 |
+| D-MPNN | 0.708 | 0.697 | 0.906 | — |
+
+Split confirmed verbatim: *"we generated an 80/10/10 train/valid/test split using the scaffold splitter
+from DeepChem"*. ClinTox is the **CT_TOX** task specifically.
+
+| ✓ | Benchmark | Stored | Paper | Verdict |
+|---|---|---|---|---|
+| [x] | BBBP | `0.643` | 0.643 | ✅ correct |
+| [x] | ClinTox | `0.733` | 0.733 | ✅ correct |
+
+## 17. D-MPNN / Chemprop (Yang et al., 2019) — 2 entries ⚠️ PARTIAL
+
+Paper: <https://doi.org/10.1021/acs.jcim.9b00237> · arXiv 1904.01561 downloaded (v1 and v5)
+
+> ⚠️ **The primary tables are not machine-readable.** Text extraction returns zero result numbers from
+> either version — the only `d.ddd` strings recovered are arXiv IDs and page numbers from the reference
+> list. The results tables are likely rendered as images or use an undecodable font encoding.
+
+Independent cross-check from ChemBERTa's table (§16), which reports D-MPNN under DeepChem scaffold split:
+
+| ✓ | Benchmark | Stored | Independent reproduction | Status |
+|---|---|---|---|---|
+| [~] | ClinTox | `0.906` | **0.906** — exact match | corroborated, not primary-verified |
+| [ ] | **BBBP** | `0.730` | **0.708** — ⚠️ conflicts by 0.022 | **unresolved** |
+
+Both notes in the registry now state this explicitly. The BBBP discrepancy may simply be Chemprop's own
+number vs. a third-party reproduction — but it cannot be settled without reading the JCIM tables directly.
+**Needs a human with the PDF open.**
+
