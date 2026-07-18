@@ -925,3 +925,64 @@ same PDFs will read the tables without difficulty.
 
 **All eight PDFs are cached at `/tmp/vpapers/` for this session** should you want them, though they are
 equally easy to re-download from the links in `TODO_VERIFY.md`.
+
+---
+
+## 19. 🎯 Zhou et al., 2023 (Uni-Mol) — 5 entries ✅ **RESOLVED** (PDF supplied by user, 2026-07-18)
+
+Paper: <https://openreview.net/forum?id=6K2RM6wVqKu> · ICLR 2023 PDF supplied directly
+
+**All five entries were wrong. Four corrected, one deleted as fabricated.**
+
+> ✅ **Split confirmed — scaffold, for both classification and regression.** Verbatim:
+> *"Following previous work GEM, we use scaffold splitting and report the mean and standard deviation by
+> the results of 3 random seeds."* This was the open question that mattered most, and Uni-Mol passes:
+> unlike MolFormer, SMILES Transformer and MoleculeNet, it does **not** switch to random splits for regression.
+
+**Table 1 (classification, ROC-AUC %) — Uni-Mol row:**
+BBBP **72.9**(0.6) · BACE 85.7(0.2) · ClinTox **91.9**(1.8) · Tox21 79.6 · ToxCast 69.6 · SIDER 65.9 · HIV 80.8 · PCBA 88.5 · MUV 82.1
+
+**Table 2 (regression, RMSE) — Uni-Mol row:**
+ESOL **0.788**(0.029) · FreeSolv 1.480 · Lipo **0.603**(0.010) · QM7 41.8 · QM8 0.0156 · QM9 0.00467
+
+| ✓ | Benchmark | Was | Now | Verdict |
+|---|---|---|---|---|
+| [x] | BBBP | `0.751` | **`0.729`** | wrong by 0.022 |
+| [x] | ClinTox | `0.932` | **`0.919`** | wrong by 0.013 |
+| [x] | **CYP3A4** | `0.725` | **DELETED** | 🚨 **fabricated — see below** |
+| [x] | ESOL | `0.550` | **`0.788`** | wrong by 0.238 |
+| [x] | Lipophilicity | `0.510` | **`0.603`** | wrong by 0.093 |
+
+### 🚨 CYP3A4 was fabricated — confirmed
+
+**The Uni-Mol paper contains zero occurrences of "CYP" and zero of "TDC".** Full-text search of the
+supplied PDF. It does not evaluate this benchmark in any form. The entry is deleted.
+
+All five signals flagged in §6 and §9 were correct:
+1. only CYP3A4 value attributed to a model's own paper ✅
+2. top-level README never mentions TDC/CYP3A4 ✅
+3. `unimol/README.md` never mentions them either ✅
+4. matched the confirmed failure pattern (ESM-2, ProstT5, RDKit 2D) ✅
+5. 0.725 exceeded the leaderboard maximum of 0.667 ✅
+
+### Ranking consequences — two findings reversed
+
+| Column | Before | After |
+|---|---|---|
+| **Lipophilicity** | Uni-Mol led (0.510) | **GROVER Large leads (0.560)**; Uni-Mol 3rd at 0.603 |
+| **CYP3A4** | Uni-Mol led (0.725) | Uni-Mol removed; **RDKit2D+MLP leads (0.639)** |
+| ESOL | Uni-Mol led (0.550) | Uni-Mol still leads (0.788) but margin over GROVER Large narrows to 0.043 |
+| BBBP | Uni-Mol 4th (0.751) | Uni-Mol 6th (0.729) |
+| ClinTox | Uni-Mol tied 3rd (0.932) | Uni-Mol 5th (0.919) |
+
+**The paper's lipophilicity claim was reversed.** It previously read *"3D information appears more
+valuable: Uni-Mol (0.510) leads"*. It now reports that GROVER leads lipophilicity while Uni-Mol leads
+ESOL, and that the two regression tasks therefore **do not** support a general claim about 3D-aware
+pretraining — it wins one and loses the other, both by margins comparable to run-to-run variation.
+
+### Bonus: third data point on the D-MPNN BBBP conflict
+
+Uni-Mol's Table 1 reports **D-MPNN BBBP = 71.0, ClinTox = 90.6** under scaffold split. Combined with
+ChemBERTa's independent reproduction (0.708 / 0.906), two separate papers now place D-MPNN BBBP at
+**≈0.709**, against our stored `0.730`. ClinTox `0.906` is confirmed by both. The stored BBBP value looks
+wrong, but Chemprop's own tables remain the deciding source and are still unreadable by extraction.
