@@ -986,3 +986,39 @@ Uni-Mol's Table 1 reports **D-MPNN BBBP = 71.0, ClinTox = 90.6** under scaffold 
 ChemBERTa's independent reproduction (0.708 / 0.906), two separate papers now place D-MPNN BBBP at
 **≈0.709**, against our stored `0.730`. ClinTox `0.906` is confirmed by both. The stored BBBP value looks
 wrong, but Chemprop's own tables remain the deciding source and are still unreadable by extraction.
+
+---
+
+## 20. Round 4 — user-supplied PDFs (2026-07-18)
+
+Thirteen PDFs dropped into the project folder. Extractor rebuilt to handle **hex strings and CID/Type0
+fonts via ToUnicode CMaps**, which unlocked five papers that the earlier literal-string-only extractor
+could not read.
+
+### ✅ Resolved (5)
+
+| Model | Was | Now | Finding |
+|---|---|---|---|
+| **DiffDock** | `38.2%` | `38.2%` ✅ | **Correct.** Results table, DiffDock(40) on holo crystal proteins: top-1 %RMSD<2Å = 38.2, median = 3.3 — both stored figures match. Abstract confirms "38% top-1 success rate". |
+| **DNABERT-2** | `0.668` | `0.668` ✅ | **Value correct** (Table 3: DNABERT-2 = 66.80). **Metric label was wrong** — paper states *"we utilize F1-Score and Matthews Correlation Coefficient (MCC). We use different metrics for different tasks"*. Relabelled "Average Score (F1 / MCC)". |
+| **HyenaDNA** | `0.740` | **`0.885`** ❌ | Wrong by 0.145. `0.740` is **DNABERT's Human-Enhancers-Cohn cell**, not HyenaDNA's average. HyenaDNA across the 8 datasets: 85.1/91.3/96.6/74.2/89.2/93.8/96.6/80.9 → mean **88.46**. Suite is **8 tasks, not 10** (*"comprised of 8 regulatory element classification datasets"*). |
+| **RXNMapper** | `0.982` | **`0.994`** ❌ | `0.982` matches nothing in the paper. It reports **99.4% correct full atom-mappings** on the 49k patent-reaction test set, and 96.8% raw match to the NameRXN reference before manual review of discrepancies. |
+| **Vilya-1** | `0.85` "Median Heavy-Atom RMSD, NMR ensemble" | **`89.2%`** "% Ring RMSD < 1 Å, 66 X-ray structures" ❌ | Metric was wrong on **three** counts: paper uses **ring** RMSD not heavy-atom, reports a **success rate** not a median, and the headline benchmark is **X-ray** not NMR. Verified: *"On a benchmark comprising 66 X-ray structures of cyclic peptides, Vilya-1 samples a near-native ring conformation (ring RMSD < 1 Å) in 89.2% of cases"* — vs Prime-MCS 37.6%, RDKit ETKDGv3 34.5%, Boltz-2 15.2%. |
+
+### ⛔ Still unreadable (8)
+
+Even with CMap decoding, these render their result tables as images or use encodings the extractor cannot
+recover. Word counts show body text is partially present but the numeric tables are absent.
+
+| Paper | Words recovered | Target value | Probe result |
+|---|---|---|---|
+| Chemprop (D-MPNN) | 5,846 | BBBP `0.730` ⚠️, ClinTox `0.906` | 0 hits for `0.7xx` |
+| AlphaFold 2 | 5,649 | `0.924` | 0 hits for `9x.x` |
+| ProteinMPNN | 9,443 | `0.524` | 0 hits for "recovery" |
+| LigandMPNN | 1,656 | `0.570` | 0 hits for "recovery" |
+| ESM-3 | 21,967 | `0.52` | 57 pTM hits, none the de-novo mean |
+| Evo | 26,869 | `0.820` | 0 hits for "Spearman" |
+| OpenFold | 10,270 | `0.780` | 1 TM-score hit, methods text only |
+| DeepDTA | 5 | `0.878` | extraction failed entirely |
+
+**These need a human to read the table off the page.** The PDFs are in the project folder.
