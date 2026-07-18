@@ -1,4 +1,4 @@
-# Remaining verification — 19 entries, 14 papers
+# Remaining verification — 14 entries, 13 papers
 
 > Updated 2026-07-18 after round 3. MSA Transformer is now **done** (was 0.570 → corrected to 0.448;
 > the stored value appeared nowhere in the paper and the metric label was wrong too).
@@ -17,21 +17,20 @@ Also check **which model variant** the row belongs to — variant/column mix-ups
 
 ---
 
-## 🔴 Priority 1 — Uni-Mol (5 entries, blocked for me, holds top of both regression columns)
+## ✅ Priority 1 — Uni-Mol — **DONE** (2026-07-18, PDF supplied)
 
-**PDF: https://openreview.net/pdf?id=6K2RM6wVqKu**
-Forum: https://openreview.net/forum?id=6K2RM6wVqKu
+All five entries were wrong. Four corrected, CYP3A4 deleted as fabricated (the paper contains zero
+occurrences of "CYP" or "TDC"). Split confirmed scaffold for both classification and regression.
 
-| Benchmark | Stored | What to check |
+| Benchmark | Was | Now |
 |---|---|---|
-| BBBP | `0.751` | value, table, split |
-| ClinTox | `0.932` | value, table, split |
-| **CYP3A4** | `0.725` | ⚠️ **search the PDF for "CYP" and "TDC" — if absent, delete this entry** |
-| **ESOL** | `0.550` | ⚠️ **scaffold or random?** currently leads the column |
-| **Lipophilicity** | `0.510` | ⚠️ **scaffold or random?** currently leads the column |
+| BBBP | `0.751` | `0.729` |
+| ClinTox | `0.932` | `0.919` |
+| CYP3A4 | `0.725` | **deleted** |
+| ESOL | `0.550` | `0.788` |
+| Lipophilicity | `0.510` | `0.603` |
 
-> CYP3A4 = 0.725 exceeds the maximum score on the entire TDC CYP3A4 leaderboard (0.667). Five independent
-> signals say it isn't real. This is the single most likely deletion in the registry.
+Two findings reversed: GROVER now leads lipophilicity, and the CYP3A4 column is clean.
 
 ---
 

@@ -449,11 +449,10 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.751", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.932", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
-      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.725", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, TDC benchmark" } },
-      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.550", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } },
-      { dataset: "Lipophilicity", metric: "RMSE", score: "0.510", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, scaffold split" } }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.729", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, Uni-Mol row, ROC-AUC %, scaffold split, mean of 3 seeds (72.9 +/- 0.6)" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.919", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, Uni-Mol row, ROC-AUC %, scaffold split, mean of 3 seeds (91.9 +/- 1.8)" } },
+      { dataset: "ESOL Solubility", metric: "RMSE", score: "0.788", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, Uni-Mol row, RMSE, scaffold split, mean of 3 seeds (0.788 +/- 0.029)" } },
+      { dataset: "Lipophilicity", metric: "RMSE", score: "0.603", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, Uni-Mol row, RMSE, scaffold split, mean of 3 seeds (0.603 +/- 0.010)" } }
     ],
     tags: ["3D", "Transformer", "Conformation"],
     codeSnippet: `# Conformer input representation extraction:
