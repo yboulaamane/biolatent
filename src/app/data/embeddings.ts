@@ -394,13 +394,13 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
 # chemprop.train.run_training(args)`
   },
   {
-    id: "mpnn_dti",
-    name: "MPNN DTI",
+    id: "deepdta",
+    name: "DeepDTA",
     representationType: "learned_embedding",
     modality: "complex",
-    inputRepresentation: "graph",
+    inputRepresentation: "sequence",
     license: "Academic/Restrictive",
-    architectureType: "Message Passing Neural Network",
+    architectureType: "Convolutional Neural Network (1D, character-level)",
     pretrainingObjective: "Supervised drug-target interaction affinity regression",
     embeddingDimension: 128,
     yearReleased: 2018,
@@ -416,12 +416,14 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 3, DeepDTA CNN-CNN = 0.878 (0.004) on Davis; MSE 0.261. Note: source model is a CNN, not an MPNN" } }
+      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 3, DeepDTA CNN-CNN = 0.878 (0.004) on Davis; MSE 0.261" } }
     ],
-    tags: ["DTI", "Binding", "Affinity", "MPNN"],
-    codeSnippet: `# MPNN is usually integrated as a sub-model in target binding pipelines:
-# from models import MPNN
-# model = MPNN(num_edge_features=10, num_node_features=40)`
+    tags: ["DTI", "Binding", "Affinity", "CNN", "Sequence"],
+    codeSnippet: `# DeepDTA encodes SMILES and protein sequences with separate 1D CNNs.
+# Reference implementation: https://github.com/hkmztrk/DeepDTA
+# from keras.layers import Conv1D, GlobalMaxPooling1D
+# drug = Conv1D(filters=32, kernel_size=4)(smiles_onehot)
+# target = Conv1D(filters=32, kernel_size=8)(sequence_onehot)`
   },
   {
     id: "uni_mol",
