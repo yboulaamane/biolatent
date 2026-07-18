@@ -48,3 +48,8 @@ paper.log
 paper.aux
 paper.out
 *.synctex.gz
+
+# source papers — fetched locally for verification, never committed
+# (publisher PDFs are not redistributable; all are freely downloadable — see TODO_VERIFY.md)
+*.pdf
+*.pdf:Zone.Identifier

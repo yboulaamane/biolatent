@@ -382,8 +382,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "UNVERIFIED: primary tables not machine-readable. Chithrananda et al. 2020 report D-MPNN BBBP = 0.708 under DeepChem scaffold split" } },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.906", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Corroborated: Chithrananda et al. 2020 independently report D-MPNN ClinTox = 0.906 under DeepChem scaffold split" } },
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.710", citation: { shortRef: "Zhou et al., 2023 (third-party eval)", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Uni-Mol Table 1, D-MPNN = 71.0 +/- 0.3, scaffold split. Chemprop's own paper reports results only as figures, with no numeric table; Chithrananda et al. 2020 independently give 0.708" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.906", citation: { shortRef: "Zhou et al., 2023 (third-party eval)", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Uni-Mol Table 1, D-MPNN = 90.6 +/- 0.6, scaffold split; Chithrananda et al. 2020 independently give the same 0.906" } },
       { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.596", citation: { shortRef: "TDC ADMET leaderboard (accessed 2026-07-18)", doi: "https://tdcommons.ai/benchmark/admet_group/15cyp3a4s/", note: "Chemprop entry, AUROC, scaffold split; Chemprop-RDKit variant = 0.619" } }
     ],
     tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
@@ -416,7 +416,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "low",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 1, Davis dataset" } }
+      { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 3, DeepDTA CNN-CNN = 0.878 (0.004) on Davis; MSE 0.261. Note: source model is a CNN, not an MPNN" } }
     ],
     tags: ["DTI", "Binding", "Affinity", "MPNN"],
     codeSnippet: `# MPNN is usually integrated as a sub-model in target binding pipelines:
@@ -792,7 +792,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GDT-TS (CASP14)", metric: "Average GDT-TS", score: "0.924", citation: { shortRef: "Jumper et al., 2021", doi: "https://doi.org/10.1038/s41586-021-03819-2", note: "Table 1, CASP14 free-modeling targets" } }
+      { dataset: "CASP14 backbone accuracy", metric: "Median RMSD-95 (Å)", score: "0.96", citation: { shortRef: "Jumper et al., 2021", doi: "https://doi.org/10.1038/s41586-021-03819-2", note: "Median backbone accuracy 0.96 A RMSD95 (95% CI 0.85-1.16) vs 2.8 A for next-best method. The paper does not report an average GDT-TS figure" } }
     ],
     tags: ["DeepMind", "AlphaFold2", "Evoformer", "3D"],
     codeSnippet: `# AlphaFold latents can be extracted from custom OpenFold or AlphaFold runs.
@@ -822,7 +822,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "CAMEO Structure Prediction", metric: "TM-score", score: "0.780", citation: { shortRef: "Ahdritz et al., 2022", doi: "https://doi.org/10.1101/2022.11.20.517210", note: "Table 1, CAMEO test set" } }
+      { dataset: "CAMEO validation set", metric: "Mean lDDT-Cα", score: "0.806", citation: { shortRef: "Ahdritz et al., 2022", doi: "https://doi.org/10.1101/2022.11.20.517210", note: "Supplementary Table 1, best data-elision model (100% topology availability) = 0.806. The paper reports NO TM-score; its headline OpenFold-vs-AlphaFold2 comparison is a scatter plot (Fig. 1A), not a tabulated value" } }
     ],
     tags: ["OpenFold", "Single-Chain", "Evoformer", "3D"],
     codeSnippet: `# Extracted from OpenFold runner without MSA queries:
@@ -854,7 +854,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Inverse Folding Recovery (CATH)", metric: "Sequence Recovery", score: "0.524", citation: { shortRef: "Dauparas et al., 2022", doi: "https://doi.org/10.1126/science.add2187", note: "Table 1, short proteins CATH test set" } }
+      { dataset: "Inverse Folding Recovery (native backbones)", metric: "Sequence Recovery", score: "0.524", citation: { shortRef: "Dauparas et al., 2022", doi: "https://doi.org/10.1126/science.add2187", note: "Abstract/results: 52.4% on native protein backbones vs 32.9% for Rosetta" } }
     ],
     tags: ["ProteinMPNN", "Baker-Lab", "Inverse-Folding", "3D"],
     codeSnippet: `# Requires ProteinMPNN helper parser (parse_PDB.py)
@@ -885,7 +885,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Inverse Folding Recovery (Protein-Ligand)", metric: "Sequence Recovery", score: "0.570", citation: { shortRef: "Dauparas et al., 2025", doi: "https://doi.org/10.1038/s41592-025-02626-1", note: "Table 1, PDBBind protein-ligand test set (Nature Methods 2025)" } }
+      { dataset: "Sequence Recovery, small-molecule-interacting residues", metric: "Sequence Recovery", score: "0.633", citation: { shortRef: "Dauparas et al., 2025", doi: "https://doi.org/10.1038/s41592-025-02626-1", note: "63.3% vs ProteinMPNN 50.5% and Rosetta 50.4%. Also nucleotides 50.5%, metals 77.5%" } }
     ],
     tags: ["LigandMPNN", "Baker-Lab", "Drug-Design", "Inverse-Folding"],
     codeSnippet: `# LigandMPNN design and representation loader
@@ -917,7 +917,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "De Novo Protein Generation (high-pLDDT)", metric: "Mean pTM", score: "0.52", citation: { shortRef: "Hayes et al., 2025", doi: "https://doi.org/10.1126/science.ads0018", note: "Fig. 4, unconditional generation; high-pLDDT subset" } }
+      { dataset: "De Novo Protein Generation (unconditional)", metric: "Mean pTM", score: "0.52", citation: { shortRef: "Hayes et al., 2025", doi: "https://doi.org/10.1126/science.ads0018", note: "Unconditional generation: mean pLDDT 0.84, mean pTM 0.52; mean pairwise seq identity 0.155, mean pairwise TM 0.48" } }
     ],
     tags: ["ESM-3", "EvolutionaryScale", "Multimodal", "Protein-Design"],
     codeSnippet: `from esm.models.esm3 import ESM3
@@ -1159,9 +1159,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     reproducibilityScore: 0.90,
     domainGeneralization: "high",
     smallDataPerformance: "high",
-    benchmarks: [
-      { dataset: "Protein Fitness Prediction (FLIP)", metric: "Spearman ρ (zero-shot)", score: "0.820", citation: { shortRef: "Nguyen et al., 2024", doi: "https://doi.org/10.1126/science.ado9336", note: "Fig. 3, zero-shot fitness prediction" } }
-    ],
+    benchmarks: [],
     tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
     codeSnippet: `from evo import Evo
 import torch

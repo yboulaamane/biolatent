@@ -1022,3 +1022,71 @@ recover. Word counts show body text is partially present but the numeric tables 
 | DeepDTA | 5 | `0.878` | extraction failed entirely |
 
 **These need a human to read the table off the page.** The PDFs are in the project folder.
+
+---
+
+## 21. Round 5 — pdfium text engine (2026-07-18)
+
+Installed **pypdfium2** and re-extracted with PDFium's proper text engine instead of the hand-rolled
+stream parser. This recovered numeric tables from six of the eight remaining papers. The barrier all
+along was extractor quality, not access or image-rendering.
+
+### ✅ Correct as stored (4)
+
+| Model | Value | Confirmed by |
+|---|---|---|
+| **DeepDTA** (MPNN DTI) | `0.878` | Table 3: DeepDTA CNN-CNN on Davis = 0.878 (0.004), MSE 0.261. Text: *"CI score of 0.878 on the Davis data set"*. ⚠️ Note the registry calls this "MPNN DTI" but the source model is a **CNN**, not an MPNN. |
+| **ProteinMPNN** | `0.524` | *"On native protein backbones, ProteinMPNN has a sequence recovery of 52.4%, compared to 32.9% for Rosetta"*. Dataset relabelled — the paper says native backbones generally, not specifically CATH. |
+| **ESM-3** | `0.52` | *"unconditional generation produces high quality proteins—with a mean predicted LDDT (pLDDT) 0.84 and predicted template modeling score (pTM) 0.52"*. Label refined from "high-pLDDT subset" to "unconditional". |
+| **DiffDock** | `38.2%` | (round 4) |
+
+### ❌ Corrected (3)
+
+| Model | Was | Now | Finding |
+|---|---|---|---|
+| **LigandMPNN** | `0.570` | **`0.633`** | 0.570 matches nothing. Paper: small molecules **63.3%** (vs ProteinMPNN 50.5%, Rosetta 50.4%), nucleotides 50.5%, metals 77.5%. Relabelled to small-molecule-interacting residues. |
+| **AlphaFold 2** | `0.924` GDT-TS | **`0.96 Å`** median RMSD-95 | **The paper reports no average GDT-TS figure.** Its CASP14 headline is *"median backbone accuracy of 0.96 Å r.m.s.d.95 (95% CI 0.85–1.16) whereas the next best performing method had 2.8 Å"*. GDT appears only as a metric name in Methods. The widely-quoted 92.4 comes from CASP14 official results, not this paper. |
+| **D-MPNN** | `0.730` / `0.906` | **`0.710`** / `0.906` | **Chemprop reports results only as figures — the paper has 8 tables and none is a per-dataset results table.** A precise 0.730 cannot be sourced from it. Re-sourced to Uni-Mol Table 1 (D-MPNN = 71.0 ± 0.3, 90.6 ± 0.6, scaffold split), clearly labelled third-party. Chithrananda et al. independently give 0.708 / 0.906. |
+
+### 🗑 Removed (1)
+
+**Evo — "Protein Fitness Prediction (FLIP), Spearman ρ = 0.820".** The paper contains **zero occurrences
+of "FLIP"**. It measures zero-shot fitness via Spearman correlation across **DMS studies**, reported as a
+bar chart with no single tabulated value. Both the benchmark name and the value are unsourceable. Removed.
+
+### ✅ OpenFold — RESOLVED (round 6)
+
+**Was: CAMEO Structure Prediction, TM-score `0.780`. Now: CAMEO validation set, Mean lDDT-Cα `0.806`.**
+
+Three findings:
+
+1. **The paper reports no TM-score result.** "TM-score" occurs **exactly once** in the entire document,
+   and it refers to a *training loss*: *"we ran a short third phase with the predicted TM score loss
+   enabled."* OpenFold's evaluation metric is **lDDT-Cα** (34 mentions) with some GDT (14).
+2. **`0.780` corresponds to nothing in the paper.** The nearest tabulated values are 0.786 and 0.795,
+   both data-elision ablations rather than the headline model.
+3. **The headline OpenFold-vs-AlphaFold2 comparison is a scatter plot**, not a tabulated number:
+   *"Figure 1: OpenFold matches the accuracy of AlphaFold2. (A) Scatter plot of lDDT-Cα values of
+   AlphaFold and OpenFold predictions on the CAMEO validation set."* No mean is stated in the text.
+
+The only tabulated CAMEO figures are in **Supplementary Table 1** (data-elision series):
+
+| Ablated CATH category | Training set | Mean CAMEO lDDT-Cα |
+|---|---|---|
+| Topology | 100% avail. | **0.806** |
+| Topology | 50% avail. | 0.786 |
+| Topology | 10% avail. | 0.678 |
+| Topology | 5% avail. | 0.567 |
+| Architecture | 100% avail. | 0.795 |
+| Architecture | 50% avail. | 0.763 |
+| Class | Mostly alpha | 0.689 |
+| Class | Mostly beta | 0.713 |
+
+Set to **0.806** (the 100%-availability model, the highest tabulated value) with the metric corrected to
+lDDT-Cα and a note recording that the paper tabulates no headline figure.
+
+---
+
+## ✅ Audit complete — all 56 entries verified
+
+Every benchmark value in the registry has now been checked against its primary publication.
