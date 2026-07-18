@@ -875,3 +875,53 @@ Both notes in the registry now state this explicitly. The BBBP discrepancy may s
 number vs. a third-party reproduction — but it cannot be settled without reading the JCIM tables directly.
 **Needs a human with the PDF open.**
 
+
+---
+
+## 18. MSA Transformer (Rao et al., 2021) — 1 entry ✅ VERIFIED — CORRECTED
+
+Paper: <https://doi.org/10.1101/2021.02.12.430858> · bioRxiv v3 PDF extracted
+
+Unsupervised contact prediction table (**long-range precision**):
+
+| Model | CASP13-FM L | CASP13-FM L/5 | CAMEO L | CAMEO L/5 |
+|---|---|---|---|---|
+| Potts | 16.9 | 31.5 | 24.0 | 42.8 |
+| ProTrans-T5 | 16.5 | 27.0 | 25.9 | 43.4 |
+| ESM-1b | 17.0 | 30.4 | 30.9 | 52.7 |
+| **MSA Transformer** | **44.8** | **72.5** | **43.5** | **66.8** |
+
+| ✓ | Was | Now | Verdict |
+|---|---|---|---|
+| [x] | `0.570`, labelled *"Contact Prediction (Short-Range), Top-L Precision"* | **`0.448`**, relabelled *"Unsupervised Contact Prediction (CASP13-FM), Top-L Long-Range Precision"* | ❌ two defects |
+
+**Two defects, both now fixed:**
+1. **The value does not exist in the paper.** Searched the full text: `0.570`, `57.0` — zero occurrences.
+2. **The metric label was wrong.** The paper reports **long-range** contact precision only. There is no
+   short-range table. The stored note claimed "Table 1, short-range top-L/5 precision".
+
+---
+
+## Round 3: free-route retrieval attempt (2026-07-18)
+
+The nine entries previously written off as "journal paywalled" were retried via open-access and preprint
+routes. **All eight PDFs downloaded successfully** (bioRxiv and nature.com both serve fine with a browser
+user-agent — the earlier 403s were from a different fetch path).
+
+| Paper | PDF obtained | Result tables extractable? |
+|---|---|---|
+| MSA Transformer | ✅ 2.6 MB | ✅ **verified — see §18** |
+| AlphaFold 2 | ✅ 3.5 MB | ❌ GDT hits are figure captions only; CASP14 headline number not surfaced |
+| ProteinMPNN | ✅ 13 MB | ❌ 0 hits for "recovery" — body text largely unextractable |
+| LigandMPNN | ✅ 5.8 MB | ❌ only 1,652 words recovered |
+| ESM-3 | ✅ 12 MB | ❌ 57 pTM hits but none is the de-novo-generation mean |
+| Evo | ✅ 20 MB | ❌ 0 hits for "Spearman" |
+| OpenFold | ✅ 12 MB | ❌ 0 hits for "TM-score" |
+| DeepDTA | ✅ 392 KB | ❌ only 5 words recovered — extraction failed entirely |
+
+**Conclusion: the barrier was never access — it is PDF text extraction.** These papers render their result
+tables as images, or use font encodings the stream-inflation extractor cannot decode. A human opening the
+same PDFs will read the tables without difficulty.
+
+**All eight PDFs are cached at `/tmp/vpapers/` for this session** should you want them, though they are
+equally easy to re-download from the links in `TODO_VERIFY.md`.

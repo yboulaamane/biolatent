@@ -758,7 +758,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Contact Prediction (Short-Range)", metric: "Top-L Precision", score: "0.570", citation: { shortRef: "Rao et al., 2021", doi: "https://doi.org/10.1101/2021.02.12.430858", note: "Table 1, short-range top-L/5 precision" } }
+      { dataset: "Unsupervised Contact Prediction (CASP13-FM)", metric: "Top-L Long-Range Precision", score: "0.448", citation: { shortRef: "Rao et al., 2021", doi: "https://doi.org/10.1101/2021.02.12.430858", note: "Unsupervised contact table: CASP13-FM top-L = 44.8, top-L/5 = 72.5; CAMEO top-L = 43.5, top-L/5 = 66.8. Paper reports LONG-range only" } }
     ],
     tags: ["MSA", "Multiple-Sequence-Alignment", "Meta"],
     codeSnippet: `# Requires a list of aligned homologous sequences
