@@ -1096,7 +1096,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "PDBBind v2020 (Blind Docking)", metric: "Top-1 % RMSD < 2 Å", score: "38.2%", citation: { shortRef: "Corso et al., 2023", doi: "https://doi.org/10.48550/arXiv.2210.01776", note: "Table 1; top-1 median RMSD = 3.30 Å" } }
+      { dataset: "PDBBind v2020 (Blind Docking)", metric: "Top-1 % RMSD < 2 Å", score: "38.2%", citation: { shortRef: "Corso et al., 2023", doi: "https://doi.org/10.48550/arXiv.2210.01776", note: "Results table, DiffDock(40) on holo crystal proteins: top-1 %RMSD<2A = 38.2, median = 3.3" } }
     ],
     tags: ["Diffusion", "Docking", "Equivariant", "Pocket"],
     codeSnippet: `# ligand_emb, pocket_emb = score_model.extract_complex_embeddings(ligand_graph, pocket_graph)`
@@ -1126,7 +1126,7 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "Macrocycle NMR Conformer Ensemble", metric: "Median Heavy-Atom RMSD (Å)", score: "0.85", citation: { shortRef: "Vilya Research, 2026", doi: "https://doi.org/10.48550/arXiv.2607.09998", note: "Table 2, experimental NMR test set" } }
+      { dataset: "Cyclic Peptide X-ray Benchmark (66 structures)", metric: "% Ring RMSD < 1 Å", score: "89.2%", citation: { shortRef: "Vilya Research, 2026", doi: "https://doi.org/10.48550/arXiv.2607.09998", note: "89.2% near-native ring conformations vs Prime-MCS 37.6%, RDKit ETKDGv3 34.5%, Boltz-2 15.2%. Paper reports RING RMSD success rate, not median heavy-atom RMSD" } }
     ],
     tags: ["Vilya", "Macrocycle", "Diffusion", "3D", "All-Atom", "Conformer"],
     codeSnippet: `# Vilya-1 all-atom foundation model loader pseudocode
@@ -1204,7 +1204,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
     domainGeneralization: "medium",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "GUE (Genome Understanding Eval)", metric: "Average F1", score: "0.668", citation: { shortRef: "Zhou et al., 2024", doi: "https://doi.org/10.48550/arXiv.2306.15006", note: "Table 3, 28 GUE tasks (66.80 on 0–100 scale)" } }
+      { dataset: "GUE (Genome Understanding Eval)", metric: "Average Score (F1 / MCC)", score: "0.668", citation: { shortRef: "Zhou et al., 2024", doi: "https://doi.org/10.48550/arXiv.2306.15006", note: "Table 3, DNABERT-2 = 66.80. Paper uses F1 for some tasks and MCC for others, averaged" } }
     ],
     tags: ["Genomics", "DNA", "BERT", "DNABERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -1243,7 +1243,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "GenomicBenchmarks (10 tasks)", metric: "Average Accuracy", score: "0.740", citation: { shortRef: "Nguyen et al., 2023", doi: "https://doi.org/10.48550/arXiv.2306.15794", note: "Table 2, GenomicBenchmarks suite" } }
+      { dataset: "GenomicBenchmarks (8 tasks)", metric: "Average Accuracy", score: "0.885", citation: { shortRef: "Nguyen et al., 2023", doi: "https://doi.org/10.48550/arXiv.2306.15794", note: "GenomicBenchmarks table, mean of HyenaDNA across the 8 datasets (85.1/91.3/96.6/74.2/89.2/93.8/96.6/80.9); SotA on 7 of 8" } }
     ],
     tags: ["DNA", "Hyena", "Long-Context", "Stanford"],
     codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
@@ -1303,7 +1303,7 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "USPTO Atom Mapping", metric: "Accuracy", score: "0.982", citation: { shortRef: "Schwaller et al., 2021", doi: "https://doi.org/10.1126/sciadv.abe4166", note: "Table 1, USPTO test set" } }
+      { dataset: "USPTO Atom Mapping (49k patent reactions)", metric: "Correct Full Atom-Mappings", score: "0.994", citation: { shortRef: "Schwaller et al., 2021", doi: "https://doi.org/10.1126/sciadv.abe4166", note: "99.4% correct full atom-mappings on the 49k test set; 96.8% matched the NameRXN reference before manual review of discrepancies" } }
     ],
     tags: ["Reaction", "Atom-Mapping", "Attention", "IBM"],
     codeSnippet: `from rxnmapper import RXNMapper
