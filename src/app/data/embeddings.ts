@@ -111,8 +111,8 @@ export const EMBEDDINGS: RepresentationEntry[] = [
     domainGeneralization: "medium",
     smallDataPerformance: "medium",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Table 3, scaffold split" } },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.733", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Table 3, scaffold split" } }
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.643", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Results table, ChemBERTa 10M ROC-AUC; DeepChem scaffold splitter 80/10/10" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.733", citation: { shortRef: "Chithrananda et al., 2020", doi: "https://doi.org/10.48550/arXiv.2010.09885", note: "Results table, ChemBERTa 10M ROC-AUC on CT_TOX task; DeepChem scaffold splitter 80/10/10" } }
     ],
     tags: ["Transformer", "SMILES", "BERT"],
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
@@ -382,8 +382,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     domainGeneralization: "high",
     smallDataPerformance: "high",
     benchmarks: [
-      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Table 2, scaffold split" } },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.906", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Table 2, scaffold split" } },
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.730", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "UNVERIFIED: primary tables not machine-readable. Chithrananda et al. 2020 report D-MPNN BBBP = 0.708 under DeepChem scaffold split" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.906", citation: { shortRef: "Yang et al., 2019", doi: "https://doi.org/10.1021/acs.jcim.9b00237", note: "Corroborated: Chithrananda et al. 2020 independently report D-MPNN ClinTox = 0.906 under DeepChem scaffold split" } },
       { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.596", citation: { shortRef: "TDC ADMET leaderboard (accessed 2026-07-18)", doi: "https://tdcommons.ai/benchmark/admet_group/15cyp3a4s/", note: "Chemprop entry, AUROC, scaffold split; Chemprop-RDKit variant = 0.619" } }
     ],
     tags: ["Directed-MPNN", "Hybrid", "Physicochemical", "Chemprop"],
