@@ -2,7 +2,6 @@
 
 An open-access registry, selection wizard, and interactive benchmark dashboard for chemical and biological vector representations.
 
-[![Vercel Deployment](https://img.shields.io/badge/deploy-vercel-blueviolet)](https://vercel.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -36,7 +35,7 @@ Fetch all curated representations or filter them programmatically using query pa
 
 #### Example Request
 ```bash
-curl "https://your-domain.vercel.app/api/representations?modality=molecule&representationType=learned_embedding"
+curl "https://biolatent.org/api/representations?modality=molecule&representationType=learned_embedding"
 ```
 
 #### Example Response
