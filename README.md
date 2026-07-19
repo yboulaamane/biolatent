@@ -4,6 +4,8 @@ An open-access registry, selection wizard, and interactive benchmark dashboard f
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![BioLatent Platform Showcase](showcase.jpg)
+
 ---
 
 ## Overview
