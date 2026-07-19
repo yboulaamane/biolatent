@@ -453,6 +453,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.729", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, Uni-Mol row, ROC-AUC %, scaffold split, mean of 3 seeds (72.9 +/- 0.6)" } },
       { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.919", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 1, Uni-Mol row, ROC-AUC %, scaffold split, mean of 3 seeds (91.9 +/- 1.8)" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.688", citation: { shortRef: "Pinto, 2025", doi: "https://doi.org/10.48550/arXiv.2506.06443", note: "Table 1, Uni-Mol Layer 13 representation, scaffold split (default CLS/final-layer is 0.662)" } },
       { dataset: "ESOL Solubility", metric: "RMSE", score: "0.788", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, Uni-Mol row, RMSE, scaffold split, mean of 3 seeds (0.788 +/- 0.029)" } },
       { dataset: "Lipophilicity", metric: "RMSE", score: "0.603", citation: { shortRef: "Zhou et al., 2023", doi: "https://openreview.net/forum?id=6K2RM6wVqKu", note: "Table 2, Uni-Mol row, RMSE, scaffold split, mean of 3 seeds (0.603 +/- 0.010)" } }
     ],
@@ -520,6 +521,40 @@ mol = Chem.MolFromSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")
 descriptors = CalcMolDescriptors(mol) # Returns dictionary of 200+ features
 values = list(descriptors.values())
 print("Descriptor count:", len(values))`
+  },
+  {
+    id: "chemxtree",
+    name: "ChemXTree",
+    representationType: "learned_embedding",
+    modality: "molecule",
+    inputRepresentation: "graph",
+    license: "Academic/Restrictive",
+    architectureType: "GNN + Neural Decision Tree",
+    pretrainingObjective: "Supervised gate-modulated property classification",
+    embeddingDimension: 300,
+    yearReleased: 2024,
+    trainingData: {
+      name: "MoleculeNet / TDC datasets",
+      size: "Task-dependent",
+      license: "Open Data"
+    },
+    codeRepositoryUrl: "https://codeocean.com/capsule/2818241/tree",
+    computeProfile: "gpu",
+    dataLeakageRisk: "low",
+    reproducibilityScore: 0.90,
+    domainGeneralization: "medium",
+    smallDataPerformance: "high",
+    benchmarks: [
+      { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.756", citation: { shortRef: "Xu et al., 2024", doi: "https://doi.org/10.1021/acs.jcim.4c01186", note: "Table 1, ChemXTree(Our) row, scaffold split, mean of 3 seeds (75.6 +/- 0.6)" } },
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.923", citation: { shortRef: "Xu et al., 2024", doi: "https://doi.org/10.1021/acs.jcim.4c01186", note: "Table 1, ChemXTree(Our) row, scaffold split, mean of 3 seeds (92.3 +/- 0.8)" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.696", citation: { shortRef: "Xu et al., 2024", doi: "https://doi.org/10.1021/acs.jcim.4c01186", note: "Page 8443, ChemXTree attains best performance on CYP3A4 substrate with 69.6%" } }
+    ],
+    tags: ["GNN", "Neural-Decision-Tree", "Gate-Modulation", "JCIM"],
+    codeSnippet: `# GMFU gate control and soft binning differentiable decision node:
+# import torch
+# from models.chemxtree import GateModulationFeatureUnit, NeuralDecisionTree
+# gmfu = GateModulationFeatureUnit(in_dim=300, out_dim=300)
+# ndt = NeuralDecisionTree(depth=4, in_dim=300)`
   },
 
   // ==================== 2. PROTEINS ====================
@@ -953,7 +988,9 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
     smallDataPerformance: "high",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.937", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 1, MolFormer-XL = 93.7, MoleculeNet scaffold split" } },
-      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.948", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 1, MolFormer-XL = 94.8, MoleculeNet scaffold split" } }],
+      { dataset: "ClinTox (FDA Approval / Tox)", metric: "ROC-AUC", score: "0.948", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 1, MolFormer-XL = 94.8, MoleculeNet scaffold split" } },
+      { dataset: "CYP3A4 Substrate (TDC)", metric: "ROC-AUC", score: "0.699", citation: { shortRef: "Pinto, 2025", doi: "https://doi.org/10.48550/arXiv.2506.06443", note: "Table 1, MolFormer Layer 9 representation, scaffold split (default CLS/final-layer is 0.662)" } }
+    ],
     tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
     codeSnippet: `from transformers import AutoModel, AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
