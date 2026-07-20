@@ -1200,8 +1200,8 @@ export default function Home() {
                     <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 700 }}>Reproduction & Safety Profile</h4>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Leakage Risk</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }} title="Flags the risk of structural train/test overlap. HIGH indicates random splitting was used instead of strict scaffold/identity clustering.">
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Leakage Risk</div>
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
@@ -1211,15 +1211,15 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Repro Index</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }} title="Reproduction Index. Measures the ease of running the model (100% means open weights with standard HuggingFace/GitHub setup, lower means custom environment builds are required).">
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Repro Index</div>
                         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-indigo)' }}>
                           {(selectedEmbedding.reproducibilityScore * 100).toFixed(0)}%
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Generalization</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }} title="Domain Generalization. Evaluates representation transferability to out-of-distribution cohorts or completely new chemical/biological families.">
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Generalization</div>
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
@@ -1229,8 +1229,8 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Low-data QSAR</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }} title="Evaluates model robustness and fine-tuning performance when the downstream training dataset is very small (under 1,000 samples).">
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Low-data QSAR</div>
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
