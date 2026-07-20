@@ -52,6 +52,7 @@ export default function Home() {
   const [chartMetric, setChartMetric] = useState<'bbbp' | 'cb513'>('bbbp');
   const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
   const [showMethodology, setShowMethodology] = useState(false);
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
   // Sorting States
   const [molSortConfig, setMolSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'bbbp', direction: 'desc' });
@@ -1200,8 +1201,38 @@ export default function Home() {
                     <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 700 }}>Reproduction & Safety Profile</h4>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }} title="Flags the risk of structural train/test overlap. HIGH indicates random splitting was used instead of strict scaffold/identity clustering.">Leakage Risk</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
+                        <div 
+                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
+                          onMouseEnter={() => setHoveredTooltip('leakage')}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                        >
+                          Leakage Risk
+                        </div>
+                        {hoveredTooltip === 'leakage' && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '105%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '200px',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            color: '#f1f5f9',
+                            fontSize: '0.7rem',
+                            textAlign: 'left',
+                            zIndex: 999,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            pointerEvents: 'none',
+                            textTransform: 'none',
+                            fontWeight: 'normal',
+                            lineHeight: '1.3'
+                          }}>
+                            Flags the risk of structural train/test overlap. HIGH indicates random splitting was used instead of strict scaffold/identity clustering.
+                          </div>
+                        )}
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
@@ -1211,15 +1242,75 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }} title="Reproduction Index. Measures the ease of running the model (100% means open weights with standard HuggingFace/GitHub setup, lower means custom environment builds are required).">Repro Index</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
+                        <div 
+                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
+                          onMouseEnter={() => setHoveredTooltip('repro')}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                        >
+                          Repro Index
+                        </div>
+                        {hoveredTooltip === 'repro' && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '105%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '200px',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            color: '#f1f5f9',
+                            fontSize: '0.7rem',
+                            textAlign: 'left',
+                            zIndex: 999,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            pointerEvents: 'none',
+                            textTransform: 'none',
+                            fontWeight: 'normal',
+                            lineHeight: '1.3'
+                          }}>
+                            Reproduction Index. Measures the ease of running the model (100% means open weights with standard HuggingFace/GitHub setup, lower means custom environment builds are required).
+                          </div>
+                        )}
                         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-indigo)' }}>
                           {(selectedEmbedding.reproducibilityScore * 100).toFixed(0)}%
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }} title="Domain Generalization. Evaluates representation transferability to out-of-distribution cohorts or completely new chemical/biological families.">Generalization</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
+                        <div 
+                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
+                          onMouseEnter={() => setHoveredTooltip('gen')}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                        >
+                          Generalization
+                        </div>
+                        {hoveredTooltip === 'gen' && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '105%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '200px',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            color: '#f1f5f9',
+                            fontSize: '0.7rem',
+                            textAlign: 'left',
+                            zIndex: 999,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            pointerEvents: 'none',
+                            textTransform: 'none',
+                            fontWeight: 'normal',
+                            lineHeight: '1.3'
+                          }}>
+                            Domain Generalization. Evaluates representation transferability to out-of-distribution cohorts or completely new chemical/biological families.
+                          </div>
+                        )}
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
@@ -1229,8 +1320,38 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }} title="Evaluates model robustness and fine-tuning performance when the downstream training dataset is very small (under 1,000 samples).">Low-data QSAR</div>
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
+                        <div 
+                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
+                          onMouseEnter={() => setHoveredTooltip('lowdata')}
+                          onMouseLeave={() => setHoveredTooltip(null)}
+                        >
+                          Low-data QSAR
+                        </div>
+                        {hoveredTooltip === 'lowdata' && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '105%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '200px',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            color: '#f1f5f9',
+                            fontSize: '0.7rem',
+                            textAlign: 'left',
+                            zIndex: 999,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            pointerEvents: 'none',
+                            textTransform: 'none',
+                            fontWeight: 'normal',
+                            lineHeight: '1.3'
+                          }}>
+                            Evaluates model robustness and fine-tuning performance when the downstream training dataset is very small (under 1,000 samples).
+                          </div>
+                        )}
                         <span style={{
                           fontWeight: 700,
                           fontSize: '0.9rem',
