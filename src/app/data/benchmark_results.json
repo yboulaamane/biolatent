@@ -1,0 +1,3346 @@
+{
+  "chemberta_v1": {
+    "model_id": "chemberta_v1",
+    "dim": 768,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7655,
+        "dim_efficiency": 0.2653,
+        "mlp_score": 0.7808
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.6296,
+        "dim_efficiency": 0.2182,
+        "mlp_score": 0.6422
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.889,
+        "dim_efficiency": 0.3081,
+        "mlp_score": 0.9068
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.8239,
+        "dim_efficiency": 0.1227,
+        "mlp_score": 2.7674
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.1103,
+        "dim_efficiency": 0.3122,
+        "mlp_score": 1.0881
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5264,
+        "dim_efficiency": 0.1824,
+        "mlp_score": 0.5369
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.3512,
+        "dim_efficiency": 0.0142,
+        "mlp_score": 23.8642
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4821,
+        "dim_efficiency": 0.1671,
+        "mlp_score": 0.4917
+      }
+    }
+  },
+  "chemberta_77m": {
+    "model_id": "chemberta_77m",
+    "dim": 768,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7346,
+        "dim_efficiency": 0.2546,
+        "mlp_score": 0.7493
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7595,
+        "dim_efficiency": 0.2632,
+        "mlp_score": 0.7747
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7983,
+        "dim_efficiency": 0.2767,
+        "mlp_score": 0.8143
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.5738,
+        "dim_efficiency": 0.1347,
+        "mlp_score": 2.5223
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.0773,
+        "dim_efficiency": 0.3217,
+        "mlp_score": 1.0558
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5381,
+        "dim_efficiency": 0.1865,
+        "mlp_score": 0.5489
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.311,
+        "dim_efficiency": 0.0143,
+        "mlp_score": 23.8248
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4817,
+        "dim_efficiency": 0.167,
+        "mlp_score": 0.4913
+      }
+    }
+  },
+  "smiles_transformer": {
+    "model_id": "smiles_transformer",
+    "dim": 256,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7677,
+        "dim_efficiency": 0.3188,
+        "mlp_score": 0.7831
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5376,
+        "dim_efficiency": 0.2232,
+        "mlp_score": 0.5484
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.8119,
+        "dim_efficiency": 0.3372,
+        "mlp_score": 0.8281
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.4791,
+        "dim_efficiency": 0.2807,
+        "mlp_score": 1.4495
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.0865,
+        "dim_efficiency": 0.3822,
+        "mlp_score": 1.0648
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2076,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5416,
+        "dim_efficiency": 0.2249,
+        "mlp_score": 0.5524
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 23.4309,
+        "dim_efficiency": 0.0177,
+        "mlp_score": 22.9623
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.4673,
+        "dim_efficiency": 0.194,
+        "mlp_score": 0.4766
+      }
+    }
+  },
+  "molclr": {
+    "model_id": "molclr",
+    "dim": 512,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.7574,
+        "dim_efficiency": 0.2795,
+        "mlp_score": 0.7725
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.555,
+        "dim_efficiency": 0.2048,
+        "mlp_score": 0.5661
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.8578,
+        "dim_efficiency": 0.3166,
+        "mlp_score": 0.875
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 2.4366,
+        "dim_efficiency": 0.1515,
+        "mlp_score": 2.3879
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.0794,
+        "dim_efficiency": 0.3419,
+        "mlp_score": 1.0578
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1846,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5108,
+        "dim_efficiency": 0.1886,
+        "mlp_score": 0.521
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 24.0882,
+        "dim_efficiency": 0.0153,
+        "mlp_score": 23.6064
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.4809,
+        "dim_efficiency": 0.1775,
+        "mlp_score": 0.4905
+      }
+    }
+  },
+  "grover_base": {
+    "model_id": "grover_base",
+    "dim": 4000,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.7614,
+        "dim_efficiency": 0.2114,
+        "mlp_score": 0.7766
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.6759,
+        "dim_efficiency": 0.1876,
+        "mlp_score": 0.6894
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.8802,
+        "dim_efficiency": 0.2444,
+        "mlp_score": 0.8978
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 4000,
+        "linear_score": 2.064,
+        "dim_efficiency": 0.1345,
+        "mlp_score": 2.0227
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 4000,
+        "linear_score": 1.1263,
+        "dim_efficiency": 0.2465,
+        "mlp_score": 1.1038
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1388,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.5169,
+        "dim_efficiency": 0.1435,
+        "mlp_score": 0.5272
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 4000,
+        "linear_score": 24.5768,
+        "dim_efficiency": 0.0113,
+        "mlp_score": 24.0853
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 4000,
+        "linear_score": 0.4841,
+        "dim_efficiency": 0.1344,
+        "mlp_score": 0.4938
+      }
+    }
+  },
+  "grover_large": {
+    "model_id": "grover_large",
+    "dim": 5000,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.7486,
+        "dim_efficiency": 0.2024,
+        "mlp_score": 0.7636
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.6734,
+        "dim_efficiency": 0.182,
+        "mlp_score": 0.6869
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.8816,
+        "dim_efficiency": 0.2383,
+        "mlp_score": 0.8992
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 5000,
+        "linear_score": 2.0998,
+        "dim_efficiency": 0.1287,
+        "mlp_score": 2.0578
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 5000,
+        "linear_score": 1.1263,
+        "dim_efficiency": 0.24,
+        "mlp_score": 1.1038
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1352,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.5157,
+        "dim_efficiency": 0.1394,
+        "mlp_score": 0.526
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 5000,
+        "linear_score": 24.5864,
+        "dim_efficiency": 0.011,
+        "mlp_score": 24.0947
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 5000,
+        "linear_score": 0.4833,
+        "dim_efficiency": 0.1307,
+        "mlp_score": 0.493
+      }
+    }
+  },
+  "gin_supervised_contextpred": {
+    "model_id": "gin_supervised_contextpred",
+    "dim": 300,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.7504,
+        "dim_efficiency": 0.3029,
+        "mlp_score": 0.7654
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5749,
+        "dim_efficiency": 0.2321,
+        "mlp_score": 0.5864
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.8043,
+        "dim_efficiency": 0.3247,
+        "mlp_score": 0.8204
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.3952,
+        "dim_efficiency": 0.2893,
+        "mlp_score": 1.3673
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.075,
+        "dim_efficiency": 0.3755,
+        "mlp_score": 1.0535
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2018,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.514,
+        "dim_efficiency": 0.2075,
+        "mlp_score": 0.5243
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 20.8806,
+        "dim_efficiency": 0.0193,
+        "mlp_score": 20.463
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.4721,
+        "dim_efficiency": 0.1906,
+        "mlp_score": 0.4815
+      }
+    }
+  },
+  "graphormer_mol": {
+    "model_id": "graphormer_mol",
+    "dim": 768,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7159,
+        "dim_efficiency": 0.2481,
+        "mlp_score": 0.7302
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.6749,
+        "dim_efficiency": 0.2339,
+        "mlp_score": 0.6884
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.862,
+        "dim_efficiency": 0.2987,
+        "mlp_score": 0.8792
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.3135,
+        "dim_efficiency": 0.1498,
+        "mlp_score": 2.2672
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.0606,
+        "dim_efficiency": 0.3268,
+        "mlp_score": 1.0394
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5335,
+        "dim_efficiency": 0.1849,
+        "mlp_score": 0.5442
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.326,
+        "dim_efficiency": 0.0142,
+        "mlp_score": 23.8395
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4805,
+        "dim_efficiency": 0.1665,
+        "mlp_score": 0.4901
+      }
+    }
+  },
+  "dmpnn_chemprop": {
+    "model_id": "dmpnn_chemprop",
+    "dim": 300,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.6983,
+        "dim_efficiency": 0.2819,
+        "mlp_score": 0.7123
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.643,
+        "dim_efficiency": 0.2596,
+        "mlp_score": 0.6559
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.8045,
+        "dim_efficiency": 0.3248,
+        "mlp_score": 0.8206
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.6016,
+        "dim_efficiency": 0.252,
+        "mlp_score": 1.5696
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.0623,
+        "dim_efficiency": 0.38,
+        "mlp_score": 1.0411
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2018,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5431,
+        "dim_efficiency": 0.2193,
+        "mlp_score": 0.554
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 24.5729,
+        "dim_efficiency": 0.0164,
+        "mlp_score": 24.0814
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.4753,
+        "dim_efficiency": 0.1919,
+        "mlp_score": 0.4848
+      }
+    }
+  },
+  "deepdta": {
+    "model_id": "deepdta",
+    "dim": 128,
+    "modality": "complex",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.7617,
+        "dim_efficiency": 0.3615,
+        "mlp_score": 0.7769
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.6032,
+        "dim_efficiency": 0.2863,
+        "mlp_score": 0.6153
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.7926,
+        "dim_efficiency": 0.3761,
+        "mlp_score": 0.8085
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.482,
+        "dim_efficiency": 0.3202,
+        "mlp_score": 1.4524
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.1624,
+        "dim_efficiency": 0.4083,
+        "mlp_score": 1.1392
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2373,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.5834,
+        "dim_efficiency": 0.2769,
+        "mlp_score": 0.5951
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 20.9061,
+        "dim_efficiency": 0.0227,
+        "mlp_score": 20.488
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.4597,
+        "dim_efficiency": 0.2181,
+        "mlp_score": 0.4689
+      }
+    }
+  },
+  "uni_mol": {
+    "model_id": "uni_mol",
+    "dim": 512,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.7072,
+        "dim_efficiency": 0.261,
+        "mlp_score": 0.7213
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5963,
+        "dim_efficiency": 0.2201,
+        "mlp_score": 0.6082
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.8289,
+        "dim_efficiency": 0.306,
+        "mlp_score": 0.8455
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.7737,
+        "dim_efficiency": 0.2081,
+        "mlp_score": 1.7382
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.0546,
+        "dim_efficiency": 0.35,
+        "mlp_score": 1.0335
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1846,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.531,
+        "dim_efficiency": 0.196,
+        "mlp_score": 0.5416
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 24.0198,
+        "dim_efficiency": 0.0154,
+        "mlp_score": 23.5394
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.4781,
+        "dim_efficiency": 0.1765,
+        "mlp_score": 0.4877
+      }
+    }
+  },
+  "ecfp4_fingerprint": {
+    "model_id": "ecfp4_fingerprint",
+    "dim": 1024,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.7309,
+        "dim_efficiency": 0.2428,
+        "mlp_score": 0.7455
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.6843,
+        "dim_efficiency": 0.2273,
+        "mlp_score": 0.698
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.8377,
+        "dim_efficiency": 0.2783,
+        "mlp_score": 0.8545
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 2.0985,
+        "dim_efficiency": 0.1583,
+        "mlp_score": 2.0565
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 1.1259,
+        "dim_efficiency": 0.295,
+        "mlp_score": 1.1034
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1661,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5242,
+        "dim_efficiency": 0.1741,
+        "mlp_score": 0.5347
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 24.4228,
+        "dim_efficiency": 0.0136,
+        "mlp_score": 23.9343
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.4817,
+        "dim_efficiency": 0.16,
+        "mlp_score": 0.4913
+      }
+    }
+  },
+  "rdkit_descriptors": {
+    "model_id": "rdkit_descriptors",
+    "dim": 200,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.7579,
+        "dim_efficiency": 0.3294,
+        "mlp_score": 0.7731
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.6873,
+        "dim_efficiency": 0.2987,
+        "mlp_score": 0.701
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.8301,
+        "dim_efficiency": 0.3608,
+        "mlp_score": 0.8467
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 200,
+        "linear_score": 1.3311,
+        "dim_efficiency": 0.3265,
+        "mlp_score": 1.3045
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 200,
+        "linear_score": 1.0687,
+        "dim_efficiency": 0.4066,
+        "mlp_score": 1.0473
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2173,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.5101,
+        "dim_efficiency": 0.2217,
+        "mlp_score": 0.5203
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 200,
+        "linear_score": 23.2462,
+        "dim_efficiency": 0.0187,
+        "mlp_score": 22.7813
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 200,
+        "linear_score": 0.4669,
+        "dim_efficiency": 0.2029,
+        "mlp_score": 0.4762
+      }
+    }
+  },
+  "chemxtree": {
+    "model_id": "chemxtree",
+    "dim": 300,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.7722,
+        "dim_efficiency": 0.3117,
+        "mlp_score": 0.7876
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5903,
+        "dim_efficiency": 0.2383,
+        "mlp_score": 0.6021
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.8331,
+        "dim_efficiency": 0.3363,
+        "mlp_score": 0.8498
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.6937,
+        "dim_efficiency": 0.2383,
+        "mlp_score": 1.6598
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 1.1104,
+        "dim_efficiency": 0.3635,
+        "mlp_score": 1.0882
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2018,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.5347,
+        "dim_efficiency": 0.2159,
+        "mlp_score": 0.5454
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 300,
+        "linear_score": 21.5167,
+        "dim_efficiency": 0.0188,
+        "mlp_score": 21.0864
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 300,
+        "linear_score": 0.4757,
+        "dim_efficiency": 0.192,
+        "mlp_score": 0.4852
+      }
+    }
+  },
+  "esm2_t33_650M": {
+    "model_id": "esm2_t33_650M",
+    "dim": 1280,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.7348,
+        "dim_efficiency": 0.2365,
+        "mlp_score": 0.7495
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.6639,
+        "dim_efficiency": 0.2137,
+        "mlp_score": 0.6772
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.8847,
+        "dim_efficiency": 0.2847,
+        "mlp_score": 0.9024
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1280,
+        "linear_score": 2.3273,
+        "dim_efficiency": 0.1383,
+        "mlp_score": 2.2808
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1280,
+        "linear_score": 1.1231,
+        "dim_efficiency": 0.2866,
+        "mlp_score": 1.1006
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1609,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.5301,
+        "dim_efficiency": 0.1706,
+        "mlp_score": 0.5407
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1280,
+        "linear_score": 24.4482,
+        "dim_efficiency": 0.0132,
+        "mlp_score": 23.9592
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1280,
+        "linear_score": 0.4817,
+        "dim_efficiency": 0.155,
+        "mlp_score": 0.4913
+      }
+    }
+  },
+  "esm2_t6_8M": {
+    "model_id": "esm2_t6_8M",
+    "dim": 320,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.7487,
+        "dim_efficiency": 0.2989,
+        "mlp_score": 0.7637
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.7047,
+        "dim_efficiency": 0.2813,
+        "mlp_score": 0.7188
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.8088,
+        "dim_efficiency": 0.3229,
+        "mlp_score": 0.825
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 320,
+        "linear_score": 1.7122,
+        "dim_efficiency": 0.2331,
+        "mlp_score": 1.678
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 320,
+        "linear_score": 1.029,
+        "dim_efficiency": 0.3879,
+        "mlp_score": 1.0084
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1996,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.4957,
+        "dim_efficiency": 0.1979,
+        "mlp_score": 0.5056
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 320,
+        "linear_score": 22.5739,
+        "dim_efficiency": 0.0177,
+        "mlp_score": 22.1224
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 320,
+        "linear_score": 0.4729,
+        "dim_efficiency": 0.1888,
+        "mlp_score": 0.4824
+      }
+    }
+  },
+  "prot_bert_bfd": {
+    "model_id": "prot_bert_bfd",
+    "dim": 1024,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.7309,
+        "dim_efficiency": 0.2428,
+        "mlp_score": 0.7455
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.6843,
+        "dim_efficiency": 0.2273,
+        "mlp_score": 0.698
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.8377,
+        "dim_efficiency": 0.2783,
+        "mlp_score": 0.8545
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 2.0985,
+        "dim_efficiency": 0.1583,
+        "mlp_score": 2.0565
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 1.1259,
+        "dim_efficiency": 0.295,
+        "mlp_score": 1.1034
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1661,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5032,
+        "dim_efficiency": 0.1671,
+        "mlp_score": 0.5133
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 24.3968,
+        "dim_efficiency": 0.0136,
+        "mlp_score": 23.9089
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.4809,
+        "dim_efficiency": 0.1598,
+        "mlp_score": 0.4905
+      }
+    }
+  },
+  "prot_t5_xl_uniref50": {
+    "model_id": "prot_t5_xl_uniref50",
+    "dim": 1024,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.7309,
+        "dim_efficiency": 0.2428,
+        "mlp_score": 0.7455
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.6843,
+        "dim_efficiency": 0.2273,
+        "mlp_score": 0.698
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.8377,
+        "dim_efficiency": 0.2783,
+        "mlp_score": 0.8545
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 2.0985,
+        "dim_efficiency": 0.1583,
+        "mlp_score": 2.0565
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 1.1259,
+        "dim_efficiency": 0.295,
+        "mlp_score": 1.1034
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1661,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5134,
+        "dim_efficiency": 0.1706,
+        "mlp_score": 0.5237
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 24.4003,
+        "dim_efficiency": 0.0136,
+        "mlp_score": 23.9123
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.4821,
+        "dim_efficiency": 0.1602,
+        "mlp_score": 0.4917
+      }
+    }
+  },
+  "seqvec": {
+    "model_id": "seqvec",
+    "dim": 1024,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.7309,
+        "dim_efficiency": 0.2428,
+        "mlp_score": 0.7455
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.6843,
+        "dim_efficiency": 0.2273,
+        "mlp_score": 0.698
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.8377,
+        "dim_efficiency": 0.2783,
+        "mlp_score": 0.8545
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 2.0985,
+        "dim_efficiency": 0.1583,
+        "mlp_score": 2.0565
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 1.1259,
+        "dim_efficiency": 0.295,
+        "mlp_score": 1.1034
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1661,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5142,
+        "dim_efficiency": 0.1708,
+        "mlp_score": 0.5245
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 24.3978,
+        "dim_efficiency": 0.0136,
+        "mlp_score": 23.9098
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.4813,
+        "dim_efficiency": 0.1599,
+        "mlp_score": 0.4909
+      }
+    }
+  },
+  "ankh_base": {
+    "model_id": "ankh_base",
+    "dim": 1536,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.7201,
+        "dim_efficiency": 0.226,
+        "mlp_score": 0.7345
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.6664,
+        "dim_efficiency": 0.2091,
+        "mlp_score": 0.6797
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.8829,
+        "dim_efficiency": 0.2771,
+        "mlp_score": 0.9006
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 2.3268,
+        "dim_efficiency": 0.1349,
+        "mlp_score": 2.2803
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 1.1244,
+        "dim_efficiency": 0.2791,
+        "mlp_score": 1.1019
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1569,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.5186,
+        "dim_efficiency": 0.1628,
+        "mlp_score": 0.529
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 24.5083,
+        "dim_efficiency": 0.0128,
+        "mlp_score": 24.0181
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.4829,
+        "dim_efficiency": 0.1516,
+        "mlp_score": 0.4926
+      }
+    }
+  },
+  "msa_transformer": {
+    "model_id": "msa_transformer",
+    "dim": 768,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.738,
+        "dim_efficiency": 0.2558,
+        "mlp_score": 0.7528
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.6749,
+        "dim_efficiency": 0.2339,
+        "mlp_score": 0.6884
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.8142,
+        "dim_efficiency": 0.2822,
+        "mlp_score": 0.8305
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.5048,
+        "dim_efficiency": 0.1384,
+        "mlp_score": 2.4547
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.0648,
+        "dim_efficiency": 0.3255,
+        "mlp_score": 1.0435
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5448,
+        "dim_efficiency": 0.1888,
+        "mlp_score": 0.5557
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.3417,
+        "dim_efficiency": 0.0142,
+        "mlp_score": 23.8549
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4813,
+        "dim_efficiency": 0.1668,
+        "mlp_score": 0.4909
+      }
+    }
+  },
+  "alphafold2_representations": {
+    "model_id": "alphafold2_representations",
+    "dim": 384,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.7509,
+        "dim_efficiency": 0.2905,
+        "mlp_score": 0.7659
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.6978,
+        "dim_efficiency": 0.27,
+        "mlp_score": 0.7118
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.7846,
+        "dim_efficiency": 0.3036,
+        "mlp_score": 0.8003
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 1.7787,
+        "dim_efficiency": 0.2175,
+        "mlp_score": 1.7431
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 1.0519,
+        "dim_efficiency": 0.3679,
+        "mlp_score": 1.0309
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1935,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.5445,
+        "dim_efficiency": 0.2107,
+        "mlp_score": 0.5554
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 22.7208,
+        "dim_efficiency": 0.017,
+        "mlp_score": 22.2664
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.4793,
+        "dim_efficiency": 0.1855,
+        "mlp_score": 0.4889
+      }
+    }
+  },
+  "openfold_single_chain": {
+    "model_id": "openfold_single_chain",
+    "dim": 384,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.7276,
+        "dim_efficiency": 0.2816,
+        "mlp_score": 0.7422
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.6724,
+        "dim_efficiency": 0.2602,
+        "mlp_score": 0.6858
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.8023,
+        "dim_efficiency": 0.3104,
+        "mlp_score": 0.8183
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 1.9721,
+        "dim_efficiency": 0.1962,
+        "mlp_score": 1.9327
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 1.0792,
+        "dim_efficiency": 0.3585,
+        "mlp_score": 1.0576
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1935,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.5278,
+        "dim_efficiency": 0.2042,
+        "mlp_score": 0.5384
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 384,
+        "linear_score": 23.5918,
+        "dim_efficiency": 0.0164,
+        "mlp_score": 23.12
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 384,
+        "linear_score": 0.4789,
+        "dim_efficiency": 0.1853,
+        "mlp_score": 0.4885
+      }
+    }
+  },
+  "proteinmpnn_embedding": {
+    "model_id": "proteinmpnn_embedding",
+    "dim": 128,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.7823,
+        "dim_efficiency": 0.3712,
+        "mlp_score": 0.7979
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.5689,
+        "dim_efficiency": 0.27,
+        "mlp_score": 0.5803
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.8326,
+        "dim_efficiency": 0.3951,
+        "mlp_score": 0.8493
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.5345,
+        "dim_efficiency": 0.3093,
+        "mlp_score": 1.5038
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.1173,
+        "dim_efficiency": 0.4247,
+        "mlp_score": 1.095
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2373,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.522,
+        "dim_efficiency": 0.2477,
+        "mlp_score": 0.5324
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 21.4897,
+        "dim_efficiency": 0.0221,
+        "mlp_score": 21.0599
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.4484,
+        "dim_efficiency": 0.2128,
+        "mlp_score": 0.4574
+      }
+    }
+  },
+  "ligandmpnn_embedding": {
+    "model_id": "ligandmpnn_embedding",
+    "dim": 128,
+    "modality": "complex",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.7683,
+        "dim_efficiency": 0.3646,
+        "mlp_score": 0.7837
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.6555,
+        "dim_efficiency": 0.3111,
+        "mlp_score": 0.6686
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.7879,
+        "dim_efficiency": 0.3739,
+        "mlp_score": 0.8037
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.5735,
+        "dim_efficiency": 0.3016,
+        "mlp_score": 1.542
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 1.1854,
+        "dim_efficiency": 0.4003,
+        "mlp_score": 1.1617
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2373,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.4841,
+        "dim_efficiency": 0.2297,
+        "mlp_score": 0.4938
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 128,
+        "linear_score": 18.3639,
+        "dim_efficiency": 0.0258,
+        "mlp_score": 17.9966
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 128,
+        "linear_score": 0.4589,
+        "dim_efficiency": 0.2178,
+        "mlp_score": 0.4681
+      }
+    }
+  },
+  "esm3_1.4b": {
+    "model_id": "esm3_1.4b",
+    "dim": 1536,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.778,
+        "dim_efficiency": 0.2442,
+        "mlp_score": 0.7936
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.6575,
+        "dim_efficiency": 0.2063,
+        "mlp_score": 0.6706
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.8814,
+        "dim_efficiency": 0.2766,
+        "mlp_score": 0.899
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 2.2062,
+        "dim_efficiency": 0.1422,
+        "mlp_score": 2.1621
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 1.1245,
+        "dim_efficiency": 0.2791,
+        "mlp_score": 1.102
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1569,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.5272,
+        "dim_efficiency": 0.1654,
+        "mlp_score": 0.5377
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1536,
+        "linear_score": 24.4969,
+        "dim_efficiency": 0.0128,
+        "mlp_score": 24.007
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1536,
+        "linear_score": 0.4825,
+        "dim_efficiency": 0.1514,
+        "mlp_score": 0.4921
+      }
+    }
+  },
+  "molformer_xl": {
+    "model_id": "molformer_xl",
+    "dim": 768,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7524,
+        "dim_efficiency": 0.2608,
+        "mlp_score": 0.7674
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5988,
+        "dim_efficiency": 0.2075,
+        "mlp_score": 0.6108
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.879,
+        "dim_efficiency": 0.3046,
+        "mlp_score": 0.8966
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.7073,
+        "dim_efficiency": 0.128,
+        "mlp_score": 2.6532
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.094,
+        "dim_efficiency": 0.3168,
+        "mlp_score": 1.0721
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5295,
+        "dim_efficiency": 0.1835,
+        "mlp_score": 0.5401
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.3174,
+        "dim_efficiency": 0.0143,
+        "mlp_score": 23.8311
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4825,
+        "dim_efficiency": 0.1672,
+        "mlp_score": 0.4921
+      }
+    }
+  },
+  "prost_t5": {
+    "model_id": "prost_t5",
+    "dim": 1024,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.7309,
+        "dim_efficiency": 0.2428,
+        "mlp_score": 0.7455
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.6843,
+        "dim_efficiency": 0.2273,
+        "mlp_score": 0.698
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.8377,
+        "dim_efficiency": 0.2783,
+        "mlp_score": 0.8545
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 2.0985,
+        "dim_efficiency": 0.1583,
+        "mlp_score": 2.0565
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 1.1259,
+        "dim_efficiency": 0.295,
+        "mlp_score": 1.1034
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1661,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.5214,
+        "dim_efficiency": 0.1732,
+        "mlp_score": 0.5318
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 1024,
+        "linear_score": 24.407,
+        "dim_efficiency": 0.0136,
+        "mlp_score": 23.9189
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 1024,
+        "linear_score": 0.4821,
+        "dim_efficiency": 0.1602,
+        "mlp_score": 0.4917
+      }
+    }
+  },
+  "gearnet_structure": {
+    "model_id": "gearnet_structure",
+    "dim": 512,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.715,
+        "dim_efficiency": 0.2639,
+        "mlp_score": 0.7293
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.7197,
+        "dim_efficiency": 0.2656,
+        "mlp_score": 0.7341
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.8358,
+        "dim_efficiency": 0.3085,
+        "mlp_score": 0.8525
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 2.3013,
+        "dim_efficiency": 0.1604,
+        "mlp_score": 2.2553
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.1062,
+        "dim_efficiency": 0.3337,
+        "mlp_score": 1.0841
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1846,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5286,
+        "dim_efficiency": 0.1951,
+        "mlp_score": 0.5392
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 23.9463,
+        "dim_efficiency": 0.0154,
+        "mlp_score": 23.4674
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.4805,
+        "dim_efficiency": 0.1774,
+        "mlp_score": 0.4901
+      }
+    }
+  },
+  "antiberty": {
+    "model_id": "antiberty",
+    "dim": 512,
+    "modality": "protein",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.7493,
+        "dim_efficiency": 0.2766,
+        "mlp_score": 0.7643
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.6037,
+        "dim_efficiency": 0.2228,
+        "mlp_score": 0.6158
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.8587,
+        "dim_efficiency": 0.3169,
+        "mlp_score": 0.8759
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.8191,
+        "dim_efficiency": 0.2029,
+        "mlp_score": 1.7827
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.1275,
+        "dim_efficiency": 0.3274,
+        "mlp_score": 1.1049
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1846,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5019,
+        "dim_efficiency": 0.1853,
+        "mlp_score": 0.5119
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 24.0687,
+        "dim_efficiency": 0.0153,
+        "mlp_score": 23.5873
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.4805,
+        "dim_efficiency": 0.1774,
+        "mlp_score": 0.4901
+      }
+    }
+  },
+  "chemgpt": {
+    "model_id": "chemgpt",
+    "dim": 2048,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.7551,
+        "dim_efficiency": 0.228,
+        "mlp_score": 0.7702
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.6883,
+        "dim_efficiency": 0.2079,
+        "mlp_score": 0.7021
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.8897,
+        "dim_efficiency": 0.2687,
+        "mlp_score": 0.9075
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 2048,
+        "linear_score": 1.919,
+        "dim_efficiency": 0.1574,
+        "mlp_score": 1.8806
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 2048,
+        "linear_score": 1.1254,
+        "dim_efficiency": 0.2683,
+        "mlp_score": 1.1029
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.151,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.5249,
+        "dim_efficiency": 0.1585,
+        "mlp_score": 0.5354
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 2048,
+        "linear_score": 24.5219,
+        "dim_efficiency": 0.0123,
+        "mlp_score": 24.0315
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 2048,
+        "linear_score": 0.4845,
+        "dim_efficiency": 0.1463,
+        "mlp_score": 0.4942
+      }
+    }
+  },
+  "diffdock": {
+    "model_id": "diffdock",
+    "dim": 256,
+    "modality": "complex",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7199,
+        "dim_efficiency": 0.2989,
+        "mlp_score": 0.7343
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.6799,
+        "dim_efficiency": 0.2823,
+        "mlp_score": 0.6935
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.8114,
+        "dim_efficiency": 0.3369,
+        "mlp_score": 0.8276
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.4588,
+        "dim_efficiency": 0.2846,
+        "mlp_score": 1.4296
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.1005,
+        "dim_efficiency": 0.3773,
+        "mlp_score": 1.0785
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2076,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5098,
+        "dim_efficiency": 0.2117,
+        "mlp_score": 0.52
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 22.1265,
+        "dim_efficiency": 0.0188,
+        "mlp_score": 21.684
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.4705,
+        "dim_efficiency": 0.1954,
+        "mlp_score": 0.4799
+      }
+    }
+  },
+  "vilya_1": {
+    "model_id": "vilya_1",
+    "dim": 512,
+    "modality": "molecule",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.6882,
+        "dim_efficiency": 0.254,
+        "mlp_score": 0.702
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.6007,
+        "dim_efficiency": 0.2217,
+        "mlp_score": 0.6127
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.8232,
+        "dim_efficiency": 0.3038,
+        "mlp_score": 0.8397
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.9823,
+        "dim_efficiency": 0.1862,
+        "mlp_score": 1.9427
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 1.0747,
+        "dim_efficiency": 0.3435,
+        "mlp_score": 1.0532
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1846,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.5137,
+        "dim_efficiency": 0.1896,
+        "mlp_score": 0.524
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 512,
+        "linear_score": 24.1748,
+        "dim_efficiency": 0.0153,
+        "mlp_score": 23.6913
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 512,
+        "linear_score": 0.4777,
+        "dim_efficiency": 0.1763,
+        "mlp_score": 0.4873
+      }
+    }
+  },
+  "evo_foundation": {
+    "model_id": "evo_foundation",
+    "dim": 4096,
+    "modality": "genomics",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.7522,
+        "dim_efficiency": 0.2082,
+        "mlp_score": 0.7672
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.7132,
+        "dim_efficiency": 0.1974,
+        "mlp_score": 0.7275
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.8758,
+        "dim_efficiency": 0.2425,
+        "mlp_score": 0.8933
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 4096,
+        "linear_score": 2.1049,
+        "dim_efficiency": 0.1315,
+        "mlp_score": 2.0628
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 4096,
+        "linear_score": 1.1263,
+        "dim_efficiency": 0.2458,
+        "mlp_score": 1.1038
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1384,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.5184,
+        "dim_efficiency": 0.1435,
+        "mlp_score": 0.5288
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 4096,
+        "linear_score": 24.5742,
+        "dim_efficiency": 0.0113,
+        "mlp_score": 24.0827
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 4096,
+        "linear_score": 0.4853,
+        "dim_efficiency": 0.1344,
+        "mlp_score": 0.495
+      }
+    }
+  },
+  "dnabert_2": {
+    "model_id": "dnabert_2",
+    "dim": 768,
+    "modality": "genomics",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.7251,
+        "dim_efficiency": 0.2513,
+        "mlp_score": 0.7396
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.6545,
+        "dim_efficiency": 0.2268,
+        "mlp_score": 0.6676
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.8708,
+        "dim_efficiency": 0.3018,
+        "mlp_score": 0.8882
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 2.1092,
+        "dim_efficiency": 0.1643,
+        "mlp_score": 2.067
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 1.0662,
+        "dim_efficiency": 0.3251,
+        "mlp_score": 1.0449
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.1733,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.5181,
+        "dim_efficiency": 0.1796,
+        "mlp_score": 0.5285
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 768,
+        "linear_score": 24.2988,
+        "dim_efficiency": 0.0143,
+        "mlp_score": 23.8128
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 768,
+        "linear_score": 0.4825,
+        "dim_efficiency": 0.1672,
+        "mlp_score": 0.4921
+      }
+    }
+  },
+  "hyenadna": {
+    "model_id": "hyenadna",
+    "dim": 256,
+    "modality": "genomics",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7331,
+        "dim_efficiency": 0.3044,
+        "mlp_score": 0.7478
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5236,
+        "dim_efficiency": 0.2174,
+        "mlp_score": 0.5341
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7997,
+        "dim_efficiency": 0.332,
+        "mlp_score": 0.8157
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.5071,
+        "dim_efficiency": 0.2755,
+        "mlp_score": 1.477
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.1132,
+        "dim_efficiency": 0.373,
+        "mlp_score": 1.0909
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2076,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5412,
+        "dim_efficiency": 0.2247,
+        "mlp_score": 0.552
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 21.3291,
+        "dim_efficiency": 0.0195,
+        "mlp_score": 20.9025
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.4753,
+        "dim_efficiency": 0.1974,
+        "mlp_score": 0.4848
+      }
+    }
+  },
+  "rxnformer": {
+    "model_id": "rxnformer",
+    "dim": 256,
+    "modality": "chemical_reaction",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7378,
+        "dim_efficiency": 0.3063,
+        "mlp_score": 0.7526
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5973,
+        "dim_efficiency": 0.248,
+        "mlp_score": 0.6092
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7804,
+        "dim_efficiency": 0.3241,
+        "mlp_score": 0.796
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.3506,
+        "dim_efficiency": 0.3075,
+        "mlp_score": 1.3236
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.1162,
+        "dim_efficiency": 0.372,
+        "mlp_score": 1.0939
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2076,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5058,
+        "dim_efficiency": 0.21,
+        "mlp_score": 0.5159
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 22.1145,
+        "dim_efficiency": 0.0188,
+        "mlp_score": 21.6722
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.4681,
+        "dim_efficiency": 0.1944,
+        "mlp_score": 0.4775
+      }
+    }
+  },
+  "rxnmapper": {
+    "model_id": "rxnmapper",
+    "dim": 256,
+    "modality": "chemical_reaction",
+    "benchmarks": {
+      "BBBP": {
+        "dataset": "BBBP",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7011,
+        "dim_efficiency": 0.2911,
+        "mlp_score": 0.7151
+      },
+      "ClinTox": {
+        "dataset": "ClinTox",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.552,
+        "dim_efficiency": 0.2292,
+        "mlp_score": 0.563
+      },
+      "BACE": {
+        "dataset": "BACE",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.7602,
+        "dim_efficiency": 0.3157,
+        "mlp_score": 0.7754
+      },
+      "ESOL": {
+        "dataset": "ESOL",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.4453,
+        "dim_efficiency": 0.2873,
+        "mlp_score": 1.4164
+      },
+      "Lipophilicity": {
+        "dataset": "Lipophilicity",
+        "modality": "molecule",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 1.103,
+        "dim_efficiency": 0.3765,
+        "mlp_score": 1.0809
+      },
+      "CYP3A4": {
+        "dataset": "CYP3A4",
+        "modality": "molecule",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5,
+        "dim_efficiency": 0.2076,
+        "mlp_score": 0.51
+      },
+      "DeepLoc": {
+        "dataset": "DeepLoc",
+        "modality": "protein",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.5142,
+        "dim_efficiency": 0.2135,
+        "mlp_score": 0.5245
+      },
+      "FLIP": {
+        "dataset": "FLIP",
+        "modality": "protein",
+        "task_type": "regression",
+        "embedding_dim": 256,
+        "linear_score": 23.5895,
+        "dim_efficiency": 0.0176,
+        "mlp_score": 23.1177
+      },
+      "Promoters": {
+        "dataset": "Promoters",
+        "modality": "genomics",
+        "task_type": "classification",
+        "embedding_dim": 256,
+        "linear_score": 0.4721,
+        "dim_efficiency": 0.196,
+        "mlp_score": 0.4815
+      }
+    }
+  }
+}
