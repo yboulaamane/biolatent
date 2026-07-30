@@ -24,3 +24,10 @@ This log registers the core design rules, constraints, and features established 
 * **Dynamic Table Sorting**: Both Molecule and Protein tables are sortable in ascending/descending order with indicators.
 * **JSON GET API Route**: `/api/representations` allows dynamic programmatic representation lookups.
 
+## 4. Active Benchmarking Vision (Frozen Embedding Suite)
+* **Architecture Proposal**: Documented in `BENCHMARK_PROPOSAL.md`.
+* **Concept**: Transition BioLatent from a literature registry to an active benchmarking suite using **Frozen Embedding Probing** (separating inference from evaluation).
+* **Multi-Modal Task Suite**: 9 curated tasks across Molecules (BBBP, ClinTox, BACE, ESOL, Lipophilicity, CYP3A4), Proteins (DeepLoc, CB513), and Genomics (Promoters).
+* **Zero Infrastructure Cost**: Evaluation requires < 90s on CPU per submission, run via GitHub Actions on hosted Hugging Face Datasets.
+
+
