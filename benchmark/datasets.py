@@ -4,7 +4,7 @@ BioLatent Multi-Modal Dataset Manager (9 Tasks)
 
 Provides standardized datasets across 3 biological modalities:
 1. Molecules: BBBP, ClinTox, BACE, ESOL, Lipophilicity, CYP3A4
-2. Proteins: DeepLoc (subcellular localization), FLIP (thermo-stability regression)
+2. Proteins: DeepLoc (subcellular localization), Fluorescence (GFP fitness regression)
 3. Genomics: Promoters (regulatory sequence detection)
 """
 
@@ -19,7 +19,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "benchmark_data
 
 ALL_DATASETS = [
     "BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
-    "DeepLoc", "FLIP", "Promoters"
+    "DeepLoc", "Fluorescence", "Promoters"
 ]
 
 def get_bemis_murcko_scaffold(smiles, include_chirality=False):
@@ -89,7 +89,7 @@ def load_benchmark_dataset(dataset_name="BBBP"):
     
     Supported datasets:
     - Molecules: 'BBBP', 'ClinTox', 'BACE', 'ESOL', 'Lipophilicity', 'CYP3A4'
-    - Proteins: 'DeepLoc', 'FLIP'
+    - Proteins: 'DeepLoc', 'Fluorescence'
     - Genomics: 'Promoters'
     """
     csv_path = os.path.join(DATA_DIR, f"{dataset_name}.csv")
@@ -148,7 +148,7 @@ def load_benchmark_dataset(dataset_name="BBBP"):
         train_idx, val_idx, test_idx = generate_scaffold_split(df["inputs"].tolist())
 
     # 2. Protein Datasets
-    elif dataset_name in ["DeepLoc", "FLIP"]:
+    elif dataset_name in ["DeepLoc", "Fluorescence"]:
         modality = "protein"
         seq_col = [c for c in df.columns if "seq" in c.lower() or "sequence" in c.lower()][0]
         target_col = [c for c in df.columns if "target" in c.lower() or "label" in c.lower() or "loc" in c.lower() or "tm" in c.lower()][0]
@@ -191,33 +191,17 @@ def load_benchmark_dataset(dataset_name="BBBP"):
     }
 
 def _generate_missing_dataset(dataset_name, csv_path):
-    """Generates standardized benchmark dataset CSV if missing."""
-    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
-    rng = np.random.RandomState(42)
-
-    if dataset_name == "CYP3A4":
-        # Curated CYP3A4 substrate dataset (6,676 samples)
-        smiles_pool = ["CC1=C(C=C(C=C1)S(=O)(=O)N)C2=CC(=NN2C3=CC=C(C=C3)S(=O)(=O)N)C(F)(F)F", "CC(=O)NO", "CN1C2CCC1CC(C2)OC(=O)C(CO)C3=CC=CC=C3"]
-        data = {"smiles": [smiles_pool[i % len(smiles_pool)] for i in range(1000)], "target": rng.randint(0, 2, size=1000)}
-        pd.DataFrame(data).to_csv(csv_path, index=False)
-
-    elif dataset_name == "DeepLoc":
-        # Curated DeepLoc protein subcellular localization (1,500 sequences)
-        amino_acids = list("ACDEFGHIKLMNPQRSTVWY")
-        seqs = ["".join(rng.choice(amino_acids, size=rng.randint(50, 200))) for _ in range(1000)]
-        data = {"sequence": seqs, "label": rng.randint(0, 10, size=1000)}
-        pd.DataFrame(data).to_csv(csv_path, index=False)
-
-    elif dataset_name == "FLIP":
-        # Curated FLIP Meltome protein thermo-stability (1,000 sequences)
-        amino_acids = list("ACDEFGHIKLMNPQRSTVWY")
-        seqs = ["".join(rng.choice(amino_acids, size=rng.randint(60, 250))) for _ in range(1000)]
-        data = {"sequence": seqs, "target": rng.uniform(30.0, 95.0, size=1000)}
-        pd.DataFrame(data).to_csv(csv_path, index=False)
-
-    elif dataset_name == "Promoters":
-        # Curated GenomicPromoters DNA sequence classification (1,000 sequences)
-        bases = list("ACGT")
-        seqs = ["".join(rng.choice(bases, size=rng.randint(100, 300))) for _ in range(1000)]
-        data = {"sequence": seqs, "target": rng.randint(0, 2, size=1000)}
-        pd.DataFrame(data).to_csv(csv_path, index=False)
+    """Raises an error when a benchmark dataset CSV is missing.
+    
+    Previously this function silently generated fake random data, which
+    produced meaningless benchmark scores. Now it fails loudly and directs
+    the user to download real datasets.
+    """
+    raise FileNotFoundError(
+        f"\n{'=' * 60}\n"
+        f"MISSING DATASET: {dataset_name}\n"
+        f"Expected file: {csv_path}\n\n"
+        f"Run the download script to fetch real benchmark data:\n"
+        f"  python benchmark/download_real_datasets.py\n"
+        f"{'=' * 60}"
+    )
