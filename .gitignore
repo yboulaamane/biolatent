@@ -53,3 +53,8 @@ paper.out
 # (publisher PDFs are not redistributable; all are freely downloadable — see TODO_VERIFY.md)
 *.pdf
 *.pdf:Zone.Identifier
+__pycache__/
+
+# benchmark datasets — fetched via benchmark/download_real_datasets.py,
+# hosted on Hugging Face / Zenodo rather than committed (see BENCHMARK_PROPOSAL.md)
+data/

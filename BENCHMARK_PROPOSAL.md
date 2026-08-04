@@ -25,20 +25,24 @@ Instead of expensive end-to-end model fine-tuning, BioLatent adopts a **Frozen E
 
 To ensure generalizability without benchmark bloat, the proposed suite spans 9 representative tasks across 3 modalities:
 
-### A. Small Molecule Modality (~15,000 compounds total)
-1. **BBBP** (Classification, 2,050 compounds) — *Membrane permeability / Blood-brain barrier*
-2. **ClinTox** (Classification, 1,478 compounds) — *Clinical toxicity & FDA approval*
+Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset Provenance), not paper-reported figures.
+
+### A. Small Molecule Modality (~22,700 compounds total)
+1. **BBBP** (Classification, 2,039 compounds) — *Membrane permeability / Blood-brain barrier*
+2. **ClinTox** (Classification, 1,480 compounds) — *Clinical toxicity & FDA approval*
 3. **BACE** (Classification, 1,513 compounds) — *Target binding (Binding affinity)*
 4. **ESOL** (Regression, 1,128 compounds) — *Aqueous solubility*
 5. **Lipophilicity** (Regression, 4,200 compounds) — *Octanol-water partition coefficient*
-6. **CYP3A4 Substrate** (Classification, 6,676 compounds) — *Metabolism stability (TDC)*
+6. **CYP3A4 Substrate** (Classification, 12,328 compounds) — *CYP3A4 inhibition, TDC `CYP3A4_Veith`*
 
-### B. Protein Modality (~94,000 sequences/residues total)
-7. **DeepLoc** (Classification, 14,000 proteins) — *Global subcellular localization*
-8. **CB513** (Per-residue Q3 Classification, 80,000 residues) — *Secondary structure prediction*
+### B. Protein Modality (~43,700 sequences total)
+7. **DeepLoc** (Classification, 22,233 proteins) — *Global subcellular localization (argmax of 10 compartments)*
+8. **Fluorescence** (Regression, 21,446 proteins) — *GFP fitness landscape (TAPE), log-fluorescence*
 
-### C. Genomic Modality (~15,000 sequences total)
-9. **GenomicBenchmarks / Human Promoters** (Classification, 15,000 sequences) — *Regulatory sequence detection*
+> **CB513 was dropped** per Design Decision D2. It was replaced with a **whole-protein regression** task (Fluorescence) so the protein modality mirrors the molecule side's classification + regression shape and preserves the per-object "one vector → one probe" harness. This also avoids enshrining a dataset ProtTrans itself calls "redundant and outdated."
+
+### C. Genomic Modality (~31,400 sequences total)
+9. **Human Promoters** (Classification, 31,443 sequences, 300 bp) — *Regulatory sequence detection; Nucleotide Transformer `promoter_all`, balanced*
 
 ---
 
@@ -46,11 +50,13 @@ To ensure generalizability without benchmark bloat, the proposed suite spans 9 r
 
 | Modality / Task Set | Sample Count | Tensor Size ($d=768$ to $1024$) | CPU Evaluation Time |
 | :--- | :--- | :--- | :--- |
-| **6 Molecular Tasks** | ~15,000 compounds | ~45 MB | ~5 seconds |
-| **DeepLoc (Protein)** | 14,000 proteins | ~57 MB | ~8 seconds |
-| **CB513 (Residues)** | 80,000 residues | ~320 MB | ~45 seconds |
-| **Genomics Task** | 15,000 sequences | ~45 MB | ~5 seconds |
-| **TOTAL SUITE** | **~124,000 vectors** | **~467 MB** | **< 90 seconds (Single CPU)** |
+| **6 Molecular Tasks** | ~22,700 compounds | ~68 MB | ~7 seconds |
+| **DeepLoc (Protein)** | 22,233 proteins | ~68 MB | ~10 seconds |
+| **Fluorescence (Protein)** | 21,446 proteins | ~66 MB | ~9 seconds |
+| **Promoters (Genomics)** | 31,443 sequences | ~96 MB | ~12 seconds |
+| **TOTAL SUITE** | **~98,000 vectors** | **~298 MB** | **< 60 seconds (Single CPU)** |
+
+> Counts are the actual downloaded datasets. All are per-object (one vector per molecule/protein/sequence), so a single probing harness covers every task — no per-residue special case.
 
 * **Total Hosting Cost**: $0 (Stored on Hugging Face Datasets)
 * **Total Compute Cost per Submission**: $0 (Executed in GitHub Actions)
@@ -106,7 +112,27 @@ The three open questions below have been resolved. Each records the decision, th
 
 ## 6. Build Items Carrying Real Cost
 
-Two decisions above are not free and should be scoped explicitly before committing:
+1. **CB513 replacement (D2).** ✅ **Done** — replaced with the whole-protein **Fluorescence** regression task (TAPE GFP landscape). Uses the same per-object probing harness as every other task; no separate per-residue code path.
+2. **Leakage-audit pipeline (D3).** ⬜ **Not started** — obtaining public pretraining corpora and building the scaffold/sequence-identity overlap computation. The highest-effort, highest-value item remaining in the proposal.
 
-1. **CB513 replacement (D2).** Sourcing and splitting a NetSurfP-2.0 / CASP-derived secondary-structure set, *or* standing up a whole-protein FLIP regression task, plus its probing harness.
-2. **Leakage-audit pipeline (D3).** Obtaining public pretraining corpora and building the scaffold/sequence-identity overlap computation — the highest-effort, highest-value item in the proposal.
+---
+
+## 7. Dataset Provenance
+
+All nine datasets are **real, sourced data** — downloaded via `benchmark/download_real_datasets.py` and loaded through `benchmark/datasets.py`. An earlier version of the loader silently fabricated random SMILES/sequences for any missing dataset; that fallback has been **removed** and now raises a loud `FileNotFoundError` directing the user to the download script. No synthetic data is admissible.
+
+| Dataset | Modality | Type | N | Source |
+| :--- | :--- | :--- | :--- | :--- |
+| BBBP | molecule | classification | 2,039 | MoleculeNet |
+| ClinTox | molecule | classification | 1,480 | MoleculeNet |
+| BACE | molecule | classification | 1,513 | MoleculeNet |
+| ESOL | molecule | regression | 1,128 | MoleculeNet |
+| Lipophilicity | molecule | regression | 4,200 | MoleculeNet |
+| CYP3A4 | molecule | classification | 12,328 | TDC `CYP3A4_Veith` |
+| DeepLoc | protein | classification | 22,233 | HF `bloyal/deeploc` (argmax of 10 compartments) |
+| Fluorescence | protein | regression | 21,446 | HF `proteinglm/fluorescence_prediction` (TAPE GFP) |
+| Promoters | genomics | classification | 31,443 | HF `InstaDeepAI/nucleotide_transformer_downstream_tasks_revised`, task `promoter_all` |
+
+**Two corrections applied during this pass:**
+- **"FLIP" → "Fluorescence"**: the file named `FLIP.csv` actually contained the TAPE GFP fluorescence landscape (Strategy 1 of the downloader succeeded, so the FLIP fallbacks never ran). Renamed to reflect true provenance rather than mislabel it as FLIP (stability/Meltome).
+- **Promoters re-download**: the previous file held only 106 sequences — the tiny UCI *E. coli* fallback, because the NT config name `promoter_all` no longer exists (the dataset restructured to a single `default` config with a `task` column). Fixed to filter `task == "promoter_all"`, yielding 31,443 balanced 300 bp human sequences.
