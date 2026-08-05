@@ -162,6 +162,7 @@ what the representations encode is largely linearly accessible.
 | :--- | ---: | ---: | ---: |
 | 3-mer frequency | 8000 | 0.5288 | **0.6755** |
 | ESM-2 8M | 320 | 0.6639 | 0.5724 |
+| ESM-2 35M | 480 | 0.7045 | 0.5924 |
 | ESM-2 150M | 640 | 0.7308 | 0.5835 |
 | ESM-2 650M | 1280 | **0.7473** | 0.6138 |
 | ProtBERT | 1024 | 0.7052 | 0.6615 |
@@ -170,9 +171,11 @@ The two protein tasks point in **opposite directions**, and the reason is
 informative rather than noise.
 
 **On DeepLoc, pretrained representations win decisively and scale helps.** ESM-2
-8M is 13.5 points above 3-mer frequency while using 25× fewer dimensions.
-Returns flatten sharply though: 8M → 150M buys 6.7 points, 150M → 650M buys 1.7
-for 4.3× the parameters.
+8M is 13.5 points above 3-mer frequency while using 25× fewer dimensions, and
+the ladder is monotonic across all four ESM-2 sizes (0.664 → 0.705 → 0.731 →
+0.747). Returns flatten sharply: 8M → 35M buys 4.1 points, 35M → 150M buys 2.6,
+150M → 650M buys 1.7 for 4.3× the parameters. ProtBERT (0.7052) lands between
+ESM-2 35M and 150M despite being larger than either.
 
 **On Fluorescence, the 3-mer baseline beats every protein language model.** It
 leads ProtBERT by 1.4 points and ESM-2 650M by 6.2. The scale ladder still rises
