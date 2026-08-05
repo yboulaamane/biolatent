@@ -26,6 +26,7 @@ Usage:
 """
 
 import argparse
+import gzip
 import json
 import os
 import sys
@@ -36,7 +37,8 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
-from benchmark.leakage import AUDIT_DIR, DECLARED_CORPORA, molecule_overlap
+from benchmark.leakage import (AUDIT_DIR, DECLARED_CORPORA, molecule_overlap,
+                               sequence_overlap)
 
 CORPORA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "corpora")
 REPORT_PATH = os.path.join(AUDIT_DIR, "leakage_report.json")
@@ -65,12 +67,83 @@ def load_zinc(sample_n, seed=42):
     return df["smiles"].astype(str).tolist()
 
 
+def load_pubchem(sample_n, seed=42):
+    """Reservoir-sample SMILES from the PubChem CID-SMILES dump.
+
+    The file holds >100M rows, so it is streamed rather than loaded. PubChem is
+    the corpus behind ChemBERTa and one of MoLFormer-XL's two sources, which
+    makes it the corpus that matters most for the molecular results.
+    """
+    path = os.path.join(CORPORA_DIR, "cid-smiles.gz")
+    if not os.path.exists(path):
+        return None
+
+    rng = np.random.RandomState(seed)
+    reservoir, seen = [], 0
+    with gzip.open(path, "rt") as fh:
+        for line in fh:
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) < 2:
+                continue
+            smi = parts[1]
+            seen += 1
+            if len(reservoir) < sample_n:
+                reservoir.append(smi)
+            else:
+                j = rng.randint(0, seen)
+                if j < sample_n:
+                    reservoir[j] = smi
+    print(f"  PubChem: sampled {len(reservoir):,} of {seen:,} rows", flush=True)
+    return reservoir
+
+
+def load_swissprot(sample_n=None):
+    """Load Swiss-Prot sequences.
+
+    Swiss-Prot rather than a random UniRef50 sample, deliberately. UniRef50
+    clusters essentially all of UniProt, so a random sample of it would report a
+    near-zero hit rate against a few thousand test proteins while true coverage
+    is near-total -- a number that would be technically correct and completely
+    misleading. Swiss-Prot is the reviewed subset DeepLoc is actually built
+    from, so overlap against it is a real, tight lower bound.
+    """
+    path = os.path.join(CORPORA_DIR, "sprot.fasta")
+    if not os.path.exists(path):
+        return None
+    seqs, current = [], []
+    with open(path) as fh:
+        for line in fh:
+            if line.startswith(">"):
+                if current:
+                    seqs.append("".join(current))
+                    current = []
+            else:
+                current.append(line.strip())
+    if current:
+        seqs.append("".join(current))
+    if sample_n and len(seqs) > sample_n:
+        rng = np.random.RandomState(42)
+        seqs = [seqs[i] for i in rng.choice(len(seqs), sample_n, replace=False)]
+    return seqs
+
+
 def main(sample_n):
     os.makedirs(AUDIT_DIR, exist_ok=True)
-    print(f"Loading ZINC sample (n={sample_n:,})...", flush=True)
+    print(f"Loading molecular corpora (sample n={sample_n:,})...", flush=True)
+    mol_corpora = {}
     zinc = load_zinc(sample_n)
-    if zinc is None:
-        print("  ZINC corpus absent; molecular audit will be skipped.", flush=True)
+    if zinc:
+        mol_corpora["zinc"] = zinc
+    pubchem = load_pubchem(sample_n)
+    if pubchem:
+        mol_corpora["pubchem"] = pubchem
+    if not mol_corpora:
+        print("  No molecular corpus present; molecular audit skipped.", flush=True)
+
+    print("Loading Swiss-Prot...", flush=True)
+    swissprot = load_swissprot()
+    print(f"  Swiss-Prot: {len(swissprot):,} sequences"
+          if swissprot else "  Swiss-Prot absent; protein audit skipped.", flush=True)
 
     report = {"sample_size": sample_n, "tasks": {}}
 
@@ -80,16 +153,36 @@ def main(sample_n):
         entry = {"modality": data["modality"], "n_test": len(test_inputs),
                  "empirical": {}, "structural": {}}
 
-        if data["modality"] == "molecule" and zinc:
-            print(f"  {task}: ECFP4/scaffold overlap vs ZINC sample...", flush=True)
-            mask = molecule_overlap(test_inputs, zinc)
-            entry["empirical"]["zinc"] = {
+        if data["modality"] == "molecule":
+            for corpus_name, corpus in mol_corpora.items():
+                print(f"  {task}: scaffold/ECFP4 overlap vs {corpus_name}...",
+                      flush=True)
+                mask = molecule_overlap(test_inputs, corpus)
+                entry["empirical"][corpus_name] = {
+                    "n_flagged": int(mask.sum()),
+                    "fraction": round(float(mask.mean()), 4),
+                    "basis": f"Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 "
+                             f"against a random {sample_n:,}-molecule sample of "
+                             f"{corpus_name} (lower bound)",
+                }
+                np.save(os.path.join(AUDIT_DIR, f"{task}__{corpus_name}_mask.npy"),
+                        mask)
+                print(f"     {mask.sum()}/{len(mask)} ({mask.mean():.1%})", flush=True)
+
+        elif data["modality"] == "protein" and swissprot:
+            print(f"  {task}: MMseqs2 search vs Swiss-Prot at 50% identity...",
+                  flush=True)
+            mask = sequence_overlap(test_inputs, swissprot,
+                                    min_identity=0.5, coverage=0.5)
+            entry["empirical"]["swissprot"] = {
                 "n_flagged": int(mask.sum()),
                 "fraction": round(float(mask.mean()), 4),
-                "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 "
-                         "against a random sample of ZINC (lower bound)",
+                "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% "
+                         "coverage against all of Swiss-Prot. Swiss-Prot is a "
+                         "subset of the UniProt that UniRef50 clusters, so this "
+                         "is a lower bound on UniRef50 coverage.",
             }
-            np.save(os.path.join(AUDIT_DIR, f"{task}__zinc_mask.npy"), mask)
+            np.save(os.path.join(AUDIT_DIR, f"{task}__swissprot_mask.npy"), mask)
             print(f"     {mask.sum()}/{len(mask)} ({mask.mean():.1%})", flush=True)
 
         for corpus, justification in STRUCTURAL.items():
