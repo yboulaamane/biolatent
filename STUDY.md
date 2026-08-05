@@ -136,6 +136,48 @@ task in absolute terms (ρ = 0.592 against RDKit2D's 0.918).
 
 ---
 
+## 4b. Results — protein tasks (DeepLoc, in progress)
+
+Ranked metric: accuracy over ten localisation classes.
+
+| Model | Dim | Accuracy | MLP gap |
+| :--- | ---: | ---: | ---: |
+| 3-mer frequency | 8000 | 0.5288 | +0.018 |
+| ESM-2 8M | 320 | 0.6639 | +0.019 |
+| ESM-2 150M | 640 | 0.7308 | −0.017 |
+| ESM-2 650M | 1280 | *running* | |
+| ProtBERT | 1024 | *pending* | |
+
+Unlike the molecular tasks, **pretrained protein representations beat the
+classical baseline decisively** — ESM-2 8M is 13.5 points above 3-mer frequency
+despite using 25× fewer dimensions, and accuracy rises monotonically with model
+scale. This is the clearest scale effect anywhere in the suite, and it is the
+opposite of the molecular picture, where descriptor baselines won five of six
+tasks.
+
+The contrast is worth stating carefully: it does **not** show that protein
+language models generalise better than molecular ones. The leakage audit (§5)
+finds that every DeepLoc test protein is represented in UniRef50 by
+construction, so part of what this ladder measures is how much of a
+memorised corpus a larger model retains.
+
+### A note on compute stability
+
+These runs exposed a failure mode worth recording. On this stack an allocation
+failure surfaces as `AcceleratorError: CUDA error: out of memory` rather than
+`torch.cuda.OutOfMemoryError`, and it leaves the CUDA context unusable — so
+after one model overflowed, every subsequent model failed instantly with the
+same error for an unrelated reason, and the log showed four "failures" that were
+really one. Embedding runs are therefore executed in an isolated subprocess per
+(model, dataset), which confines a context loss to the cell that caused it.
+
+Separately, two runner instances briefly competed for the same 4 GB card, which
+reduced throughput from roughly 220 sequences/second to 8 and produced
+allocation failures at model load. Throughput figures in this document are from
+single-tenant runs.
+
+---
+
 ## 5. Results — leakage audit
 
 Fraction of each **test split** with a Murcko-scaffold match or ECFP4 Tanimoto

@@ -682,6 +682,124 @@
           "embedding_dim": 8000
         },
         "linear_mlp_gap": 0.0179
+      },
+      "esm2_8m": {
+        "label": "ESM-2 8M",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.6639,
+          "macro_f1": 0.5497,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 320,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 196.9,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.683,
+          "macro_f1": 0.592,
+          "probe": "mlp",
+          "embedding_dim": 320
+        },
+        "linear_mlp_gap": 0.0191
+      },
+      "esm2_150m": {
+        "label": "ESM-2 150M",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.7308,
+          "macro_f1": 0.6222,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 640,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 1164.6,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.7135,
+          "macro_f1": 0.6272,
+          "probe": "mlp",
+          "embedding_dim": 640
+        },
+        "linear_mlp_gap": -0.0173
+      }
+    }
+  },
+  "Fluorescence": {
+    "modality": "protein",
+    "task_type": "regression",
+    "split_source": "official",
+    "n_total": 54025,
+    "n_train": 21446,
+    "n_test": 27217,
+    "models": {
+      "kmer3_protein": {
+        "label": "3-mer frequency",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6755,
+          "rmse": 1.0599,
+          "r2": -0.1837,
+          "hyperparameter": {
+            "alpha": 1000.0
+          },
+          "probe": "linear",
+          "embedding_dim": 8000,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 1.7,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.3572,
+          "rmse": 3.7091,
+          "r2": -13.4955,
+          "probe": "mlp",
+          "embedding_dim": 8000
+        },
+        "linear_mlp_gap": -0.3183
+      }
+    }
+  },
+  "Promoters": {
+    "modality": "genomics",
+    "task_type": "classification",
+    "split_source": "official",
+    "n_total": 31443,
+    "n_train": 29872,
+    "n_test": 1571,
+    "models": {
+      "kmer5_dna": {
+        "label": "5-mer frequency",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9304,
+          "accuracy": 0.8523,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 29872,
+          "n_test": 1571
+        },
+        "embed_seconds": 13.2,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9283,
+          "accuracy": 0.853,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.0021
       }
     }
   }

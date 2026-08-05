@@ -111,10 +111,10 @@ def run(task_names=None, run_mlp=True):
                       f"(dim {lin['embedding_dim']}, {embed_time:.0f}s){gap}",
                       flush=True)
 
-            except Exception:
+            except Exception as exc:
                 # A failed cell is left absent. It is never back-filled.
-                print(f"     FAILED: {traceback.format_exc().splitlines()[-1]}",
-                      flush=True)
+                print(f"     FAILED: {type(exc).__name__}: {exc}", flush=True)
+                traceback.print_exc()
 
     save_results(results)
     print(f"\nWrote {RESULTS_PATH}", flush=True)

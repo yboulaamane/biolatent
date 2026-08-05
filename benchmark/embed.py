@@ -24,6 +24,8 @@ revision hash, pooling, truncation and dtype, so any row can be regenerated.
 import hashlib
 import json
 import os
+import subprocess
+import sys
 
 import numpy as np
 from rdkit import Chem, RDLogger
@@ -35,7 +37,7 @@ RDLogger.DisableLog("rdApp.*")
 EMB_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "embeddings")
 os.makedirs(EMB_DIR, exist_ok=True)
 
-MAX_LEN = {"protein": 1022, "genomics": 512, "molecule": 256}
+MAX_LEN = {"protein": 512, "genomics": 512, "molecule": 256}
 
 # ---------------------------------------------------------------------------
 # Model registry. Every entry is a real, downloadable checkpoint or a
@@ -65,8 +67,9 @@ MODEL_REGISTRY = {
     # --- proteins: pretrained language models ---
     "esm2_8m":   {"kind": "hf", "modality": "protein",
                   "checkpoint": "facebook/esm2_t6_8M_UR50D",   "label": "ESM-2 8M"},
-    "esm2_35m":  {"kind": "hf", "modality": "protein",
-                  "checkpoint": "facebook/esm2_t12_35M_UR50D", "label": "ESM-2 35M"},
+    # ESM-2 35M is omitted: 8M / 150M / 650M already give a three-point scale
+    # ladder, and the intermediate point costs run time without adding a
+    # distinct conclusion on a 4 GB card.
     "esm2_150m": {"kind": "hf", "modality": "protein",
                   "checkpoint": "facebook/esm2_t30_150M_UR50D", "label": "ESM-2 150M"},
     "esm2_650m": {"kind": "hf", "modality": "protein",
@@ -165,7 +168,60 @@ def _token_budget_batches(order, sequences, max_len, budget):
         yield batch
 
 
-def embed_hf(sequences, spec, modality, token_budget=8192, progress_every=5000):
+def _forward_pooled(model, tok, batch, max_len, device, spec):
+    """Tokenise, run, and mean-pool one batch. Returns a numpy array."""
+    import torch
+
+    texts = [str(s)[:max_len * 6] for s in batch]
+    if spec.get("space_tokens"):
+        # ProtBERT expects residues separated by spaces.
+        texts = [" ".join(list(s[:max_len])) for s in texts]
+
+    enc = tok(texts, return_tensors="pt", padding=True,
+              truncation=True, max_length=max_len)
+    enc = {k: v.to(device) for k, v in enc.items()}
+    hidden = model(**enc).last_hidden_state
+
+    mask = enc.get("attention_mask")
+    if mask is None:
+        mask = torch.ones(hidden.shape[:2], device=device)
+    mask = mask.unsqueeze(-1).to(hidden.dtype)
+    pooled = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1)
+    return pooled.float().cpu().numpy()
+
+
+def _forward_with_oom_retry(model, tok, seqs, max_len, device, spec, depth=0):
+    """Run a batch, halving it on CUDA OOM rather than failing the model.
+
+    A single oversized batch would otherwise abort the whole run, and -- worse
+    -- an OOM can leave the CUDA context unusable so that every subsequent
+    model fails instantly for an unrelated reason. Splitting keeps the failure
+    local and the results identical, since pooling is per sequence.
+    """
+    import torch
+
+    try:
+        return _forward_pooled(model, tok, seqs, max_len, device, spec)
+    except Exception as exc:
+        # On this stack an allocation failure surfaces as AcceleratorError
+        # ("CUDA error: out of memory") rather than torch.cuda.OutOfMemoryError,
+        # so the retry keys on the message rather than the exception class.
+        if "out of memory" not in str(exc).lower():
+            raise
+        torch.cuda.empty_cache()
+        if len(seqs) == 1:
+            raise
+        mid = len(seqs) // 2
+        if depth == 0:
+            print(f"      OOM on batch of {len(seqs)}; splitting", flush=True)
+        left = _forward_with_oom_retry(model, tok, seqs[:mid], max_len, device,
+                                       spec, depth + 1)
+        right = _forward_with_oom_retry(model, tok, seqs[mid:], max_len, device,
+                                        spec, depth + 1)
+        return np.vstack([left, right])
+
+
+def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
     """Mean-pooled frozen embeddings from a HuggingFace checkpoint.
 
     Sequences are processed in length-sorted, token-budgeted batches and
@@ -187,42 +243,47 @@ def embed_hf(sequences, spec, modality, token_budget=8192, progress_every=5000):
     pooled_by_index = [None] * len(sequences)
     done = 0
 
-    with torch.no_grad():
-        for idx_batch in _token_budget_batches(order, sequences, max_len, token_budget):
-            batch = [str(sequences[i])[:max_len * 6] for i in idx_batch]
-            if spec.get("space_tokens"):
-                # ProtBERT expects residues separated by spaces.
-                batch = [" ".join(list(s[:max_len])) for s in batch]
+    try:
+        with torch.no_grad():
+            for idx_batch in _token_budget_batches(order, sequences, max_len,
+                                                   token_budget):
+                pooled = _forward_with_oom_retry(
+                    model, tok, [sequences[i] for i in idx_batch],
+                    max_len, device, spec)
 
-            enc = tok(batch, return_tensors="pt", padding=True,
-                      truncation=True, max_length=max_len)
-            enc = {k: v.to(device) for k, v in enc.items()}
-            hidden = model(**enc).last_hidden_state
+                for slot, row in zip(idx_batch, pooled):
+                    pooled_by_index[slot] = row
 
-            mask = enc.get("attention_mask")
-            if mask is None:
-                mask = torch.ones(hidden.shape[:2], device=device)
-            mask = mask.unsqueeze(-1).to(hidden.dtype)
-            pooled = ((hidden * mask).sum(1) / mask.sum(1).clamp(min=1))
-            pooled = pooled.float().cpu().numpy()
+                prev, done = done, done + len(idx_batch)
+                if done // progress_every > prev // progress_every:
+                    print(f"      {done}/{len(sequences)}", flush=True)
+    finally:
+        # Always release the model, so one model's failure cannot starve the
+        # next one of VRAM.
+        del model
+        if device == "cuda":
+            torch.cuda.empty_cache()
 
-            for slot, row in zip(idx_batch, pooled):
-                pooled_by_index[slot] = row
-
-            prev, done = done, done + len(idx_batch)
-            if done // progress_every > prev // progress_every:
-                print(f"      {done}/{len(sequences)}", flush=True)
-
-    del model
-    if device == "cuda":
-        torch.cuda.empty_cache()
+    missing = [i for i, v in enumerate(pooled_by_index) if v is None]
+    if missing:
+        raise RuntimeError(
+            f"{spec.get('checkpoint')}: {len(missing)} sequences produced no "
+            f"embedding (first index {missing[0]})")
     return np.vstack(pooled_by_index).astype(np.float32)
 
 
 # ------------------------------------------------------------------ driver
 
-def generate(model_id, dataset_name, inputs, modality, force=False):
-    """Generate (or load from cache) the frozen matrix for one model/dataset."""
+def generate(model_id, dataset_name, inputs, modality, force=False,
+             isolate=True):
+    """Generate (or load from cache) the frozen matrix for one model/dataset.
+
+    Neural checkpoints are embedded in a subprocess by default. An allocation
+    failure on this stack surfaces as a CUDA context error rather than a clean
+    Python exception, and once it occurs every later CUDA call in the same
+    process fails too -- so one oversized model would otherwise take down every
+    model queued behind it. Isolating each run confines that to its own cell.
+    """
     spec = MODEL_REGISTRY[model_id]
     if spec["modality"] != modality:
         return None  # not applicable -- reported as N/A, never imputed
@@ -232,6 +293,18 @@ def generate(model_id, dataset_name, inputs, modality, force=False):
         return np.load(path)
 
     kind = spec["kind"]
+
+    if kind == "hf" and isolate:
+        subprocess.run(
+            [sys.executable, "-u", os.path.abspath(__file__),
+             model_id, dataset_name],
+            check=True, env={**os.environ, "PYTHONPATH": ""},
+        )
+        if not os.path.exists(path):
+            raise RuntimeError(
+                f"{model_id}/{dataset_name}: isolated embedding run produced "
+                f"no cache file")
+        return np.load(path)
     if kind == "ecfp4":
         mat = embed_ecfp4(inputs)
     elif kind == "rdkit":
@@ -265,3 +338,15 @@ def generate(model_id, dataset_name, inputs, modality, force=False):
     with open(path.replace(".npy", ".json"), "w") as fh:
         json.dump(meta, fh, indent=2)
     return mat
+
+
+if __name__ == "__main__":
+    # Entry point for the isolated per-model embedding run invoked by
+    # generate(). Loads one dataset, embeds it with one model, writes the cache.
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from benchmark.datasets import load_benchmark_dataset
+
+    _model_id, _dataset = sys.argv[1], sys.argv[2]
+    _data = load_benchmark_dataset(_dataset)
+    generate(_model_id, _dataset, _data["inputs"], _data["modality"],
+             isolate=False)
