@@ -46,10 +46,27 @@ def load_results():
 
 
 def save_results(results):
-    tmp = RESULTS_PATH + ".tmp"
+    """Merge this runner's cells into the file, then write atomically.
+
+    Writing the in-memory dict wholesale loses work when two runners are active:
+    each holds a snapshot taken at start-up, so whichever saves last erases
+    every cell the other computed in the meantime. Re-reading and merging keeps
+    concurrent runs on disjoint tasks safe, which matters because the natural
+    way to use this harness is one runner per modality.
+    """
+    merged = load_results()
+    for task, info in results.items():
+        if task not in merged:
+            merged[task] = info
+            continue
+        merged[task].update({k: v for k, v in info.items() if k != "models"})
+        merged[task].setdefault("models", {}).update(info.get("models", {}))
+
+    tmp = f"{RESULTS_PATH}.{os.getpid()}.tmp"
     with open(tmp, "w") as fh:
-        json.dump(results, fh, indent=2)
+        json.dump(merged, fh, indent=2)
     os.replace(tmp, RESULTS_PATH)
+    return merged
 
 
 def run(task_names=None, run_mlp=True):
