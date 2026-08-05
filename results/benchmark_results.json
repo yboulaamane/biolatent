@@ -902,6 +902,54 @@
           "embedding_dim": 1280
         },
         "linear_mlp_gap": -0.0083
+      },
+      "protbert": {
+        "label": "ProtBERT",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.7052,
+          "macro_f1": 0.6191,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 900.0,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.711,
+          "macro_f1": 0.6552,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": 0.0058
+      },
+      "esm2_35m": {
+        "label": "ESM-2 35M",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.7045,
+          "macro_f1": 0.6176,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 480,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 395.1,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.7017,
+          "macro_f1": 0.643,
+          "probe": "mlp",
+          "embedding_dim": 480
+        },
+        "linear_mlp_gap": -0.0028
       }
     }
   },
@@ -938,6 +986,110 @@
           "embedding_dim": 8000
         },
         "linear_mlp_gap": -0.3183
+      },
+      "esm2_8m": {
+        "label": "ESM-2 8M",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5724,
+          "rmse": 0.9678,
+          "r2": 0.0131,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "probe": "linear",
+          "embedding_dim": 320,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 261.9,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5847,
+          "rmse": 0.971,
+          "r2": 0.0065,
+          "probe": "mlp",
+          "embedding_dim": 320
+        },
+        "linear_mlp_gap": 0.0123
+      },
+      "esm2_150m": {
+        "label": "ESM-2 150M",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5835,
+          "rmse": 0.9737,
+          "r2": 0.001,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "probe": "linear",
+          "embedding_dim": 640,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 1305.8,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.584,
+          "rmse": 0.9303,
+          "r2": 0.0881,
+          "probe": "mlp",
+          "embedding_dim": 640
+        },
+        "linear_mlp_gap": 0.0005
+      },
+      "esm2_650m": {
+        "label": "ESM-2 650M",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6138,
+          "rmse": 0.9559,
+          "r2": 0.0372,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "probe": "linear",
+          "embedding_dim": 1280,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 2528.9,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5854,
+          "rmse": 0.8659,
+          "r2": 0.21,
+          "probe": "mlp",
+          "embedding_dim": 1280
+        },
+        "linear_mlp_gap": -0.0284
+      },
+      "protbert": {
+        "label": "ProtBERT",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6615,
+          "rmse": 1.024,
+          "r2": -0.1049,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 724.4,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.641,
+          "rmse": 0.8477,
+          "r2": 0.2428,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.0205
       }
     }
   },
@@ -972,6 +1124,54 @@
           "embedding_dim": 1024
         },
         "linear_mlp_gap": -0.0021
+      },
+      "nucleotide_transformer": {
+        "label": "Nucleotide Transformer 500M",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9363,
+          "accuracy": 0.8485,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 1280,
+          "n_train": 29872,
+          "n_test": 1571
+        },
+        "embed_seconds": 195.8,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9297,
+          "accuracy": 0.8466,
+          "probe": "mlp",
+          "embedding_dim": 1280
+        },
+        "linear_mlp_gap": -0.0066
+      },
+      "hyenadna": {
+        "label": "HyenaDNA tiny",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9381,
+          "accuracy": 0.8581,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 128,
+          "n_train": 29872,
+          "n_test": 1571
+        },
+        "embed_seconds": 36.7,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9403,
+          "accuracy": 0.8631,
+          "probe": "mlp",
+          "embedding_dim": 128
+        },
+        "linear_mlp_gap": 0.0022
       }
     }
   }

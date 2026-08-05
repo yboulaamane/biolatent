@@ -156,26 +156,64 @@ what the representations encode is largely linearly accessible.
 
 ---
 
-## 4b. Results — protein tasks (DeepLoc, in progress)
+## 4b. Results — protein tasks
 
-Ranked metric: accuracy over ten localisation classes.
-
-| Model | Dim | Accuracy | MLP gap |
+| Model | Dim | DeepLoc (accuracy) | Fluorescence (Spearman ρ) |
 | :--- | ---: | ---: | ---: |
-| 3-mer frequency | 8000 | 0.5288 | +0.018 |
-| ESM-2 8M | 320 | 0.6639 | +0.019 |
-| ESM-2 150M | 640 | 0.7308 | −0.017 |
-| ESM-2 650M | 1280 | **0.7473** | −0.008 |
-| ProtBERT | 1024 | *running* | |
+| 3-mer frequency | 8000 | 0.5288 | **0.6755** |
+| ESM-2 8M | 320 | 0.6639 | 0.5724 |
+| ESM-2 150M | 640 | 0.7308 | 0.5835 |
+| ESM-2 650M | 1280 | **0.7473** | 0.6138 |
+| ProtBERT | 1024 | 0.7052 | 0.6615 |
 
-**Pretrained protein representations beat the classical baseline decisively**, and
-accuracy rises monotonically with scale — ESM-2 8M is already 13.5 points above
-3-mer frequency while using 25× fewer dimensions.
+The two protein tasks point in **opposite directions**, and the reason is
+informative rather than noise.
 
-But the returns fall away sharply. Going 8M → 150M buys 6.7 points; going
-150M → 650M buys 1.7 points for 4.3× the parameters. The ladder is real but
-flattening, which matters for a leaderboard that would otherwise imply that
-scale is the axis to optimise.
+**On DeepLoc, pretrained representations win decisively and scale helps.** ESM-2
+8M is 13.5 points above 3-mer frequency while using 25× fewer dimensions.
+Returns flatten sharply though: 8M → 150M buys 6.7 points, 150M → 650M buys 1.7
+for 4.3× the parameters.
+
+**On Fluorescence, the 3-mer baseline beats every protein language model.** It
+leads ProtBERT by 1.4 points and ESM-2 650M by 6.2. The scale ladder still rises
+(0.572 → 0.584 → 0.614) but never reaches a plain k-mer count.
+
+This is a pooling artefact, and it is *this study's* artefact. Fluorescence is a
+mutational scan: all 54,025 sequences are 237-residue GFP variants differing at
+a handful of positions. Mean-pooling a transformer over 237 residues averages
+away exactly the one-to-fifteen substitutions that carry the entire label, while
+3-mer frequencies register each substitution directly as a change in counts.
+
+Design decision D1 pinned mean pooling for every model so that pooling could not
+masquerade as a difference between representations. The cost of that choice is
+visible here: on tasks whose signal is local, a fixed global pooling discards
+it. The honest reading is not "protein language models are bad at fitness
+prediction" — published work using per-residue readouts does far better — but
+"a frozen mean-pooled embedding is the wrong probe for a mutational scan."
+
+That distinction matters for how a leaderboard should be read. A single number
+per (model, task) silently encodes a readout choice, and for one of these nine
+tasks that choice dominates the result.
+
+---
+
+## 4c. Results — genomics
+
+| Model | Dim | Promoters (ROC-AUC) |
+| :--- | ---: | ---: |
+| 5-mer frequency | 1024 | 0.9304 |
+| Nucleotide Transformer 500M | 1280 | 0.9363 |
+| HyenaDNA tiny | 128 | **0.9381** |
+
+**All three are within 0.008 of each other.** A 500M-parameter genomic foundation
+model buys 0.6 points over counting 5-mers, and is edged out by HyenaDNA-tiny
+using ten times fewer dimensions than either.
+
+Read alongside §5, this is the least reassuring result in the suite: the
+promoter sequences are excerpts of the very assembly both pretrained models were
+trained on, so even that 0.6-point margin is measured under total corpus
+contamination. Whatever these models offer over k-mer counting on this task, it
+is not visible through a frozen linear probe.
 
 The contrast is worth stating carefully: it does **not** show that protein
 language models generalise better than molecular ones. The leakage audit (§5)
@@ -285,7 +323,19 @@ registry.
 4. **CYP3A4 is inhibition, not substrate** (TDC `CYP3A4_Veith`). The substrate
    dataset is a different and much smaller one.
 5. **Mean pooling is imposed on every model**, including those whose authors
-   recommend a different readout. This is deliberate for comparability but will
-   disadvantage some checkpoints relative to their published usage.
+   recommend a different readout. This is deliberate for comparability, but §4b
+   shows it is not free: on Fluorescence it costs the protein language models
+   the task outright, because averaging over 237 residues erases the point
+   mutations that carry the label. Any per-residue or mutation-aware readout
+   would change that row substantially.
 6. **No confidence intervals.** Scores are single-seed point estimates; the
-   probe is deterministic but the split seed is not varied.
+   probe is deterministic but the split seed is not varied. Several margins
+   reported here — MoLFormer-XL versus RDKit2D on Lipophilicity (0.0001), versus
+   ECFP4 on CYP3A4 (0.0001), and all three genomic models (within 0.008) — are
+   almost certainly inside the noise, and are reported as ties rather than
+   rankings.
+7. **Concurrent runners previously lost results.** Each runner held a snapshot
+   of the results file taken at start-up, so the last writer erased cells
+   computed by the other; six MoLFormer-XL results were destroyed this way and
+   had to be recomputed. Saving now merges against the file on disk. Any results
+   produced before this fix should be regenerated rather than trusted.
