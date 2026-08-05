@@ -1,12 +1,26 @@
 """
-Download Real Benchmark Datasets for BioLatent (v3)
-====================================================
-Uses verified sources for all 4 missing datasets.
+Download Real Benchmark Datasets for BioLatent
+==============================================
+
+Fetches all nine benchmark datasets from their primary sources and writes them
+to ``data/benchmark_datasets/<Task>.csv``.
+
+Design rule: **official splits are preserved whenever the source defines one.**
+Re-splitting a dataset that ships an author-defined split silently changes the
+task -- most severely for Fluorescence, where the TAPE protocol trains on
+low-mutation variants and tests on distant ones. A random split there turns a
+generalisation benchmark into an interpolation benchmark and inflates every
+score. Datasets with a published split therefore carry a ``split`` column;
+datasets without one (the MoleculeNet tasks) are scaffold-split downstream by
+``datasets.py``.
+
+No dataset is ever synthesised. If a source is unreachable the download fails
+loudly rather than substituting a fallback of different provenance.
 """
 
 import os
-import sys
 import subprocess
+import sys
 
 import pandas as pd
 
@@ -15,231 +29,203 @@ os.makedirs(DATA_DIR, exist_ok=True)
 PYTHON = sys.executable
 
 
-def _run_hf_download(script_body, output_csv="/tmp/_hf_download.csv"):
-    """Run a HuggingFace download in a subprocess (avoids local 'datasets' collision)."""
+def _run_hf_download(script_body, output_csv):
+    """Run a HuggingFace download in a subprocess.
+
+    Isolating the call is necessary because this package contains a module
+    named ``datasets``, which shadows the HuggingFace library on import.
+    """
     env = os.environ.copy()
     env["PYTHONPATH"] = ""
     result = subprocess.run(
         [PYTHON, "-c", script_body],
-        capture_output=True, text=True, env=env, timeout=180
+        capture_output=True, text=True, env=env, timeout=1800,
     )
     if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip()[-500:])
+        raise RuntimeError(result.stderr.strip()[-800:])
     return pd.read_csv(output_csv)
 
 
-# ============================================================
-# 1. CYP3A4
-# ============================================================
+def _write(out, name, expect_min):
+    if len(out) < expect_min:
+        raise RuntimeError(
+            f"{name}: got {len(out)} rows, expected at least {expect_min}. "
+            f"Refusing to write a degenerate dataset."
+        )
+    path = os.path.join(DATA_DIR, f"{name}.csv")
+    out.to_csv(path, index=False)
+    counts = dict(out["split"].value_counts()) if "split" in out.columns else {}
+    print(f"   OK  {name}: {len(out)} rows {counts}")
+
+
+# ---------------------------------------------------------------- molecules
+
+def download_moleculenet():
+    """BBBP, ClinTox, BACE, ESOL, Lipophilicity from DeepChem's MoleculeNet.
+
+    These ship no official split; scaffold splitting is applied downstream.
+    """
+    print("[1/4] MoleculeNet (BBBP, ClinTox, BACE, ESOL, Lipophilicity)...")
+    base = "https://deepchemdata.s3.us-west-1.amazonaws.com/datasets"
+    sources = {
+        "BBBP": ("BBBP.csv", "smiles", "p_np"),
+        "ClinTox": ("clintox.csv.gz", "smiles", "FDA_APPROVED"),
+        "BACE": ("bace.csv", "mol", "Class"),
+        "ESOL": ("delaney-processed.csv", "smiles",
+                 "measured log solubility in mols per litre"),
+        "Lipophilicity": ("Lipophilicity.csv", "smiles", "exp"),
+    }
+    for name, (fname, smi_col, tgt_col) in sources.items():
+        path = os.path.join(DATA_DIR, f"{name}.csv")
+        if os.path.exists(path):
+            print(f"   .. {name} already present, skipping")
+            continue
+        df = pd.read_csv(f"{base}/{fname}")
+        out = pd.DataFrame({"smiles": df[smi_col], "target": df[tgt_col]}).dropna()
+        _write(out.reset_index(drop=True), name, 1000)
+
+
 def download_cyp3a4():
-    print("[1/4] CYP3A4_Veith from TDC...")
+    """TDC CYP3A4_Veith -- CYP3A4 *inhibition*, with TDC's official scaffold split.
+
+    Named for what it measures. CYP3A4 substrate prediction is a different and
+    much smaller TDC dataset (CYP3A4_Substrate_CarbonMangels, ~670 compounds).
+    """
+    print("[2/4] CYP3A4 inhibition (TDC CYP3A4_Veith, official scaffold split)...")
     from tdc.single_pred import ADME
     data = ADME(name="CYP3A4_Veith")
-    df = data.get_data()
-    out = pd.DataFrame({"smiles": df["Drug"], "target": df["Y"].astype(int)})
-    path = os.path.join(DATA_DIR, "CYP3A4.csv")
-    out.to_csv(path, index=False)
-    print(f"   ✓ {len(out)} compounds, balance: {dict(out['target'].value_counts())}")
+    split = data.get_split(method="scaffold", seed=42, frac=[0.8, 0.1, 0.1])
+    frames = []
+    for key, tag in [("train", "train"), ("valid", "val"), ("test", "test")]:
+        d = split[key]
+        frames.append(pd.DataFrame({
+            "smiles": d["Drug"], "target": d["Y"].astype(int), "split": tag,
+        }))
+    _write(pd.concat(frames, ignore_index=True), "CYP3A4", 5000)
 
 
-# ============================================================
-# 2. DeepLoc — multi-class subcellular localization
-# ============================================================
+# ----------------------------------------------------------------- proteins
+
 def download_deeploc():
-    print("[2/4] DeepLoc subcellular localization from HuggingFace...")
-    
-    # The HF dataset has multi-label columns for 10 compartments.
-    # We take the argmax compartment as the single-label class.
+    """DeepLoc subcellular localisation, official train/validation/test split.
+
+    The source is multi-label over ten compartments; we take the argmax
+    compartment as a single-label 10-class target. This is a documented
+    simplification, not the original multi-label task.
+    """
+    print("[3/4] DeepLoc subcellular localisation (official split)...")
     csv_tmp = "/tmp/_deeploc_raw.csv"
     script = f'''
-import datasets
-ds = datasets.load_dataset("bloyal/deeploc", split="train")
-ds.to_csv("{csv_tmp}")
-print("OK")
+import datasets, pandas as pd
+frames = []
+for split, tag in [("train","train"),("validation","val"),("test","test")]:
+    ds = datasets.load_dataset("bloyal/deeploc", split=split)
+    d = ds.to_pandas(); d["split"] = tag
+    frames.append(d)
+pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
 '''
     df = _run_hf_download(script, csv_tmp)
-    print(f"   Raw columns: {list(df.columns)}")
-    
-    # The 10 localization compartments (binary multi-label)
     loc_cols = ["Cytoplasm", "Nucleus", "Extracellular", "Cell membrane",
                 "Mitochondrion", "Plastid", "Endoplasmic reticulum",
                 "Lysosome/Vacuole", "Golgi apparatus", "Peroxisome"]
-    available_loc_cols = [c for c in loc_cols if c in df.columns]
-    
-    if available_loc_cols:
-        # Assign each protein to its primary compartment (argmax)
-        loc_matrix = df[available_loc_cols].fillna(0).values
-        primary_loc = loc_matrix.argmax(axis=1)
-        out = pd.DataFrame({
-            "sequence": df["Sequence"],
-            "label": primary_loc
-        })
-        print(f"   Multi-class from {len(available_loc_cols)} compartments")
-    else:
-        # Fallback: use Membrane column
-        out = pd.DataFrame({
-            "sequence": df["Sequence"],
-            "label": df["Membrane"].astype(int)
-        })
-    
-    out = out.dropna(subset=["sequence"]).reset_index(drop=True)
+    cols = [c for c in loc_cols if c in df.columns]
+    if not cols:
+        raise RuntimeError(f"DeepLoc: no localisation columns found in {list(df.columns)}")
+    out = pd.DataFrame({
+        "sequence": df["Sequence"].str.upper().str.strip(),
+        "target": df[cols].fillna(0).values.argmax(axis=1),
+        "split": df["split"],
+    }).dropna()
     out = out[out["sequence"].str.len().between(30, 2000)].reset_index(drop=True)
-    
-    path = os.path.join(DATA_DIR, "DeepLoc.csv")
-    out.to_csv(path, index=False)
-    print(f"   ✓ {len(out)} proteins, {out['label'].nunique()} classes")
-    print(f"   Class distribution: {dict(out['label'].value_counts().head(5))}")
+    _write(out, "DeepLoc", 10000)
 
 
-# ============================================================
-# 3. Fluorescence — GFP protein fitness regression (TAPE)
-# ============================================================
 def download_fluorescence():
-    print("[3/4] Fluorescence (GFP fitness landscape) protein regression...")
+    """TAPE GFP fluorescence landscape, official split.
 
-    # Strategy 1: proteinglm/fluorescence_prediction (GFP fitness landscape)
+    The official partition is the point of the benchmark: training variants sit
+    close to wild-type while the test set is dominated by distant, higher-order
+    mutants, so the task measures extrapolation. The test split is deliberately
+    larger than train.
+    """
+    print("[4/4] Fluorescence -- TAPE GFP landscape (official split)...")
     csv_tmp = "/tmp/_fluorescence_raw.csv"
-    
-    try:
-        print("   Trying proteinglm/fluorescence_prediction...")
-        script = f'''
-import datasets
-ds = datasets.load_dataset("proteinglm/fluorescence_prediction", split="train")
-ds.to_csv("{csv_tmp}")
-print("OK")
+    script = f'''
+import datasets, pandas as pd
+frames = []
+for split, tag in [("train","train"),("valid","val"),("test","test")]:
+    ds = datasets.load_dataset("proteinglm/fluorescence_prediction", split=split)
+    d = ds.to_pandas(); d["split"] = tag
+    frames.append(d)
+pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
 '''
-        df = _run_hf_download(script, csv_tmp)
-        print(f"   Downloaded. Columns: {list(df.columns)}, shape: {df.shape}")
-        
-        seq_col = next(c for c in df.columns if "seq" in c.lower() or "primary" in c.lower())
-        target_col = next(c for c in df.columns 
-                         if c.lower() in ("log_fluorescence", "target", "fluorescence",
-                                          "y", "label", "log_fitness"))
-        out = pd.DataFrame({
-            "sequence": df[seq_col],
-            "target": pd.to_numeric(df[target_col], errors="coerce")
-        })
-        
-    except Exception as e:
-        print(f"   proteinglm failed ({e})")
-        
-        # Strategy 2: genbio-ai/fluorescence_prediction_rag
-        try:
-            print("   Trying genbio-ai/fluorescence_prediction_rag...")
-            script = f'''
-import datasets
-ds = datasets.load_dataset("genbio-ai/fluorescence_prediction_rag", split="train")
-ds.to_csv("{csv_tmp}")
-print("OK")
-'''
-            df = _run_hf_download(script, csv_tmp)
-            seq_col = next(c for c in df.columns if "seq" in c.lower() or "primary" in c.lower())
-            target_col = next(c for c in df.columns 
-                             if "fluorescence" in c.lower() or "target" in c.lower()
-                             or "fitness" in c.lower() or c.lower() == "y")
-            out = pd.DataFrame({
-                "sequence": df[seq_col],
-                "target": pd.to_numeric(df[target_col], errors="coerce")
-            })
-            
-        except Exception as e2:
-            print(f"   ProteinGym failed ({e2})")
-            
-            # Strategy 3: Use TDC protein_sabdab or TAP
-            print("   Using TDC TAP as protein fitness proxy...")
-            from tdc.single_pred import Develop
-            data = Develop(name="TAP", label_name="TAP")
-            df = data.get_data()
-            out = pd.DataFrame({
-                "sequence": df["Drug"],
-                "target": pd.to_numeric(df["Y"], errors="coerce")
-            })
-    
-    out = out.dropna().reset_index(drop=True)
-    out = out[out["sequence"].str.len().between(10, 2000)].reset_index(drop=True)
-
-    path = os.path.join(DATA_DIR, "Fluorescence.csv")
-    out.to_csv(path, index=False)
-    print(f"   ✓ {len(out)} proteins, "
-          f"target: [{out['target'].min():.2f}, {out['target'].max():.2f}], "
-          f"mean: {out['target'].mean():.2f}, std: {out['target'].std():.2f}")
+    df = _run_hf_download(script, csv_tmp)
+    seq_col = next(c for c in df.columns if c.lower() in ("seq", "sequence", "primary"))
+    tgt_col = next(c for c in df.columns
+                   if c.lower() in ("label", "target", "log_fluorescence", "y"))
+    out = pd.DataFrame({
+        "sequence": df[seq_col].str.upper().str.strip(),
+        "target": pd.to_numeric(df[tgt_col], errors="coerce"),
+        "split": df["split"],
+    }).dropna().reset_index(drop=True)
+    _write(out, "Fluorescence", 20000)
 
 
-# ============================================================
-# 4. Promoters — DNA promoter sequence classification
-# ============================================================
+# ----------------------------------------------------------------- genomics
+
 def download_promoters():
-    print("[4/4] Human promoter sequences (Nucleotide Transformer promoter_all)...")
+    """Human promoter detection, Nucleotide Transformer ``promoter_all``.
 
-    # The NT downstream benchmark now ships a single 'default' config with a
-    # 'task' column; the human promoter set is task == 'promoter_all' (~31k
-    # sequences, 300 bp, balanced). We pull both the train and test splits and
-    # combine them, then re-split downstream with our standardized splitter.
+    The benchmark now ships one 'default' config carrying every task in a
+    ``task`` column; the older per-task config names no longer resolve. The
+    official train/test partition is preserved.
+    """
+    print("[5/5] Human promoters (NT promoter_all, official split)...")
     csv_tmp = "/tmp/_promoters_raw.csv"
     script = f'''
 import datasets, pandas as pd
 frames = []
-for split in ["train", "test"]:
+for split, tag in [("train","train"),("test","test")]:
     ds = datasets.load_dataset(
         "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
         "default", split=split, trust_remote_code=True)
     ds = ds.filter(lambda r: r["task"] == "promoter_all")
-    frames.append(ds.to_pandas()[["sequence", "label"]])
+    d = ds.to_pandas()[["sequence","label"]]; d["split"] = tag
+    frames.append(d)
 pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
-print("OK")
 '''
     df = _run_hf_download(script, csv_tmp)
-    out = pd.DataFrame({"sequence": df["sequence"], "target": df["label"]})
-    out["sequence"] = out["sequence"].str.upper().str.strip()
-    out = out.dropna().drop_duplicates(subset=["sequence"]).reset_index(drop=True)
-
-    if len(out) < 1000:
-        raise RuntimeError(
-            f"Promoter download returned only {len(out)} sequences — expected ~31k. "
-            f"Refusing to write a degenerate dataset.")
-
-    path = os.path.join(DATA_DIR, "Promoters.csv")
-    out.to_csv(path, index=False)
-    print(f"   ✓ {len(out)} sequences, "
-          f"balance: {dict(out['target'].value_counts())}")
+    out = pd.DataFrame({
+        "sequence": df["sequence"].str.upper().str.strip(),
+        "target": df["label"].astype(int),
+        "split": df["split"],
+    }).dropna().drop_duplicates(subset=["sequence"]).reset_index(drop=True)
+    _write(out, "Promoters", 10000)
 
 
-# ============================================================
-# Verification
-# ============================================================
 def verify_all():
-    print("\n" + "=" * 70)
-    print("VERIFICATION: All 9 benchmark datasets")
-    print("=" * 70)
-    
+    print("\n" + "=" * 72)
+    print("VERIFICATION")
+    print("=" * 72)
     for name in ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity",
                  "CYP3A4", "DeepLoc", "Fluorescence", "Promoters"]:
         path = os.path.join(DATA_DIR, f"{name}.csv")
         if not os.path.exists(path):
-            print(f"  ✗ {name}: MISSING")
+            print(f"  MISSING  {name}")
             continue
         df = pd.read_csv(path)
-        input_col = df.columns[0]
-        n_unique = df[input_col].nunique()
-        ratio = n_unique / max(len(df), 1)
-        status = "⚠ SUSPICIOUS" if ratio < 0.01 else "✓"
-        print(f"  {status} {name:15s}: {len(df):6d} samples, "
-              f"{n_unique:5d} unique ({ratio:.0%})")
-    print("=" * 70)
+        col = "smiles" if "smiles" in df.columns else df.columns[0]
+        uniq = df[col].nunique()
+        split = f" splits={dict(df['split'].value_counts())}" if "split" in df.columns else " (scaffold-split downstream)"
+        flag = "  DEGENERATE" if uniq / max(len(df), 1) < 0.01 else ""
+        print(f"  {name:14s} {len(df):6d} rows, {uniq:6d} unique{split}{flag}")
+    print("=" * 72)
 
 
 if __name__ == "__main__":
-    print("=" * 70)
-    print("  DOWNLOADING REAL BENCHMARK DATASETS FOR BIOLATENT")
-    print("=" * 70 + "\n")
-    
+    download_moleculenet()
     download_cyp3a4()
-    print()
     download_deeploc()
-    print()
     download_fluorescence()
-    print()
     download_promoters()
-    
     verify_all()
-    print("\n✅ All 4 datasets replaced with real data!")

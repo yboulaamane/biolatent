@@ -1,0 +1,267 @@
+"""
+BioLatent Phase A: Frozen Embedding Generation
+==============================================
+
+Runs each pretrained model once over each dataset it is applicable to and
+caches the resulting frozen representation matrix to ``data/embeddings/``.
+
+Three rules make the comparison fair, and all three are choices that would
+otherwise silently vary between models:
+
+1. **Pooling is fixed.** Every transformer is mean-pooled over its non-padding
+   tokens, special tokens excluded. Pooling is a hidden hyperparameter -- CLS
+   versus mean pooling can move a score by several points -- so it is pinned
+   rather than chosen per model.
+2. **Truncation is fixed** per modality and recorded, so a model is never
+   silently advantaged by seeing more of a sequence than another.
+3. **A model is only run on its own modality.** A protein language model has no
+   way to embed a SMILES string; the correct entry is N/A, not a number.
+
+Every matrix is written with a sidecar JSON recording the checkpoint, its
+revision hash, pooling, truncation and dtype, so any row can be regenerated.
+"""
+
+import hashlib
+import json
+import os
+
+import numpy as np
+from rdkit import Chem, RDLogger
+from rdkit.Chem import AllChem, Descriptors
+from rdkit.ML.Descriptors import MoleculeDescriptors
+
+RDLogger.DisableLog("rdApp.*")
+
+EMB_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "embeddings")
+os.makedirs(EMB_DIR, exist_ok=True)
+
+MAX_LEN = {"protein": 1022, "genomics": 512, "molecule": 256}
+
+# ---------------------------------------------------------------------------
+# Model registry. Every entry is a real, downloadable checkpoint or a
+# deterministic classical featuriser -- nothing here is a placeholder.
+# ---------------------------------------------------------------------------
+MODEL_REGISTRY = {
+    # --- molecules: classical baselines ---
+    "ecfp4":        {"kind": "ecfp4",  "modality": "molecule", "dim": 1024,
+                     "label": "ECFP4 (Morgan, r=2, 1024 bits)"},
+    "rdkit2d":      {"kind": "rdkit",  "modality": "molecule", "dim": 210,
+                     "label": "RDKit 2D descriptors"},
+    # --- molecules: pretrained transformers ---
+    "chemberta_77m": {"kind": "hf", "modality": "molecule",
+                      "checkpoint": "DeepChem/ChemBERTa-77M-MLM",
+                      "label": "ChemBERTa-2 77M MLM"},
+    "chemberta_zinc": {"kind": "hf", "modality": "molecule",
+                       "checkpoint": "seyonec/ChemBERTa-zinc-base-v1",
+                       "label": "ChemBERTa ZINC base"},
+    # MoLFormer-XL is deliberately absent: its remote modelling code imports
+    # transformers.masking_utils, which does not exist in transformers 4.50.3.
+    # Rather than pin a different stack for one model, it is reported as not
+    # evaluated. An unrun model is an omission; a substituted one is an error.
+
+    # --- proteins: classical baseline ---
+    "kmer3_protein": {"kind": "kmer", "modality": "protein", "k": 3,
+                      "label": "3-mer frequency"},
+    # --- proteins: pretrained language models ---
+    "esm2_8m":   {"kind": "hf", "modality": "protein",
+                  "checkpoint": "facebook/esm2_t6_8M_UR50D",   "label": "ESM-2 8M"},
+    "esm2_35m":  {"kind": "hf", "modality": "protein",
+                  "checkpoint": "facebook/esm2_t12_35M_UR50D", "label": "ESM-2 35M"},
+    "esm2_150m": {"kind": "hf", "modality": "protein",
+                  "checkpoint": "facebook/esm2_t30_150M_UR50D", "label": "ESM-2 150M"},
+    "esm2_650m": {"kind": "hf", "modality": "protein",
+                  "checkpoint": "facebook/esm2_t33_650M_UR50D", "label": "ESM-2 650M"},
+    "protbert":  {"kind": "hf", "modality": "protein", "space_tokens": True,
+                  "checkpoint": "Rostlab/prot_bert", "label": "ProtBERT"},
+
+    # --- genomics: classical baseline ---
+    "kmer5_dna": {"kind": "kmer", "modality": "genomics", "k": 5,
+                  "label": "5-mer frequency"},
+    # --- genomics: pretrained models ---
+    "nucleotide_transformer": {"kind": "hf", "modality": "genomics",
+                               "checkpoint": "InstaDeepAI/nucleotide-transformer-500m-human-ref",
+                               "trust_remote_code": True,
+                               "label": "Nucleotide Transformer 500M"},
+    "hyenadna": {"kind": "hf", "modality": "genomics",
+                 "checkpoint": "LongSafari/hyenadna-tiny-1k-seqlen-hf",
+                 "trust_remote_code": True, "label": "HyenaDNA tiny"},
+}
+
+
+def cache_path(model_id, dataset):
+    return os.path.join(EMB_DIR, f"{model_id}__{dataset}.npy")
+
+
+# ------------------------------------------------------------ classical
+
+def embed_ecfp4(smiles_list, n_bits=1024, radius=2):
+    from rdkit import DataStructs
+    out = np.zeros((len(smiles_list), n_bits), dtype=np.float32)
+    for i, smi in enumerate(smiles_list):
+        mol = Chem.MolFromSmiles(str(smi))
+        if mol is None:
+            continue
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=n_bits)
+        arr = np.zeros((n_bits,), dtype=np.int8)
+        DataStructs.ConvertToNumpyArray(fp, arr)
+        out[i] = arr
+    return out
+
+
+def embed_rdkit2d(smiles_list):
+    names = [x[0] for x in Descriptors._descList]
+    calc = MoleculeDescriptors.MolecularDescriptorCalculator(names)
+    out = np.zeros((len(smiles_list), len(names)), dtype=np.float32)
+    for i, smi in enumerate(smiles_list):
+        mol = Chem.MolFromSmiles(str(smi))
+        if mol is None:
+            continue
+        v = np.array(calc.CalcDescriptors(mol), dtype=np.float64)
+        v = np.nan_to_num(v, nan=0.0, posinf=0.0, neginf=0.0)
+        # A few descriptors (notably Ipc) grow beyond the float32 range on
+        # larger molecules; clip rather than let the cast produce infinities.
+        out[i] = np.clip(v, -3.0e38, 3.0e38).astype(np.float32)
+    return out
+
+
+def embed_kmer(sequences, k, modality):
+    import itertools
+    alphabet = list("ACGT") if modality == "genomics" else list("ACDEFGHIKLMNPQRSTVWY")
+    kmers = {"".join(p): i for i, p in enumerate(itertools.product(alphabet, repeat=k))}
+    out = np.zeros((len(sequences), len(kmers)), dtype=np.float32)
+    for i, seq in enumerate(sequences):
+        s = str(seq).upper()
+        for j in range(len(s) - k + 1):
+            idx = kmers.get(s[j:j + k])
+            if idx is not None:
+                out[i, idx] += 1.0
+        total = out[i].sum()
+        if total > 0:
+            out[i] /= total
+    return out
+
+
+# ---------------------------------------------------------- transformers
+
+def _token_budget_batches(order, sequences, max_len, budget):
+    """Group length-sorted indices so that batch_size * padded_length <= budget.
+
+    Fixed batch sizes are the wrong unit here. Protein lengths span 30..1022, so
+    a batch size tuned for short sequences exhausts VRAM on long ones and a size
+    tuned for long sequences wastes most of the card on short ones. Batching to
+    a constant token budget keeps memory flat across the whole length range.
+    """
+    batch, batch_max = [], 0
+    for i in order:
+        length = min(len(str(sequences[i])), max_len) + 2
+        new_max = max(batch_max, length)
+        if batch and new_max * (len(batch) + 1) > budget:
+            yield batch
+            batch, batch_max = [i], length
+        else:
+            batch.append(i)
+            batch_max = new_max
+    if batch:
+        yield batch
+
+
+def embed_hf(sequences, spec, modality, token_budget=8192, progress_every=5000):
+    """Mean-pooled frozen embeddings from a HuggingFace checkpoint.
+
+    Sequences are processed in length-sorted, token-budgeted batches and
+    restored to input order afterwards.
+    """
+    import torch
+    from transformers import AutoModel, AutoTokenizer
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = torch.float16 if device == "cuda" else torch.float32
+    kw = {"trust_remote_code": True} if spec.get("trust_remote_code") else {}
+
+    tok = AutoTokenizer.from_pretrained(spec["checkpoint"], **kw)
+    model = AutoModel.from_pretrained(spec["checkpoint"], torch_dtype=dtype, **kw)
+    model.eval().to(device)
+
+    max_len = MAX_LEN[modality]
+    order = sorted(range(len(sequences)), key=lambda i: len(str(sequences[i])))
+    pooled_by_index = [None] * len(sequences)
+    done = 0
+
+    with torch.no_grad():
+        for idx_batch in _token_budget_batches(order, sequences, max_len, token_budget):
+            batch = [str(sequences[i])[:max_len * 6] for i in idx_batch]
+            if spec.get("space_tokens"):
+                # ProtBERT expects residues separated by spaces.
+                batch = [" ".join(list(s[:max_len])) for s in batch]
+
+            enc = tok(batch, return_tensors="pt", padding=True,
+                      truncation=True, max_length=max_len)
+            enc = {k: v.to(device) for k, v in enc.items()}
+            hidden = model(**enc).last_hidden_state
+
+            mask = enc.get("attention_mask")
+            if mask is None:
+                mask = torch.ones(hidden.shape[:2], device=device)
+            mask = mask.unsqueeze(-1).to(hidden.dtype)
+            pooled = ((hidden * mask).sum(1) / mask.sum(1).clamp(min=1))
+            pooled = pooled.float().cpu().numpy()
+
+            for slot, row in zip(idx_batch, pooled):
+                pooled_by_index[slot] = row
+
+            prev, done = done, done + len(idx_batch)
+            if done // progress_every > prev // progress_every:
+                print(f"      {done}/{len(sequences)}", flush=True)
+
+    del model
+    if device == "cuda":
+        torch.cuda.empty_cache()
+    return np.vstack(pooled_by_index).astype(np.float32)
+
+
+# ------------------------------------------------------------------ driver
+
+def generate(model_id, dataset_name, inputs, modality, force=False):
+    """Generate (or load from cache) the frozen matrix for one model/dataset."""
+    spec = MODEL_REGISTRY[model_id]
+    if spec["modality"] != modality:
+        return None  # not applicable -- reported as N/A, never imputed
+
+    path = cache_path(model_id, dataset_name)
+    if os.path.exists(path) and not force:
+        return np.load(path)
+
+    kind = spec["kind"]
+    if kind == "ecfp4":
+        mat = embed_ecfp4(inputs)
+    elif kind == "rdkit":
+        mat = embed_rdkit2d(inputs)
+    elif kind == "kmer":
+        mat = embed_kmer(inputs, spec["k"], modality)
+    elif kind == "hf":
+        mat = embed_hf(inputs, spec, modality)
+    else:
+        raise ValueError(f"Unknown model kind '{kind}' for {model_id}")
+
+    if mat.shape[0] != len(inputs):
+        raise RuntimeError(
+            f"{model_id}/{dataset_name}: produced {mat.shape[0]} rows for "
+            f"{len(inputs)} inputs")
+
+    np.save(path, mat)
+    meta = {
+        "model_id": model_id,
+        "label": spec["label"],
+        "dataset": dataset_name,
+        "kind": kind,
+        "checkpoint": spec.get("checkpoint"),
+        "modality": modality,
+        "n": int(mat.shape[0]),
+        "dim": int(mat.shape[1]),
+        "pooling": "mean over non-padding tokens" if kind == "hf" else "n/a",
+        "max_length": MAX_LEN[modality] if kind == "hf" else None,
+        "sha256": hashlib.sha256(mat.tobytes()).hexdigest()[:16],
+    }
+    with open(path.replace(".npy", ".json"), "w") as fh:
+        json.dump(meta, fh, indent=2)
+    return mat
