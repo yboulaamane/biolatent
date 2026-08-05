@@ -243,47 +243,74 @@ single-tenant runs.
 
 ## 5. Results — leakage audit
 
-Fraction of each **test split** with a Murcko-scaffold match or ECFP4 Tanimoto
-≥ 0.9 against a random 150,000-molecule sample of ZINC.
+Fraction of each **test split** found in a pretraining corpus. Molecules: Murcko
+scaffold identity or ECFP4 Tanimoto ≥ 0.9 against a random 150,000-molecule
+sample. Proteins: MMseqs2 alignment at ≥50% identity and ≥50% coverage against
+**all** of Swiss-Prot (575,503 sequences).
 
-| Task | Test items flagged | Fraction |
-| :--- | :--- | :--- |
-| ESOL | 53 / 114 | **46.5%** |
-| BBBP | 61 / 205 | 29.8% |
-| ClinTox | 44 / 148 | 29.7% |
-| Lipophilicity | 95 / 420 | 22.6% |
-| CYP3A4 | 249 / 1234 | 20.2% |
-| BACE | 2 / 152 | **1.3%** |
+| Task | ZINC | PubChem | Swiss-Prot |
+| :--- | ---: | ---: | ---: |
+| ESOL | 46.5% | **82.5%** | — |
+| BBBP | 29.8% | 46.3% | — |
+| Lipophilicity | 22.6% | 42.4% | — |
+| ClinTox | 29.7% | 38.5% | — |
+| CYP3A4 | 20.2% | 30.1% | — |
+| BACE | 1.3% | **0.7%** | — |
+| DeepLoc | — | — | **99.5%** |
+| Fluorescence | — | — | **100.0%** |
 
-These are **lower bounds**: sampling 150k of ZINC can only miss overlap, never
-invent it, and only one corpus was audited empirically.
+Every molecular figure is a **lower bound**: the PubChem sample is 150,000 of
+124,466,629 rows, roughly one molecule in 830. Sampling can only miss overlap,
+never invent it.
 
-Two things follow. First, between a fifth and nearly a half of the test items on
-five of six molecular benchmarks are chemically present in a corpus that
-molecular language models routinely pretrain on — so a frozen-embedding score on
-those tasks is partly a memorisation readout. Second, **BACE is the exception at
-1.3%**, which makes it the most trustworthy molecular task in the suite: it is a
-focused inhibitor series that sits outside generic drug-like chemical space. It
-is also, notably, the one task where the ranking is tightest (ECFP4 0.8601 versus
-ChemBERTa-ZINC 0.8571).
+**The molecular picture.** PubChem overlap exceeds ZINC overlap on five of six
+tasks, which is what one would expect given that PubChem is the union source for
+public medicinal chemistry and the declared corpus behind ChemBERTa and one of
+MoLFormer-XL's two sources. ESOL is the extreme: **82.5% of its test molecules
+have a near-duplicate or shared scaffold in one-tenth of one percent of
+PubChem.** ESOL is also where RDKit2D posts its highest score in the suite
+(ρ = 0.919). A solubility benchmark of 114 small, common molecules is close to a
+lookup task.
 
-### Structural contamination
+**BACE is the exception, and it is the informative one.** At 1.3% and 0.7% it is
+effectively uncontaminated — a focused inhibitor series outside generic drug-like
+space. It is also the task with the tightest spread between representations
+(MoLFormer-XL 0.8635, ECFP4 0.8601, ChemBERTa-ZINC 0.8571). The suite's cleanest
+task is the one where the models are hardest to tell apart, which is the
+relationship one would predict if part of the separation seen elsewhere is
+memorisation rather than representation quality.
 
-For the protein and genomic tasks the overlap is not a sampling question:
+**The protein figures replace an argument with a measurement.** An earlier
+version of this document asserted that DeepLoc and Fluorescence were contaminated
+"by construction" because UniRef50 clusters essentially all of UniProt. That
+claim is now measured: **99.5% of DeepLoc test proteins and 100.0% of
+Fluorescence test proteins** align at ≥50% identity to a Swiss-Prot entry. Since
+Swiss-Prot is the reviewed subset of the UniProt that UniRef50 clusters — and
+every ESM-2 variant and ProtBERT declares UniRef50 — these are themselves lower
+bounds on pretraining coverage.
 
-- **DeepLoc and Fluorescence** entries are UniProt proteins; UniRef50 clusters
-  essentially all of UniProt at 50% identity. Every ESM-2 variant and ProtBERT
-  declares UniRef50 as its pretraining corpus, so test proteins are represented
-  in pretraining **by construction**.
-- **Promoters** sequences are excerpts of the same human reference assembly the
-  Nucleotide Transformer and HyenaDNA were pretrained on — again contained **by
-  construction**.
+Swiss-Prot was chosen over a random UniRef50 sample deliberately. Sampling
+UniRef50 would report a near-zero hit rate against a few thousand test proteins
+while true coverage is near-total: technically correct, and completely
+misleading. Swiss-Prot is the corpus DeepLoc is actually built from, so the
+overlap is real and tight.
 
-Reporting a sampled percentage here would understate a near-total contamination,
-so the audit records the structural claim instead. The practical consequence is
-that frozen-embedding leaderboards for protein and genomic language models
-cannot be interpreted as measuring generalisation to unseen sequences, and
-should not be presented as if they were.
+**Promoters** remains a structural claim rather than a measurement: the sequences
+are excerpts of the same human reference assembly the Nucleotide Transformer and
+HyenaDNA were pretrained on, so coverage is total by definition and there is no
+independent corpus to search against.
+
+### What this means for the leaderboard
+
+The protein and genomic tasks cannot be read as measuring generalisation to
+unseen sequences — at 99.5% and 100% coverage, they measure how much of a
+memorised corpus a model retains and how linearly that content is exposed. The
+ESM-2 scale ladder in §4b is best read that way: a larger model recovering more
+of what it has already seen.
+
+That is not a reason to discard the tasks, but it is a reason to stop presenting
+a single number per model as evidence of generalisation. The suite reports the
+leakage fraction beside every score for exactly this reason.
 
 ---
 
@@ -315,8 +342,10 @@ registry.
 
 ## 7. Limitations
 
-1. **One corpus was audited empirically.** ZINC was sampled; PubChem was not.
-   Reported molecular leakage is a lower bound.
+1. **Molecular leakage is sampled, not exhaustive.** ZINC and PubChem were each
+   sampled at 150,000 molecules — for PubChem that is one row in 830 — so every
+   molecular figure is a lower bound. Swiss-Prot was searched in full.
+   Promoters has no independent corpus to search and remains a structural claim.
 2. **Balanced scaffold splits are easier** than DeepChem's deterministic
    splitter, so absolute values here sit above commonly cited figures for the
    same task names. Values are internally comparable, not externally.
