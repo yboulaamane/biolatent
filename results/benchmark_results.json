@@ -16,6 +16,10 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.828,
+          "ci_high": 0.9302,
+          "ci_width": 0.1023,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 1631,
@@ -40,6 +44,10 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.8758,
+          "ci_high": 0.952,
+          "ci_width": 0.0763,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 1631,
@@ -64,6 +72,10 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.8434,
+          "ci_high": 0.9342,
+          "ci_width": 0.0908,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 1631,
@@ -88,6 +100,10 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.8615,
+          "ci_high": 0.9441,
+          "ci_width": 0.0826,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1631,
@@ -112,6 +128,10 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.8585,
+          "ci_high": 0.9411,
+          "ci_width": 0.0826,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1631,
@@ -146,12 +166,16 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.6461,
+          "ci_high": 0.9529,
+          "ci_width": 0.3067,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 1184,
           "n_test": 148
         },
-        "embed_seconds": 0.3,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.7591,
@@ -170,12 +194,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.6218,
+          "ci_high": 0.953,
+          "ci_width": 0.3312,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 1184,
           "n_test": 148
         },
-        "embed_seconds": 15.1,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8407,
@@ -194,12 +222,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.6025,
+          "ci_high": 0.9413,
+          "ci_width": 0.3389,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 1184,
           "n_test": 148
         },
-        "embed_seconds": 4.0,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.7173,
@@ -218,12 +250,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.7398,
+          "ci_high": 0.9526,
+          "ci_width": 0.2128,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1184,
           "n_test": 148
         },
-        "embed_seconds": 1.5,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.856,
@@ -242,6 +278,10 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.791,
+          "ci_high": 0.9819,
+          "ci_width": 0.1909,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1184,
@@ -276,12 +316,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.7936,
+          "ci_high": 0.9149,
+          "ci_width": 0.1214,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 1210,
           "n_test": 152
         },
-        "embed_seconds": 0.3,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8829,
@@ -300,12 +344,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.7444,
+          "ci_high": 0.8839,
+          "ci_width": 0.1395,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 1210,
           "n_test": 152
         },
-        "embed_seconds": 14.1,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8265,
@@ -324,12 +372,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.7669,
+          "ci_high": 0.9011,
+          "ci_width": 0.1341,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 1210,
           "n_test": 152
         },
-        "embed_seconds": 1.2,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8104,
@@ -348,12 +400,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.7877,
+          "ci_high": 0.9178,
+          "ci_width": 0.1301,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1210,
           "n_test": 152
         },
-        "embed_seconds": 1.8,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8421,
@@ -372,6 +428,10 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.8007,
+          "ci_high": 0.9183,
+          "ci_width": 0.1176,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 1210,
@@ -407,12 +467,16 @@
           "hyperparameter": {
             "alpha": 1000.0
           },
+          "ci_low": 0.4667,
+          "ci_high": 0.7037,
+          "ci_width": 0.237,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 902,
           "n_test": 114
         },
-        "embed_seconds": 0.2,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.4352,
@@ -433,12 +497,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.8618,
+          "ci_high": 0.949,
+          "ci_width": 0.0873,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 902,
           "n_test": 114
         },
-        "embed_seconds": 6.0,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.8917,
@@ -459,12 +527,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.7551,
+          "ci_high": 0.901,
+          "ci_width": 0.1459,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 902,
           "n_test": 114
         },
-        "embed_seconds": 0.6,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.8508,
@@ -485,12 +557,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.7039,
+          "ci_high": 0.857,
+          "ci_width": 0.1531,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 902,
           "n_test": 114
         },
-        "embed_seconds": 1.2,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.8061,
@@ -511,6 +587,10 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.8621,
+          "ci_high": 0.9361,
+          "ci_width": 0.074,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 902,
@@ -547,12 +627,16 @@
           "hyperparameter": {
             "alpha": 1000.0
           },
+          "ci_low": 0.5117,
+          "ci_high": 0.6535,
+          "ci_width": 0.1417,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 3360,
           "n_test": 420
         },
-        "embed_seconds": 0.8,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5309,
@@ -573,12 +657,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.5732,
+          "ci_high": 0.6978,
+          "ci_width": 0.1245,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 3360,
           "n_test": 420
         },
-        "embed_seconds": 35.2,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.63,
@@ -599,12 +687,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.5723,
+          "ci_high": 0.6952,
+          "ci_width": 0.1229,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 3360,
           "n_test": 420
         },
-        "embed_seconds": 1.3,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.6698,
@@ -625,12 +717,16 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.4329,
+          "ci_high": 0.5798,
+          "ci_width": 0.1469,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 3360,
           "n_test": 420
         },
-        "embed_seconds": 3.4,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.4756,
@@ -651,6 +747,10 @@
           "hyperparameter": {
             "alpha": 100.0
           },
+          "ci_low": 0.5746,
+          "ci_high": 0.7018,
+          "ci_width": 0.1272,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 3360,
@@ -686,12 +786,16 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.8241,
+          "ci_high": 0.8674,
+          "ci_width": 0.0433,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 9862,
           "n_test": 1234
         },
-        "embed_seconds": 2.1,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8528,
@@ -705,17 +809,21 @@
         "label": "RDKit 2D descriptors",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8333,
-          "accuracy": 0.7569,
+          "score": 0.8335,
+          "accuracy": 0.752,
           "hyperparameter": {
-            "C": 1.0
+            "C": 10.0
           },
+          "ci_low": 0.8116,
+          "ci_high": 0.8557,
+          "ci_width": 0.0441,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 210,
           "n_train": 9862,
           "n_test": 1234
         },
-        "embed_seconds": 99.3,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8663,
@@ -723,7 +831,7 @@
           "probe": "mlp",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": 0.033
+        "linear_mlp_gap": 0.0328
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
@@ -734,12 +842,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.7994,
+          "ci_high": 0.8399,
+          "ci_width": 0.0406,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 384,
           "n_train": 9862,
           "n_test": 1234
         },
-        "embed_seconds": 2.7,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8495,
@@ -758,12 +870,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.794,
+          "ci_high": 0.8387,
+          "ci_width": 0.0447,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 9862,
           "n_test": 1234
         },
-        "embed_seconds": 8.7,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.8242,
@@ -782,12 +898,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.8242,
+          "ci_high": 0.8646,
+          "ci_width": 0.0405,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 768,
           "n_train": 9862,
           "n_test": 1234
         },
-        "embed_seconds": 0.0,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.862,
@@ -816,6 +936,10 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.5104,
+          "ci_high": 0.5471,
+          "ci_width": 0.0367,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 8000,
           "n_train": 22233,
@@ -840,12 +964,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.6459,
+          "ci_high": 0.6819,
+          "ci_width": 0.036,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 320,
           "n_train": 22233,
           "n_test": 2782
         },
-        "embed_seconds": 196.9,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Accuracy",
           "score": 0.683,
@@ -854,6 +982,34 @@
           "embedding_dim": 320
         },
         "linear_mlp_gap": 0.0191
+      },
+      "esm2_35m": {
+        "label": "ESM-2 35M",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.7045,
+          "macro_f1": 0.6176,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "ci_low": 0.6873,
+          "ci_high": 0.7214,
+          "ci_width": 0.0341,
+          "n_boot": 1000,
+          "probe": "linear",
+          "embedding_dim": 480,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 0.1,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.7017,
+          "macro_f1": 0.643,
+          "probe": "mlp",
+          "embedding_dim": 480
+        },
+        "linear_mlp_gap": -0.0028
       },
       "esm2_150m": {
         "label": "ESM-2 150M",
@@ -864,12 +1020,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.7157,
+          "ci_high": 0.7473,
+          "ci_width": 0.0316,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 640,
           "n_train": 22233,
           "n_test": 2782
         },
-        "embed_seconds": 1164.6,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Accuracy",
           "score": 0.7135,
@@ -888,12 +1048,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.7308,
+          "ci_high": 0.7635,
+          "ci_width": 0.0327,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1280,
           "n_train": 22233,
           "n_test": 2782
         },
-        "embed_seconds": 2538.3,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Accuracy",
           "score": 0.739,
@@ -912,12 +1076,16 @@
           "hyperparameter": {
             "C": 0.01
           },
+          "ci_low": 0.6894,
+          "ci_high": 0.7218,
+          "ci_width": 0.0324,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 22233,
           "n_test": 2782
         },
-        "embed_seconds": 900.0,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Accuracy",
           "score": 0.711,
@@ -926,30 +1094,6 @@
           "embedding_dim": 1024
         },
         "linear_mlp_gap": 0.0058
-      },
-      "esm2_35m": {
-        "label": "ESM-2 35M",
-        "linear": {
-          "metric": "Accuracy",
-          "score": 0.7045,
-          "macro_f1": 0.6176,
-          "hyperparameter": {
-            "C": 0.1
-          },
-          "probe": "linear",
-          "embedding_dim": 480,
-          "n_train": 22233,
-          "n_test": 2782
-        },
-        "embed_seconds": 395.1,
-        "mlp": {
-          "metric": "Accuracy",
-          "score": 0.7017,
-          "macro_f1": 0.643,
-          "probe": "mlp",
-          "embedding_dim": 480
-        },
-        "linear_mlp_gap": -0.0028
       }
     }
   },
@@ -971,12 +1115,16 @@
           "hyperparameter": {
             "alpha": 1000.0
           },
+          "ci_low": 0.6676,
+          "ci_high": 0.6842,
+          "ci_width": 0.0167,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 8000,
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 1.7,
+        "embed_seconds": 1.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.3572,
@@ -997,12 +1145,16 @@
           "hyperparameter": {
             "alpha": 10.0
           },
+          "ci_low": 0.5635,
+          "ci_high": 0.5813,
+          "ci_width": 0.0178,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 320,
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 261.9,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5847,
@@ -1012,6 +1164,36 @@
           "embedding_dim": 320
         },
         "linear_mlp_gap": 0.0123
+      },
+      "esm2_35m": {
+        "label": "ESM-2 35M",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5924,
+          "rmse": 0.9885,
+          "r2": -0.0297,
+          "hyperparameter": {
+            "alpha": 1.0
+          },
+          "ci_low": 0.5841,
+          "ci_high": 0.6014,
+          "ci_width": 0.0173,
+          "n_boot": 1000,
+          "probe": "linear",
+          "embedding_dim": 480,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 0.1,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5985,
+          "rmse": 0.9017,
+          "r2": 0.1433,
+          "probe": "mlp",
+          "embedding_dim": 480
+        },
+        "linear_mlp_gap": 0.0061
       },
       "esm2_150m": {
         "label": "ESM-2 150M",
@@ -1023,12 +1205,16 @@
           "hyperparameter": {
             "alpha": 10.0
           },
+          "ci_low": 0.5747,
+          "ci_high": 0.5926,
+          "ci_width": 0.0179,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 640,
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 1305.8,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.584,
@@ -1049,12 +1235,16 @@
           "hyperparameter": {
             "alpha": 10.0
           },
+          "ci_low": 0.6047,
+          "ci_high": 0.6219,
+          "ci_width": 0.0172,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1280,
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 2528.9,
+        "embed_seconds": 0.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5854,
@@ -1075,12 +1265,16 @@
           "hyperparameter": {
             "alpha": 10.0
           },
+          "ci_low": 0.6536,
+          "ci_high": 0.67,
+          "ci_width": 0.0164,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 724.4,
+        "embed_seconds": 0.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.641,
@@ -1090,32 +1284,6 @@
           "embedding_dim": 1024
         },
         "linear_mlp_gap": -0.0205
-      },
-      "esm2_35m": {
-        "label": "ESM-2 35M",
-        "linear": {
-          "metric": "Spearman rho",
-          "score": 0.5924,
-          "rmse": 0.9885,
-          "r2": -0.0297,
-          "hyperparameter": {
-            "alpha": 1.0
-          },
-          "probe": "linear",
-          "embedding_dim": 480,
-          "n_train": 21446,
-          "n_test": 27217
-        },
-        "embed_seconds": 363.2,
-        "mlp": {
-          "metric": "Spearman rho",
-          "score": 0.5985,
-          "rmse": 0.9017,
-          "r2": 0.1433,
-          "probe": "mlp",
-          "embedding_dim": 480
-        },
-        "linear_mlp_gap": 0.0061
       }
     }
   },
@@ -1136,12 +1304,16 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.9178,
+          "ci_high": 0.9419,
+          "ci_width": 0.0241,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1024,
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 13.2,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9283,
@@ -1160,12 +1332,16 @@
           "hyperparameter": {
             "C": 0.001
           },
+          "ci_low": 0.925,
+          "ci_high": 0.947,
+          "ci_width": 0.0219,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 1280,
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 195.8,
+        "embed_seconds": 0.1,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9297,
@@ -1184,12 +1360,16 @@
           "hyperparameter": {
             "C": 0.1
           },
+          "ci_low": 0.9264,
+          "ci_high": 0.9488,
+          "ci_width": 0.0224,
+          "n_boot": 1000,
           "probe": "linear",
           "embedding_dim": 128,
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 36.7,
+        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9403,
