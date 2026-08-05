@@ -63,3 +63,6 @@ data/
 test.csv
 BioLatent.docx
 BioLatent Model Input-*.png
+
+# run logs
+run_*.log

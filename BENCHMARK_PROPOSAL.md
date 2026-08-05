@@ -65,9 +65,12 @@ Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset
 
 ## 4. Key Metric Innovations
 
-1. **Pure Representation Score**: ROC-AUC / RMSE evaluated strictly via frozen linear probes.
-2. **Dimensional Efficiency (AUC/dim or RMSE/dim)**: Evaluates performance per embedding dimension to inform high-throughput virtual screening (billion-scale compound libraries).
-3. **Latency / Inference Time**: Time required to generate 1,000 embeddings.
+1. **Linear Probe Score** (ranked): ROC-AUC (binary), accuracy and macro-F1 (multi-class), or Spearman ρ (regression), from a frozen L2-regularised linear probe. Named for what it measures — linear decodability under this probe — rather than "pure representation quality", which would overclaim.
+2. **Linear-to-MLP gap** (diagnostic): the difference between a fixed 2-layer MLP and the linear probe, separating representations whose information is linearly accessible from those needing a non-linear head.
+3. **Leakage-risk flag**: fraction of the test split recoverable from a model's declared pretraining corpora (§7 of `STUDY.md`).
+4. **Embedding dimension and inference time**, recorded per model.
+
+> *Dropped:* "RMSE per embedding dimension". RMSE is not comparable across tasks with different target scales, so dividing it by a dimension count produces a quantity with no meaning. Dimension is reported alongside the score instead.
 
 ---
 
@@ -113,7 +116,9 @@ The three open questions below have been resolved. Each records the decision, th
 ## 6. Build Items Carrying Real Cost
 
 1. **CB513 replacement (D2).** ✅ **Done** — replaced with the whole-protein **Fluorescence** regression task (TAPE GFP landscape). Uses the same per-object probing harness as every other task; no separate per-residue code path.
-2. **Leakage-audit pipeline (D3).** ⬜ **Not started** — obtaining public pretraining corpora and building the scaffold/sequence-identity overlap computation. The highest-effort, highest-value item remaining in the proposal.
+2. **Leakage-audit pipeline (D3).** ✅ **Built and run** — `benchmark/leakage.py` and `benchmark/run_leakage.py`. Molecular overlap is measured empirically against a ZINC sample (Murcko scaffold identity plus ECFP4 Tanimoto ≥ 0.9); protein and genomic contamination is recorded as a structural claim because it is near-total by construction. Results in `STUDY.md` §5. Remaining extension: sampling PubChem so the molecular bound tightens, and MMseqs2 identity search against a UniRef50 sample.
+
+> **The study itself is now built and partly run.** `STUDY.md` records the protocol, the split decisions, the molecular results and the leakage audit. The fabricated runner that produced the previous `benchmark_results.json` — random Gaussian projections of a single baseline, standing in for 38 models — has been deleted.
 
 ---
 

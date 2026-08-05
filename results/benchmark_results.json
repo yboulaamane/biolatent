@@ -1,0 +1,688 @@
+{
+  "BBBP": {
+    "modality": "molecule",
+    "task_type": "classification",
+    "split_source": "scaffold",
+    "n_total": 2039,
+    "n_train": 1631,
+    "n_test": 205,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8826,
+          "accuracy": 0.8098,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 1631,
+          "n_test": 205
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8656,
+          "accuracy": 0.8341,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.017
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9176,
+          "accuracy": 0.8488,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 1631,
+          "n_test": 205
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9168,
+          "accuracy": 0.8634,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": -0.0008
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8927,
+          "accuracy": 0.8049,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 1631,
+          "n_test": 205
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9193,
+          "accuracy": 0.8195,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": 0.0266
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9048,
+          "accuracy": 0.8244,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1631,
+          "n_test": 205
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8575,
+          "accuracy": 0.7756,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0473
+      }
+    }
+  },
+  "ClinTox": {
+    "modality": "molecule",
+    "task_type": "classification",
+    "split_source": "scaffold",
+    "n_total": 1480,
+    "n_train": 1184,
+    "n_test": 148,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8109,
+          "accuracy": 0.9257,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 1184,
+          "n_test": 148
+        },
+        "embed_seconds": 0.3,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.7591,
+          "accuracy": 0.9257,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.0518
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8003,
+          "accuracy": 0.9257,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 1184,
+          "n_test": 148
+        },
+        "embed_seconds": 15.1,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8407,
+          "accuracy": 0.9257,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": 0.0404
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.7837,
+          "accuracy": 0.9189,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 1184,
+          "n_test": 148
+        },
+        "embed_seconds": 4.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.7173,
+          "accuracy": 0.9189,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": -0.0664
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8597,
+          "accuracy": 0.9324,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1184,
+          "n_test": 148
+        },
+        "embed_seconds": 1.5,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.856,
+          "accuracy": 0.9392,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0037
+      }
+    }
+  },
+  "BACE": {
+    "modality": "molecule",
+    "task_type": "classification",
+    "split_source": "scaffold",
+    "n_total": 1513,
+    "n_train": 1210,
+    "n_test": 152,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8601,
+          "accuracy": 0.7829,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 1210,
+          "n_test": 152
+        },
+        "embed_seconds": 0.3,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8829,
+          "accuracy": 0.8158,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": 0.0228
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.817,
+          "accuracy": 0.7566,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 1210,
+          "n_test": 152
+        },
+        "embed_seconds": 14.1,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8265,
+          "accuracy": 0.7303,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": 0.0095
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8402,
+          "accuracy": 0.8092,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 1210,
+          "n_test": 152
+        },
+        "embed_seconds": 1.2,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8104,
+          "accuracy": 0.7763,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": -0.0298
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8571,
+          "accuracy": 0.7895,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1210,
+          "n_test": 152
+        },
+        "embed_seconds": 1.8,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8421,
+          "accuracy": 0.7171,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.015
+      }
+    }
+  },
+  "ESOL": {
+    "modality": "molecule",
+    "task_type": "regression",
+    "split_source": "scaffold",
+    "n_total": 1128,
+    "n_train": 902,
+    "n_test": 114,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5924,
+          "rmse": 1.9209,
+          "r2": 0.2297,
+          "hyperparameter": {
+            "alpha": 1000.0
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 902,
+          "n_test": 114
+        },
+        "embed_seconds": 0.2,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.4352,
+          "rmse": 3.3024,
+          "r2": -1.2765,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.1572
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.9185,
+          "rmse": 0.8299,
+          "r2": 0.8562,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 902,
+          "n_test": 114
+        },
+        "embed_seconds": 6.0,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8917,
+          "rmse": 0.9028,
+          "r2": 0.8299,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": -0.0268
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.8398,
+          "rmse": 1.1641,
+          "r2": 0.7171,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 902,
+          "n_test": 114
+        },
+        "embed_seconds": 0.6,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8508,
+          "rmse": 1.0965,
+          "r2": 0.749,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": 0.011
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.793,
+          "rmse": 1.3158,
+          "r2": 0.6386,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 902,
+          "n_test": 114
+        },
+        "embed_seconds": 1.2,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8061,
+          "rmse": 1.2848,
+          "r2": 0.6554,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": 0.0131
+      }
+    }
+  },
+  "Lipophilicity": {
+    "modality": "molecule",
+    "task_type": "regression",
+    "split_source": "scaffold",
+    "n_total": 4200,
+    "n_train": 3360,
+    "n_test": 420,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5883,
+          "rmse": 0.988,
+          "r2": 0.3186,
+          "hyperparameter": {
+            "alpha": 1000.0
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 3360,
+          "n_test": 420
+        },
+        "embed_seconds": 0.8,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5309,
+          "rmse": 1.1514,
+          "r2": 0.0745,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.0574
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6409,
+          "rmse": 0.8697,
+          "r2": 0.472,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 3360,
+          "n_test": 420
+        },
+        "embed_seconds": 35.2,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.63,
+          "rmse": 0.8907,
+          "r2": 0.4462,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": -0.0109
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6376,
+          "rmse": 0.8707,
+          "r2": 0.4708,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 3360,
+          "n_test": 420
+        },
+        "embed_seconds": 1.3,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6698,
+          "rmse": 0.873,
+          "r2": 0.468,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": 0.0322
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.51,
+          "rmse": 0.9702,
+          "r2": 0.343,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 3360,
+          "n_test": 420
+        },
+        "embed_seconds": 3.4,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.4756,
+          "rmse": 1.0674,
+          "r2": 0.2047,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0344
+      }
+    }
+  },
+  "CYP3A4": {
+    "modality": "molecule",
+    "task_type": "classification",
+    "split_source": "official",
+    "n_total": 12328,
+    "n_train": 9862,
+    "n_test": 1234,
+    "models": {
+      "ecfp4": {
+        "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8463,
+          "accuracy": 0.769,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 1024,
+          "n_train": 9862,
+          "n_test": 1234
+        },
+        "embed_seconds": 2.1,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8528,
+          "accuracy": 0.7763,
+          "probe": "mlp",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": 0.0065
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8333,
+          "accuracy": 0.7569,
+          "hyperparameter": {
+            "C": 1.0
+          },
+          "probe": "linear",
+          "embedding_dim": 210,
+          "n_train": 9862,
+          "n_test": 1234
+        },
+        "embed_seconds": 99.3,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8663,
+          "accuracy": 0.7844,
+          "probe": "mlp",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": 0.033
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8194,
+          "accuracy": 0.7464,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "probe": "linear",
+          "embedding_dim": 384,
+          "n_train": 9862,
+          "n_test": 1234
+        },
+        "embed_seconds": 2.7,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8495,
+          "accuracy": 0.769,
+          "probe": "mlp",
+          "embedding_dim": 384
+        },
+        "linear_mlp_gap": 0.0301
+      },
+      "chemberta_zinc": {
+        "label": "ChemBERTa ZINC base",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.816,
+          "accuracy": 0.7334,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 9862,
+          "n_test": 1234
+        },
+        "embed_seconds": 8.7,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8242,
+          "accuracy": 0.7415,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": 0.0082
+      }
+    }
+  },
+  "DeepLoc": {
+    "modality": "protein",
+    "task_type": "classification",
+    "split_source": "official",
+    "n_total": 27783,
+    "n_train": 22233,
+    "n_test": 2782,
+    "models": {
+      "kmer3_protein": {
+        "label": "3-mer frequency",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.5288,
+          "macro_f1": 0.3936,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 8000,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 0.6,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.5467,
+          "macro_f1": 0.4373,
+          "probe": "mlp",
+          "embedding_dim": 8000
+        },
+        "linear_mlp_gap": 0.0179
+      }
+    }
+  }
+}

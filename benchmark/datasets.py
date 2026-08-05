@@ -1,207 +1,182 @@
 """
-BioLatent Multi-Modal Dataset Manager (9 Tasks)
-================================================
+BioLatent Benchmark Dataset Loader (9 tasks, 3 modalities)
+==========================================================
 
-Provides standardized datasets across 3 biological modalities:
-1. Molecules: BBBP, ClinTox, BACE, ESOL, Lipophilicity, CYP3A4
-2. Proteins: DeepLoc (subcellular localization), Fluorescence (GFP fitness regression)
-3. Genomics: Promoters (regulatory sequence detection)
+Loads the nine benchmark tasks into a single standardised shape so that one
+probing harness covers every task:
+
+    molecules  BBBP, ClinTox, BACE, ESOL, Lipophilicity, CYP3A4
+    proteins   DeepLoc, Fluorescence
+    genomics   Promoters
+
+Splitting policy
+----------------
+If the source CSV carries a ``split`` column, that split is used verbatim. This
+matters: several of these datasets define their split as part of the task. The
+TAPE Fluorescence partition trains on variants near wild-type and tests on
+distant ones, so re-splitting it randomly measures interpolation instead of
+extrapolation and inflates every score.
+
+Datasets without a published split (the five MoleculeNet tasks) get a
+Bemis-Murcko scaffold split, the DeepChem convention for those benchmarks.
+
+Every input file must exist. Nothing is generated.
 """
 
 import os
-import pandas as pd
-import numpy as np
-from rdkit import Chem
-from rdkit.Chem.Scaffolds import MurckoScaffold
 from collections import defaultdict
+
+import numpy as np
+import pandas as pd
+from rdkit import Chem, RDLogger
+from rdkit.Chem.Scaffolds import MurckoScaffold
+
+RDLogger.DisableLog("rdApp.*")
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "benchmark_datasets")
 
-ALL_DATASETS = [
-    "BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
-    "DeepLoc", "Fluorescence", "Promoters"
-]
+MOLECULE_TASKS = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4"]
+PROTEIN_TASKS = ["DeepLoc", "Fluorescence"]
+GENOMIC_TASKS = ["Promoters"]
+ALL_DATASETS = MOLECULE_TASKS + PROTEIN_TASKS + GENOMIC_TASKS
 
-def get_bemis_murcko_scaffold(smiles, include_chirality=False):
-    """Computes Murcko Scaffold for a SMILES string."""
+TASK_TYPE = {
+    "BBBP": "classification", "ClinTox": "classification", "BACE": "classification",
+    "ESOL": "regression", "Lipophilicity": "regression", "CYP3A4": "classification",
+    "DeepLoc": "classification", "Fluorescence": "regression",
+    "Promoters": "classification",
+}
+
+MODALITY = ({t: "molecule" for t in MOLECULE_TASKS}
+            | {t: "protein" for t in PROTEIN_TASKS}
+            | {t: "genomics" for t in GENOMIC_TASKS})
+
+
+def get_scaffold(smiles):
+    """Bemis-Murcko scaffold of a SMILES string, '' if unparseable."""
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
             return ""
-        return MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=include_chirality)
+        return MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False)
     except Exception:
         return ""
 
-def generate_scaffold_split(smiles_list, frac_train=0.8, frac_val=0.1, frac_test=0.1, seed=42):
-    """Generates Bemis-Murcko scaffold split indices matching DeepChem / MoleculeNet protocol."""
-    np.random.seed(seed)
+
+def scaffold_split(smiles_list, frac_train=0.8, frac_val=0.1, seed=42):
+    """Balanced Bemis-Murcko scaffold split (Chemprop / MoleculeNet convention).
+
+    Scaffold groups larger than half a split are placed in train first so that
+    common chemotypes are learned rather than tested on; the remaining groups
+    are shuffled under a fixed seed before greedy assignment.
+
+    The shuffle is what makes the split usable. Assigning the remaining groups
+    in dataset order instead lets the file's own ordering leak into the split:
+    on BBBP, roughly three quarters of scaffolds are singletons, and taking
+    them in file order yields validation and test sets containing a single
+    class, for which ROC-AUC is undefined.
+    """
     scaffolds = defaultdict(list)
-    for idx, sm in enumerate(smiles_list):
-        scaffold = get_bemis_murcko_scaffold(sm)
-        scaffolds[scaffold].append(idx)
+    for idx, smi in enumerate(smiles_list):
+        scaffolds[get_scaffold(smi)].append(idx)
+
+    n = len(smiles_list)
+    n_train, n_val = frac_train * n, frac_val * n
+
+    big, small = [], []
+    for group in scaffolds.values():
+        if len(group) > n_val / 2:
+            big.append(group)
+        else:
+            small.append(group)
 
     rng = np.random.RandomState(seed)
-    scaffold_sets = list(scaffolds.values())
-    rng.shuffle(scaffold_sets)
+    rng.shuffle(small)
+    groups = big + small
 
-    total = len(smiles_list)
-    train_cutoff = frac_train * total
-    val_cutoff = (frac_train + frac_val) * total
-
-    train_idx, val_idx, test_idx = [], [], []
-    current_count = 0
-
-    for scaf_set in scaffold_sets:
-        if (current_count + len(scaf_set) <= train_cutoff) or len(train_idx) == 0:
-            train_idx.extend(scaf_set)
-        elif (current_count + len(scaf_set) <= val_cutoff) or len(val_idx) == 0:
-            val_idx.extend(scaf_set)
+    train, val, test = [], [], []
+    for group in groups:
+        if len(train) + len(group) <= n_train:
+            train += group
+        elif len(val) + len(group) <= n_val:
+            val += group
         else:
-            test_idx.extend(scaf_set)
-        current_count += len(scaf_set)
+            test += group
 
-    if len(test_idx) == 0 and len(val_idx) > 1:
-        split_point = max(1, len(val_idx) // 2)
-        test_idx = val_idx[split_point:]
-        val_idx = val_idx[:split_point]
+    return (np.array(train, dtype=int), np.array(val, dtype=int),
+            np.array(test, dtype=int))
 
-    return np.array(train_idx, dtype=int), np.array(val_idx, dtype=int), np.array(test_idx, dtype=int)
 
-def generate_sequence_split(sequences, frac_train=0.8, frac_val=0.1, frac_test=0.1, seed=42):
-    """Generates stratified/random split indices for protein and DNA sequence datasets."""
-    rng = np.random.RandomState(seed)
-    indices = np.arange(len(sequences))
-    rng.shuffle(indices)
+def load_benchmark_dataset(name):
+    """Load one benchmark task.
 
-    total = len(sequences)
-    n_train = int(frac_train * total)
-    n_val = int(frac_val * total)
-
-    train_idx = indices[:n_train]
-    val_idx = indices[n_train:n_train + n_val]
-    test_idx = indices[n_train + n_val:]
-
-    return train_idx, val_idx, test_idx
-
-def load_benchmark_dataset(dataset_name="BBBP"):
+    Returns a dict with inputs, targets, split indices, modality and task type.
     """
-    Loads and standardizes any of the 9 BioLatent benchmark datasets.
-    
-    Supported datasets:
-    - Molecules: 'BBBP', 'ClinTox', 'BACE', 'ESOL', 'Lipophilicity', 'CYP3A4'
-    - Proteins: 'DeepLoc', 'Fluorescence'
-    - Genomics: 'Promoters'
-    """
-    csv_path = os.path.join(DATA_DIR, f"{dataset_name}.csv")
+    if name not in ALL_DATASETS:
+        raise ValueError(f"Unknown dataset '{name}'. Expected one of {ALL_DATASETS}")
 
-    # If dataset missing, generate standardized dataset representation
-    if not os.path.exists(csv_path):
-        _generate_missing_dataset(dataset_name, csv_path)
+    path = os.path.join(DATA_DIR, f"{name}.csv")
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"\n{'=' * 60}\nMISSING DATASET: {name}\nExpected: {path}\n\n"
+            f"Fetch the real data with:\n"
+            f"  python benchmark/download_real_datasets.py\n{'=' * 60}"
+        )
 
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(path)
+    modality = MODALITY[name]
+    task_type = TASK_TYPE[name]
 
-    # 1. Molecular Datasets
-    if dataset_name in ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4"]:
-        modality = "molecule"
-        
-        # Prioritize exact 'smiles' column first
-        smiles_candidates = [c for c in df.columns if c.lower() == "smiles"]
-        if smiles_candidates:
-            smiles_col = smiles_candidates[0]
-        else:
-            smiles_col = [c for c in df.columns if "smiles" in c.lower() or "mol" in c.lower() or "name" in c.lower()][0]
-        
-        if dataset_name == "BBBP":
-            target_col = [c for c in df.columns if "p_np" in c or "target" in c][0]
-            task_type = "classification"
-        elif dataset_name == "ClinTox":
-            target_col = "FDA_APPROVED"
-            task_type = "classification"
-        elif dataset_name == "BACE":
-            target_col = [c for c in df.columns if "class" in c.lower() or "target" in c.lower()][0]
-            task_type = "classification"
-        elif dataset_name == "ESOL":
-            target_col = [c for c in df.columns if "solubility" in c.lower() or "esol" in c.lower()][0]
-            task_type = "regression"
-        elif dataset_name == "Lipophilicity":
-            target_col = "exp"
-            task_type = "regression"
-        elif dataset_name == "CYP3A4":
-            target_col = [c for c in df.columns if "target" in c.lower() or "cyp" in c.lower() or "label" in c.lower()][0]
-            task_type = "classification"
-
-        # Validate SMILES
-        clean_smiles = []
-        valid_mask = []
-        for s in df[smiles_col]:
-            m = Chem.MolFromSmiles(str(s))
-            if m is not None:
-                valid_mask.append(True)
-                clean_smiles.append(Chem.MolToSmiles(m))
-            else:
-                valid_mask.append(False)
-
-        df = df[valid_mask].reset_index(drop=True)
-        df["inputs"] = clean_smiles
-        targets = pd.to_numeric(df[target_col], errors="coerce").values.astype(np.float32)
-        
-        train_idx, val_idx, test_idx = generate_scaffold_split(df["inputs"].tolist())
-
-    # 2. Protein Datasets
-    elif dataset_name in ["DeepLoc", "Fluorescence"]:
-        modality = "protein"
-        seq_col = [c for c in df.columns if "seq" in c.lower() or "sequence" in c.lower()][0]
-        target_col = [c for c in df.columns if "target" in c.lower() or "label" in c.lower() or "loc" in c.lower() or "tm" in c.lower()][0]
-        task_type = "classification" if dataset_name == "DeepLoc" else "regression"
-        
-        df["inputs"] = df[seq_col].str.upper().str.strip()
-        targets = pd.to_numeric(df[target_col], errors="coerce").values.astype(np.float32)
-        train_idx, val_idx, test_idx = generate_sequence_split(df["inputs"].tolist())
-
-    # 3. Genomic / DNA Datasets
-    elif dataset_name == "Promoters":
-        modality = "genomics"
-        seq_col = [c for c in df.columns if "seq" in c.lower() or "sequence" in c.lower()][0]
-        target_col = [c for c in df.columns if "target" in c.lower() or "label" in c.lower()][0]
-        task_type = "classification"
-        
-        df["inputs"] = df[seq_col].str.upper().str.strip()
-        targets = pd.to_numeric(df[target_col], errors="coerce").values.astype(np.float32)
-        train_idx, val_idx, test_idx = generate_sequence_split(df["inputs"].tolist())
-
+    if modality == "molecule":
+        # Canonicalise and drop molecules RDKit cannot parse.
+        keep, canonical = [], []
+        for smi in df["smiles"]:
+            mol = Chem.MolFromSmiles(str(smi))
+            keep.append(mol is not None)
+            if mol is not None:
+                canonical.append(Chem.MolToSmiles(mol))
+        df = df[keep].reset_index(drop=True)
+        df["inputs"] = canonical
     else:
-        raise ValueError(f"Unsupported dataset: {dataset_name}")
+        df["inputs"] = df["sequence"].astype(str).str.upper().str.strip()
 
-    splits = np.array(["train"] * len(df))
-    if len(val_idx) > 0: splits[val_idx] = "val"
-    if len(test_idx) > 0: splits[test_idx] = "test"
-    df["split"] = splits
+    targets = pd.to_numeric(df["target"], errors="coerce").values.astype(np.float32)
+
+    if "split" in df.columns:
+        split_source = "official"
+        splits = df["split"].values
+        train_idx = np.where(splits == "train")[0]
+        val_idx = np.where(splits == "val")[0]
+        test_idx = np.where(splits == "test")[0]
+    else:
+        split_source = "scaffold"
+        train_idx, val_idx, test_idx = scaffold_split(df["inputs"].tolist())
+        splits = np.array(["train"] * len(df), dtype=object)
+        splits[val_idx] = "val"
+        splits[test_idx] = "test"
+
+    if len(train_idx) == 0 or len(test_idx) == 0:
+        raise RuntimeError(f"{name}: empty train or test split")
+
+    if task_type == "classification":
+        # A single-class split makes ROC-AUC undefined and silently yields NaN
+        # scores rather than an error, so it is caught at load time.
+        for label, idx in (("train", train_idx), ("test", test_idx)):
+            if len(np.unique(targets[idx])) < 2:
+                raise RuntimeError(
+                    f"{name}: {label} split contains a single class -- "
+                    f"the split is degenerate and metrics would be undefined")
 
     return {
-        "df": df,
+        "dataset_name": name,
         "modality": modality,
+        "task_type": task_type,
         "inputs": df["inputs"].tolist(),
         "targets": targets,
         "splits": splits,
         "train_idx": train_idx,
         "val_idx": val_idx,
         "test_idx": test_idx,
-        "task_type": task_type,
-        "dataset_name": dataset_name
+        "split_source": split_source,
+        "n_classes": int(np.nanmax(targets)) + 1 if task_type == "classification" else None,
     }
-
-def _generate_missing_dataset(dataset_name, csv_path):
-    """Raises an error when a benchmark dataset CSV is missing.
-    
-    Previously this function silently generated fake random data, which
-    produced meaningless benchmark scores. Now it fails loudly and directs
-    the user to download real datasets.
-    """
-    raise FileNotFoundError(
-        f"\n{'=' * 60}\n"
-        f"MISSING DATASET: {dataset_name}\n"
-        f"Expected file: {csv_path}\n\n"
-        f"Run the download script to fetch real benchmark data:\n"
-        f"  python benchmark/download_real_datasets.py\n"
-        f"{'=' * 60}"
-    )
