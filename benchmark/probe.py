@@ -91,6 +91,44 @@ def _regression_metrics(y_true, y_pred):
             "r2": round(float(r2_score(y_true, y_pred)), 4)}
 
 
+def _score_only(y_true, y_pred, y_prob, task_type, n_classes):
+    """Recompute just the ranked metric, for bootstrap resampling."""
+    if task_type == "regression":
+        rho = spearmanr(y_true, y_pred).statistic
+        return float(rho) if np.isfinite(rho) else np.nan
+    if n_classes == 2:
+        if len(np.unique(y_true)) < 2:
+            return np.nan          # resample lost a class; ROC-AUC undefined
+        return float(roc_auc_score(y_true, y_prob[:, 1]))
+    return float(accuracy_score(y_true, y_pred))
+
+
+def bootstrap_ci(y_true, y_pred, y_prob, task_type, n_classes,
+                 n_boot=1000, alpha=0.05, seed=SEED):
+    """Percentile bootstrap interval for the ranked metric.
+
+    Resamples the test set rather than refitting, so the interval describes
+    uncertainty from the finite test set -- which is the relevant question when
+    two models differ by a ten-thousandth of a point on 420 test molecules. It
+    does not capture variance from the split itself; see split_seed_spread.
+    """
+    rng = np.random.RandomState(seed)
+    n = len(y_true)
+    scores = np.empty(n_boot)
+    for b in range(n_boot):
+        idx = rng.randint(0, n, n)
+        scores[b] = _score_only(
+            y_true[idx], y_pred[idx],
+            y_prob[idx] if y_prob is not None else None,
+            task_type, n_classes)
+    scores = scores[np.isfinite(scores)]
+    if len(scores) == 0:
+        return None
+    lo, hi = np.percentile(scores, [100 * alpha / 2, 100 * (1 - alpha / 2)])
+    return {"ci_low": round(float(lo), 4), "ci_high": round(float(hi), 4),
+            "ci_width": round(float(hi - lo), 4), "n_boot": int(len(scores))}
+
+
 def _search_subset(X, y, stratify):
     """Deterministic subsample used only for the regularisation search."""
     if len(y) <= SEARCH_CAP:
@@ -123,9 +161,12 @@ def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4):
         search.fit(Xs, ys)
         model = LogisticRegression(C=search.best_params_["C"], max_iter=1000,
                                    random_state=SEED).fit(X_tr, y_tr)
-        out = _classification_metrics(y_te, model.predict(X_te),
-                                      model.predict_proba(X_te), n_classes)
+        y_pred, y_prob = model.predict(X_te), model.predict_proba(X_te)
+        out = _classification_metrics(y_te, y_pred, y_prob, n_classes)
         out["hyperparameter"] = {"C": search.best_params_["C"]}
+        ci = bootstrap_ci(y_te, y_pred, y_prob, task_type, n_classes)
+        if ci:
+            out.update(ci)
     else:
         Xs, ys = _search_subset(X_tr, y_tr, stratify=False)
         search = GridSearchCV(Ridge(random_state=SEED), {"alpha": ALPHA_GRID},
@@ -133,8 +174,12 @@ def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4):
         search.fit(Xs, ys)
         model = Ridge(alpha=search.best_params_["alpha"],
                       random_state=SEED).fit(X_tr, y_tr)
-        out = _regression_metrics(y_te, model.predict(X_te))
+        y_pred = model.predict(X_te)
+        out = _regression_metrics(y_te, y_pred)
         out["hyperparameter"] = {"alpha": search.best_params_["alpha"]}
+        ci = bootstrap_ci(y_te, y_pred, None, task_type, None)
+        if ci:
+            out.update(ci)
 
     out["probe"] = "linear"
     out["embedding_dim"] = int(X_train.shape[1])

@@ -119,36 +119,58 @@ Ranked metric, linear probe. Best score per task in bold.
 
 Metrics: ROC-AUC for BBBP/ClinTox/BACE/CYP3A4, Spearman ρ for ESOL/Lipophilicity.
 
-**Scale separates the pretrained models; the ChemBERTa-class models do not beat
-descriptors, and MoLFormer-XL does.** The picture splits cleanly in two:
+### The rankings above are not statistically supported
 
-- **Descriptor baselines win where physicochemistry is the target.** RDKit2D
-  takes BBBP (0.9176) and ESOL (0.9185) outright, and its ESOL margin over
-  ECFP4 is enormous (0.918 vs 0.592) — a binary fingerprint is a poor substrate
-  for a continuous solubility regression.
-- **MoLFormer-XL wins ClinTox (0.8968) and BACE (0.8635)**, and ties the best
-  classical score on Lipophilicity (0.6410 vs 0.6409) and CYP3A4 (0.8462 vs
-  0.8463). Those last two differences, one ten-thousandth of a point, are ties
-  in everything but sort order.
+Each score carries a 95% percentile bootstrap interval over the test set
+(1,000 resamples). Comparing each model against the task leader:
 
-So across six tasks: two clear wins for classical descriptors, two for
-MoLFormer-XL, and two ties. The two ChemBERTa variants, pretrained on far less
-data, lead nothing.
+| Task | Test n | Leader | 95% CI | Models overlapping the leader |
+| :--- | ---: | :--- | :--- | ---: |
+| BBBP | 205 | RDKit2D 0.9176 | [0.876, 0.952] | **4 of 4** |
+| ClinTox | 148 | MoLFormer-XL 0.8968 | [0.791, 0.982] | **4 of 4** |
+| BACE | 152 | MoLFormer-XL 0.8635 | [0.801, 0.918] | **4 of 4** |
+| ESOL | 114 | RDKit2D 0.9185 | [0.862, 0.949] | 2 of 4 |
+| Lipophilicity | 420 | MoLFormer-XL 0.6410 | [0.575, 0.702] | **4 of 4** |
+| CYP3A4 | 1234 | ECFP4 0.8463 | [0.824, 0.867] | **4 of 4** |
 
-> **This corrects an earlier reading of these results.** Before MoLFormer-XL was
-> evaluated, the same table supported "classical descriptors win five of six
-> tasks". That conclusion was an artefact of which models had been run: the only
-> pretrained molecular models in the roster were two small SMILES BERTs. Adding
-> the one large-scale molecular foundation model overturned it. The episode is
-> the clearest argument in this study for auditing a benchmark's *roster* as
-> carefully as its numbers — an absent model is not a neutral omission, it
-> silently shapes the conclusion.
+**On five of six molecular tasks, every representation is statistically
+indistinguishable from every other.** The only separations that survive are on
+ESOL, where ECFP4 (0.592) and ChemBERTa-ZINC (0.793) fall genuinely below the
+leading cluster of RDKit2D, MoLFormer-XL and ChemBERTa-77M.
 
-The relationship to Sultan et al. (*J. Cheminform.* 2026,
-10.1186/s13321-026-01252-z) is therefore narrower than it first appeared. Their
-finding that descriptor baselines remain strong is reproduced here — descriptors
-are never far behind and win outright twice — but these results do not support a
-blanket claim that pretrained molecular transformers underperform them.
+The cause is test-set size. These scaffold-split test sets hold 114 to 420
+molecules; ClinTox's 148-molecule test set yields a ROC-AUC interval **0.19 wide
+for the leader and 0.34 wide for ECFP4**. No ranking is recoverable at that
+resolution. The differences the table appears to show — and that the wider
+literature routinely reports on these same benchmarks — are smaller than the
+uncertainty of the measurement.
+
+> **This is the third time these results changed a conclusion, and the pattern
+> is the finding.** First the roster: with only two small SMILES BERTs standing
+> in for pretrained models, the data said "classical descriptors win five of
+> six". Adding MoLFormer-XL turned that into "two wins each, two ties". Adding
+> confidence intervals turned *that* into "almost nothing here is
+> distinguishable". Each intermediate claim was a faithful reading of the
+> numbers then in hand, and each was wrong. A single-number leaderboard over
+> small test sets will produce a ranking whatever the data does, and it will
+> look convincing.
+
+What can be said honestly about the molecular tasks:
+
+- **No representation is demonstrably best.** Across six tasks and five
+  representations, the only reliable statements are negative ones.
+- **ECFP4 is genuinely poor for solubility regression** (ESOL ρ = 0.592 against
+  RDKit2D's 0.918, non-overlapping). A binary fingerprint is a poor substrate
+  for a continuous physicochemical target.
+- **Pretraining buys nothing measurable here.** MoLFormer-XL, trained on ~1.1B
+  molecules, cannot be distinguished from a 210-dimensional RDKit descriptor
+  vector on any of the six tasks.
+
+That last point is the one that connects to Sultan et al. (*J. Cheminform.* 2026,
+10.1186/s13321-026-01252-z). Their conclusion that descriptor baselines remain
+competitive is consistent with what is found here — but the stronger reading is
+that **these benchmarks lack the resolution to support either claim**, theirs or
+its opposite.
 
 **The linear-to-MLP gap is small and usually negative** (range −0.157 to +0.040).
 Adding non-linear capacity on top of these frozen embeddings rarely helps, so
@@ -166,6 +188,13 @@ what the representations encode is largely linearly accessible.
 | ESM-2 150M | 640 | 0.7308 | 0.5835 |
 | ESM-2 650M | 1280 | **0.7473** | 0.6138 |
 | ProtBERT | 1024 | 0.7052 | 0.6615 |
+
+**Unlike the molecular tasks, these separations are real.** DeepLoc's test set
+holds 2,782 proteins and Fluorescence's 27,217, so the bootstrap intervals are
+narrow (0.033 and 0.017 wide respectively). On DeepLoc every model below ESM-2
+150M is separated from the leader; on Fluorescence every ESM-2 variant is
+separated from the k-mer baseline. Test-set size, not modality, is what decides
+whether a benchmark can rank anything.
 
 The two protein tasks point in **opposite directions**, and the reason is
 informative rather than noise.
@@ -208,9 +237,9 @@ tasks that choice dominates the result.
 | Nucleotide Transformer 500M | 1280 | 0.9363 |
 | HyenaDNA tiny | 128 | **0.9381** |
 
-**All three are within 0.008 of each other.** A 500M-parameter genomic foundation
-model buys 0.6 points over counting 5-mers, and is edged out by HyenaDNA-tiny
-using ten times fewer dimensions than either.
+**All three are within 0.008 of each other, and all three overlap** (intervals
+≈0.024 wide on 1,571 test sequences). A 500M-parameter genomic foundation model
+is not distinguishable from counting 5-mers on this task.
 
 Read alongside §5, this is the least reassuring result in the suite: the
 promoter sequences are excerpts of the very assembly both pretrained models were
@@ -360,12 +389,12 @@ registry.
    the task outright, because averaging over 237 residues erases the point
    mutations that carry the label. Any per-residue or mutation-aware readout
    would change that row substantially.
-6. **No confidence intervals.** Scores are single-seed point estimates; the
-   probe is deterministic but the split seed is not varied. Several margins
-   reported here — MoLFormer-XL versus RDKit2D on Lipophilicity (0.0001), versus
-   ECFP4 on CYP3A4 (0.0001), and all three genomic models (within 0.008) — are
-   almost certainly inside the noise, and are reported as ties rather than
-   rankings.
+6. **Intervals cover test-set uncertainty only.** The reported 95% intervals are
+   percentile bootstraps over the test set (1,000 resamples), which is the
+   relevant source of noise for comparing models on a fixed split. They do
+   **not** cover variance from the split itself; re-drawing the scaffold split
+   under different seeds would widen the molecular intervals further, making the
+   molecular non-separation conclusion stronger rather than weaker.
 7. **Concurrent runners previously lost results.** Each runner held a snapshot
    of the results file taken at start-up, so the last writer erased cells
    computed by the other; six MoLFormer-XL results were destroyed this way and
