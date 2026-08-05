@@ -102,6 +102,30 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0473
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9013,
+          "accuracy": 0.839,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1631,
+          "n_test": 205
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8788,
+          "accuracy": 0.8049,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0225
       }
     }
   },
@@ -208,6 +232,30 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0037
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8968,
+          "accuracy": 0.9392,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1184,
+          "n_test": 148
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8686,
+          "accuracy": 0.9392,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0282
       }
     }
   },
@@ -314,6 +362,30 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.015
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8635,
+          "accuracy": 0.7632,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 1210,
+          "n_test": 152
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.84,
+          "accuracy": 0.7763,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0235
       }
     }
   },
@@ -428,6 +500,32 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": 0.0131
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.9063,
+          "rmse": 0.958,
+          "r2": 0.8084,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 902,
+          "n_test": 114
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8484,
+          "rmse": 1.0731,
+          "r2": 0.7596,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": -0.0579
       }
     }
   },
@@ -542,6 +640,32 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0344
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.641,
+          "rmse": 0.8515,
+          "r2": 0.4938,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 3360,
+          "n_test": 420
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6534,
+          "rmse": 0.8879,
+          "r2": 0.4497,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": 0.0124
       }
     }
   },
@@ -648,6 +772,30 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": 0.0082
+      },
+      "molformer_xl": {
+        "label": "MoLFormer-XL",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8462,
+          "accuracy": 0.7618,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 768,
+          "n_train": 9862,
+          "n_test": 1234
+        },
+        "embed_seconds": 0.0,
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.862,
+          "accuracy": 0.7707,
+          "probe": "mlp",
+          "embedding_dim": 768
+        },
+        "linear_mlp_gap": 0.0158
       }
     }
   },
@@ -730,6 +878,30 @@
           "embedding_dim": 640
         },
         "linear_mlp_gap": -0.0173
+      },
+      "esm2_650m": {
+        "label": "ESM-2 650M",
+        "linear": {
+          "metric": "Accuracy",
+          "score": 0.7473,
+          "macro_f1": 0.6872,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "probe": "linear",
+          "embedding_dim": 1280,
+          "n_train": 22233,
+          "n_test": 2782
+        },
+        "embed_seconds": 2538.3,
+        "mlp": {
+          "metric": "Accuracy",
+          "score": 0.739,
+          "macro_f1": 0.7002,
+          "probe": "mlp",
+          "embedding_dim": 1280
+        },
+        "linear_mlp_gap": -0.0083
       }
     }
   },
