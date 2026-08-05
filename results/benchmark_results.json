@@ -1090,6 +1090,32 @@
           "embedding_dim": 1024
         },
         "linear_mlp_gap": -0.0205
+      },
+      "esm2_35m": {
+        "label": "ESM-2 35M",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5924,
+          "rmse": 0.9885,
+          "r2": -0.0297,
+          "hyperparameter": {
+            "alpha": 1.0
+          },
+          "probe": "linear",
+          "embedding_dim": 480,
+          "n_train": 21446,
+          "n_test": 27217
+        },
+        "embed_seconds": 363.2,
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5985,
+          "rmse": 0.9017,
+          "r2": 0.1433,
+          "probe": "mlp",
+          "embedding_dim": 480
+        },
+        "linear_mlp_gap": 0.0061
       }
     }
   },
