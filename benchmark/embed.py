@@ -39,6 +39,11 @@ os.makedirs(EMB_DIR, exist_ok=True)
 
 MAX_LEN = {"protein": 512, "genomics": 512, "molecule": 256}
 
+# Some checkpoints need a different library stack than the main environment.
+# Rather than upgrade globally and disturb results already computed, such a
+# model declares its own interpreter and is embedded in that environment.
+MOLFORMER_ENV = os.path.expanduser("~/biolatent_molformer_env/bin/python")
+
 # ---------------------------------------------------------------------------
 # Model registry. Every entry is a real, downloadable checkpoint or a
 # deterministic classical featuriser -- nothing here is a placeholder.
@@ -56,10 +61,16 @@ MODEL_REGISTRY = {
     "chemberta_zinc": {"kind": "hf", "modality": "molecule",
                        "checkpoint": "seyonec/ChemBERTa-zinc-base-v1",
                        "label": "ChemBERTa ZINC base"},
-    # MoLFormer-XL is deliberately absent: its remote modelling code imports
-    # transformers.masking_utils, which does not exist in transformers 4.50.3.
-    # Rather than pin a different stack for one model, it is reported as not
-    # evaluated. An unrun model is an omission; a substituted one is an error.
+    # MoLFormer-XL's remote modelling code imports transformers.masking_utils,
+    # absent from the main environment's transformers 4.50.3. Because embedding
+    # already runs in a subprocess, this model just points at a second
+    # environment holding a newer transformers; the main environment, and every
+    # result already computed in it, are untouched.
+    "molformer_xl": {"kind": "hf", "modality": "molecule",
+                     "checkpoint": "ibm/MoLFormer-XL-both-10pct",
+                     "trust_remote_code": True,
+                     "interpreter": MOLFORMER_ENV,
+                     "label": "MoLFormer-XL"},
 
     # --- proteins: classical baseline ---
     "kmer3_protein": {"kind": "kmer", "modality": "protein", "k": 3,
@@ -67,9 +78,8 @@ MODEL_REGISTRY = {
     # --- proteins: pretrained language models ---
     "esm2_8m":   {"kind": "hf", "modality": "protein",
                   "checkpoint": "facebook/esm2_t6_8M_UR50D",   "label": "ESM-2 8M"},
-    # ESM-2 35M is omitted: 8M / 150M / 650M already give a three-point scale
-    # ladder, and the intermediate point costs run time without adding a
-    # distinct conclusion on a 4 GB card.
+    "esm2_35m":  {"kind": "hf", "modality": "protein",
+                  "checkpoint": "facebook/esm2_t12_35M_UR50D", "label": "ESM-2 35M"},
     "esm2_150m": {"kind": "hf", "modality": "protein",
                   "checkpoint": "facebook/esm2_t30_150M_UR50D", "label": "ESM-2 150M"},
     "esm2_650m": {"kind": "hf", "modality": "protein",
@@ -295,8 +305,13 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     kind = spec["kind"]
 
     if kind == "hf" and isolate:
+        interpreter = spec.get("interpreter", sys.executable)
+        if not os.path.exists(interpreter):
+            raise RuntimeError(
+                f"{model_id}: declared interpreter {interpreter} does not "
+                f"exist; the model is not evaluated rather than substituted")
         subprocess.run(
-            [sys.executable, "-u", os.path.abspath(__file__),
+            [interpreter, "-u", os.path.abspath(__file__),
              model_id, dataset_name],
             check=True, env={**os.environ, "PYTHONPATH": ""},
         )

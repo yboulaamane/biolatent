@@ -107,32 +107,52 @@ shared SMILES between train and test on BBBP, BACE and ClinTox.
 
 ## 4. Results — molecular tasks
 
-Ranked metric, linear probe. `gap` is MLP minus linear.
+Ranked metric, linear probe. Best score per task in bold.
 
-| Task | Best | Score | 2nd | Score |
-| :--- | :--- | :--- | :--- | :--- |
-| BBBP (ROC-AUC) | **RDKit2D** | 0.9176 | ChemBERTa-ZINC | 0.9048 |
-| ClinTox (ROC-AUC) | ChemBERTa-ZINC | 0.8597 | ECFP4 | 0.8109 |
-| BACE (ROC-AUC) | **ECFP4** | 0.8601 | ChemBERTa-ZINC | 0.8571 |
-| ESOL (Spearman) | **RDKit2D** | 0.9185 | ChemBERTa-77M | 0.8398 |
-| Lipophilicity (Spearman) | **RDKit2D** | 0.6409 | ChemBERTa-77M | 0.6376 |
-| CYP3A4 (ROC-AUC) | **ECFP4** | 0.8463 | RDKit2D | 0.8333 |
+| Model | BBBP | ClinTox | BACE | ESOL | Lipo | CYP3A4 |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| ECFP4 (1024d) | 0.8826 | 0.8109 | 0.8601 | 0.5924 | 0.5883 | **0.8463** |
+| RDKit2D (210d) | **0.9176** | 0.8003 | 0.8170 | **0.9185** | 0.6409 | 0.8333 |
+| ChemBERTa-77M (384d) | 0.8927 | 0.7837 | 0.8402 | 0.8398 | 0.6376 | 0.8194 |
+| ChemBERTa-ZINC (768d) | 0.9048 | 0.8597 | 0.8571 | 0.7930 | 0.5100 | 0.8160 |
+| MoLFormer-XL (768d) | 0.9013 | **0.8968** | **0.8635** | 0.9063 | **0.6410** | 0.8462 |
 
-**Classical descriptors win five of six molecular tasks.** A 210-dimensional
-RDKit descriptor vector beats both pretrained ChemBERTa variants on BBBP, ESOL
-and Lipophilicity, and 1024-bit ECFP4 wins BACE and CYP3A4. The only task where
-a pretrained transformer leads is ClinTox.
+Metrics: ROC-AUC for BBBP/ClinTox/BACE/CYP3A4, Spearman ρ for ESOL/Lipophilicity.
 
-This is consistent with, and independently reproduces, the conclusion of Sultan
-et al. (*J. Cheminform.* 2026, 10.1186/s13321-026-01252-z) that descriptor
-baselines remain strong against pretrained molecular transformers.
+**Scale separates the pretrained models; the ChemBERTa-class models do not beat
+descriptors, and MoLFormer-XL does.** The picture splits cleanly in two:
 
-**The linear-to-MLP gap is small and often negative** (range −0.157 to +0.040).
+- **Descriptor baselines win where physicochemistry is the target.** RDKit2D
+  takes BBBP (0.9176) and ESOL (0.9185) outright, and its ESOL margin over
+  ECFP4 is enormous (0.918 vs 0.592) — a binary fingerprint is a poor substrate
+  for a continuous solubility regression.
+- **MoLFormer-XL wins ClinTox (0.8968) and BACE (0.8635)**, and ties the best
+  classical score on Lipophilicity (0.6410 vs 0.6409) and CYP3A4 (0.8462 vs
+  0.8463). Those last two differences, one ten-thousandth of a point, are ties
+  in everything but sort order.
+
+So across six tasks: two clear wins for classical descriptors, two for
+MoLFormer-XL, and two ties. The two ChemBERTa variants, pretrained on far less
+data, lead nothing.
+
+> **This corrects an earlier reading of these results.** Before MoLFormer-XL was
+> evaluated, the same table supported "classical descriptors win five of six
+> tasks". That conclusion was an artefact of which models had been run: the only
+> pretrained molecular models in the roster were two small SMILES BERTs. Adding
+> the one large-scale molecular foundation model overturned it. The episode is
+> the clearest argument in this study for auditing a benchmark's *roster* as
+> carefully as its numbers — an absent model is not a neutral omission, it
+> silently shapes the conclusion.
+
+The relationship to Sultan et al. (*J. Cheminform.* 2026,
+10.1186/s13321-026-01252-z) is therefore narrower than it first appeared. Their
+finding that descriptor baselines remain strong is reproduced here — descriptors
+are never far behind and win outright twice — but these results do not support a
+blanket claim that pretrained molecular transformers underperform them.
+
+**The linear-to-MLP gap is small and usually negative** (range −0.157 to +0.040).
 Adding non-linear capacity on top of these frozen embeddings rarely helps, so
-what the representations encode is largely linearly accessible. The one large
-negative gap, ECFP4 on ESOL (−0.157), reflects a binary fingerprint being a poor
-substrate for a continuous physicochemical regression — it is also ECFP4's worst
-task in absolute terms (ρ = 0.592 against RDKit2D's 0.918).
+what the representations encode is largely linearly accessible.
 
 ---
 
@@ -145,15 +165,17 @@ Ranked metric: accuracy over ten localisation classes.
 | 3-mer frequency | 8000 | 0.5288 | +0.018 |
 | ESM-2 8M | 320 | 0.6639 | +0.019 |
 | ESM-2 150M | 640 | 0.7308 | −0.017 |
-| ESM-2 650M | 1280 | *running* | |
-| ProtBERT | 1024 | *pending* | |
+| ESM-2 650M | 1280 | **0.7473** | −0.008 |
+| ProtBERT | 1024 | *running* | |
 
-Unlike the molecular tasks, **pretrained protein representations beat the
-classical baseline decisively** — ESM-2 8M is 13.5 points above 3-mer frequency
-despite using 25× fewer dimensions, and accuracy rises monotonically with model
-scale. This is the clearest scale effect anywhere in the suite, and it is the
-opposite of the molecular picture, where descriptor baselines won five of six
-tasks.
+**Pretrained protein representations beat the classical baseline decisively**, and
+accuracy rises monotonically with scale — ESM-2 8M is already 13.5 points above
+3-mer frequency while using 25× fewer dimensions.
+
+But the returns fall away sharply. Going 8M → 150M buys 6.7 points; going
+150M → 650M buys 1.7 points for 4.3× the parameters. The ladder is real but
+flattening, which matters for a leaderboard that would otherwise imply that
+scale is the axis to optimise.
 
 The contrast is worth stating carefully: it does **not** show that protein
 language models generalise better than molecular ones. The leakage audit (§5)
@@ -228,14 +250,25 @@ should not be presented as if they were.
 
 Fourteen entries were specified; thirteen ran.
 
-**Molecules** — ECFP4, RDKit2D, ChemBERTa-77M-MLM, ChemBERTa-ZINC-base.
+**Molecules** — ECFP4, RDKit2D, ChemBERTa-77M-MLM, ChemBERTa-ZINC-base,
+MoLFormer-XL.
 **Proteins** — 3-mer frequency, ESM-2 (8M / 35M / 150M / 650M), ProtBERT.
 **Genomics** — 5-mer frequency, Nucleotide Transformer 500M, HyenaDNA-tiny.
 
-**MoLFormer-XL is absent.** Its remote modelling code imports
-`transformers.masking_utils`, which does not exist in transformers 4.50.3.
-Rather than pin a separate stack for one model, it is reported as not evaluated.
-An unrun model is an omission; a substituted one would be an error.
+MoLFormer-XL needs a newer `transformers` than the main environment's 4.50.3,
+because its remote modelling code imports `transformers.masking_utils`. Since
+embedding already runs in a subprocess per (model, dataset), that model declares
+its own interpreter and runs in a second environment; the main environment, and
+every result already computed in it, are untouched. A model that cannot be run
+is reported as not evaluated — never substituted with another featuriser.
+
+**This roster is a subset of the BioLatent registry, not the whole of it.**
+`src/app/data/embeddings.ts` catalogues 38 entries; 14 are evaluated here. Most
+of the remainder — AlphaFold 2, DiffDock, ProteinMPNN, RXNMapper — do not emit a
+single per-object embedding vector for these tasks, so they are out of scope for
+this harness rather than missing from it. The distinction belongs in any write-up:
+the suite evaluates representative representations, it does not benchmark the
+registry.
 
 ---
 
