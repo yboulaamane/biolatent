@@ -33,7 +33,7 @@ Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset
 3. **BACE** (Classification, 1,513 compounds) — *Target binding (Binding affinity)*
 4. **ESOL** (Regression, 1,128 compounds) — *Aqueous solubility*
 5. **Lipophilicity** (Regression, 4,200 compounds) — *Octanol-water partition coefficient*
-6. **CYP3A4 Substrate** (Classification, 12,328 compounds) — *CYP3A4 inhibition, TDC `CYP3A4_Veith`*
+6. **CYP3A4 Inhibition** (Classification, 12,328 compounds) — *TDC `CYP3A4_Veith`, official scaffold split. Named for what it measures: CYP3A4 **substrate** prediction is a different and much smaller TDC dataset (`CYP3A4_Substrate_CarbonMangels`, ~670 compounds).*
 
 ### B. Protein Modality (~43,700 sequences total)
 7. **DeepLoc** (Classification, 22,233 proteins) — *Global subcellular localization (argmax of 10 compartments)*
@@ -59,7 +59,9 @@ Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset
 > Counts are the actual downloaded datasets. All are per-object (one vector per molecule/protein/sequence), so a single probing harness covers every task — no per-residue special case.
 
 * **Total Hosting Cost**: $0 (Stored on Hugging Face Datasets)
-* **Total Compute Cost per Submission**: $0 (Executed in GitHub Actions)
+* **Phase B (probing) cost per submission**: effectively $0 — the probes really do run in seconds to a couple of minutes on CPU, and the measured figures above are from actual runs.
+
+> **Correction, measured.** The original framing — "$0 total, evaluation in <90s" — described Phase B and quietly assumed Phase A away. In practice generating the frozen embeddings for this study took **hours on a GPU**: ~42 min for ESM-2 650M on DeepLoc alone, and roughly 6 hours across the protein and genomic tasks on a 4 GB laptop card. That cost is real; it is simply paid **once per (model, dataset)** by whoever submits, not per evaluation. The zero-cost claim holds for the leaderboard, not for the suite as a whole, and the proposal should say so.
 
 ---
 
