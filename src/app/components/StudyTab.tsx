@@ -91,9 +91,12 @@ function TaskCard({ task }: { task: string }) {
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem',
       }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff' }}>{task}</h3>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff' }}>
+          {meta.dataset_label ?? task}
+        </h3>
         <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
           {metric} · test n = {meta.n_test.toLocaleString()} · {meta.split_source} split
+          {meta.dataset_source ? ` · ${meta.dataset_source}` : ''}
         </div>
       </div>
 

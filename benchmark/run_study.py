@@ -59,6 +59,11 @@ def save_results(results):
         if task not in merged:
             merged[task] = info
             continue
+        incoming_hash = info.get("dataset_sha256")
+        stored_hash = merged[task].get("dataset_sha256")
+        if incoming_hash and incoming_hash != stored_hash:
+            merged[task] = info
+            continue
         merged[task].update({k: v for k, v in info.items() if k != "models"})
         merged[task].setdefault("models", {}).update(info.get("models", {}))
 
@@ -83,7 +88,10 @@ def run(task_names=None, run_mlp=True):
               f"{data['split_source']} split, n={len(data['inputs'])})\n{'=' * 72}",
               flush=True)
 
-        results.setdefault(task, {
+        task_info = {
+            "dataset_label": data["dataset_label"],
+            "dataset_source": data["dataset_source"],
+            "dataset_sha256": data["dataset_sha256"],
             "modality": modality,
             "task_type": data["task_type"],
             "split_source": data["split_source"],
@@ -91,7 +99,11 @@ def run(task_names=None, run_mlp=True):
             "n_train": int(len(data["train_idx"])),
             "n_test": int(len(data["test_idx"])),
             "models": {},
-        })
+        }
+        if results.get(task, {}).get("dataset_sha256") != data["dataset_sha256"]:
+            results[task] = task_info
+        else:
+            results.setdefault(task, task_info)
 
         for model_id in applicable:
             if model_id in results[task]["models"]:

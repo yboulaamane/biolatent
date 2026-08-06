@@ -40,7 +40,8 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
+from benchmark.datasets import (ALL_DATASETS, MOLECULE_TASKS, PROTEIN_TASKS,
+                                load_benchmark_dataset)
 from benchmark.leakage import (AUDIT_DIR, DECLARED_CORPORA, molecule_overlap,
                                sequence_overlap)
 
@@ -165,28 +166,41 @@ def _structural_for(modality, empirical):
     return out
 
 
-def main(sample_n):
+def main(sample_n, task_names=None):
+    tasks = task_names or ALL_DATASETS
+    unknown = sorted(set(tasks) - set(ALL_DATASETS))
+    if unknown:
+        raise ValueError(f"Unknown tasks: {unknown}")
+
     os.makedirs(AUDIT_DIR, exist_ok=True)
     os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
-    print(f"Loading molecular corpora (sample n={sample_n:,})...", flush=True)
     mol_corpora = {}
-    zinc = load_zinc(sample_n)
-    if zinc:
-        mol_corpora["zinc"] = zinc
-    pubchem = load_pubchem(sample_n)
-    if pubchem:
-        mol_corpora["pubchem"] = pubchem
-    if not mol_corpora:
-        print("  No molecular corpus present; molecular audit skipped.", flush=True)
+    needs_molecules = any(t in MOLECULE_TASKS for t in tasks)
+    if needs_molecules:
+        print(f"Loading molecular corpora (sample n={sample_n:,})...", flush=True)
+        zinc = load_zinc(sample_n)
+        if zinc:
+            mol_corpora["zinc"] = zinc
+        pubchem = load_pubchem(sample_n)
+        if pubchem:
+            mol_corpora["pubchem"] = pubchem
+        if not mol_corpora:
+            print("  No molecular corpus present; molecular audit skipped.", flush=True)
 
-    print("Loading Swiss-Prot...", flush=True)
-    swissprot = load_swissprot()
-    print(f"  Swiss-Prot: {len(swissprot):,} sequences"
-          if swissprot else "  Swiss-Prot absent; protein audit skipped.", flush=True)
+    swissprot = None
+    if any(t in PROTEIN_TASKS for t in tasks):
+        print("Loading Swiss-Prot...", flush=True)
+        swissprot = load_swissprot()
+        print(f"  Swiss-Prot: {len(swissprot):,} sequences"
+              if swissprot else "  Swiss-Prot absent; protein audit skipped.", flush=True)
 
     report = {"sample_size": sample_n, "tasks": {}}
+    if task_names and os.path.exists(REPORT_PATH):
+        with open(REPORT_PATH) as fh:
+            report = json.load(fh)
+        report["sample_size"] = sample_n
 
-    for task in ALL_DATASETS:
+    for task in tasks:
         data = load_benchmark_dataset(task)
         test_inputs = [data["inputs"][i] for i in data["test_idx"]]
         entry = {"modality": data["modality"], "n_test": len(test_inputs),
@@ -237,4 +251,6 @@ def main(sample_n):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", type=int, default=200000)
-    main(ap.parse_args().sample)
+    ap.add_argument("tasks", nargs="*", help="optional task names to refresh")
+    args = ap.parse_args()
+    main(args.sample, args.tasks or None)

@@ -840,7 +840,7 @@ export default function Home() {
                     <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <li><strong>BBBP, ClinTox, CYP3A4 Substrate</strong>: Evaluated using Classification Area Under the ROC Curve (ROC-AUC) ↑.</li>
                       <li><strong>ESOL (Solubility), Lipophilicity</strong>: Evaluated using Regression Root Mean Square Error (RMSE) ↓.</li>
-                      <li style={{ color: '#fbbf24' }}><strong>Note on CYP3A4.</strong> This column is CYP3A4 <em>substrate</em> prediction (TDC <code>cyp3a4s</code>). The Measured Benchmark tab uses CYP3A4 <em>inhibition</em> (<code>CYP3A4_Veith</code>), a different and much larger dataset. The two are not comparable.</li>
+                      <li style={{ color: '#fbbf24' }}><strong>Note on CYP3A4.</strong> Both this column and the Measured Benchmark tab now use TDC <code>CYP3A4_Substrate_CarbonMangels</code>. The measured and literature values still use different downstream protocols, so sharing a dataset does not make the scores directly comparable.</li>
                     </ul>
                   </div>
                   <div>

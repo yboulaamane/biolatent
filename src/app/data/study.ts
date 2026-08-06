@@ -41,6 +41,9 @@ export interface ModelCell {
 }
 
 export interface TaskResult {
+  dataset_label?: string;
+  dataset_source?: string;
+  dataset_sha256?: string;
   modality: Modality;
   task_type: 'classification' | 'regression';
   split_source: string;
