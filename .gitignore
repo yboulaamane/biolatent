@@ -61,7 +61,8 @@ data/
 
 # stray local working artifacts — not part of the published repo
 test.csv
-BioLatent.docx
+BioLatent*.docx
+*.docx:Zone.Identifier
 BioLatent Model Input-*.png
 
 # run logs
