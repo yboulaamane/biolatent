@@ -86,14 +86,16 @@ def download_moleculenet():
 
 
 def download_cyp3a4():
-    """TDC CYP3A4_Veith -- CYP3A4 *inhibition*, with TDC's official scaffold split.
+    """TDC CYP3A4 substrate prediction with TDC's scaffold split.
 
-    Named for what it measures. CYP3A4 substrate prediction is a different and
-    much smaller TDC dataset (CYP3A4_Substrate_CarbonMangels, ~670 compounds).
+    This is the same task used by the audited CYP3A4 literature column. The
+    larger ``CYP3A4_Veith`` dataset measures inhibition and is intentionally
+    not substituted: substrate and inhibition are different biological labels.
     """
-    print("[2/4] CYP3A4 inhibition (TDC CYP3A4_Veith, official scaffold split)...")
+    dataset_id = "CYP3A4_Substrate_CarbonMangels"
+    print(f"[2/4] CYP3A4 substrate (TDC {dataset_id}, scaffold split)...")
     from tdc.single_pred import ADME
-    data = ADME(name="CYP3A4_Veith")
+    data = ADME(name=dataset_id)
     split = data.get_split(method="scaffold", seed=42, frac=[0.8, 0.1, 0.1])
     frames = []
     for key, tag in [("train", "train"), ("valid", "val"), ("test", "test")]:
@@ -101,7 +103,7 @@ def download_cyp3a4():
         frames.append(pd.DataFrame({
             "smiles": d["Drug"], "target": d["Y"].astype(int), "split": tag,
         }))
-    _write(pd.concat(frames, ignore_index=True), "CYP3A4", 5000)
+    _write(pd.concat(frames, ignore_index=True), "CYP3A4", 600)
 
 
 # ----------------------------------------------------------------- proteins

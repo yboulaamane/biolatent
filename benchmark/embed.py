@@ -69,6 +69,8 @@ MODEL_REGISTRY = {
     "molformer_xl": {"kind": "hf", "modality": "molecule",
                      "checkpoint": "ibm/MoLFormer-XL-both-10pct",
                      "trust_remote_code": True,
+                     "force_float32": True,
+                     "inference_seed": 42,
                      "interpreter": MOLFORMER_ENV,
                      "label": "MoLFormer-XL"},
 
@@ -240,13 +242,23 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
     import torch
     from transformers import AutoModel, AutoTokenizer
 
+    inference_seed = spec.get("inference_seed", 42)
+    torch.manual_seed(inference_seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(inference_seed)
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    dtype = torch.float16 if device == "cuda" else torch.float32
+    dtype = (torch.float16 if device == "cuda" and not spec.get("force_float32")
+             else torch.float32)
     kw = {"trust_remote_code": True} if spec.get("trust_remote_code") else {}
 
     tok = AutoTokenizer.from_pretrained(spec["checkpoint"], **kw)
     model = AutoModel.from_pretrained(spec["checkpoint"], torch_dtype=dtype, **kw)
-    model.eval().to(device)
+    # ``torch_dtype`` controls checkpoint parameters but not necessarily
+    # floating buffers created by remote model code. MoLFormer's random-feature
+    # projection is one such buffer; cast the complete module so its attention
+    # operands cannot mix float16 parameters with a float32 buffer.
+    model.eval().to(device=device, dtype=dtype)
 
     max_len = MAX_LEN[modality]
     order = sorted(range(len(sequences)), key=lambda i: len(str(sequences[i])))
@@ -299,8 +311,26 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         return None  # not applicable -- reported as N/A, never imputed
 
     path = cache_path(model_id, dataset_name)
+    input_sha256 = hashlib.sha256(
+        "\0".join(str(value) for value in inputs).encode("utf-8")
+    ).hexdigest()[:16]
     if os.path.exists(path) and not force:
-        return np.load(path)
+        cached = np.load(path)
+        meta_path = path.replace(".npy", ".json")
+        meta = {}
+        if os.path.exists(meta_path):
+            with open(meta_path) as fh:
+                meta = json.load(fh)
+        content_matches = (
+            cached.shape[0] == len(inputs)
+            and meta.get("input_sha256", input_sha256) == input_sha256
+            and ("inference_seed" not in spec
+                 or meta.get("inference_seed") == spec["inference_seed"])
+        )
+        if content_matches:
+            return cached
+        print(f"      stale cache for {model_id}/{dataset_name}; regenerating",
+              flush=True)
 
     kind = spec["kind"]
 
@@ -310,9 +340,12 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
             raise RuntimeError(
                 f"{model_id}: declared interpreter {interpreter} does not "
                 f"exist; the model is not evaluated rather than substituted")
+        command = [interpreter, "-u", os.path.abspath(__file__),
+                   model_id, dataset_name]
+        if force:
+            command.append("--force")
         subprocess.run(
-            [interpreter, "-u", os.path.abspath(__file__),
-             model_id, dataset_name],
+            command,
             check=True, env={**os.environ, "PYTHONPATH": ""},
         )
         if not os.path.exists(path):
@@ -348,6 +381,8 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         "dim": int(mat.shape[1]),
         "pooling": "mean over non-padding tokens" if kind == "hf" else "n/a",
         "max_length": MAX_LEN[modality] if kind == "hf" else None,
+        "input_sha256": input_sha256,
+        "inference_seed": spec.get("inference_seed"),
         "sha256": hashlib.sha256(mat.tobytes()).hexdigest()[:16],
     }
     with open(path.replace(".npy", ".json"), "w") as fh:
@@ -364,4 +399,4 @@ if __name__ == "__main__":
     _model_id, _dataset = sys.argv[1], sys.argv[2]
     _data = load_benchmark_dataset(_dataset)
     generate(_model_id, _dataset, _data["inputs"], _data["modality"],
-             isolate=False)
+             force="--force" in sys.argv[3:], isolate=False)

@@ -23,6 +23,7 @@ Bemis-Murcko scaffold split, the DeepChem convention for those benchmarks.
 Every input file must exist. Nothing is generated.
 """
 
+import hashlib
 import os
 from collections import defaultdict
 
@@ -50,6 +51,9 @@ TASK_TYPE = {
 MODALITY = ({t: "molecule" for t in MOLECULE_TASKS}
             | {t: "protein" for t in PROTEIN_TASKS}
             | {t: "genomics" for t in GENOMIC_TASKS})
+
+DATASET_LABEL = {"CYP3A4": "CYP3A4 Substrate"}
+DATASET_SOURCE = {"CYP3A4": "TDC CYP3A4_Substrate_CarbonMangels"}
 
 
 def get_scaffold(smiles):
@@ -167,8 +171,14 @@ def load_benchmark_dataset(name):
                     f"{name}: {label} split contains a single class -- "
                     f"the split is degenerate and metrics would be undefined")
 
+    with open(path, "rb") as dataset_file:
+        dataset_sha256 = hashlib.sha256(dataset_file.read()).hexdigest()
+
     return {
         "dataset_name": name,
+        "dataset_label": DATASET_LABEL.get(name, name),
+        "dataset_source": DATASET_SOURCE.get(name),
+        "dataset_sha256": dataset_sha256,
         "modality": modality,
         "task_type": task_type,
         "inputs": df["inputs"].tolist(),

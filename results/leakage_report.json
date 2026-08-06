@@ -88,16 +88,16 @@
     },
     "CYP3A4": {
       "modality": "molecule",
-      "n_test": 1234,
+      "n_test": 67,
       "empirical": {
         "zinc": {
-          "n_flagged": 249,
-          "fraction": 0.2018,
+          "n_flagged": 29,
+          "fraction": 0.4328,
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of zinc (lower bound)"
         },
         "pubchem": {
-          "n_flagged": 372,
-          "fraction": 0.3015,
+          "n_flagged": 47,
+          "fraction": 0.7015,
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },

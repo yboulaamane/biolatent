@@ -245,50 +245,50 @@
     }
   },
   "CYP3A4": {
-    "leader": "ecfp4",
-    "leader_score": 0.8463,
-    "n_test": 1234,
+    "leader": "chemberta_77m",
+    "leader_score": 0.7614,
+    "n_test": 67,
     "n_boot": 1000,
     "correction": "Holm-Bonferroni within task",
     "comparisons": {
-      "molformer_xl": {
-        "score": 0.8462,
-        "delta": 0.0001,
-        "ci_low": -0.0195,
-        "ci_high": 0.0202,
-        "p_raw": 1.0,
-        "p_holm": 1.0,
+      "ecfp4": {
+        "score": 0.6946,
+        "delta": 0.0668,
+        "ci_low": -0.0457,
+        "ci_high": 0.1843,
+        "p_raw": 0.258,
+        "p_holm": 0.46,
         "significant": false,
         "n_boot_valid": 1000
       },
       "rdkit2d": {
-        "score": 0.8335,
-        "delta": 0.0128,
-        "ci_low": -0.0089,
-        "ci_high": 0.0345,
-        "p_raw": 0.258,
-        "p_holm": 0.516,
+        "score": 0.6946,
+        "delta": 0.0668,
+        "ci_low": -0.0401,
+        "ci_high": 0.1762,
+        "p_raw": 0.23,
+        "p_holm": 0.46,
         "significant": false,
         "n_boot_valid": 1000
       },
-      "chemberta_77m": {
-        "score": 0.8194,
-        "delta": 0.0269,
-        "ci_low": 0.0064,
-        "ci_high": 0.047,
-        "p_raw": 0.006,
-        "p_holm": 0.024,
-        "significant": true,
+      "molformer_xl": {
+        "score": 0.6429,
+        "delta": 0.1186,
+        "ci_low": 0.0045,
+        "ci_high": 0.2244,
+        "p_raw": 0.046,
+        "p_holm": 0.152,
+        "significant": false,
         "n_boot_valid": 1000
       },
       "chemberta_zinc": {
-        "score": 0.816,
-        "delta": 0.0303,
-        "ci_low": 0.0081,
-        "ci_high": 0.0542,
-        "p_raw": 0.006,
-        "p_holm": 0.024,
-        "significant": true,
+        "score": 0.6337,
+        "delta": 0.1277,
+        "ci_low": 0.0153,
+        "ci_high": 0.2442,
+        "p_raw": 0.038,
+        "p_holm": 0.152,
+        "significant": false,
         "n_boot_valid": 1000
       }
     }
