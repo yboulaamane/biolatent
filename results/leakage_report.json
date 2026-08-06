@@ -16,15 +16,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "ClinTox": {
       "modality": "molecule",
@@ -41,15 +33,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "BACE": {
       "modality": "molecule",
@@ -66,15 +50,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "ESOL": {
       "modality": "molecule",
@@ -91,15 +67,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "Lipophilicity": {
       "modality": "molecule",
@@ -116,15 +84,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "CYP3A4": {
       "modality": "molecule",
@@ -141,15 +101,7 @@
           "basis": "Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 against a random 150,000-molecule sample of pubchem (lower bound)"
         }
       },
-      "structural": {
-        "pubchem10m": {
-          "affected_models": [
-            "chemberta_77m",
-            "molformer_xl"
-          ],
-          "claim": "PubChem is the union source for most public medicinal-chemistry sets; overlap is expected but was not sampled here."
-        }
-      }
+      "structural": {}
     },
     "DeepLoc": {
       "modality": "protein",
