@@ -57,7 +57,9 @@ __pycache__/
 
 # benchmark datasets — fetched via benchmark/download_real_datasets.py,
 # hosted on Hugging Face / Zenodo rather than committed (see BENCHMARK_PROPOSAL.md)
-data/
+# Anchored to the repo root: an unanchored "data/" also matches src/app/data/,
+# which silently excluded application source from the build.
+/data/
 
 # stray local working artifacts — not part of the published repo
 test.csv
