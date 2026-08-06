@@ -10,16 +10,20 @@ Scope and honesty about it
 --------------------------
 Corpus coverage is uneven and the report says so per row:
 
-* **ZINC** is audited directly against a random sample of the real corpus. The
-  reported fraction is therefore a *lower bound* -- sampling can only miss
-  overlap, never invent it.
-* **UniRef50 and the human reference genome** are not sampled here. For those
-  the overlap is structural rather than empirical: DeepLoc entries are UniProt
-  proteins and UniRef50 clusters essentially all of UniProt, and the promoter
-  sequences are excerpts of the same human reference assembly the genomic
-  models were pretrained on. Sampling would produce a number that understates a
-  contamination which is near-total by construction, so the audit records the
-  structural claim instead of a misleading percentage.
+* **ZINC and PubChem** are audited against random samples of the real corpora,
+  and **Swiss-Prot** is searched in full. Every sampled fraction is a *lower
+  bound* -- sampling can only miss overlap, never invent it.
+* **The human reference genome** is not sampled. There the overlap is
+  structural rather than empirical: the promoter sequences are excerpts of the
+  same assembly the genomic models were pretrained on, so coverage is total by
+  definition and there is no independent corpus to search against. Sampling
+  would produce a number that understates a contamination which is total by
+  construction, so the audit records the structural claim instead of a
+  misleading percentage.
+
+A corpus is never reported both ways. Once it has an empirical measurement the
+structural claim is dropped, so a reader is not offered a percentage and a
+hand-wave for the same row.
 
 Usage:
     python benchmark/run_leakage.py [--sample 200000]
@@ -41,10 +45,22 @@ from benchmark.leakage import (AUDIT_DIR, DECLARED_CORPORA, molecule_overlap,
                                sequence_overlap)
 
 CORPORA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "corpora")
-REPORT_PATH = os.path.join(AUDIT_DIR, "leakage_report.json")
+
+# The report is committed; the per-item boolean masks it summarises stay in
+# AUDIT_DIR under the ignored data/ tree. Keeping the summary beside the other
+# study outputs means the numbers STUDY.md quotes are inspectable from a fresh
+# clone, without committing anything that can be regenerated.
+REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
+                           "leakage_report.json")
 
 # Corpora that cover a benchmark's items by construction rather than by
 # sampling. Recorded as a structural claim with its justification.
+#
+# UniRef50 stays here even though Swiss-Prot is now searched empirically,
+# because the two claims are different: the Swiss-Prot figure is a measured
+# lower bound, while this records why the true UniRef50 coverage is higher than
+# any sample of it would show. Corpora with a direct empirical measurement of
+# their own are dropped from a task's structural block by ``_structural_for``.
 STRUCTURAL = {
     "uniref50": ("DeepLoc entries are UniProt proteins and UniRef50 clusters "
                  "essentially all of UniProt at 50% identity, so test proteins "
@@ -52,9 +68,10 @@ STRUCTURAL = {
     "human_ref_genome": ("Promoter sequences are excerpts of the human reference "
                          "assembly used for pretraining, so test sequences are "
                          "contained in the pretraining corpus by construction."),
-    "pubchem10m": ("PubChem is the union source for most public medicinal-chemistry "
-                   "sets; overlap is expected but was not sampled here."),
 }
+
+# Declared-corpus name -> the corpus actually sampled in the empirical audit.
+MEASURED_BY = {"pubchem10m": "pubchem", "zinc250k": "zinc", "zinc": "zinc"}
 
 
 def load_zinc(sample_n, seed=42):
@@ -127,8 +144,30 @@ def load_swissprot(sample_n=None):
     return seqs
 
 
+def _structural_for(modality, empirical):
+    """Structural claims that apply to a modality and were not measured.
+
+    A corpus whose overlap was actually sampled is omitted: reporting a measured
+    percentage and an unquantified "overlap is expected" claim for the same
+    corpus would let a reader take the weaker statement as the finding.
+    """
+    applies = {"protein": ["uniref50"], "genomics": ["human_ref_genome"],
+               "molecule": []}
+    out = {}
+    for corpus in applies.get(modality, []):
+        if MEASURED_BY.get(corpus) in empirical:
+            continue
+        out[corpus] = {
+            "affected_models": [m for m, c in DECLARED_CORPORA.items()
+                                if corpus in c],
+            "claim": STRUCTURAL[corpus],
+        }
+    return out
+
+
 def main(sample_n):
     os.makedirs(AUDIT_DIR, exist_ok=True)
+    os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
     print(f"Loading molecular corpora (sample n={sample_n:,})...", flush=True)
     mol_corpora = {}
     zinc = load_zinc(sample_n)
@@ -185,18 +224,7 @@ def main(sample_n):
             np.save(os.path.join(AUDIT_DIR, f"{task}__swissprot_mask.npy"), mask)
             print(f"     {mask.sum()}/{len(mask)} ({mask.mean():.1%})", flush=True)
 
-        for corpus, justification in STRUCTURAL.items():
-            models = [m for m, c in DECLARED_CORPORA.items() if corpus in c]
-            relevant = (
-                (corpus == "uniref50" and data["modality"] == "protein")
-                or (corpus == "human_ref_genome" and data["modality"] == "genomics")
-                or (corpus == "pubchem10m" and data["modality"] == "molecule")
-            )
-            if relevant:
-                entry["structural"][corpus] = {
-                    "affected_models": models,
-                    "claim": justification,
-                }
+        entry["structural"] = _structural_for(data["modality"], entry["empirical"])
 
         report["tasks"][task] = entry
 

@@ -1,0 +1,521 @@
+{
+  "BBBP": {
+    "leader": "rdkit2d",
+    "leader_score": 0.9176,
+    "n_test": 205,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "chemberta_zinc": {
+        "score": 0.9048,
+        "delta": 0.0127,
+        "ci_low": -0.0139,
+        "ci_high": 0.0393,
+        "p_raw": 0.334,
+        "p_holm": 0.468,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "molformer_xl": {
+        "score": 0.9013,
+        "delta": 0.0163,
+        "ci_low": -0.0087,
+        "ci_high": 0.0416,
+        "p_raw": 0.234,
+        "p_holm": 0.468,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.8927,
+        "delta": 0.0248,
+        "ci_low": -0.0043,
+        "ci_high": 0.0581,
+        "p_raw": 0.096,
+        "p_holm": 0.288,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "ecfp4": {
+        "score": 0.8826,
+        "delta": 0.0349,
+        "ci_low": 0.0027,
+        "ci_high": 0.0696,
+        "p_raw": 0.046,
+        "p_holm": 0.184,
+        "significant": false,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "ClinTox": {
+    "leader": "molformer_xl",
+    "leader_score": 0.8968,
+    "n_test": 148,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "chemberta_zinc": {
+        "score": 0.8597,
+        "delta": 0.0372,
+        "ci_low": -0.0416,
+        "ci_high": 0.1202,
+        "p_raw": 0.334,
+        "p_holm": 0.334,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "ecfp4": {
+        "score": 0.8109,
+        "delta": 0.0859,
+        "ci_low": -0.0012,
+        "ci_high": 0.193,
+        "p_raw": 0.058,
+        "p_holm": 0.132,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "rdkit2d": {
+        "score": 0.8003,
+        "delta": 0.0965,
+        "ci_low": 0.012,
+        "ci_high": 0.2031,
+        "p_raw": 0.018,
+        "p_holm": 0.072,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.7837,
+        "delta": 0.1131,
+        "ci_low": 0.0051,
+        "ci_high": 0.2397,
+        "p_raw": 0.044,
+        "p_holm": 0.132,
+        "significant": false,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "BACE": {
+    "leader": "molformer_xl",
+    "leader_score": 0.8635,
+    "n_test": 152,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "ecfp4": {
+        "score": 0.8601,
+        "delta": 0.0035,
+        "ci_low": -0.0515,
+        "ci_high": 0.0573,
+        "p_raw": 0.88,
+        "p_holm": 1.0,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_zinc": {
+        "score": 0.8571,
+        "delta": 0.0064,
+        "ci_low": -0.0325,
+        "ci_high": 0.0571,
+        "p_raw": 0.808,
+        "p_holm": 1.0,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.8402,
+        "delta": 0.0234,
+        "ci_low": -0.0176,
+        "ci_high": 0.066,
+        "p_raw": 0.268,
+        "p_holm": 0.804,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "rdkit2d": {
+        "score": 0.817,
+        "delta": 0.0466,
+        "ci_low": -0.0119,
+        "ci_high": 0.1028,
+        "p_raw": 0.11,
+        "p_holm": 0.44,
+        "significant": false,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "ESOL": {
+    "leader": "rdkit2d",
+    "leader_score": 0.9185,
+    "n_test": 114,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "molformer_xl": {
+        "score": 0.9063,
+        "delta": 0.0122,
+        "ci_low": -0.0314,
+        "ci_high": 0.0519,
+        "p_raw": 0.506,
+        "p_holm": 0.506,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.8398,
+        "delta": 0.0787,
+        "ci_low": 0.0231,
+        "ci_high": 0.1472,
+        "p_raw": 0.002,
+        "p_holm": 0.004,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "chemberta_zinc": {
+        "score": 0.793,
+        "delta": 0.1254,
+        "ci_low": 0.0631,
+        "ci_high": 0.2025,
+        "p_raw": 0.001,
+        "p_holm": 0.004,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "ecfp4": {
+        "score": 0.5924,
+        "delta": 0.3261,
+        "ci_low": 0.2116,
+        "ci_high": 0.444,
+        "p_raw": 0.001,
+        "p_holm": 0.004,
+        "significant": true,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "Lipophilicity": {
+    "leader": "molformer_xl",
+    "leader_score": 0.641,
+    "n_test": 420,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "rdkit2d": {
+        "score": 0.6409,
+        "delta": 0.0001,
+        "ci_low": -0.0599,
+        "ci_high": 0.0662,
+        "p_raw": 0.97,
+        "p_holm": 1.0,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.6376,
+        "delta": 0.0034,
+        "ci_low": -0.0453,
+        "ci_high": 0.0519,
+        "p_raw": 0.866,
+        "p_holm": 1.0,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "ecfp4": {
+        "score": 0.5883,
+        "delta": 0.0527,
+        "ci_low": -0.0213,
+        "ci_high": 0.1344,
+        "p_raw": 0.154,
+        "p_holm": 0.462,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_zinc": {
+        "score": 0.51,
+        "delta": 0.131,
+        "ci_low": 0.0542,
+        "ci_high": 0.2064,
+        "p_raw": 0.002,
+        "p_holm": 0.008,
+        "significant": true,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "CYP3A4": {
+    "leader": "ecfp4",
+    "leader_score": 0.8463,
+    "n_test": 1234,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "molformer_xl": {
+        "score": 0.8462,
+        "delta": 0.0001,
+        "ci_low": -0.0195,
+        "ci_high": 0.0202,
+        "p_raw": 1.0,
+        "p_holm": 1.0,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "rdkit2d": {
+        "score": 0.8335,
+        "delta": 0.0128,
+        "ci_low": -0.0089,
+        "ci_high": 0.0345,
+        "p_raw": 0.258,
+        "p_holm": 0.516,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "chemberta_77m": {
+        "score": 0.8194,
+        "delta": 0.0269,
+        "ci_low": 0.0064,
+        "ci_high": 0.047,
+        "p_raw": 0.006,
+        "p_holm": 0.024,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "chemberta_zinc": {
+        "score": 0.816,
+        "delta": 0.0303,
+        "ci_low": 0.0081,
+        "ci_high": 0.0542,
+        "p_raw": 0.006,
+        "p_holm": 0.024,
+        "significant": true,
+        "n_boot_valid": 1000
+      }
+    }
+  },
+  "DeepLoc": {
+    "leader": "esm2_650m",
+    "leader_score": 0.7473,
+    "n_test": 2782,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "esm2_150m": {
+        "score": 0.7308,
+        "delta": 0.0165,
+        "ci_low": 0.0032,
+        "ci_high": 0.0306,
+        "p_raw": 0.018,
+        "p_holm": 0.018,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "protbert": {
+        "score": 0.7052,
+        "delta": 0.0421,
+        "ci_low": 0.0273,
+        "ci_high": 0.0572,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_35m": {
+        "score": 0.7045,
+        "delta": 0.0428,
+        "ci_low": 0.0277,
+        "ci_high": 0.0572,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_8m": {
+        "score": 0.6639,
+        "delta": 0.0834,
+        "ci_low": 0.0658,
+        "ci_high": 0.0999,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "kmer3_protein": {
+        "score": 0.5288,
+        "delta": 0.2185,
+        "ci_low": 0.1988,
+        "ci_high": 0.2398,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      }
+    },
+    "ladders": {
+      "esm2_scale": {
+        "rungs": [
+          "esm2_8m",
+          "esm2_35m",
+          "esm2_150m",
+          "esm2_650m"
+        ],
+        "steps": {
+          "esm2_8m->esm2_35m": {
+            "delta": 0.0406,
+            "ci_low": 0.0255,
+            "ci_high": 0.055,
+            "p_raw": 0.001,
+            "p_holm": 0.003,
+            "direction": "improves",
+            "significant": true
+          },
+          "esm2_35m->esm2_150m": {
+            "delta": 0.0262,
+            "ci_low": 0.0126,
+            "ci_high": 0.0392,
+            "p_raw": 0.001,
+            "p_holm": 0.003,
+            "direction": "improves",
+            "significant": true
+          },
+          "esm2_150m->esm2_650m": {
+            "delta": 0.0165,
+            "ci_low": 0.0032,
+            "ci_high": 0.0306,
+            "p_raw": 0.018,
+            "p_holm": 0.018,
+            "direction": "improves",
+            "significant": true
+          }
+        }
+      }
+    }
+  },
+  "Fluorescence": {
+    "leader": "kmer3_protein",
+    "leader_score": 0.6755,
+    "n_test": 27217,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "protbert": {
+        "score": 0.6615,
+        "delta": 0.014,
+        "ci_low": 0.0114,
+        "ci_high": 0.0171,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_650m": {
+        "score": 0.6138,
+        "delta": 0.0617,
+        "ci_low": 0.0567,
+        "ci_high": 0.0671,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_35m": {
+        "score": 0.5924,
+        "delta": 0.0831,
+        "ci_low": 0.0775,
+        "ci_high": 0.0887,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_150m": {
+        "score": 0.5835,
+        "delta": 0.0921,
+        "ci_low": 0.0859,
+        "ci_high": 0.098,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      },
+      "esm2_8m": {
+        "score": 0.5724,
+        "delta": 0.1032,
+        "ci_low": 0.0971,
+        "ci_high": 0.1092,
+        "p_raw": 0.001,
+        "p_holm": 0.005,
+        "significant": true,
+        "n_boot_valid": 1000
+      }
+    },
+    "ladders": {
+      "esm2_scale": {
+        "rungs": [
+          "esm2_8m",
+          "esm2_35m",
+          "esm2_150m",
+          "esm2_650m"
+        ],
+        "steps": {
+          "esm2_8m->esm2_35m": {
+            "delta": 0.02,
+            "ci_low": 0.0141,
+            "ci_high": 0.0262,
+            "p_raw": 0.001,
+            "p_holm": 0.003,
+            "direction": "improves",
+            "significant": true
+          },
+          "esm2_35m->esm2_150m": {
+            "delta": -0.0089,
+            "ci_low": -0.0154,
+            "ci_high": -0.003,
+            "p_raw": 0.008,
+            "p_holm": 0.008,
+            "direction": "REGRESSES",
+            "significant": true
+          },
+          "esm2_150m->esm2_650m": {
+            "delta": 0.0303,
+            "ci_low": 0.0236,
+            "ci_high": 0.0363,
+            "p_raw": 0.001,
+            "p_holm": 0.003,
+            "direction": "improves",
+            "significant": true
+          }
+        }
+      }
+    }
+  },
+  "Promoters": {
+    "leader": "hyenadna",
+    "leader_score": 0.9381,
+    "n_test": 1571,
+    "n_boot": 1000,
+    "correction": "Holm-Bonferroni within task",
+    "comparisons": {
+      "nucleotide_transformer": {
+        "score": 0.9363,
+        "delta": 0.0018,
+        "ci_low": -0.0043,
+        "ci_high": 0.0081,
+        "p_raw": 0.566,
+        "p_holm": 0.566,
+        "significant": false,
+        "n_boot_valid": 1000
+      },
+      "kmer5_dna": {
+        "score": 0.9304,
+        "delta": 0.0077,
+        "ci_low": 0.0007,
+        "ci_high": 0.0149,
+        "p_raw": 0.03,
+        "p_holm": 0.06,
+        "significant": false,
+        "n_boot_valid": 1000
+      }
+    }
+  }
+}

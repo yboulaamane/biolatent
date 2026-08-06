@@ -29,7 +29,11 @@ runs real inference:
 | Phase A | `embed.py` | Real frozen embeddings from real checkpoints, cached to disk |
 | Phase B | `probe.py` | Linear probe (ranked) and fixed MLP (diagnostic) |
 | Audit | `leakage.py`, `run_leakage.py` | Pretraining-corpus overlap per task |
+| Significance | `paired_test.py` | Paired bootstrap of each model against the task leader |
 | Runner | `run_study.py` | Orchestrates, resumable, never back-fills a failure |
+
+Environment is pinned in `benchmark/requirements.txt`; MoLFormer-XL's separate
+interpreter is built by `benchmark/setup_molformer_env.sh` (see §6).
 
 ---
 
@@ -39,9 +43,20 @@ runs real inference:
 Pooling is pinned rather than chosen per model because CLS-versus-mean pooling
 alone can move a score by several points; leaving it free would let that choice
 masquerade as a difference between representations. Truncation is fixed per
-modality (proteins 1022, genomics 512, molecules 256 tokens). Each cached
-matrix carries a sidecar JSON with checkpoint, dimension, pooling, truncation
-and a content hash.
+modality (proteins 512, genomics 512, molecules 256 tokens) and recorded in
+every cached sidecar JSON alongside checkpoint, dimension, pooling and a
+content hash.
+
+> Protein truncation at 512 is a real constraint on the DeepLoc results, not a
+> neutral setting. ESM-2 accepts 1022 residues, and **38.6% of DeepLoc
+> sequences are longer than 512** (median 426, maximum 2000), so for well over a
+> third of that task every transformer sees a truncated protein and any
+> localisation signal past residue 512 is invisible to it. The limit was imposed
+> by 4.3 GB of VRAM and applies identically to all models, so the comparison
+> between them is fair — but absolute DeepLoc numbers would likely move if it
+> were lifted, and the 3-mer baseline, computed over the full sequence, is not
+> subject to it at all. Fluorescence is unaffected: every sequence is 237
+> residues.
 
 **Probes.** The ranked metric is an L2-regularised linear probe. Regularisation
 is selected from one fixed grid by 3-fold cross-validation on the training
@@ -119,58 +134,92 @@ Ranked metric, linear probe. Best score per task in bold.
 
 Metrics: ROC-AUC for BBBP/ClinTox/BACE/CYP3A4, Spearman ρ for ESOL/Lipophilicity.
 
-### The rankings above are not statistically supported
+### Which of these differences are real
 
-Each score carries a 95% percentile bootstrap interval over the test set
-(1,000 resamples). Comparing each model against the task leader:
+Every model is compared against its task's leader by **paired bootstrap**
+(`benchmark/paired_test.py`, 1,000 resamples). Both models are scored on the
+same test molecules, so the test set is resampled once per replicate and the
+statistic is the *difference*: shared difficulty cancels and what remains is
+genuine disagreement between the two models on the same items. Because each
+task runs one test per non-leading model, p-values are **Holm-corrected within
+the task**.
 
-| Task | Test n | Leader | 95% CI | Models overlapping the leader |
-| :--- | ---: | :--- | :--- | ---: |
-| BBBP | 205 | RDKit2D 0.9176 | [0.876, 0.952] | **4 of 4** |
-| ClinTox | 148 | MoLFormer-XL 0.8968 | [0.791, 0.982] | **4 of 4** |
-| BACE | 152 | MoLFormer-XL 0.8635 | [0.801, 0.918] | **4 of 4** |
-| ESOL | 114 | RDKit2D 0.9185 | [0.862, 0.949] | 2 of 4 |
-| Lipophilicity | 420 | MoLFormer-XL 0.6410 | [0.575, 0.702] | **4 of 4** |
-| CYP3A4 | 1234 | ECFP4 0.8463 | [0.824, 0.867] | **4 of 4** |
+| Task | Test n | Leader | Reliably below the leader | Tied with the leader |
+| :--- | ---: | :--- | :--- | :--- |
+| BBBP | 205 | RDKit2D 0.9176 | — | all 4 |
+| ClinTox | 148 | MoLFormer-XL 0.8968 | — | all 4 |
+| BACE | 152 | MoLFormer-XL 0.8635 | — | all 4 |
+| ESOL | 114 | RDKit2D 0.9185 | ECFP4, ChemBERTa-ZINC, ChemBERTa-77M | MoLFormer-XL |
+| Lipophilicity | 420 | MoLFormer-XL 0.6410 | ChemBERTa-ZINC | RDKit2D, ChemBERTa-77M, ECFP4 |
+| CYP3A4 | 1234 | ECFP4 0.8463 | ChemBERTa-77M, ChemBERTa-ZINC | MoLFormer-XL, RDKit2D |
 
-**On five of six molecular tasks, every representation is statistically
-indistinguishable from every other.** The only separations that survive are on
-ESOL, where ECFP4 (0.592) and ChemBERTa-ZINC (0.793) fall genuinely below the
-leading cluster of RDKit2D, MoLFormer-XL and ChemBERTa-77M.
+Per-comparison deltas, intervals and Holm-adjusted p-values are in
+`results/paired_comparisons.json`.
 
-The cause is test-set size. These scaffold-split test sets hold 114 to 420
-molecules; ClinTox's 148-molecule test set yields a ROC-AUC interval **0.19 wide
-for the leader and 0.34 wide for ECFP4**. No ranking is recoverable at that
-resolution. The differences the table appears to show — and that the wider
-literature routinely reports on these same benchmarks — are smaller than the
-uncertainty of the measurement.
+Six of twenty-four comparisons survive. **No task separates its leader from the
+whole field** — every task's top is a statistical tie of two or more
+representations — but on three tasks the *bottom* of the table is real.
 
-> **This is the third time these results changed a conclusion, and the pattern
-> is the finding.** First the roster: with only two small SMILES BERTs standing
-> in for pretrained models, the data said "classical descriptors win five of
-> six". Adding MoLFormer-XL turned that into "two wins each, two ties". Adding
-> confidence intervals turned *that* into "almost nothing here is
-> distinguishable". Each intermediate claim was a faithful reading of the
-> numbers then in hand, and each was wrong. A single-number leaderboard over
-> small test sets will produce a ranking whatever the data does, and it will
-> look convincing.
+Counting how often each representation sits in the statistically tied top group
+is the most that these six tasks support, and it is deliberately not a ranking:
 
-What can be said honestly about the molecular tasks:
+| Representation | In the top group on |
+| :--- | ---: |
+| RDKit2D (210d) | 6 of 6 |
+| MoLFormer-XL (768d) | 6 of 6 |
+| ECFP4 (1024d) | 5 of 6 |
+| ChemBERTa-77M (384d) | 4 of 6 |
+| ChemBERTa-ZINC (768d) | 3 of 6 |
 
-- **No representation is demonstrably best.** Across six tasks and five
-  representations, the only reliable statements are negative ones.
+> **A note on the test itself, because an earlier version of this document got
+> it wrong.** The first analysis compared each model's independent 95% interval
+> against the leader's and called any overlap a tie. That is a real test but a
+> badly conservative one, since it discards the fact that both models saw the
+> same test items; it found only 2 separations. The paired test finds 10 before
+> correction and 6 after. The conclusion below is similar to the one that wrong
+> test produced, but it is now reached by a test that could have contradicted it.
+
+What holds up:
+
+- **No representation is demonstrably best on any molecular task.** Six tasks,
+  five representations, and not one leader is separated from its runner-up.
 - **ECFP4 is genuinely poor for solubility regression** (ESOL ρ = 0.592 against
-  RDKit2D's 0.918, non-overlapping). A binary fingerprint is a poor substrate
-  for a continuous physicochemical target.
-- **Pretraining buys nothing measurable here.** MoLFormer-XL, trained on ~1.1B
-  molecules, cannot be distinguished from a 210-dimensional RDKit descriptor
-  vector on any of the six tasks.
+  RDKit2D's 0.918, Δ = 0.326, Holm p = 0.004). A binary fingerprint is a poor
+  substrate for a continuous physicochemical target — this is the largest
+  effect anywhere in the molecular suite.
+- **The two ChemBERTa variants are the weakest entries.** ChemBERTa-ZINC falls
+  reliably below the leader on three of six tasks and ChemBERTa-77M on two;
+  MoLFormer-XL and RDKit2D never do. Small SMILES BERTs are not
+  interchangeable with the pretrained model they are often used to stand in for.
+- **Pretraining is not distinguishable from descriptors.** MoLFormer-XL
+  (~1.1B molecules) and a 210-dimensional RDKit descriptor vector are in the
+  tied top group on all six tasks and are never separated from each other in
+  either direction.
 
-That last point is the one that connects to Sultan et al. (*J. Cheminform.* 2026,
+Where separations survive, it is because the effect is large (ESOL, Δ up to
+0.33) or the test set is (CYP3A4, n = 1234). BBBP, ClinTox and BACE have
+neither: their scaffold-split test sets hold 148–205 molecules, and ClinTox's
+148 yield a leader interval **0.19 wide**. At that resolution the differences
+these benchmarks appear to show — and that the wider literature routinely
+reports on these same task names — are smaller than the measurement.
+
+> **This is the fourth time these results changed a conclusion, and the pattern
+> is the finding.** With only two small SMILES BERTs standing in for pretrained
+> models, the data said "classical descriptors win five of six". Adding
+> MoLFormer-XL turned that into "two wins each, two ties". Adding confidence
+> intervals turned *that* into "almost nothing is distinguishable". Replacing
+> the interval-overlap test with the correct paired one brought six separations
+> back — none of them at the top of a table. Each intermediate claim was a
+> faithful reading of the numbers then in hand, and each was wrong. A
+> single-number leaderboard over small test sets will produce a ranking whatever
+> the data does, and it will look convincing.
+
+This connects to Sultan et al. (*J. Cheminform.* 2026,
 10.1186/s13321-026-01252-z). Their conclusion that descriptor baselines remain
-competitive is consistent with what is found here — but the stronger reading is
-that **these benchmarks lack the resolution to support either claim**, theirs or
-its opposite.
+competitive is consistent with what is found here — RDKit2D is never beaten by
+a pretrained model on any of these six tasks. But the stronger reading is that
+**these benchmarks lack the resolution to support either claim**, theirs or its
+opposite.
 
 **The linear-to-MLP gap is small and usually negative** (range −0.157 to +0.040).
 Adding non-linear capacity on top of these frozen embeddings rarely helps, so
@@ -190,25 +239,79 @@ what the representations encode is largely linearly accessible.
 | ProtBERT | 1024 | 0.7052 | 0.6615 |
 
 **Unlike the molecular tasks, these separations are real.** DeepLoc's test set
-holds 2,782 proteins and Fluorescence's 27,217, so the bootstrap intervals are
-narrow (0.033 and 0.017 wide respectively). On DeepLoc every model below ESM-2
-150M is separated from the leader; on Fluorescence every ESM-2 variant is
-separated from the k-mer baseline. Test-set size, not modality, is what decides
-whether a benchmark can rank anything.
+holds 2,782 proteins and Fluorescence's 27,217. Under the same paired bootstrap
+and the same Holm correction that erased almost everything in §4, **every single
+comparison on both protein tasks survives** — ten of ten, against six of
+twenty-four on the molecular side.
+
+| Task | Leader | Reliably below the leader (Holm-corrected) |
+| :--- | :--- | :--- |
+| DeepLoc | ESM-2 650M 0.7473 | ESM-2 150M, ProtBERT, ESM-2 35M, ESM-2 8M, 3-mer — **all 5** |
+| Fluorescence | 3-mer 0.6755 | ProtBERT, ESM-2 650M/35M/150M/8M — **all 5** |
+
+Even the narrowest gaps resolve: ESM-2 150M sits 0.0165 below ESM-2 650M on
+DeepLoc (p = 0.018), and ProtBERT 0.0140 below the 3-mer baseline on
+Fluorescence (p = 0.005).
+
+Test-set size, not modality, is what decides whether a benchmark can rank
+anything. ClinTox cannot establish a **0.113** ROC-AUC gap on 148 molecules;
+Fluorescence establishes a **0.014** Spearman gap — eight times smaller — on
+27,217 sequences.
 
 The two protein tasks point in **opposite directions**, and the reason is
 informative rather than noise.
 
-**On DeepLoc, pretrained representations win decisively and scale helps.** ESM-2
-8M is 13.5 points above 3-mer frequency while using 25× fewer dimensions, and
-the ladder is monotonic across all four ESM-2 sizes (0.664 → 0.705 → 0.731 →
-0.747). Returns flatten sharply: 8M → 35M buys 4.1 points, 35M → 150M buys 2.6,
-150M → 650M buys 1.7 for 4.3× the parameters. ProtBERT (0.7052) lands between
-ESM-2 35M and 150M despite being larger than either.
+**On DeepLoc, pretrained representations win decisively.** ESM-2 650M is
+separated from all five other entries, and the 3-mer baseline trails it by 21.9
+points while using 6× more dimensions. Even the smallest ESM-2 (8M, 320
+dimensions) scores 13.5 points above 3-mer frequency at 25× fewer dimensions —
+a gap larger than several that were tested and confirmed, though that specific
+pair was not itself tested (limitation 10).
 
-**On Fluorescence, the 3-mer baseline beats every protein language model.** It
-leads ProtBERT by 1.4 points and ESM-2 650M by 6.2. The scale ladder still rises
-(0.572 → 0.584 → 0.614) but never reaches a plain k-mer count.
+ProtBERT (0.7052) and ESM-2 35M (0.7045) differ by 0.0007 and sit 0.0421 and
+0.0428 below the leader respectively — the same distance to within a
+thousandth. An earlier version of this document said ProtBERT "lands between
+ESM-2 35M and 150M"; that was a ranking read off a gap far inside the noise,
+and it is withdrawn. What can be said is that ProtBERT, at 1024 dimensions and
+more parameters than either, is not distinguishable from ESM-2 35M.
+
+**Here scale does help, at every step, with diminishing returns.** Each
+consecutive ESM-2 step tested against the one below it:
+
+| Step | Δ accuracy | 95% CI | Holm p | |
+| :--- | ---: | :--- | ---: | :--- |
+| 8M → 35M | +0.0406 | [+0.026, +0.055] | 0.003 | improves |
+| 35M → 150M | +0.0262 | [+0.013, +0.039] | 0.003 | improves |
+| 150M → 650M | +0.0165 | [+0.003, +0.031] | 0.018 | improves |
+
+Every step is a reliable gain and each buys less than the one before — 4.1, then
+2.6, then 1.7 points, the last for 4.3× the parameters. This is the one place in
+the suite where a scale ladder behaves the way the scaling literature would
+predict, and it is now tested rather than asserted.
+
+**On Fluorescence, the 3-mer baseline beats every protein language model** —
+reliably, all five of them. It leads ProtBERT by 1.4 points and ESM-2 650M by
+6.2, and both gaps clear Holm correction.
+
+Here the scale ladder does **not** simply rise. Testing each consecutive ESM-2
+step against the one below it (a pre-specified family, Holm-corrected within it):
+
+| Step | Δ Spearman ρ | 95% CI | Holm p | |
+| :--- | ---: | :--- | ---: | :--- |
+| 8M → 35M | +0.0200 | [+0.014, +0.026] | 0.003 | improves |
+| 35M → 150M | **−0.0089** | [−0.015, −0.003] | 0.008 | **reliably worse** |
+| 150M → 650M | +0.0303 | [+0.024, +0.036] | 0.003 | improves |
+
+The middle step is not noise around a flat trend: the interval lies entirely
+below zero, so on this task a 4.3× larger model is **reliably worse** than the
+one it replaces. Scale is not monotonic here, and a table of six scores read
+top-to-bottom would not reveal that.
+
+The same four checkpoints, the same probe and the same test therefore give
+**opposite verdicts on whether scale helps**, depending only on which task they
+are pointed at: three reliable gains on DeepLoc, a reliable loss in the middle
+of the ladder on Fluorescence. "Does a bigger protein language model produce a
+better frozen embedding?" has no task-independent answer here.
 
 This is a pooling artefact, and it is *this study's* artefact. Fluorescence is a
 mutational scan: all 54,025 sequences are 237-residue GFP variants differing at
@@ -237,9 +340,13 @@ tasks that choice dominates the result.
 | Nucleotide Transformer 500M | 1280 | 0.9363 |
 | HyenaDNA tiny | 128 | **0.9381** |
 
-**All three are within 0.008 of each other, and all three overlap** (intervals
-≈0.024 wide on 1,571 test sequences). A 500M-parameter genomic foundation model
-is not distinguishable from counting 5-mers on this task.
+**All three are within 0.008 of each other and none is separated from the
+leader** (paired bootstrap, Holm-corrected, n = 1,571). Nucleotide Transformer
+sits 0.0018 below HyenaDNA (p = 0.57) and the 5-mer baseline 0.0077 below
+(raw p = 0.030, Holm p = 0.060 — the one comparison in the suite that changes
+verdict under correction, and it lands on the wrong side). A 500M-parameter
+genomic foundation model is not distinguishable from counting 5-mers on this
+task, and neither is distinguishable from a 128-dimensional HyenaDNA.
 
 Read alongside §5, this is the least reassuring result in the suite: the
 promoter sequences are excerpts of the very assembly both pretrained models were
@@ -334,8 +441,15 @@ independent corpus to search against.
 The protein and genomic tasks cannot be read as measuring generalisation to
 unseen sequences — at 99.5% and 100% coverage, they measure how much of a
 memorised corpus a model retains and how linearly that content is exposed. The
-ESM-2 scale ladder in §4b is best read that way: a larger model recovering more
-of what it has already seen.
+ESM-2 scale ladder on DeepLoc is best read that way: a larger model recovering
+more of what it has already seen, reliably, at every step.
+
+But coverage does not explain the ladders on its own. DeepLoc and Fluorescence
+are contaminated at 99.5% and 100% respectively — effectively equally — and the
+same four checkpoints climb monotonically on the first while reversing in the
+middle of the second. Leakage sets a ceiling on what a score can be claimed to
+demonstrate; it does not determine which model reaches it. The readout does, and
+here that readout is the mean pooling of decision D1.
 
 That is not a reason to discard the tasks, but it is a reason to stop presenting
 a single number per model as evidence of generalisation. The suite reports the
@@ -345,7 +459,8 @@ leakage fraction beside every score for exactly this reason.
 
 ## 6. Model roster
 
-Fourteen entries were specified; thirteen ran.
+Fourteen entries were specified and all fourteen ran, producing 45 filled
+(model, task) cells.
 
 **Molecules** — ECFP4, RDKit2D, ChemBERTa-77M-MLM, ChemBERTa-ZINC-base,
 MoLFormer-XL.
@@ -395,7 +510,28 @@ registry.
    **not** cover variance from the split itself; re-drawing the scaffold split
    under different seeds would widen the molecular intervals further, making the
    molecular non-separation conclusion stronger rather than weaker.
-7. **Concurrent runners previously lost results.** Each runner held a snapshot
+7. **The leader is selected on the test set that then judges it.** Each task's
+   comparisons are made against whichever model scored highest on that task, so
+   every leader-versus-challenger gap carries a winner's curse and is biased
+   upward. Holm correction controls multiplicity across the models compared;
+   it does not touch this selection bias. The direction is what matters for
+   reading the results: a reported separation may be optimistic, while a
+   reported **tie is if anything conservative** — so "these two cannot be told
+   apart" is the safer of the two conclusions this suite produces, and it is
+   the one most of the molecular table supports.
+8. **Bootstrap p-values bottom out at 0.001.** With 1,000 replicates no smaller
+   value is resolvable, so `p = 0.001` in `results/paired_comparisons.json`
+   means "at the resolution floor", not an exact figure.
+9. **Proteins are truncated at 512 residues**, below ESM-2's 1022 limit, which
+    affects 38.6% of DeepLoc sequences. The cap is uniform across models so
+    their comparison is fair, but it depresses absolute DeepLoc scores for
+    every transformer while leaving the full-sequence 3-mer baseline untouched.
+10. **Only two families of comparison were tested.** Each model against its
+    task's leader, and each consecutive step of the ESM-2 scale ladder. Other
+    pairs — ProtBERT against ESM-2 150M, say — carry no test here, and a
+    difference between two of them should not be read as established merely
+    because their scores differ.
+11. **Concurrent runners previously lost results.** Each runner held a snapshot
    of the results file taken at start-up, so the last writer erased cells
    computed by the other; six MoLFormer-XL results were destroyed this way and
    had to be recomputed. Saving now merges against the file on disk. Any results

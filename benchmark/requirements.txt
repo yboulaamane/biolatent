@@ -1,0 +1,25 @@
+# BioLatent benchmark — main environment
+#
+# Versions are the ones the reported results in STUDY.md were produced under,
+# on Python 3.11.15. They are pinned rather than bounded because probe scores
+# are sensitive to solver defaults: scikit-learn has changed LogisticRegression
+# and Ridge convergence behaviour across minor releases, and a different
+# version can move a ROC-AUC in the third decimal without any error.
+#
+# MoLFormer-XL does NOT run here. It needs transformers >= 5, which the rest of
+# the pipeline is not pinned to; see setup_molformer_env.sh.
+
+torch==2.13.0
+transformers==4.50.3
+tokenizers==0.21.4
+datasets==2.19.2
+numpy==1.26.4
+scipy==1.17.1
+scikit-learn==1.8.0
+pandas==2.3.3
+rdkit==2023.9.6
+PyTDC==1.1.15
+
+# Protein leakage audit. Not a Python package -- install via conda/mamba
+# (`mamba install -c bioconda mmseqs2`) or from the upstream release.
+# Version used: MMseqs2 18.8cc5c
