@@ -18,6 +18,7 @@ This log registers the core design rules, constraints, and features established 
 * **Missing Scores (N/A)**: If a model was not evaluated on a task (e.g. structural models like AlphaFold 2 on 2D property classifiers), report `N/A`. Do not synthesize values to fill empty grid fields.
 
 ## 3. Implemented Features
+* **Measured Benchmark tab (landing tab)**: Renders the frozen-embedding study from `results/*.json` via `src/app/data/study.ts` and `src/app/components/StudyTab.tsx`. Scores, 95% intervals, paired-bootstrap verdicts against each task leader, ESM-2 scale ladders and the leakage audit. **Never mix these with registry values** — these were measured here, registry values were transcribed from papers under incompatible protocols. Headline counts (45 cells, 6/24, 10/10) are *computed* from the JSON, never hardcoded, so they cannot go stale when the study is re-run.
 * **Registry & Filter Sidebar**: Fully searchable directory filtering by biological modality, license, representation type, and input format.
 * **Selection Wizard**: Rules recommending optimal representations based on targets, datasets, and hardware budgets.
 * **Interactive SVG Scatter Plot**: Maps embedding dimension size (log-scale X-axis) against scores (linear Y-axis) with custom hover tooltips.

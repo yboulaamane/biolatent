@@ -2,10 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { EMBEDDINGS, RepresentationEntry, FixedDescriptor, LearnedEmbedding, HybridRepresentation } from './data/embeddings';
+import StudyTab from './components/StudyTab';
 
 export default function Home() {
-  // Navigation Tabs
-  const [activeTab, setActiveTab] = useState<'directory' | 'wizard' | 'benchmarks'>('directory');
+  // Navigation Tabs. The measured study is the landing tab: it is the only
+  // content on this site where every number was produced by running the model.
+  const [activeTab, setActiveTab] = useState<'study' | 'directory' | 'wizard' | 'benchmarks'>('study');
 
   // Search & Filtering States
   const [searchQuery, setSearchQuery] = useState('');
@@ -374,6 +376,12 @@ export default function Home() {
           
           <div className="tabs-nav">
             <button
+              className={`tab-btn ${activeTab === 'study' ? 'active' : ''}`}
+              onClick={() => setActiveTab('study')}
+            >
+              Measured Benchmark
+            </button>
+            <button
               className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
               onClick={() => setActiveTab('directory')}
             >
@@ -392,11 +400,14 @@ export default function Home() {
               className={`tab-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
               onClick={() => setActiveTab('benchmarks')}
             >
-              Benchmarks
+              Literature Scores
             </button>
           </div>
         </div>
       </header>
+
+      {/* ==================== TAB 0: MEASURED STUDY ==================== */}
+      {activeTab === 'study' && <StudyTab />}
 
       {/* ==================== TAB 1: REGISTRY DIRECTORY ==================== */}
       {activeTab === 'directory' && (
@@ -773,10 +784,23 @@ export default function Home() {
       {/* ==================== TAB 3: BENCHMARKS ==================== */}
       {activeTab === 'benchmarks' && (
         <div className="glass-card">
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>MoleculeNet & Protein Downstream Benchmarks</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-            Comparison of reported benchmark scores across molecular and biological representations.
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Literature Scores — as reported by their authors</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1rem' }}>
+            Benchmark values transcribed from primary publications, each linked to its source table, split and DOI.
           </p>
+          <div style={{
+            marginBottom: '1.5rem', padding: '0.9rem 1.15rem',
+            background: 'rgba(251, 191, 36, 0.07)',
+            border: '1px solid rgba(251, 191, 36, 0.22)', borderRadius: '12px',
+            color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6,
+          }}>
+            <strong style={{ color: '#fbbf24' }}>These numbers were not measured by us, and they are not comparable with each other.</strong>{' '}
+            Each was computed by a different group under a different split, readout and downstream head, so the ordering of a column here
+            reflects those choices as much as the representations. They carry no uncertainty and no significance test.
+            For values produced under one protocol on our hardware, with confidence intervals, paired significance tests and a
+            leakage audit, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab — which finds that most
+            differences of this size cannot be established at all.
+          </div>
 
           {/* Scientific Methodology Card */}
           <div style={{ marginBottom: '2rem' }}>
@@ -816,12 +840,16 @@ export default function Home() {
                     <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <li><strong>BBBP, ClinTox, CYP3A4 Substrate</strong>: Evaluated using Classification Area Under the ROC Curve (ROC-AUC) ↑.</li>
                       <li><strong>ESOL (Solubility), Lipophilicity</strong>: Evaluated using Regression Root Mean Square Error (RMSE) ↓.</li>
+                      <li style={{ color: '#fbbf24' }}><strong>Note on CYP3A4.</strong> This column is CYP3A4 <em>substrate</em> prediction (TDC <code>cyp3a4s</code>). The Measured Benchmark tab uses CYP3A4 <em>inhibition</em> (<code>CYP3A4_Veith</code>), a different and much larger dataset. The two are not comparable.</li>
                     </ul>
                   </div>
                   <div>
                     <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Protein & Genomics Protocols</h4>
                     <p style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                      Protein benchmarks follow standard homology-split protocols (such as sequence identity clusters or CATH topology limits) to prevent data leakage from homologous training structures.
+                      Protein benchmarks are <strong>reported</strong> under homology-split protocols (sequence identity clusters or CATH topology limits), which are intended to limit leakage from homologous training sequences.
+                    </p>
+                    <p style={{ marginBottom: '0.75rem', lineHeight: '1.4', color: '#fbbf24' }}>
+                      <strong>Measured correction.</strong> Those protocols do not prevent pretraining leakage, which is a separate problem. Our own audit (see the Measured Benchmark tab) finds <strong>99.5% of DeepLoc</strong> and <strong>100% of Fluorescence</strong> test proteins aligning at ≥50% identity to a Swiss-Prot entry — and every ESM-2 variant and ProtBERT declares UniRef50, which clusters that same UniProt. A homology-split test set can still be almost entirely contained in the pretraining corpus.
                     </p>
                     <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <li><strong>CB513 Secondary Structure</strong>: Predicts 3-state or 8-state amino acid structure, reported in 3-state Accuracy (Q3) ↑.</li>
