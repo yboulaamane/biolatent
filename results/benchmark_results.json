@@ -1,1111 +1,1211 @@
 {
   "BBBP": {
+    "dataset_label": "BBBP",
+    "dataset_source": "DeepChem MoleculeNet BBBP.csv",
+    "dataset_variant": "source SMILES retained; 11 RDKit-invalid rows excluded",
+    "dataset_sha256": "caefe5d4f5ee781e1150b21a03ca3c17cc1613092f2a84716f339bca5787b3b9",
+    "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
+    "protocol_version": 4,
     "modality": "molecule",
     "task_type": "classification",
-    "split_source": "scaffold",
+    "split_source": "balanced Murcko scaffold split (seed 42)",
     "n_total": 2039,
-    "n_train": 1631,
+    "n_train": 1834,
     "n_test": 205,
+    "target_labels": [
+      "target"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8826,
-          "accuracy": 0.8098,
+          "score": 0.9141,
+          "accuracy": 0.8244,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.828,
-          "ci_high": 0.9302,
-          "ci_width": 0.1023,
+          "ci_low": 0.8567,
+          "ci_high": 0.9525,
+          "ci_width": 0.0958,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
           "embedding_dim": 1024,
-          "n_train": 1631,
+          "n_train": 1834,
           "n_test": 205
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.8656,
-          "accuracy": 0.8341,
+          "score": 0.9071,
+          "accuracy": 0.8829,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.017
+        "linear_mlp_gap": -0.007
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.9176,
-          "accuracy": 0.8488,
+          "score": 0.9227,
+          "accuracy": 0.8341,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8758,
-          "ci_high": 0.952,
-          "ci_width": 0.0763,
+          "ci_low": 0.8756,
+          "ci_high": 0.9548,
+          "ci_width": 0.0792,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
           "embedding_dim": 210,
-          "n_train": 1631,
+          "n_train": 1834,
           "n_test": 205
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.9168,
-          "accuracy": 0.8634,
+          "score": 0.916,
+          "accuracy": 0.8585,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.0008
+        "linear_mlp_gap": -0.0067
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8927,
-          "accuracy": 0.8049,
+          "score": 0.9538,
+          "accuracy": 0.8878,
           "hyperparameter": {
-            "C": 0.01
+            "C": 0.001
           },
-          "ci_low": 0.8434,
-          "ci_high": 0.9342,
-          "ci_width": 0.0908,
+          "ci_low": 0.9173,
+          "ci_high": 0.9807,
+          "ci_width": 0.0634,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
           "embedding_dim": 384,
-          "n_train": 1631,
+          "n_train": 1834,
           "n_test": 205
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.9193,
-          "accuracy": 0.8195,
+          "score": 0.9582,
+          "accuracy": 0.8829,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": 0.0266
+        "linear_mlp_gap": 0.0044
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.9048,
-          "accuracy": 0.8244,
+          "score": 0.9713,
+          "accuracy": 0.9122,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8615,
-          "ci_high": 0.9441,
-          "ci_width": 0.0826,
+          "ci_low": 0.9504,
+          "ci_high": 0.987,
+          "ci_width": 0.0366,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
           "embedding_dim": 768,
-          "n_train": 1631,
+          "n_train": 1834,
           "n_test": 205
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.8575,
-          "accuracy": 0.7756,
+          "score": 0.967,
+          "accuracy": 0.8976,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0473
+        "linear_mlp_gap": -0.0043
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.9013,
-          "accuracy": 0.839,
+          "score": 0.9541,
+          "accuracy": 0.8683,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.8585,
-          "ci_high": 0.9411,
-          "ci_width": 0.0826,
+          "ci_low": 0.9213,
+          "ci_high": 0.9774,
+          "ci_width": 0.0561,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
           "embedding_dim": 768,
-          "n_train": 1631,
+          "n_train": 1834,
           "n_test": 205
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.8788,
-          "accuracy": 0.8049,
+          "score": 0.9448,
+          "accuracy": 0.878,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0225
+        "linear_mlp_gap": -0.0093
       }
     }
   },
   "ClinTox": {
+    "dataset_label": "ClinTox (FDA approval and clinical toxicity)",
+    "dataset_source": "DeepChem MoleculeNet clintox.csv.gz",
+    "dataset_variant": "two-endpoint task; macro-average over FDA_APPROVED and CT_TOX; 4 RDKit-invalid rows excluded",
+    "dataset_sha256": "5ec8263ab0979b0d3b2cd3cf2c135535b23671c4be8046a94edac16f47b3de87",
+    "input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
+    "protocol_version": 4,
     "modality": "molecule",
-    "task_type": "classification",
-    "split_source": "scaffold",
+    "task_type": "multilabel",
+    "split_source": "balanced Murcko scaffold split (seed 42)",
     "n_total": 1480,
-    "n_train": 1184,
+    "n_train": 1332,
     "n_test": 148,
+    "target_labels": [
+      "target_FDA_APPROVED",
+      "target_CT_TOX"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.8109,
-          "accuracy": 0.9257,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8482,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.4807,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.6461,
-          "ci_high": 0.9529,
-          "ci_width": 0.3067,
+          "ci_low": 0.6797,
+          "ci_high": 0.9739,
+          "ci_width": 0.2942,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
           "embedding_dim": 1024,
-          "n_train": 1184,
+          "n_train": 1332,
           "n_test": 148
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.7591,
-          "accuracy": 0.9257,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8096,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.4824,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.0518
+        "linear_mlp_gap": -0.0386
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
         "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.8003,
-          "accuracy": 0.9257,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8524,
+          "subset_accuracy": 0.9324,
+          "macro_f1": 0.6362,
           "hyperparameter": {
-            "C": 0.01
+            "C": 0.1
           },
-          "ci_low": 0.6218,
-          "ci_high": 0.953,
-          "ci_width": 0.3312,
+          "ci_low": 0.7202,
+          "ci_high": 0.9612,
+          "ci_width": 0.241,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
           "embedding_dim": 210,
-          "n_train": 1184,
+          "n_train": 1332,
           "n_test": 148
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.8407,
-          "accuracy": 0.9257,
+          "metric": "Macro ROC-AUC",
+          "score": 0.7409,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.564,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": 0.0404
+        "linear_mlp_gap": -0.1115
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
         "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.7837,
-          "accuracy": 0.9189,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9751,
+          "subset_accuracy": 0.973,
+          "macro_f1": 0.9213,
           "hyperparameter": {
-            "C": 0.1
+            "C": 0.01
           },
-          "ci_low": 0.6025,
-          "ci_high": 0.9413,
-          "ci_width": 0.3389,
+          "ci_low": 0.918,
+          "ci_high": 1.0,
+          "ci_width": 0.082,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
           "embedding_dim": 384,
-          "n_train": 1184,
+          "n_train": 1332,
           "n_test": 148
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.7173,
-          "accuracy": 0.9189,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9894,
+          "subset_accuracy": 0.9797,
+          "macro_f1": 0.9231,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": -0.0664
+        "linear_mlp_gap": 0.0143
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.8597,
-          "accuracy": 0.9324,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9851,
+          "subset_accuracy": 0.9865,
+          "macro_f1": 0.9464,
           "hyperparameter": {
-            "C": 0.1
+            "C": 0.01
           },
-          "ci_low": 0.7398,
-          "ci_high": 0.9526,
-          "ci_width": 0.2128,
+          "ci_low": 0.9373,
+          "ci_high": 1.0,
+          "ci_width": 0.0627,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
           "embedding_dim": 768,
-          "n_train": 1184,
+          "n_train": 1332,
           "n_test": 148
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.856,
-          "accuracy": 0.9392,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9837,
+          "subset_accuracy": 0.973,
+          "macro_f1": 0.9055,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0037
+        "linear_mlp_gap": -0.0014
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.8968,
-          "accuracy": 0.9392,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9718,
+          "subset_accuracy": 0.9797,
+          "macro_f1": 0.9708,
           "hyperparameter": {
-            "C": 0.01
+            "C": 0.1
           },
-          "ci_low": 0.791,
-          "ci_high": 0.9819,
-          "ci_width": 0.1909,
+          "ci_low": 0.8974,
+          "ci_high": 1.0,
+          "ci_width": 0.1026,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
           "embedding_dim": 768,
-          "n_train": 1184,
+          "n_train": 1332,
           "n_test": 148
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.8686,
-          "accuracy": 0.9392,
+          "metric": "Macro ROC-AUC",
+          "score": 0.9658,
+          "subset_accuracy": 0.9865,
+          "macro_f1": 0.9726,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0282
+        "linear_mlp_gap": -0.006
       }
     }
   },
   "BACE": {
+    "dataset_label": "BACE",
+    "dataset_source": "DeepChem MoleculeNet bace.csv",
+    "dataset_variant": "source SMILES retained; binary Class endpoint",
+    "dataset_sha256": "4666a966319b599fd04869c3406c9ee772d206fa97049c2494e9d2d93a5e4cb2",
+    "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
+    "protocol_version": 4,
     "modality": "molecule",
     "task_type": "classification",
-    "split_source": "scaffold",
+    "split_source": "balanced Murcko scaffold split (seed 42)",
     "n_total": 1513,
-    "n_train": 1210,
+    "n_train": 1361,
     "n_test": 152,
+    "target_labels": [
+      "target"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8601,
+          "score": 0.8904,
+          "accuracy": 0.8158,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.813,
+          "ci_high": 0.9467,
+          "ci_width": 0.1337,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 1024,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8939,
+          "accuracy": 0.8224,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": 0.0035
+      },
+      "rdkit2d": {
+        "label": "RDKit 2D descriptors",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8315,
+          "accuracy": 0.75,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "ci_low": 0.7233,
+          "ci_high": 0.9182,
+          "ci_width": 0.1949,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 210,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8279,
+          "accuracy": 0.7566,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 210
+        },
+        "linear_mlp_gap": -0.0036
+      },
+      "chemberta_77m": {
+        "label": "ChemBERTa-2 77M MLM",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8391,
           "accuracy": 0.7829,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.7936,
-          "ci_high": 0.9149,
-          "ci_width": 0.1214,
+          "ci_low": 0.7473,
+          "ci_high": 0.9111,
+          "ci_width": 0.1638,
           "n_boot": 1000,
           "probe": "linear",
-          "embedding_dim": 1024,
-          "n_train": 1210,
-          "n_test": 152
-        },
-        "embed_seconds": 0.0,
-        "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.8829,
-          "accuracy": 0.8158,
-          "probe": "mlp",
-          "embedding_dim": 1024
-        },
-        "linear_mlp_gap": 0.0228
-      },
-      "rdkit2d": {
-        "label": "RDKit 2D descriptors",
-        "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.817,
-          "accuracy": 0.7566,
-          "hyperparameter": {
-            "C": 0.1
-          },
-          "ci_low": 0.7444,
-          "ci_high": 0.8839,
-          "ci_width": 0.1395,
-          "n_boot": 1000,
-          "probe": "linear",
-          "embedding_dim": 210,
-          "n_train": 1210,
-          "n_test": 152
-        },
-        "embed_seconds": 0.0,
-        "mlp": {
-          "metric": "ROC-AUC",
-          "score": 0.8265,
-          "accuracy": 0.7303,
-          "probe": "mlp",
-          "embedding_dim": 210
-        },
-        "linear_mlp_gap": 0.0095
-      },
-      "chemberta_77m": {
-        "label": "ChemBERTa-2 77M MLM",
-        "linear": {
-          "metric": "ROC-AUC",
-          "score": 0.8402,
-          "accuracy": 0.8092,
-          "hyperparameter": {
-            "C": 0.01
-          },
-          "ci_low": 0.7669,
-          "ci_high": 0.9011,
-          "ci_width": 0.1341,
-          "n_boot": 1000,
-          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
           "embedding_dim": 384,
-          "n_train": 1210,
+          "n_train": 1361,
           "n_test": 152
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.8104,
-          "accuracy": 0.7763,
+          "score": 0.8334,
+          "accuracy": 0.7697,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": -0.0298
+        "linear_mlp_gap": -0.0057
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8571,
-          "accuracy": 0.7895,
+          "score": 0.8265,
+          "accuracy": 0.7303,
           "hyperparameter": {
-            "C": 0.01
+            "C": 0.1
           },
-          "ci_low": 0.7877,
+          "ci_low": 0.7369,
           "ci_high": 0.9178,
-          "ci_width": 0.1301,
+          "ci_width": 0.1809,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
           "embedding_dim": 768,
-          "n_train": 1210,
+          "n_train": 1361,
           "n_test": 152
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.8421,
-          "accuracy": 0.7171,
+          "score": 0.8251,
+          "accuracy": 0.7303,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.015
+        "linear_mlp_gap": -0.0014
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.8635,
-          "accuracy": 0.7632,
+          "score": 0.8102,
+          "accuracy": 0.7434,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8007,
-          "ci_high": 0.9183,
-          "ci_width": 0.1176,
+          "ci_low": 0.7174,
+          "ci_high": 0.8861,
+          "ci_width": 0.1688,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
           "embedding_dim": 768,
-          "n_train": 1210,
+          "n_train": 1361,
           "n_test": 152
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.84,
-          "accuracy": 0.7763,
+          "score": 0.8177,
+          "accuracy": 0.75,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0235
+        "linear_mlp_gap": 0.0075
       }
     }
   },
   "ESOL": {
+    "dataset_label": "ESOL",
+    "dataset_source": "DeepChem MoleculeNet delaney-processed.csv",
+    "dataset_variant": "source SMILES retained; measured log-solubility endpoint",
+    "dataset_sha256": "cb325f87455b79cc23f6a3ffa89587a15795d7c042afacca925dfcbd6d77e76e",
+    "input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
+    "protocol_version": 4,
     "modality": "molecule",
     "task_type": "regression",
-    "split_source": "scaffold",
+    "split_source": "balanced Murcko scaffold split (seed 42)",
     "n_total": 1128,
-    "n_train": 902,
+    "n_train": 1014,
     "n_test": 114,
+    "target_labels": [
+      "target"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.5924,
-          "rmse": 1.9209,
-          "r2": 0.2297,
+          "score": 0.6161,
+          "rmse": 1.8694,
+          "r2": 0.2705,
           "hyperparameter": {
             "alpha": 1000.0
           },
-          "ci_low": 0.4667,
-          "ci_high": 0.7037,
-          "ci_width": 0.237,
+          "ci_low": 0.4489,
+          "ci_high": 0.7321,
+          "ci_width": 0.2832,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
           "embedding_dim": 1024,
-          "n_train": 902,
+          "n_train": 1014,
           "n_test": 114
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.4352,
-          "rmse": 3.3024,
-          "r2": -1.2765,
+          "score": 0.4655,
+          "rmse": 3.027,
+          "r2": -0.9127,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.1572
+        "linear_mlp_gap": -0.1506
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.9185,
-          "rmse": 0.8299,
-          "r2": 0.8562,
+          "score": 0.9049,
+          "rmse": 0.9184,
+          "r2": 0.8239,
           "hyperparameter": {
-            "alpha": 100.0
+            "alpha": 1000.0
           },
-          "ci_low": 0.8618,
-          "ci_high": 0.949,
-          "ci_width": 0.0873,
+          "ci_low": 0.8343,
+          "ci_high": 0.9399,
+          "ci_width": 0.1056,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
           "embedding_dim": 210,
-          "n_train": 902,
+          "n_train": 1014,
           "n_test": 114
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.8917,
-          "rmse": 0.9028,
-          "r2": 0.8299,
+          "score": 0.8799,
+          "rmse": 0.9562,
+          "r2": 0.8091,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.0268
+        "linear_mlp_gap": -0.025
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.8398,
-          "rmse": 1.1641,
-          "r2": 0.7171,
+          "score": 0.8469,
+          "rmse": 1.1178,
+          "r2": 0.7392,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.7551,
-          "ci_high": 0.901,
-          "ci_width": 0.1459,
+          "ci_low": 0.7242,
+          "ci_high": 0.9181,
+          "ci_width": 0.194,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
           "embedding_dim": 384,
-          "n_train": 902,
+          "n_train": 1014,
           "n_test": 114
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.8508,
-          "rmse": 1.0965,
-          "r2": 0.749,
+          "score": 0.8409,
+          "rmse": 1.0889,
+          "r2": 0.7525,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": 0.011
+        "linear_mlp_gap": -0.006
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.793,
-          "rmse": 1.3158,
-          "r2": 0.6386,
+          "score": 0.8428,
+          "rmse": 1.0901,
+          "r2": 0.7519,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.7039,
-          "ci_high": 0.857,
-          "ci_width": 0.1531,
+          "ci_low": 0.7244,
+          "ci_high": 0.9097,
+          "ci_width": 0.1853,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
           "embedding_dim": 768,
-          "n_train": 902,
+          "n_train": 1014,
           "n_test": 114
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.8061,
-          "rmse": 1.2848,
-          "r2": 0.6554,
+          "score": 0.8127,
+          "rmse": 1.2642,
+          "r2": 0.6664,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0131
+        "linear_mlp_gap": -0.0301
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.9063,
-          "rmse": 0.958,
-          "r2": 0.8084,
+          "score": 0.8928,
+          "rmse": 1.026,
+          "r2": 0.7802,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.8621,
-          "ci_high": 0.9361,
-          "ci_width": 0.074,
+          "ci_low": 0.7908,
+          "ci_high": 0.9459,
+          "ci_width": 0.1551,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
           "embedding_dim": 768,
-          "n_train": 902,
+          "n_train": 1014,
           "n_test": 114
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.8484,
-          "rmse": 1.0731,
-          "r2": 0.7596,
+          "score": 0.8653,
+          "rmse": 1.1251,
+          "r2": 0.7357,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0579
+        "linear_mlp_gap": -0.0275
       }
     }
   },
   "Lipophilicity": {
+    "dataset_label": "Lipophilicity",
+    "dataset_source": "DeepChem MoleculeNet Lipophilicity.csv",
+    "dataset_variant": "source SMILES retained; experimental logD endpoint",
+    "dataset_sha256": "03dc89d2bc667660da4cc6949e898361a24164f64fc54d97ba825f031ae5bc4a",
+    "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
+    "protocol_version": 4,
     "modality": "molecule",
     "task_type": "regression",
-    "split_source": "scaffold",
+    "split_source": "balanced Murcko scaffold split (seed 42)",
     "n_total": 4200,
-    "n_train": 3360,
+    "n_train": 3780,
     "n_test": 420,
+    "target_labels": [
+      "target"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.5883,
-          "rmse": 0.988,
-          "r2": 0.3186,
+          "score": 0.5868,
+          "rmse": 0.9881,
+          "r2": 0.3185,
           "hyperparameter": {
             "alpha": 1000.0
           },
-          "ci_low": 0.5117,
-          "ci_high": 0.6535,
-          "ci_width": 0.1417,
+          "ci_low": 0.4864,
+          "ci_high": 0.6674,
+          "ci_width": 0.181,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
           "embedding_dim": 1024,
-          "n_train": 3360,
+          "n_train": 3780,
           "n_test": 420
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.5309,
-          "rmse": 1.1514,
-          "r2": 0.0745,
+          "score": 0.5348,
+          "rmse": 1.1388,
+          "r2": 0.0946,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.0574
+        "linear_mlp_gap": -0.052
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.6409,
-          "rmse": 0.8697,
-          "r2": 0.472,
+          "score": 0.673,
+          "rmse": 0.8448,
+          "r2": 0.5018,
           "hyperparameter": {
-            "alpha": 100.0
+            "alpha": 0.1
           },
-          "ci_low": 0.5732,
-          "ci_high": 0.6978,
-          "ci_width": 0.1245,
+          "ci_low": 0.5834,
+          "ci_high": 0.7569,
+          "ci_width": 0.1735,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
           "embedding_dim": 210,
-          "n_train": 3360,
+          "n_train": 3780,
           "n_test": 420
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.63,
-          "rmse": 0.8907,
-          "r2": 0.4462,
+          "score": 0.6447,
+          "rmse": 0.8931,
+          "r2": 0.4432,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.0109
+        "linear_mlp_gap": -0.0283
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.6376,
-          "rmse": 0.8707,
-          "r2": 0.4708,
+          "score": 0.6029,
+          "rmse": 0.893,
+          "r2": 0.4433,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.5723,
-          "ci_high": 0.6952,
-          "ci_width": 0.1229,
+          "ci_low": 0.5018,
+          "ci_high": 0.6991,
+          "ci_width": 0.1973,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
           "embedding_dim": 384,
-          "n_train": 3360,
+          "n_train": 3780,
           "n_test": 420
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.6698,
-          "rmse": 0.873,
-          "r2": 0.468,
+          "score": 0.6173,
+          "rmse": 0.913,
+          "r2": 0.4182,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": 0.0322
+        "linear_mlp_gap": 0.0144
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.51,
-          "rmse": 0.9702,
-          "r2": 0.343,
+          "score": 0.5483,
+          "rmse": 0.9693,
+          "r2": 0.3441,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.4329,
-          "ci_high": 0.5798,
-          "ci_width": 0.1469,
+          "ci_low": 0.4449,
+          "ci_high": 0.6362,
+          "ci_width": 0.1913,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
           "embedding_dim": 768,
-          "n_train": 3360,
+          "n_train": 3780,
           "n_test": 420
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.4756,
-          "rmse": 1.0674,
-          "r2": 0.2047,
+          "score": 0.5706,
+          "rmse": 0.9959,
+          "r2": 0.3076,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": -0.0344
+        "linear_mlp_gap": 0.0223
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.641,
-          "rmse": 0.8515,
-          "r2": 0.4938,
+          "score": 0.5988,
+          "rmse": 0.9151,
+          "r2": 0.4155,
           "hyperparameter": {
             "alpha": 100.0
           },
-          "ci_low": 0.5746,
-          "ci_high": 0.7018,
-          "ci_width": 0.1272,
+          "ci_low": 0.4775,
+          "ci_high": 0.7004,
+          "ci_width": 0.2229,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
           "embedding_dim": 768,
-          "n_train": 3360,
+          "n_train": 3780,
           "n_test": 420
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.6534,
-          "rmse": 0.8879,
-          "r2": 0.4497,
+          "score": 0.6035,
+          "rmse": 0.9354,
+          "r2": 0.3892,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0124
+        "linear_mlp_gap": 0.0047
       }
     }
   },
   "CYP3A4": {
     "dataset_label": "CYP3A4 Substrate",
     "dataset_source": "TDC CYP3A4_Substrate_CarbonMangels",
-    "dataset_sha256": "ebb97867bd4f89c9b1851244b94708f8860c284254d11dd79f6d0341551a0266",
+    "dataset_variant": "canonical-SMILES deduplicated before TDC scaffold splitting",
+    "dataset_sha256": "1e8de92e605aeb4eda0fdcff66bd297f480454ba6b9733185634f49f3799c650",
+    "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
+    "protocol_version": 4,
     "modality": "molecule",
     "task_type": "classification",
-    "split_source": "official",
-    "n_total": 670,
-    "n_train": 536,
-    "n_test": 67,
+    "split_source": "TDC scaffold split (seed 42)",
+    "n_total": 667,
+    "n_train": 599,
+    "n_test": 68,
+    "target_labels": [
+      "target"
+    ],
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.6946,
-          "accuracy": 0.6716,
+          "score": 0.6838,
+          "accuracy": 0.6618,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.5489,
-          "ci_high": 0.8224,
-          "ci_width": 0.2735,
+          "ci_low": 0.5187,
+          "ci_high": 0.8195,
+          "ci_width": 0.3008,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
           "embedding_dim": 1024,
-          "n_train": 536,
-          "n_test": 67
+          "n_train": 599,
+          "n_test": 68
         },
-        "embed_seconds": 0.4,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.6781,
-          "accuracy": 0.6866,
+          "score": 0.6539,
+          "accuracy": 0.6176,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.0165
+        "linear_mlp_gap": -0.0299
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.6946,
-          "accuracy": 0.6418,
+          "score": 0.6873,
+          "accuracy": 0.6765,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.5543,
-          "ci_high": 0.8276,
-          "ci_width": 0.2733,
+          "ci_low": 0.5186,
+          "ci_high": 0.8256,
+          "ci_width": 0.307,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
           "embedding_dim": 210,
-          "n_train": 536,
-          "n_test": 67
+          "n_train": 599,
+          "n_test": 68
         },
-        "embed_seconds": 10.2,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.5847,
-          "accuracy": 0.5672,
+          "score": 0.5803,
+          "accuracy": 0.6029,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.1099
+        "linear_mlp_gap": -0.107
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.7614,
-          "accuracy": 0.7463,
+          "score": 0.7285,
+          "accuracy": 0.6618,
           "hyperparameter": {
-            "C": 0.01
+            "C": 0.001
           },
-          "ci_low": 0.6309,
-          "ci_high": 0.8706,
-          "ci_width": 0.2397,
+          "ci_low": 0.585,
+          "ci_high": 0.8581,
+          "ci_width": 0.2731,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
           "embedding_dim": 384,
-          "n_train": 536,
-          "n_test": 67
+          "n_train": 599,
+          "n_test": 68
         },
-        "embed_seconds": 17.7,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.788,
-          "accuracy": 0.7015,
+          "score": 0.7031,
+          "accuracy": 0.6471,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": 0.0266
+        "linear_mlp_gap": -0.0254
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.6337,
-          "accuracy": 0.597,
+          "score": 0.6579,
+          "accuracy": 0.6471,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.4955,
-          "ci_high": 0.7689,
-          "ci_width": 0.2733,
+          "ci_low": 0.5206,
+          "ci_high": 0.7859,
+          "ci_width": 0.2653,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
           "embedding_dim": 768,
-          "n_train": 536,
-          "n_test": 67
+          "n_train": 599,
+          "n_test": 68
         },
-        "embed_seconds": 13.5,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.7143,
-          "accuracy": 0.6866,
+          "score": 0.7772,
+          "accuracy": 0.7059,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0806
+        "linear_mlp_gap": 0.1193
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.6429,
-          "accuracy": 0.597,
+          "score": 0.6518,
+          "accuracy": 0.6176,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.5053,
-          "ci_high": 0.7705,
-          "ci_width": 0.2652,
+          "ci_low": 0.4979,
+          "ci_high": 0.7871,
+          "ci_width": 0.2891,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
           "embedding_dim": 768,
-          "n_train": 536,
-          "n_test": 67
+          "n_train": 599,
+          "n_test": 68
         },
-        "embed_seconds": 17.1,
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.6786,
-          "accuracy": 0.6567,
+          "score": 0.6447,
+          "accuracy": 0.6324,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0357
+        "linear_mlp_gap": -0.0071
       }
     }
   },
   "DeepLoc": {
+    "dataset_label": "DeepLoc 2.0 (10-label localisation)",
+    "dataset_source": "DeepLoc 2.0 SwissProt localisation dataset",
+    "dataset_variant": "original multi-label task; published homology partitions assigned as folds 0 test, 1 validation, and 2-4 train",
+    "dataset_sha256": "402e2f2690d70298b7d1c986ccfbee51f33fa9f607ea71c1ce59821af6840d94",
+    "protocol_version": 4,
     "modality": "protein",
-    "task_type": "classification",
-    "split_source": "official",
-    "n_total": 27783,
-    "n_train": 22233,
-    "n_test": 2782,
+    "task_type": "multilabel",
+    "split_source": "published homology partitions (fixed fold assignment)",
+    "n_total": 28303,
+    "n_train": 22340,
+    "n_test": 5963,
+    "target_labels": [
+      "target_Cytoplasm",
+      "target_Nucleus",
+      "target_Extracellular",
+      "target_Cell_membrane",
+      "target_Mitochondrion",
+      "target_Plastid",
+      "target_Endoplasmic_reticulum",
+      "target_Lysosome_Vacuole",
+      "target_Golgi_apparatus",
+      "target_Peroxisome"
+    ],
     "models": {
       "kmer3_protein": {
         "label": "3-mer frequency",
         "linear": {
-          "metric": "Accuracy",
-          "score": 0.5288,
-          "macro_f1": 0.3936,
+          "metric": "Macro ROC-AUC",
+          "score": 0.7162,
+          "subset_accuracy": 0.1816,
+          "macro_f1": 0.2025,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.5104,
-          "ci_high": 0.5471,
-          "ci_width": 0.0367,
+          "ci_low": 0.7074,
+          "ci_high": 0.7246,
+          "ci_width": 0.0172,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 2,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 8000,
-          "n_train": 22233,
-          "n_test": 2782
+          "n_train": 16889,
+          "n_test": 5963
         },
-        "embed_seconds": 0.6,
         "mlp": {
-          "metric": "Accuracy",
-          "score": 0.5467,
-          "macro_f1": 0.4373,
+          "metric": "Macro ROC-AUC",
+          "score": 0.6779,
+          "subset_accuracy": 0.2061,
+          "macro_f1": 0.2173,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 8000
         },
-        "linear_mlp_gap": 0.0179
+        "linear_mlp_gap": -0.0383
       },
       "esm2_8m": {
         "label": "ESM-2 8M",
         "linear": {
-          "metric": "Accuracy",
-          "score": 0.6639,
-          "macro_f1": 0.5497,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8444,
+          "subset_accuracy": 0.386,
+          "macro_f1": 0.4042,
           "hyperparameter": {
-            "C": 0.1
+            "C": 0.01
           },
-          "ci_low": 0.6459,
-          "ci_high": 0.6819,
-          "ci_width": 0.036,
+          "ci_low": 0.8367,
+          "ci_high": 0.8521,
+          "ci_width": 0.0155,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 2,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 320,
-          "n_train": 22233,
-          "n_test": 2782
+          "n_train": 16889,
+          "n_test": 5963
         },
-        "embed_seconds": 0.0,
         "mlp": {
-          "metric": "Accuracy",
-          "score": 0.683,
-          "macro_f1": 0.592,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8412,
+          "subset_accuracy": 0.4115,
+          "macro_f1": 0.4772,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 320
         },
-        "linear_mlp_gap": 0.0191
+        "linear_mlp_gap": -0.0032
       },
       "esm2_35m": {
         "label": "ESM-2 35M",
         "linear": {
-          "metric": "Accuracy",
-          "score": 0.7045,
-          "macro_f1": 0.6176,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8622,
+          "subset_accuracy": 0.4478,
+          "macro_f1": 0.4609,
           "hyperparameter": {
-            "C": 0.1
+            "C": 0.01
           },
-          "ci_low": 0.6873,
-          "ci_high": 0.7214,
-          "ci_width": 0.0341,
+          "ci_low": 0.8546,
+          "ci_high": 0.8695,
+          "ci_width": 0.0149,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 2,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 480,
-          "n_train": 22233,
-          "n_test": 2782
+          "n_train": 16889,
+          "n_test": 5963
         },
-        "embed_seconds": 0.1,
         "mlp": {
-          "metric": "Accuracy",
-          "score": 0.7017,
-          "macro_f1": 0.643,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8613,
+          "subset_accuracy": 0.4511,
+          "macro_f1": 0.5076,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 480
         },
-        "linear_mlp_gap": -0.0028
+        "linear_mlp_gap": -0.0009
       },
       "esm2_150m": {
         "label": "ESM-2 150M",
         "linear": {
-          "metric": "Accuracy",
-          "score": 0.7308,
-          "macro_f1": 0.6222,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8766,
+          "subset_accuracy": 0.4825,
+          "macro_f1": 0.5024,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.7157,
-          "ci_high": 0.7473,
-          "ci_width": 0.0316,
+          "ci_low": 0.8696,
+          "ci_high": 0.8825,
+          "ci_width": 0.0129,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 2,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 640,
-          "n_train": 22233,
-          "n_test": 2782
+          "n_train": 16889,
+          "n_test": 5963
         },
-        "embed_seconds": 0.1,
         "mlp": {
-          "metric": "Accuracy",
-          "score": 0.7135,
-          "macro_f1": 0.6272,
+          "metric": "Macro ROC-AUC",
+          "score": 0.8676,
+          "subset_accuracy": 0.4722,
+          "macro_f1": 0.5563,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 640
         },
-        "linear_mlp_gap": -0.0173
-      },
-      "esm2_650m": {
-        "label": "ESM-2 650M",
-        "linear": {
-          "metric": "Accuracy",
-          "score": 0.7473,
-          "macro_f1": 0.6872,
-          "hyperparameter": {
-            "C": 0.01
-          },
-          "ci_low": 0.7308,
-          "ci_high": 0.7635,
-          "ci_width": 0.0327,
-          "n_boot": 1000,
-          "probe": "linear",
-          "embedding_dim": 1280,
-          "n_train": 22233,
-          "n_test": 2782
-        },
-        "embed_seconds": 0.1,
-        "mlp": {
-          "metric": "Accuracy",
-          "score": 0.739,
-          "macro_f1": 0.7002,
-          "probe": "mlp",
-          "embedding_dim": 1280
-        },
-        "linear_mlp_gap": -0.0083
-      },
-      "protbert": {
-        "label": "ProtBERT",
-        "linear": {
-          "metric": "Accuracy",
-          "score": 0.7052,
-          "macro_f1": 0.6191,
-          "hyperparameter": {
-            "C": 0.01
-          },
-          "ci_low": 0.6894,
-          "ci_high": 0.7218,
-          "ci_width": 0.0324,
-          "n_boot": 1000,
-          "probe": "linear",
-          "embedding_dim": 1024,
-          "n_train": 22233,
-          "n_test": 2782
-        },
-        "embed_seconds": 0.1,
-        "mlp": {
-          "metric": "Accuracy",
-          "score": 0.711,
-          "macro_f1": 0.6552,
-          "probe": "mlp",
-          "embedding_dim": 1024
-        },
-        "linear_mlp_gap": 0.0058
+        "linear_mlp_gap": -0.009
       }
-    }
+    },
+    "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3"
   },
   "Fluorescence": {
     "modality": "protein",
     "task_type": "regression",
-    "split_source": "official",
+    "split_source": "published extrapolation partition",
     "n_total": 54025,
-    "n_train": 21446,
+    "n_train": 26808,
     "n_test": 27217,
     "models": {
       "kmer3_protein": {
@@ -1127,7 +1227,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 1.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.3572,
@@ -1157,7 +1256,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5847,
@@ -1187,7 +1285,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5985,
@@ -1217,7 +1314,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 0.1,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.584,
@@ -1247,7 +1343,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 0.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.5854,
@@ -1277,7 +1372,6 @@
           "n_train": 21446,
           "n_test": 27217
         },
-        "embed_seconds": 0.2,
         "mlp": {
           "metric": "Spearman rho",
           "score": 0.641,
@@ -1288,12 +1382,21 @@
         },
         "linear_mlp_gap": -0.0205
       }
-    }
+    },
+    "dataset_label": "Fluorescence",
+    "dataset_source": "proteinglm/fluorescence_prediction revision d2a150fc808dbb02330c5fff6c4cb4807efe1979",
+    "dataset_variant": "TAPE GFP log-fluorescence task; published train, validation and extrapolation-test partitions retained",
+    "dataset_sha256": "d433037fc1da850b7f29888a18b8fc61f00d181f44870db345a60a6316063a86",
+    "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+    "protocol_version": 4,
+    "target_labels": [
+      "target"
+    ]
   },
   "Promoters": {
     "modality": "genomics",
     "task_type": "classification",
-    "split_source": "official",
+    "split_source": "published chromosome partition (within-split deduplicated)",
     "n_total": 31443,
     "n_train": 29872,
     "n_test": 1571,
@@ -1316,7 +1419,6 @@
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 0.1,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9283,
@@ -1344,7 +1446,6 @@
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 0.1,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9297,
@@ -1372,7 +1473,6 @@
           "n_train": 29872,
           "n_test": 1571
         },
-        "embed_seconds": 0.0,
         "mlp": {
           "metric": "ROC-AUC",
           "score": 0.9403,
@@ -1382,6 +1482,15 @@
         },
         "linear_mlp_gap": 0.0022
       }
-    }
+    },
+    "dataset_label": "Promoters",
+    "dataset_source": "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised revision 851f9946252e90c665cdb3cc3eedb78f1f26197c",
+    "dataset_variant": "within-split exact-sequence deduplicated official partition",
+    "dataset_sha256": "3998422fb9e71fe6cd9437ed53df4328517b0b0ca8709c139442678ab02084a1",
+    "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+    "protocol_version": 4,
+    "target_labels": [
+      "target"
+    ]
   }
 }

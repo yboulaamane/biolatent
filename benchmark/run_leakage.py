@@ -1,25 +1,28 @@
 """
-BioLatent D3: Leakage Audit Runner
-==================================
+BioLatent D3: Pretraining Input-Exposure Audit Runner
+=====================================================
 
-Measures, per task, how much of the *test split* is recoverable from the
-pretraining corpora that models declare. The result is a per-model leakage-risk
-flag that sits beside the score rather than a silent correction to it.
+Measures, per task, how much of the *test split* is similar to available
+proxies for corpora that models declare. The result is input-exposure context
+that sits beside the score rather than a silent correction to it.
 
 Scope and honesty about it
 --------------------------
 Corpus coverage is uneven and the report says so per row:
 
-* **ZINC and PubChem** are audited against random samples of the real corpora,
-  and **Swiss-Prot** is searched in full. Every sampled fraction is a *lower
-  bound* -- sampling can only miss overlap, never invent it.
+* **ZINC and PubChem** are audited against random samples of the broader
+  databases, not the checkpoints' exact dated training subsets. The resulting
+  fractions are exposure proxies, not confirmed membership or contamination.
+  **Swiss-Prot** is searched in full as a homology proxy for the UniRef50 and
+  UniRef100 corpora used by the evaluated protein checkpoints.
 * **The human reference genome** is not sampled. There the overlap is
   structural rather than empirical: the promoter sequences are excerpts of the
   same assembly the genomic models were pretrained on, so coverage is total by
   definition and there is no independent corpus to search against. Sampling
-  would produce a number that understates a contamination which is total by
+  would produce a number that understates input exposure which is total by
   construction, so the audit records the structural claim instead of a
-  misleading percentage.
+  misleading percentage. This is input exposure, not evidence that downstream
+  labels were seen during pretraining.
 
 A corpus is never reported both ways. Once it has an empirical measurement the
 structural claim is dropped, so a reader is not offered a percentage and a
@@ -42,8 +45,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark.datasets import (ALL_DATASETS, MOLECULE_TASKS, PROTEIN_TASKS,
                                 load_benchmark_dataset)
-from benchmark.leakage import (AUDIT_DIR, DECLARED_CORPORA, molecule_overlap,
-                               sequence_overlap)
+from benchmark.leakage import (AUDIT_DIR, DECLARED_CORPORA,
+                               molecule_overlap_components,
+                               prepare_molecule_corpus, sequence_overlap)
 
 CORPORA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "corpora")
 
@@ -52,27 +56,32 @@ CORPORA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "corpora")
 # study outputs means the numbers STUDY.md quotes are inspectable from a fresh
 # clone, without committing anything that can be regenerated.
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
-                           "leakage_report.json")
+                           "exposure_report.json")
 
 # Corpora that cover a benchmark's items by construction rather than by
 # sampling. Recorded as a structural claim with its justification.
 #
-# UniRef50 stays here even though Swiss-Prot is now searched empirically,
-# because the two claims are different: the Swiss-Prot figure is a measured
-# lower bound, while this records why the true UniRef50 coverage is higher than
-# any sample of it would show. Corpora with a direct empirical measurement of
-# their own are dropped from a task's structural block by ``_structural_for``.
+# Only construction-level input exposure is stored here. Swiss-Prot homology is
+# empirical and remains explicitly a proxy for UniRef50/UniRef100, not a
+# structural claim.
 STRUCTURAL = {
-    "uniref50": ("DeepLoc entries are UniProt proteins and UniRef50 clusters "
-                 "essentially all of UniProt at 50% identity, so test proteins "
-                 "are represented in pretraining by construction."),
     "human_ref_genome": ("Promoter sequences are excerpts of the human reference "
-                         "assembly used for pretraining, so test sequences are "
-                         "contained in the pretraining corpus by construction."),
+                         "assembly used for pretraining, so the benchmark inputs "
+                         "are exposed by construction. This does not imply label "
+                         "exposure."),
 }
 
 # Declared-corpus name -> the corpus actually sampled in the empirical audit.
 MEASURED_BY = {"pubchem10m": "pubchem", "zinc250k": "zinc", "zinc": "zinc"}
+
+
+def affected_models(corpus_name):
+    """Models whose declared pretraining corpus is represented by a proxy."""
+    aliases = ({"uniref50", "uniref100"} if corpus_name == "swissprot"
+               else {declared for declared, measured in MEASURED_BY.items()
+                     if measured == corpus_name})
+    return [model for model, corpora in DECLARED_CORPORA.items()
+            if aliases.intersection(corpora)]
 
 
 def load_zinc(sample_n, seed=42):
@@ -118,12 +127,13 @@ def load_pubchem(sample_n, seed=42):
 def load_swissprot(sample_n=None):
     """Load Swiss-Prot sequences.
 
-    Swiss-Prot rather than a random UniRef50 sample, deliberately. UniRef50
-    clusters essentially all of UniProt, so a random sample of it would report a
-    near-zero hit rate against a few thousand test proteins while true coverage
-    is near-total -- a number that would be technically correct and completely
-    misleading. Swiss-Prot is the reviewed subset DeepLoc is actually built
-    from, so overlap against it is a real, tight lower bound.
+    Swiss-Prot rather than a random UniRef sample, deliberately. UniRef50 and
+    UniRef100 cluster essentially all of UniProt, so a random sample would report a
+    near-zero hit rate against a few thousand test proteins and would not be a
+    useful proxy. Swiss-Prot is the reviewed source from which DeepLoc 2.0 was
+    curated, so homology against it is measured directly. It is used as a
+    proxy for both UniRef50 (ESM-2) and UniRef100 (ProtBERT). It still does not
+    prove exact membership in a checkpoint's dated training snapshot.
     """
     path = os.path.join(CORPORA_DIR, "sprot.fasta")
     if not os.path.exists(path):
@@ -152,7 +162,7 @@ def _structural_for(modality, empirical):
     percentage and an unquantified "overlap is expected" claim for the same
     corpus would let a reader take the weaker statement as the finding.
     """
-    applies = {"protein": ["uniref50"], "genomics": ["human_ref_genome"],
+    applies = {"protein": [], "genomics": ["human_ref_genome"],
                "molecule": []}
     out = {}
     for corpus in applies.get(modality, []):
@@ -186,6 +196,10 @@ def main(sample_n, task_names=None):
             mol_corpora["pubchem"] = pubchem
         if not mol_corpora:
             print("  No molecular corpus present; molecular audit skipped.", flush=True)
+    mol_indexes = {}
+    for corpus_name, corpus in mol_corpora.items():
+        print(f"  Indexing {corpus_name} molecular proxy once...", flush=True)
+        mol_indexes[corpus_name] = prepare_molecule_corpus(corpus)
 
     swissprot = None
     if any(t in PROTEIN_TASKS for t in tasks):
@@ -194,7 +208,11 @@ def main(sample_n, task_names=None):
         print(f"  Swiss-Prot: {len(swissprot):,} sequences"
               if swissprot else "  Swiss-Prot absent; protein audit skipped.", flush=True)
 
-    report = {"sample_size": sample_n, "tasks": {}}
+    report = {
+        "report_kind": "pretraining_input_exposure_proxy",
+        "interpretation": ("Input familiarity audit; not evidence of downstream "
+                           "label leakage or exact checkpoint-corpus membership."),
+        "sample_size": sample_n, "tasks": {}}
     if task_names and os.path.exists(REPORT_PATH):
         with open(REPORT_PATH) as fh:
             report = json.load(fh)
@@ -208,19 +226,32 @@ def main(sample_n, task_names=None):
 
         if data["modality"] == "molecule":
             for corpus_name, corpus in mol_corpora.items():
-                print(f"  {task}: scaffold/ECFP4 overlap vs {corpus_name}...",
+                print(f"  {task}: exposure proxies vs {corpus_name}...",
                       flush=True)
-                mask = molecule_overlap(test_inputs, corpus)
+                masks = molecule_overlap_components(
+                    test_inputs, corpus, corpus_index=mol_indexes[corpus_name])
                 entry["empirical"][corpus_name] = {
-                    "n_flagged": int(mask.sum()),
-                    "fraction": round(float(mask.mean()), 4),
-                    "basis": f"Murcko scaffold identity or ECFP4 Tanimoto >= 0.9 "
-                             f"against a random {sample_n:,}-molecule sample of "
-                             f"{corpus_name} (lower bound)",
+                    "affected_models": affected_models(corpus_name),
+                    "sample_role": (f"random {sample_n:,}-molecule database "
+                                    "sample used as an exposure proxy; not the "
+                                    "checkpoint's exact training subset"),
+                    "measures": {
+                        "exact_identity": _measure(
+                            masks["exact_identity"], "canonical SMILES identity"),
+                        "near_duplicate": _measure(
+                            masks["near_duplicate"], "ECFP4 Tanimoto >= 0.9"),
+                        "shared_scaffold": _measure(
+                            masks["shared_scaffold"], "Murcko scaffold identity"),
+                        "any_proxy_hit": _measure(
+                            masks["any_proxy_hit"], "union of the three proxies"),
+                    },
                 }
-                np.save(os.path.join(AUDIT_DIR, f"{task}__{corpus_name}_mask.npy"),
-                        mask)
-                print(f"     {mask.sum()}/{len(mask)} ({mask.mean():.1%})", flush=True)
+                for measure, mask in masks.items():
+                    np.save(os.path.join(
+                        AUDIT_DIR, f"{task}__{corpus_name}__{measure}.npy"), mask)
+                union = masks["any_proxy_hit"]
+                print(f"     union {union.sum()}/{len(union)} "
+                      f"({union.mean():.1%})", flush=True)
 
         elif data["modality"] == "protein" and swissprot:
             print(f"  {task}: MMseqs2 search vs Swiss-Prot at 50% identity...",
@@ -228,12 +259,13 @@ def main(sample_n, task_names=None):
             mask = sequence_overlap(test_inputs, swissprot,
                                     min_identity=0.5, coverage=0.5)
             entry["empirical"]["swissprot"] = {
+                "affected_models": affected_models("swissprot"),
                 "n_flagged": int(mask.sum()),
                 "fraction": round(float(mask.mean()), 4),
                 "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% "
-                         "coverage against all of Swiss-Prot. Swiss-Prot is a "
-                         "subset of the UniProt that UniRef50 clusters, so this "
-                         "is a lower bound on UniRef50 coverage.",
+                         "coverage against all of Swiss-Prot. This is a homology "
+                         "exposure proxy for UniRef50/UniRef100, not confirmation of exact "
+                         "checkpoint training membership.",
             }
             np.save(os.path.join(AUDIT_DIR, f"{task}__swissprot_mask.npy"), mask)
             print(f"     {mask.sum()}/{len(mask)} ({mask.mean():.1%})", flush=True)
@@ -246,6 +278,11 @@ def main(sample_n, task_names=None):
         json.dump(report, fh, indent=2)
     print(f"\nWrote {REPORT_PATH}", flush=True)
     return report
+
+
+def _measure(mask, basis):
+    return {"n_flagged": int(mask.sum()),
+            "fraction": round(float(mask.mean()), 4), "basis": basis}
 
 
 if __name__ == "__main__":

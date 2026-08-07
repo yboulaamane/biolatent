@@ -3,7 +3,7 @@
 ## Executive Summary
 This proposal outlines the strategic transition of **BioLatent** from a literature-indexed registry into an **active, community-driven benchmarking suite** for chemical and biological vector representations.
 
-Instead of expensive end-to-end model fine-tuning, BioLatent adopts a **Frozen Embedding Probing** methodology. This decouples one-time representation generation from ultra-fast, zero-cost downstream evaluation, making it feasible to run a multi-modal leaderboard at **$0 infrastructure cost**.
+Instead of end-to-end model fine-tuning, BioLatent adopts a **Frozen Embedding Probing** methodology. This decouples one-time representation generation from downstream evaluation. Repeated probing is CPU-only, but neither embedding generation nor evaluation is described as universally free or sub-90-second.
 
 ---
 
@@ -14,10 +14,10 @@ Instead of expensive end-to-end model fine-tuning, BioLatent adopts a **Frozen E
 * The output is a frozen matrix of representation vectors ($N \times d$, e.g., $2050 \times 768$ for BBBP).
 * Embeddings are hosted on open-access storage (e.g., Hugging Face Datasets or Zenodo).
 
-### Phase B: Standardized Downstream Probing (Near-Zero Cost)
-* Downstream evaluation uses standardized, hyperparameter-free probes (e.g., `scikit-learn` Ridge/Logistic Regression or a fixed 2-layer MLP).
-* **Elimination of Downstream Tuning Bias**: All representations are evaluated with the exact same classifier architecture and random seeds on identical scaffold splits.
-* Evaluation takes **seconds on a single CPU**, enabling automated leaderboard scoring via free GitHub Actions runners.
+### Phase B: Standardized Downstream Probing
+* Downstream evaluation uses a standardised L2 linear probe with one fixed regularisation grid and training-only cross-validation. A one-hidden-layer MLP is diagnostic and never ranked.
+* **Reduction of Downstream Tuning Bias**: Representations within a task use the same probe family, grid, metric and seed on identical object splits.
+* Evaluation is CPU-only after embeddings are cached. Runtime depends on sample count, dimension and cache state and is recorded as operational context rather than a scientific score.
 
 ---
 
@@ -27,17 +27,17 @@ To ensure generalizability without benchmark bloat, the proposed suite spans 9 r
 
 Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset Provenance), not paper-reported figures.
 
-### A. Small Molecule Modality (~22,700 compounds total)
+### A. Small Molecule Modality (~11,000 compounds total)
 1. **BBBP** (Classification, 2,039 compounds) — *Membrane permeability / Blood-brain barrier*
 2. **ClinTox** (Classification, 1,480 compounds) — *Clinical toxicity & FDA approval*
 3. **BACE** (Classification, 1,513 compounds) — *Target binding (Binding affinity)*
 4. **ESOL** (Regression, 1,128 compounds) — *Aqueous solubility*
 5. **Lipophilicity** (Regression, 4,200 compounds) — *Octanol-water partition coefficient*
-6. **CYP3A4 Inhibition** (Classification, 12,328 compounds) — *TDC `CYP3A4_Veith`, official scaffold split. Named for what it measures: CYP3A4 **substrate** prediction is a different and much smaller TDC dataset (`CYP3A4_Substrate_CarbonMangels`, ~670 compounds).*
+6. **CYP3A4 Substrate** (Classification, 667 unique compounds) — *TDC `CYP3A4_Substrate_CarbonMangels`, canonicalised and deduplicated before scaffold splitting at seed 42. TDC `CYP3A4_Veith` measures inhibition and is not interchangeable.*
 
-### B. Protein Modality (~43,700 sequences total)
-7. **DeepLoc** (Classification, 22,233 proteins) — *Global subcellular localization (argmax of 10 compartments)*
-8. **Fluorescence** (Regression, 21,446 proteins) — *GFP fitness landscape (TAPE), log-fluorescence*
+### B. Protein Modality (~82,300 sequences total)
+7. **DeepLoc 2.0** (Multi-label classification, 28,303 proteins) — *Ten localisation labels; published homology partitions retained with a fixed train/validation/test fold assignment*
+8. **Fluorescence** (Regression, 54,025 proteins; 21,446 train) — *GFP fitness landscape (TAPE), log-fluorescence*
 
 > **CB513 was dropped** per Design Decision D2. It was replaced with a **whole-protein regression** task (Fluorescence) so the protein modality mirrors the molecule side's classification + regression shape and preserves the per-object "one vector → one probe" harness. This also avoids enshrining a dataset ProtTrans itself calls "redundant and outdated."
 
@@ -50,27 +50,25 @@ Sample counts below reflect the **actual downloaded datasets** (see §7, Dataset
 
 | Modality / Task Set | Sample Count | Tensor Size ($d=768$ to $1024$) | CPU Evaluation Time |
 | :--- | :--- | :--- | :--- |
-| **6 Molecular Tasks** | ~22,700 compounds | ~68 MB | ~7 seconds |
-| **DeepLoc (Protein)** | 22,233 proteins | ~68 MB | ~10 seconds |
-| **Fluorescence (Protein)** | 21,446 proteins | ~66 MB | ~9 seconds |
+| **6 Molecular Tasks** | ~11,000 compounds | ~34 MB | ~7 seconds |
+| **DeepLoc 2.0 (Protein)** | 28,303 proteins | model-dependent | CPU-only after embedding |
+| **Fluorescence (Protein)** | 54,025 proteins | ~166 MB | ~9 seconds |
 | **Promoters (Genomics)** | 31,443 sequences | ~96 MB | ~12 seconds |
-| **TOTAL SUITE** | **~98,000 vectors** | **~298 MB** | **< 60 seconds (Single CPU)** |
+| **TOTAL SUITE** | **~124,800 vectors** | **model-dependent** | **no universal timing claim** |
 
 > Counts are the actual downloaded datasets. All are per-object (one vector per molecule/protein/sequence), so a single probing harness covers every task — no per-residue special case.
 
-* **Total Hosting Cost**: $0 (Stored on Hugging Face Datasets)
-* **Phase B (probing) cost per submission**: effectively $0 — the probes really do run in seconds to a couple of minutes on CPU, and the measured figures above are from actual runs.
-
-> **Correction, measured.** The original framing — "$0 total, evaluation in <90s" — described Phase B and quietly assumed Phase A away. In practice generating the frozen embeddings for this study took **hours on a GPU**: ~42 min for ESM-2 650M on DeepLoc alone, and roughly 6 hours across the protein and genomic tasks on a 4 GB laptop card. That cost is real; it is simply paid **once per (model, dataset)** by whoever submits, not per evaluation. The zero-cost claim holds for the leaderboard, not for the suite as a whole, and the proposal should say so.
+Embedding generation is paid once per model-task cell and can require substantial accelerator time. Hosted storage and CI may be covered by free service allowances, but that is an operational funding detail, not zero resource use.
 
 ---
 
 ## 4. Key Metric Innovations
 
-1. **Linear Probe Score** (ranked): ROC-AUC (binary), accuracy and macro-F1 (multi-class), or Spearman ρ (regression), from a frozen L2-regularised linear probe. Named for what it measures — linear decodability under this probe — rather than "pure representation quality", which would overclaim.
-2. **Linear-to-MLP gap** (diagnostic): the difference between a fixed 2-layer MLP and the linear probe, separating representations whose information is linearly accessible from those needing a non-linear head.
-3. **Leakage-risk flag**: fraction of the test split recoverable from a model's declared pretraining corpora (§7 of `STUDY.md`).
-4. **Embedding dimension and inference time**, recorded per model.
+1. **Linear Probe Score** (ranked): ROC-AUC (binary), macro ROC-AUC (multi-label), or Spearman ρ (regression), from a frozen L2-regularised linear probe. It measures linear decodability under the stated pooling and truncation protocol.
+2. **Linear-to-MLP gap** (diagnostic): the difference between a fixed one-hidden-layer MLP and the linear probe.
+3. **Validation-selected paired inference**: cluster-bootstrap difference intervals, paired-randomisation p-values and study-wide Holm correction.
+4. **Pretraining input-exposure proxies**: exact identity, near-duplicate and scaffold overlap reported separately for molecules; Swiss-Prot homology for proteins. These are not labelled as contamination or label leakage.
+5. **Embedding provenance**: checkpoint revision, input and matrix hashes, special-token handling, truncation and software versions.
 
 > *Dropped:* "RMSE per embedding dimension". RMSE is not comparable across tasks with different target scales, so dividing it by a dimension count produces a quantity with no meaning. Dimension is reported alongside the score instead.
 
@@ -82,12 +80,12 @@ The three open questions below have been resolved. Each records the decision, th
 
 ### D1 — Probe selection: linear-ranked, MLP as diagnostic
 
-**Decision:** The **ranked metric is a strict L2-regularized linear/logistic probe**. A **fixed 2-layer MLP is reported as a secondary diagnostic but is not ranked**.
+**Decision:** The **ranked metric is a strict L2-regularized linear/logistic probe**. A **fixed one-hidden-layer MLP is reported as a secondary diagnostic but is not ranked**.
 
 - **Why linear ranks.** A linear probe has almost no capacity of its own, so whatever it decodes was already present in the embedding. This is the property that makes the fairness claim defensible: rank on the MLP and the metric starts measuring the MLP's capacity, not the representation.
 - **Why keep the MLP.** The *gap* between linear and MLP performance is itself informative — it distinguishes representations that encode information linearly (cheap to use downstream) from those that need a non-linear head. Two models with equal linear scores but different MLP scores are genuinely different.
-- **Guardrail.** The MLP must be pinned (fixed width 256, 2 layers, dropout 0.1, 100 epochs, seed 0, no per-model early stopping). Any per-model tuning reintroduces exactly the downstream-tuning bias the suite exists to eliminate.
-- **Policy.** Ranking metric = L2-regularized linear/logistic probe (single fixed regularization value selected once by 5-fold CV, not per model). Secondary diagnostic = the fixed MLP above, reported but not ranked.
+- **Guardrail.** The MLP is pinned to one 256-unit ReLU hidden layer, alpha 10^-4, batch size 256, learning rate 10^-3, early stopping and seed 42. Any per-model tuning is prohibited.
+- **Policy.** Ranking metric = L2-regularized linear/logistic probe, with C or alpha selected from one fixed grid by three-fold training-only CV and a disclosed 6,000-row search cap. Secondary diagnostic = the fixed MLP above, reported but not ranked.
 - **Trade-off accepted.** Two columns is more surface area to explain, but compute is negligible (MLP on frozen features is still seconds) and it preempts the "linear probing is too weak to be fair" objection. Metric #1 is renamed from "Pure Representation Score" to **"Linear Probe Score"** — the earlier name overclaimed, since linear probing measures *linear decodability under this probe*, not abstract representation quality.
 
 ### D2 — Task coverage: rebalance the 9 tasks, do not add PDBBind
@@ -101,26 +99,26 @@ The three open questions below have been resolved. Each records the decision, th
 
 *D-note (probing uniformity):* per-residue CB513 is a different harness from the per-object tasks — different data shape and a protein-level (not scaffold) split. If a per-residue task is retained, it must be described as a separate harness rather than folded into the "same classifier, same seed, same everything" uniformity claim.
 
-### D3 — Pretraining leakage: computed, first-class, per-model audit
+### D3 — Pretraining input exposure: computed, first-class context
 
-**Decision:** **Leakage is measured by BioLatent, not self-reported.** It becomes a computed, per-(model, task) flag — the scientific centerpiece of the suite, not a footnote.
+**Decision:** BioLatent reports **input-exposure proxies**, not confirmed contamination or label leakage.
 
-- **Why not self-report.** Deduplication self-reports are unreliable: authors won't apply them uniformly, many cannot reconstruct their exact training set, and there is an incentive not to look. A benchmark whose integrity depends on the honesty of the ranked parties is not a benchmark. With frozen embeddings the stakes are maximal — a test item seen in pretraining has its label already encoded in its vector, so a leaked model gets an unearned linear-probe boost and the leaderboard rewards leakage.
+- **Why the terminology matters.** Self-supervised pretraining can contain a benchmark input without containing its downstream label. Familiarity may affect an embedding, but it does not prove memorised labels or an unearned score.
 - **Audit pipeline (computed by us):**
-  1. **Structural overlap.** For each benchmark test set, compute Bemis–Murcko **scaffold** overlap (molecules) or **sequence-identity** overlap via MMseqs2 at 30–50% identity (proteins) against the *public* pretraining corpora that can be obtained (PubChem, ZINC, ChEMBL, UniRef, etc.). Private data can't be checked, but the largest models train on public data. Output a **leakage-risk score per (model, task)** = fraction of test items with a near-duplicate in that model's declared corpus.
+  1. **Separate measures.** For molecules report exact canonical identity, ECFP4 Tanimoto ≥0.9 and Murcko-scaffold identity separately. For proteins report MMseqs2 homology at a stated identity and coverage threshold.
   2. **Structured self-declaration (auditable, not trusted).** Each submission names its pretraining corpora from a **controlled list**; these map onto the precomputed overlap tables. The self-report is used to *select which overlap table applies*, not taken on faith.
-  3. **Flag, don't exclude.** Display a leakage-risk badge beside each score. Silent exclusion invites "you disqualified my model" disputes; transparent flagging is more defensible and lets readers discount appropriately.
-  4. **Leakage-controlled sub-leaderboard (optional).** Additionally rank on the subset of test items with zero detected overlap across *all* models — the cleanest apples-to-apples number the suite can offer.
-- **Trade-off accepted.** This is the most expensive part of the plan (it requires obtaining the pretraining corpora and building an overlap pipeline), but it is also what makes the work novel and citable: a **leakage-audited** frozen-embedding benchmark is a materially stronger claim than "another leaderboard," and the overlap statistics are a publishable result in their own right.
+  3. **Flag, don't silently exclude.** Display the proxy beside each score and retain masks for sensitivity subsets.
+  4. **Bound the claim.** Random ZINC/PubChem samples are not exact checkpoint subsets, and Swiss-Prot homology is not exact UniRef50 membership.
+- **Trade-off accepted.** This audit adds context and reproducibility, but it cannot infer whether familiarity helped any prediction.
 
 ---
 
 ## 6. Build Items Carrying Real Cost
 
 1. **CB513 replacement (D2).** ✅ **Done** — replaced with the whole-protein **Fluorescence** regression task (TAPE GFP landscape). Uses the same per-object probing harness as every other task; no separate per-residue code path.
-2. **Leakage-audit pipeline (D3).** ✅ **Built and run** — `benchmark/leakage.py` and `benchmark/run_leakage.py`. Molecular overlap is measured empirically against a ZINC sample (Murcko scaffold identity plus ECFP4 Tanimoto ≥ 0.9); protein and genomic contamination is recorded as a structural claim because it is near-total by construction. Results in `STUDY.md` §5. Remaining extension: sampling PubChem so the molecular bound tightens, and MMseqs2 identity search against a UniRef50 sample.
+2. **Input-exposure pipeline (D3).** ✅ **Built and run** — `benchmark/leakage.py` and `benchmark/run_leakage.py`. Molecular proxy dimensions are separated, Swiss-Prot is searched in full, and human-reference input exposure is stated structurally without implying label exposure.
 
-> **The study itself is now built and partly run.** `STUDY.md` records the protocol, the split decisions, the molecular results and the leakage audit. The fabricated runner that produced the previous `benchmark_results.json` — random Gaussian projections of a single baseline, standing in for 38 models — has been deleted.
+> **The study is executable end to end.** `STUDY.md` is a local audit report; the public website and manuscript read the generated artefacts in `results/`. The earlier fabricated Gaussian-projection runner has been deleted and no failed or missing cell is back-filled.
 
 ---
 
@@ -135,9 +133,9 @@ All nine datasets are **real, sourced data** — downloaded via `benchmark/downl
 | BACE | molecule | classification | 1,513 | MoleculeNet |
 | ESOL | molecule | regression | 1,128 | MoleculeNet |
 | Lipophilicity | molecule | regression | 4,200 | MoleculeNet |
-| CYP3A4 | molecule | classification | 12,328 | TDC `CYP3A4_Veith` |
-| DeepLoc | protein | classification | 22,233 | HF `bloyal/deeploc` (argmax of 10 compartments) |
-| Fluorescence | protein | regression | 21,446 | HF `proteinglm/fluorescence_prediction` (TAPE GFP) |
+| CYP3A4 Substrate | molecule | classification | 667 | TDC `CYP3A4_Substrate_CarbonMangels` |
+| DeepLoc 2.0 | protein | multi-label | 28,303 | Published SwissProt localisation data and homology partitions |
+| Fluorescence | protein | regression | 54,025 (21,446 train) | HF `proteinglm/fluorescence_prediction` (TAPE GFP) |
 | Promoters | genomics | classification | 31,443 | HF `InstaDeepAI/nucleotide_transformer_downstream_tasks_revised`, task `promoter_all` |
 
 **Two corrections applied during this pass:**

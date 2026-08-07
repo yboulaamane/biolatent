@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
-# Build the second interpreter that MoLFormer-XL runs in.
+# Build the compatibility interpreter used only for MoLFormer-XL embedding.
 #
-# Why a second environment exists
-# -------------------------------
-# MoLFormer-XL ships its modelling code as remote code on the Hub, and that code
-# imports `transformers.masking_utils`, which does not exist before transformers
-# 5. The rest of the suite is pinned to 4.50.3 (see requirements.txt) and
-# upgrading it in place would silently re-run every other model under a
-# different library version, invalidating results already computed.
-#
-# Since embedding already runs in a subprocess per (model, dataset), the model
-# simply declares its own interpreter -- see MOLFORMER_ENV in embed.py. Nothing
-# else in the pipeline is affected.
+# MoLFormer's pinned remote code imports an API available in transformers 5 but
+# absent from the main transformers 4.50.3 environment. The embedding runner
+# isolates every neural model in a subprocess and records that subprocess's
+# Python, torch and transformers versions in the public run manifest, so the
+# compatibility environment is explicit rather than hidden.
 #
 # The venv inherits system site-packages so torch, numpy and RDKit are shared
 # with the main environment; only transformers and tokenizers are overridden.
@@ -32,12 +26,8 @@ echo "Target venv:      $ENV_DIR"
 "$ENV_DIR/bin/pip" install --quiet "transformers==5.14.1" "tokenizers==0.22.2"
 
 "$ENV_DIR/bin/python" - <<'PY'
-import transformers, torch
+import torch, transformers
+import transformers.masking_utils
 print(f"transformers {transformers.__version__}, torch {torch.__version__}")
-import transformers.masking_utils  # the import that fails on 4.x
-print("masking_utils present -- MoLFormer-XL remote code will load")
+print("masking_utils present")
 PY
-
-echo
-echo "Set MOLFORMER_ENV in benchmark/embed.py to:"
-echo "    $ENV_DIR/bin/python"

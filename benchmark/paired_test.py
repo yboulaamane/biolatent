@@ -1,56 +1,15 @@
-"""
-BioLatent: Paired Bootstrap Significance Test
-=============================================
+"""Paired inference for the BioLatent frozen-embedding study.
 
-Answers "is the leading representation actually better than this one?" -- the
-question a ranked table implies but a table of scores cannot settle.
+The representation used as comparator is selected on validation data, never on
+the test scores it is compared against. Test-set uncertainty is estimated by a
+paired cluster bootstrap (Murcko scaffold clusters for molecules; individual
+items otherwise). P-values come from a paired randomisation test that swaps the
+two models' predictions within the same resampling units under the null.
 
-Why paired, and not overlapping confidence intervals
-----------------------------------------------------
-The per-model intervals in ``benchmark_results.json`` describe each score in
-isolation. Reading two of them and calling the models indistinguishable when
-the intervals overlap is a real test, but a badly conservative one: both models
-are scored on the *same* test molecules, so their errors are strongly
-correlated. A test set that happens to contain hard items drags every model
-down together, and that shared movement inflates both intervals while telling
-us nothing about which model is better.
-
-The paired bootstrap removes it. One resample of the test indices per
-replicate, scored under every model, and the statistic is the *difference*.
-Shared difficulty cancels; what remains is disagreement between the models on
-the same items. A difference interval that excludes zero is a real separation.
-
-The probes are fit once on the real training split -- exactly the fit that
-produced the reported score -- and only the test set is resampled. The interval
-therefore describes uncertainty from the finite test set, not from the split or
-from probe initialisation.
-
-Two things this does not fix
-----------------------------
-Each task runs one test per non-leading model, so p-values are Holm-corrected
-within the task. That controls the family-wise error rate across the models
-being compared, and without it twenty-four uncorrected tests at 5% would be
-expected to manufacture roughly one separation from noise alone. Scale-ladder
-steps (see LADDERS) form their own family and are corrected separately.
-
-It does **not** correct for the leader being chosen as the maximum on the same
-test set that then judges it. That is a winner's-curse selection, and it biases
-every leader-versus-challenger gap upward. The consequence is directional and
-worth stating plainly: a separation reported here may be optimistic, but a
-*non*-separation is if anything conservative -- so "these two cannot be told
-apart" is the safer of the two conclusions this test produces.
-
-Memory
-------
-The protein embedding matrices are large (the 3-mer baseline on Fluorescence is
-1.7 GB on its own) and a parallel grid search over one of them forks that
-footprint. Each task therefore runs in its own subprocess, and the search is
-serial for the non-molecular modalities. Results are merged into the report
-file so a partial run keeps its finished tasks.
-
-Usage:
-    python benchmark/paired_test.py              # every task, one subprocess each
-    python benchmark/paired_test.py DeepLoc      # a single task, in-process
+Primary significance uses a Holm correction across every reference comparison
+in the study. Within-task and within-modality adjusted values are retained as
+sensitivity analyses. ESM-2 scale steps are pre-specified and corrected as a
+separate family.
 """
 
 import gc
@@ -63,117 +22,232 @@ import numpy as np
 from scipy.stats import spearmanr
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import accuracy_score, roc_auc_score
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
-from benchmark.probe import ALPHA_GRID, C_GRID, SEED, _prepare, _search_subset
+from benchmark.probe import (ALPHA_GRID, C_GRID, PROBE_PROTOCOL_VERSION,
+                             SEED, _multilabel_auc_scorer, _search_subset,
+                             _valid_rows)
 
-N_BOOT = 1000
+N_BOOT = 2000
+N_PERM = 2000
+INFERENCE_PROTOCOL_VERSION = 4
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
                            "paired_comparisons.json")
+PREDICTION_DIR = os.path.join(os.path.dirname(__file__), "..", "results",
+                              "predictions")
 
-# Pre-specified secondary comparisons: each consecutive step of a model-scale
-# ladder, tested against the step below it.
-#
-# These are a separate family from leader-versus-rest and are corrected
-# separately, because they answer a different question. "Is anything reliably
-# worse than the best model?" and "does making the model bigger reliably help?"
-# are not the same claim, and pooling them into one correction would penalise
-# both for the other's tests. The ladder is fixed here rather than derived from
-# the results so that it cannot be chosen after seeing which steps look
-# convincing.
 LADDERS = {
     "esm2_scale": ["esm2_8m", "esm2_35m", "esm2_150m", "esm2_650m"],
 }
 
 
-def fit_predict(X, y, train_idx, test_idx, task_type, n_jobs):
-    """Fit the standard linear probe and return its test-set predictions.
+def _spearman_scorer(estimator, X, y_true):
+    value = spearmanr(y_true, estimator.predict(X)).statistic
+    return float(value) if np.isfinite(value) else 0.0
 
-    Identical procedure to ``probe.linear_probe`` -- same grid, same folds, same
-    seed -- so the comparison is between the scores that were actually reported.
-    """
-    X_tr, y_tr, X_te, y_te = _prepare(X[train_idx], y[train_idx],
-                                      X[test_idx], y[test_idx])
+
+def fit_model(X, y, train_idx, task_type, n_jobs):
+    """Fit the exact standard linear-probe protocol on ``train_idx``."""
+    valid = _valid_rows(y[train_idx])
+    X_raw = X[train_idx][valid]
+    y_train = y[train_idx][valid]
+    scaler = StandardScaler().fit(X_raw)
+    X_train = np.nan_to_num(scaler.transform(X_raw), nan=0.0,
+                            posinf=0.0, neginf=0.0)
 
     if task_type == "classification":
-        y_tr, y_te = y_tr.astype(int), y_te.astype(int)
-        n_classes = int(max(y_tr.max(), y_te.max())) + 1
-        Xs, ys = _search_subset(X_tr, y_tr, stratify=True)
+        y_train = y_train.astype(int)
+        n_classes = int(y_train.max()) + 1
+        Xs, ys = _search_subset(X_raw, y_train, stratify=True)
+        scoring = "roc_auc" if n_classes == 2 else "accuracy"
         search = GridSearchCV(
-            LogisticRegression(max_iter=1000, random_state=SEED),
-            {"C": C_GRID}, cv=3, n_jobs=n_jobs,
-            scoring="roc_auc" if n_classes == 2 else "accuracy").fit(Xs, ys)
-        model = LogisticRegression(C=search.best_params_["C"], max_iter=1000,
-                                   random_state=SEED).fit(X_tr, y_tr)
-        y_prob = model.predict_proba(X_te) if n_classes == 2 else None
-        return y_te, model.predict(X_te), y_prob, n_classes
+            Pipeline([
+                ("scale", StandardScaler()),
+                ("model", LogisticRegression(max_iter=1000,
+                                               random_state=SEED)),
+            ]),
+            {"model__C": C_GRID}, cv=3, n_jobs=n_jobs,
+            scoring=scoring).fit(Xs, ys)
+        model = LogisticRegression(C=search.best_params_["model__C"], max_iter=1000,
+                                   random_state=SEED).fit(X_train, y_train)
+    elif task_type == "multilabel":
+        y_train = y_train.astype(int)
+        n_classes = y_train.shape[1]
+        Xs, ys = _search_subset(X_raw, y_train, stratify=False)
+        search = GridSearchCV(
+            Pipeline([
+                ("scale", StandardScaler()),
+                ("model", OneVsRestClassifier(
+                    LogisticRegression(max_iter=1000, random_state=SEED))),
+            ]),
+            {"model__estimator__C": C_GRID}, cv=3, n_jobs=n_jobs,
+            scoring=_multilabel_auc_scorer).fit(Xs, ys)
+        model = OneVsRestClassifier(LogisticRegression(
+            C=search.best_params_["model__estimator__C"], max_iter=1000,
+            random_state=SEED)).fit(X_train, y_train)
+    else:
+        n_classes = None
+        Xs, ys = _search_subset(X_raw, y_train, stratify=False)
+        search = GridSearchCV(
+            Pipeline([
+                ("scale", StandardScaler()),
+                ("model", Ridge(random_state=SEED)),
+            ]),
+            {"model__alpha": ALPHA_GRID}, cv=3, n_jobs=n_jobs,
+            scoring=_spearman_scorer).fit(Xs, ys)
+        model = Ridge(alpha=search.best_params_["model__alpha"],
+                      random_state=SEED).fit(X_train, y_train)
+    return scaler, model, n_classes
 
-    Xs, ys = _search_subset(X_tr, y_tr, stratify=False)
-    search = GridSearchCV(Ridge(random_state=SEED), {"alpha": ALPHA_GRID},
-                          cv=3, n_jobs=n_jobs, scoring="r2").fit(Xs, ys)
-    model = Ridge(alpha=search.best_params_["alpha"],
-                  random_state=SEED).fit(X_tr, y_tr)
-    return y_te, model.predict(X_te), None, None
+
+def predict_bundle(X, y, eval_idx, fitted, task_type):
+    scaler, model, n_classes = fitted
+    valid = _valid_rows(y[eval_idx])
+    X_eval = np.nan_to_num(scaler.transform(X[eval_idx][valid]), nan=0.0,
+                           posinf=0.0, neginf=0.0)
+    y_true = y[eval_idx][valid]
+    y_pred = model.predict(X_eval)
+    y_prob = (model.predict_proba(X_eval)
+              if task_type in ("classification", "multilabel") else None)
+    return {"y_true": y_true, "y_pred": y_pred, "y_prob": y_prob,
+            "n_classes": n_classes, "valid": valid}
 
 
-def bootstrap_p(diff):
-    """Two-sided percentile-bootstrap p-value for a paired difference.
-
-    The proportion of replicates falling on the wrong side of zero, doubled.
-    Floored at 1/n_boot: with 1,000 replicates the resolution runs out at
-    p = 0.001, and reporting a smaller number would be inventing precision the
-    resampling cannot supply.
-    """
-    n = len(diff)
-    tail = min((diff <= 0).sum(), (diff >= 0).sum()) / n
-    return float(min(1.0, max(2 * tail, 1.0 / n)))
+def score(bundle, idx=None):
+    y_true, y_pred, y_prob = (bundle["y_true"], bundle["y_pred"],
+                              bundle["y_prob"])
+    if idx is not None:
+        y_true, y_pred = y_true[idx], y_pred[idx]
+        y_prob = y_prob[idx] if y_prob is not None else None
+    task_type, n_classes = bundle["task_type"], bundle["n_classes"]
+    if task_type == "regression":
+        value = spearmanr(y_true, y_pred).statistic
+        return float(value) if np.isfinite(value) else np.nan
+    if task_type == "multilabel":
+        if any(len(np.unique(y_true[:, column])) < 2
+               for column in range(y_true.shape[1])):
+            return np.nan
+        return float(roc_auc_score(y_true, y_prob, average="macro"))
+    if n_classes == 2:
+        if len(np.unique(y_true)) < 2:
+            return np.nan
+        return float(roc_auc_score(y_true, y_prob[:, 1]))
+    return float(accuracy_score(y_true, y_pred))
 
 
 def holm(pvalues):
-    """Holm-Bonferroni adjusted p-values, order preserved.
-
-    Every model on a task is compared against that task's leader, so a task
-    with five models runs four tests and the suite runs twenty-four. At an
-    uncorrected 5% that is more than one expected false separation across the
-    molecular tasks alone -- enough to manufacture a ranking on its own. Holm
-    is used rather than Bonferroni because it is uniformly more powerful and
-    needs no independence assumption, which matters here: the comparisons share
-    the leader and are strongly correlated.
-    """
+    """Holm-Bonferroni adjusted p-values, preserving input order."""
     m = len(pvalues)
-    order = sorted(range(m), key=lambda i: pvalues[i])
-    adjusted = [0.0] * m
-    running = 0.0
-    for rank, i in enumerate(order):
-        running = max(running, min(1.0, (m - rank) * pvalues[i]))
-        adjusted[i] = running
+    if not m:
+        return []
+    order = sorted(range(m), key=lambda index: pvalues[index])
+    adjusted, running = [0.0] * m, 0.0
+    for rank, index in enumerate(order):
+        running = max(running, min(1.0, (m - rank) * pvalues[index]))
+        adjusted[index] = running
     return adjusted
 
 
-def score(y_true, y_pred, y_prob, task_type, n_classes, idx):
-    if task_type == "regression":
-        rho = spearmanr(y_true[idx], y_pred[idx]).statistic
-        return float(rho) if np.isfinite(rho) else np.nan
-    if n_classes == 2:
-        if len(np.unique(y_true[idx])) < 2:
-            return np.nan          # resample lost a class; ROC-AUC undefined
-        return float(roc_auc_score(y_true[idx], y_prob[idx, 1]))
-    return float(accuracy_score(y_true[idx], y_pred[idx]))
+def _sample_indices(rng, groups):
+    unique = np.unique(groups)
+    sampled = rng.choice(unique, len(unique), replace=True)
+    return np.concatenate([np.where(groups == group)[0] for group in sampled])
+
+
+def _swapped_bundle(left, right, swap_items):
+    """Return predictions formed by swapping paired outcomes under the null."""
+    mask = np.asarray(swap_items)
+    shape = (len(mask),) + (1,) * (left["y_pred"].ndim - 1)
+    pred_mask = mask.reshape(shape)
+    left_pred = np.where(pred_mask, right["y_pred"], left["y_pred"])
+    right_pred = np.where(pred_mask, left["y_pred"], right["y_pred"])
+    if left["y_prob"] is None:
+        left_prob = right_prob = None
+    else:
+        probability_mask = mask.reshape(
+            (len(mask),) + (1,) * (left["y_prob"].ndim - 1))
+        left_prob = np.where(probability_mask, right["y_prob"], left["y_prob"])
+        right_prob = np.where(probability_mask, left["y_prob"], right["y_prob"])
+    common = {key: left[key] for key in ("y_true", "n_classes", "task_type")}
+    return ({**common, "y_pred": left_pred, "y_prob": left_prob},
+            {**common, "y_pred": right_pred, "y_prob": right_prob})
+
+
+def paired_inference(left, right, groups, seed=SEED):
+    """Cluster-bootstrap CI and paired randomisation p-value for a difference."""
+    observed = score(left) - score(right)
+    rng = np.random.RandomState(seed)
+    boot = np.empty(N_BOOT)
+    for index in range(N_BOOT):
+        sampled = _sample_indices(rng, groups)
+        boot[index] = score(left, sampled) - score(right, sampled)
+    boot = boot[np.isfinite(boot)]
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+
+    unique_groups = np.unique(groups)
+    group_membership = {group: np.where(groups == group)[0]
+                        for group in unique_groups}
+    extreme, valid = 0, 0
+    for _ in range(N_PERM):
+        selected = rng.randint(0, 2, len(unique_groups)).astype(bool)
+        swap = np.zeros(len(groups), dtype=bool)
+        for group, enabled in zip(unique_groups, selected):
+            if enabled:
+                swap[group_membership[group]] = True
+        perm_left, perm_right = _swapped_bundle(left, right, swap)
+        value = score(perm_left) - score(perm_right)
+        if np.isfinite(value):
+            valid += 1
+            extreme += abs(value) >= abs(observed) - 1e-15
+    p_value = (extreme + 1) / (valid + 1)
+    return {"delta": round(float(observed), 4),
+            "ci_low": round(float(lo), 4), "ci_high": round(float(hi), 4),
+            "p_raw": round(float(p_value), 6),
+            "n_boot_valid": int(len(boot)), "n_perm_valid": int(valid)}
+
+
+def _selection_indices(data):
+    if len(data["val_idx"]):
+        return data["train_idx"], data["val_idx"], "published validation split"
+    train = data["train_idx"]
+    labels = data["targets"][train]
+    stratify = labels if data["task_type"] == "classification" else None
+    fit, select = train_test_split(train, test_size=0.1, random_state=SEED,
+                                   stratify=stratify)
+    return np.asarray(fit), np.asarray(select), \
+        "deterministic 10% holdout from training split"
+
+
+def _save_predictions(task, data, predictions):
+    os.makedirs(PREDICTION_DIR, exist_ok=True)
+    first = next(iter(predictions.values()))
+    valid = first["valid"]
+    payload = {
+        "y_true": first["y_true"],
+        "groups": np.asarray(data["resampling_groups"]
+                             [data["test_idx"]][valid], dtype=str),
+    }
+    for model_id, bundle in predictions.items():
+        payload[f"{model_id}__pred"] = bundle["y_pred"]
+        if bundle["y_prob"] is not None:
+            payload[f"{model_id}__prob"] = bundle["y_prob"]
+    np.savez_compressed(os.path.join(PREDICTION_DIR, f"{task}.npz"), **payload)
 
 
 def run_task(task):
-    """Compare every model on one task against that task's leader."""
     data = load_benchmark_dataset(task)
     task_type, modality = data["task_type"], data["modality"]
-    # Grid-search workers fork the parent's arrays; on the protein matrices
-    # that multiplies several gigabytes by the worker count.
     n_jobs = 4 if modality == "molecule" else 1
+    selection_train, selection_idx, selection_source = _selection_indices(data)
 
-    preds = {}
+    test_predictions, selection_scores = {}, {}
     for model_id, spec in embed.MODEL_REGISTRY.items():
         if spec["modality"] != modality:
             continue
@@ -181,120 +255,145 @@ def run_task(task):
         if not os.path.exists(path):
             continue
         X = np.load(path)
-        preds[model_id] = fit_predict(X, data["targets"], data["train_idx"],
-                                      data["test_idx"], task_type, n_jobs)
+        selection_fit = fit_model(X, data["targets"], selection_train,
+                                  task_type, n_jobs)
+        selection = predict_bundle(X, data["targets"], selection_idx,
+                                   selection_fit, task_type)
+        selection["task_type"] = task_type
+        selection_scores[model_id] = score(selection)
+
+        # After the representation is selected on held-out validation data,
+        # every final probe is refit on all non-test labels. Promoters has no
+        # published validation split, so this is its complete training set.
+        test_fit = fit_model(X, data["targets"], data["final_train_idx"],
+                             task_type, n_jobs)
+        test = predict_bundle(X, data["targets"], data["test_idx"],
+                              test_fit, task_type)
+        test["task_type"] = task_type
+        test_predictions[model_id] = test
         del X
         gc.collect()
 
-    if len(preds) < 2:
+    if len(test_predictions) < 2:
         print(f"{task}: fewer than two cached models, skipped", flush=True)
         return None
 
-    def scored(model_id, idx):
-        y_true, y_pred, y_prob, n_classes = preds[model_id]
-        return score(y_true, y_pred, y_prob, task_type, n_classes, idx)
+    names = list(test_predictions)
+    reference = max(names, key=lambda model: selection_scores[model])
+    test_scores = {model: score(bundle)
+                   for model, bundle in test_predictions.items()}
+    observed_best = max(names, key=lambda model: test_scores[model])
+    valid = test_predictions[reference]["valid"]
+    groups = np.asarray(data["resampling_groups"]
+                        [data["test_idx"]][valid], dtype=str)
 
-    names = list(preds)
-    n = len(preds[names[0]][0])
-    full = {m: scored(m, np.arange(n)) for m in names}
-    leader = max(names, key=lambda m: full[m])
+    comparisons = {}
+    challengers = [model for model in sorted(names,
+                                             key=lambda item: -test_scores[item])
+                   if model != reference]
+    print(f"\n{task}: validation reference={reference}; "
+          f"test best={observed_best}", flush=True)
+    for offset, model in enumerate(challengers):
+        result = paired_inference(test_predictions[reference],
+                                  test_predictions[model], groups,
+                                  seed=SEED + offset)
+        result["score"] = round(float(test_scores[model]), 4)
+        comparisons[model] = result
+        print(f"  vs {model:24s} d={result['delta']:+.4f} "
+              f"CI [{result['ci_low']:+.4f}, {result['ci_high']:+.4f}] "
+              f"p={result['p_raw']:.4g}", flush=True)
 
-    rng = np.random.RandomState(SEED)
-    boots = {m: np.empty(N_BOOT) for m in names}
-    for b in range(N_BOOT):
-        idx = rng.randint(0, n, n)
-        for m in names:
-            boots[m][b] = scored(m, idx)
+    adjusted = holm([comparisons[model]["p_raw"] for model in challengers])
+    for model, p_value in zip(challengers, adjusted):
+        comparisons[model]["p_holm_task"] = round(float(p_value), 6)
+        comparisons[model]["significant_task"] = bool(p_value < 0.05)
 
-    challengers = [m for m in sorted(names, key=lambda m: -full[m]) if m != leader]
-    stats = {}
-    for m in challengers:
-        diff = boots[leader] - boots[m]
-        diff = diff[np.isfinite(diff)]
-        lo, hi = np.percentile(diff, [2.5, 97.5])
-        stats[m] = (lo, hi, bootstrap_p(diff), len(diff))
-
-    adjusted = holm([stats[m][2] for m in challengers])
-
-    entry = {"leader": leader, "leader_score": round(float(full[leader]), 4),
-             "n_test": int(n), "n_boot": N_BOOT,
-             "correction": "Holm-Bonferroni within task", "comparisons": {}}
-    print(f"\n{task} (n={n})  leader = {leader} {full[leader]:.4f}", flush=True)
-
-    for m, p_adj in zip(challengers, adjusted):
-        lo, hi, p_raw, n_valid = stats[m]
-        entry["comparisons"][m] = {
-            "score": round(float(full[m]), 4),
-            "delta": round(float(full[leader] - full[m]), 4),
-            "ci_low": round(float(lo), 4), "ci_high": round(float(hi), 4),
-            "p_raw": round(p_raw, 4), "p_holm": round(p_adj, 4),
-            "significant": bool(p_adj < 0.05), "n_boot_valid": int(n_valid),
-        }
-        print(f"   vs {m:24s} d={full[leader] - full[m]:+.4f} "
-              f"95% CI [{lo:+.4f}, {hi:+.4f}]  "
-              f"p={p_raw:.3f} p_holm={p_adj:.3f}  "
-              f"{'SIGNIFICANT' if p_adj < 0.05 else 'n.s.'}", flush=True)
-
-    ladders = _ladder_steps(names, boots, full)
-    if ladders:
-        entry["ladders"] = ladders
+    entry = {
+        "protocol_version": INFERENCE_PROTOCOL_VERSION,
+        "reference": reference,
+        "reference_selection": selection_source,
+        "reference_selection_score": round(float(selection_scores[reference]), 4),
+        "reference_test_score": round(float(test_scores[reference]), 4),
+        "observed_test_best": observed_best,
+        "observed_test_best_score": round(float(test_scores[observed_best]), 4),
+        "n_test": int(len(groups)), "n_resampling_groups": int(len(np.unique(groups))),
+        "n_boot": N_BOOT, "n_permutations": N_PERM,
+        "resampling_unit": "Murcko scaffold cluster" if modality == "molecule"
+                           else "test item",
+        "primary_correction": "Holm-Bonferroni across all reference comparisons",
+        "comparisons": comparisons,
+    }
+    entry["ladders"] = _ladder_steps(names, test_predictions, test_scores, groups)
+    _save_predictions(task, data, test_predictions)
     return entry
 
 
-def _ladder_steps(names, boots, full):
-    """Test each consecutive step of every applicable scale ladder."""
+def _ladder_steps(names, predictions, test_scores, groups):
     out = {}
     for ladder_name, rungs in LADDERS.items():
-        present = [m for m in rungs if m in names]
+        present = [model for model in rungs if model in names]
         if len(present) < 2:
             continue
-        steps = list(zip(present, present[1:]))
-        stats = []
-        for lower, upper in steps:
-            diff = boots[upper] - boots[lower]
-            diff = diff[np.isfinite(diff)]
-            lo, hi = np.percentile(diff, [2.5, 97.5])
-            stats.append((lo, hi, bootstrap_p(diff)))
-        adjusted = holm([s[2] for s in stats])
-
-        out[ladder_name] = {"rungs": present, "steps": {}}
-        print(f"   -- {ladder_name} (Holm over {len(steps)} steps)", flush=True)
-        for (lower, upper), (lo, hi, p_raw), p_adj in zip(steps, stats, adjusted):
-            delta = full[upper] - full[lower]
-            # Three outcomes, not two. A step that is reliably *worse* is a
-            # different finding from a step that cannot be resolved, and
-            # collapsing both into "no gain" would hide a scale regression --
-            # which is exactly what ESM-2 35M -> 150M does on Fluorescence.
-            if p_adj >= 0.05:
-                direction = "no reliable difference"
-            elif delta > 0:
-                direction = "improves"
+        steps, raw = {}, []
+        for offset, (lower, upper) in enumerate(zip(present, present[1:])):
+            result = paired_inference(predictions[upper], predictions[lower],
+                                      groups, seed=SEED + 100 + offset)
+            steps[f"{lower}->{upper}"] = result
+            raw.append(result["p_raw"])
+        for key, p_value in zip(steps, holm(raw)):
+            result = steps[key]
+            result["p_holm"] = round(float(p_value), 6)
+            result["significant"] = bool(p_value < 0.05)
+            if p_value >= 0.05:
+                result["direction"] = "no reliable difference"
+            elif result["delta"] > 0:
+                result["direction"] = "improves"
             else:
-                direction = "REGRESSES"
-            out[ladder_name]["steps"][f"{lower}->{upper}"] = {
-                "delta": round(float(delta), 4),
-                "ci_low": round(float(lo), 4), "ci_high": round(float(hi), 4),
-                "p_raw": round(p_raw, 4), "p_holm": round(p_adj, 4),
-                "direction": direction,
-                "significant": bool(p_adj < 0.05),
-            }
-            print(f"      {lower} -> {upper:16s} d={delta:+.4f} "
-                  f"95% CI [{lo:+.4f}, {hi:+.4f}] p_holm={p_adj:.3f}  "
-                  f"{direction}", flush=True)
+                result["direction"] = "REGRESSES"
+        out[ladder_name] = {"rungs": present, "steps": steps,
+                            "correction": "Holm within pre-specified ladder"}
     return out
 
 
 def merge_report(task, entry):
-    """Read-modify-write, so a per-task subprocess keeps earlier tasks."""
     report = {}
     if os.path.exists(REPORT_PATH):
-        with open(REPORT_PATH) as fh:
-            report = json.load(fh)
+        with open(REPORT_PATH) as handle:
+            report = json.load(handle)
     report[task] = entry
-    tmp = f"{REPORT_PATH}.{os.getpid()}.tmp"
-    with open(tmp, "w") as fh:
-        json.dump(report, fh, indent=2)
-    os.replace(tmp, REPORT_PATH)
+    temporary = f"{REPORT_PATH}.{os.getpid()}.tmp"
+    with open(temporary, "w") as handle:
+        json.dump(report, handle, indent=2)
+    os.replace(temporary, REPORT_PATH)
+
+
+def apply_familywise_corrections():
+    with open(REPORT_PATH) as handle:
+        report = json.load(handle)
+    records = []
+    for task, entry in report.items():
+        modality = load_benchmark_dataset(task)["modality"]
+        for model, comparison in entry["comparisons"].items():
+            records.append((task, modality, model, comparison))
+
+    for modality in sorted({record[1] for record in records}):
+        family = [record for record in records if record[1] == modality]
+        adjusted = holm([record[3]["p_raw"] for record in family])
+        for record, p_value in zip(family, adjusted):
+            record[3]["p_holm_modality"] = round(float(p_value), 6)
+            record[3]["significant_modality"] = bool(p_value < 0.05)
+
+    adjusted = holm([record[3]["p_raw"] for record in records])
+    for record, p_value in zip(records, adjusted):
+        record[3]["p_holm_global"] = round(float(p_value), 6)
+        record[3]["significant_global"] = bool(p_value < 0.05)
+        # Backwards-compatible aliases used by older website builds. They now
+        # point to the primary, study-wide correction rather than task-only Holm.
+        record[3]["p_holm"] = record[3]["p_holm_global"]
+        record[3]["significant"] = record[3]["significant_global"]
+
+    with open(REPORT_PATH, "w") as handle:
+        json.dump(report, handle, indent=2)
 
 
 if __name__ == "__main__":
@@ -307,5 +406,6 @@ if __name__ == "__main__":
         os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
         for task_name in (requested or ALL_DATASETS):
             subprocess.run([sys.executable, "-u", os.path.abspath(__file__),
-                            task_name], check=False)
+                            task_name], check=True)
+        apply_familywise_corrections()
         print(f"\nWrote {REPORT_PATH}", flush=True)

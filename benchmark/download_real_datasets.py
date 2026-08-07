@@ -23,6 +23,7 @@ import subprocess
 import sys
 
 import pandas as pd
+from rdkit import Chem
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "benchmark_datasets")
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -60,7 +61,7 @@ def _write(out, name, expect_min):
 
 # ---------------------------------------------------------------- molecules
 
-def download_moleculenet():
+def download_moleculenet(force=False):
     """BBBP, ClinTox, BACE, ESOL, Lipophilicity from DeepChem's MoleculeNet.
 
     These ship no official split; scaffold splitting is applied downstream.
@@ -68,20 +69,26 @@ def download_moleculenet():
     print("[1/4] MoleculeNet (BBBP, ClinTox, BACE, ESOL, Lipophilicity)...")
     base = "https://deepchemdata.s3.us-west-1.amazonaws.com/datasets"
     sources = {
-        "BBBP": ("BBBP.csv", "smiles", "p_np"),
-        "ClinTox": ("clintox.csv.gz", "smiles", "FDA_APPROVED"),
-        "BACE": ("bace.csv", "mol", "Class"),
+        "BBBP": ("BBBP.csv", "smiles", ["p_np"]),
+        "ClinTox": ("clintox.csv.gz", "smiles", ["FDA_APPROVED", "CT_TOX"]),
+        "BACE": ("bace.csv", "mol", ["Class"]),
         "ESOL": ("delaney-processed.csv", "smiles",
-                 "measured log solubility in mols per litre"),
-        "Lipophilicity": ("Lipophilicity.csv", "smiles", "exp"),
+                 ["measured log solubility in mols per litre"]),
+        "Lipophilicity": ("Lipophilicity.csv", "smiles", ["exp"]),
     }
-    for name, (fname, smi_col, tgt_col) in sources.items():
+    for name, (fname, smi_col, tgt_cols) in sources.items():
         path = os.path.join(DATA_DIR, f"{name}.csv")
-        if os.path.exists(path):
+        if os.path.exists(path) and not force:
             print(f"   .. {name} already present, skipping")
             continue
         df = pd.read_csv(f"{base}/{fname}")
-        out = pd.DataFrame({"smiles": df[smi_col], "target": df[tgt_col]}).dropna()
+        out = pd.DataFrame({"smiles": df[smi_col]})
+        if len(tgt_cols) == 1:
+            out["target"] = df[tgt_cols[0]]
+        else:
+            for target in tgt_cols:
+                out[f"target_{target}"] = df[target]
+        out = out.dropna()
         _write(out.reset_index(drop=True), name, 1000)
 
 
@@ -96,6 +103,23 @@ def download_cyp3a4():
     print(f"[2/4] CYP3A4 substrate (TDC {dataset_id}, scaffold split)...")
     from tdc.single_pred import ADME
     data = ADME(name=dataset_id)
+    raw = data.get_data().copy()
+
+    def canonicalise(value):
+        molecule = Chem.MolFromSmiles(str(value))
+        return Chem.MolToSmiles(molecule) if molecule is not None else None
+
+    raw["canonical"] = raw["Drug"].map(canonicalise)
+    raw = raw.dropna(subset=["canonical", "Y"])
+    conflicts = raw.groupby("canonical")["Y"].nunique()
+    if int((conflicts > 1).sum()):
+        raise RuntimeError("CYP3A4: conflicting labels after canonicalisation")
+    raw = raw.drop_duplicates(subset=["canonical"])[["canonical", "Y"]]
+    raw = raw.rename(columns={"canonical": "Drug"}).reset_index(drop=True)
+    # TDC's splitter operates on its Dataset object, so replace the in-memory
+    # table only after canonicalisation and exact-identity deduplication.
+    data.entity1, data.y = raw["Drug"], raw["Y"]
+    data.entity1_idx = pd.Series(range(len(raw)))
     split = data.get_split(method="scaffold", seed=42, frac=[0.8, 0.1, 0.1])
     frames = []
     for key, tag in [("train", "train"), ("valid", "val"), ("test", "test")]:
@@ -109,24 +133,17 @@ def download_cyp3a4():
 # ----------------------------------------------------------------- proteins
 
 def download_deeploc():
-    """DeepLoc subcellular localisation, official train/validation/test split.
+    """DeepLoc 2.0 multi-label subcellular localisation.
 
-    The source is multi-label over ten compartments; we take the argmax
-    compartment as a single-label 10-class target. This is a documented
-    simplification, not the original multi-label task.
+    The source is multi-label over ten compartments. All ten binary labels and
+    all source sequence lengths are retained; no argmax simplification is made.
+    The paper supplies five homology partitions rather than one train/test split.
+    We pre-specify fold 0 as test, fold 1 as validation and folds 2-4 as train.
     """
-    print("[3/4] DeepLoc subcellular localisation (official split)...")
-    csv_tmp = "/tmp/_deeploc_raw.csv"
-    script = f'''
-import datasets, pandas as pd
-frames = []
-for split, tag in [("train","train"),("validation","val"),("test","test")]:
-    ds = datasets.load_dataset("bloyal/deeploc", split=split)
-    d = ds.to_pandas(); d["split"] = tag
-    frames.append(d)
-pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
-'''
-    df = _run_hf_download(script, csv_tmp)
+    print("[3/4] DeepLoc 2.0 (published homology partitions)...")
+    source = ("https://services.healthtech.dtu.dk/services/DeepLoc-2.0/"
+              "data/Swissprot_Train_Validation_dataset.csv")
+    df = pd.read_csv(source)
     loc_cols = ["Cytoplasm", "Nucleus", "Extracellular", "Cell membrane",
                 "Mitochondrion", "Plastid", "Endoplasmic reticulum",
                 "Lysosome/Vacuole", "Golgi apparatus", "Peroxisome"]
@@ -135,10 +152,13 @@ pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
         raise RuntimeError(f"DeepLoc: no localisation columns found in {list(df.columns)}")
     out = pd.DataFrame({
         "sequence": df["Sequence"].str.upper().str.strip(),
-        "target": df[cols].fillna(0).values.argmax(axis=1),
-        "split": df["split"],
-    }).dropna()
-    out = out[out["sequence"].str.len().between(30, 2000)].reset_index(drop=True)
+        "split": df["Partition"].map(
+            {0: "test", 1: "val", 2: "train", 3: "train", 4: "train"}),
+    })
+    for column in cols:
+        safe = column.replace(" ", "_").replace("/", "_")
+        out[f"target_{safe}"] = pd.to_numeric(df[column], errors="coerce")
+    out = out.dropna().reset_index(drop=True)
     _write(out, "DeepLoc", 10000)
 
 
@@ -156,7 +176,9 @@ def download_fluorescence():
 import datasets, pandas as pd
 frames = []
 for split, tag in [("train","train"),("valid","val"),("test","test")]:
-    ds = datasets.load_dataset("proteinglm/fluorescence_prediction", split=split)
+    ds = datasets.load_dataset(
+        "proteinglm/fluorescence_prediction", split=split,
+        revision="d2a150fc808dbb02330c5fff6c4cb4807efe1979")
     d = ds.to_pandas(); d["split"] = tag
     frames.append(d)
 pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
@@ -190,7 +212,8 @@ frames = []
 for split, tag in [("train","train"),("test","test")]:
     ds = datasets.load_dataset(
         "InstaDeepAI/nucleotide_transformer_downstream_tasks_revised",
-        "default", split=split, trust_remote_code=True)
+        "default", split=split, trust_remote_code=True,
+        revision="851f9946252e90c665cdb3cc3eedb78f1f26197c")
     ds = ds.filter(lambda r: r["task"] == "promoter_all")
     d = ds.to_pandas()[["sequence","label"]]; d["split"] = tag
     frames.append(d)
@@ -201,7 +224,12 @@ pd.concat(frames, ignore_index=True).to_csv("{csv_tmp}", index=False)
         "sequence": df["sequence"].str.upper().str.strip(),
         "target": df["label"].astype(int),
         "split": df["split"],
-    }).dropna().drop_duplicates(subset=["sequence"]).reset_index(drop=True)
+    }).dropna()
+    # The source contains within-partition exact repeats but no train-test
+    # repeats. Deduplicate within each published partition so repeated strings
+    # do not receive extra statistical weight while chromosome separation is
+    # preserved.
+    out = out.drop_duplicates(subset=["split", "sequence"]).reset_index(drop=True)
     _write(out, "Promoters", 10000)
 
 

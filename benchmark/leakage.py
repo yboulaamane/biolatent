@@ -1,11 +1,11 @@
 """
-BioLatent D3: Pretraining Leakage Audit
-=======================================
+BioLatent D3: Pretraining Input-Exposure Audit
+==============================================
 
-Frozen-embedding probing has a specific failure mode. If a test item appeared
-in a model's pretraining corpus, its label may already be encoded in the
-embedding, so the probe reads back memorised information rather than a learned
-representation. The leaderboard would then reward contamination.
+Self-supervised pretraining can expose a model to benchmark inputs without
+exposing their downstream labels. This is not label leakage, but it can make a
+nominally held-out test item familiar and is therefore important context for a
+frozen-embedding comparison.
 
 This module measures that overlap directly instead of trusting a self-report.
 Authors declare *which corpora* they pretrained on -- a controlled, checkable
@@ -21,8 +21,8 @@ Two similarity notions, one per modality:
   (default 30% for proteins, the conventional homology floor).
 
 Output per (corpus, task) is the fraction of *test-split* items with a hit,
-and the per-item hit mask so that a leakage-controlled clean subset can be
-formed by intersecting masks across models.
+and the per-item hit mask so that an exposure-controlled sensitivity subset can
+be formed by intersecting masks across models.
 """
 
 import json
@@ -52,7 +52,7 @@ DECLARED_CORPORA = {
     "molformer_xl": ["pubchem10m", "zinc250k"],
     "esm2_8m": ["uniref50"], "esm2_35m": ["uniref50"],
     "esm2_150m": ["uniref50"], "esm2_650m": ["uniref50"],
-    "protbert": ["uniref50"],
+    "protbert": ["uniref100"],
     "nucleotide_transformer": ["human_ref_genome"],
     "hyenadna": ["human_ref_genome"],
 }
@@ -67,7 +67,14 @@ def scaffold_set(smiles_list):
         if mol is None:
             continue
         try:
-            out.add(MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False))
+            scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                mol=mol, includeChirality=False)
+            # Acyclic compounds all have the empty Murcko scaffold. Treating
+            # that empty string as a shared chemotype would flag any acyclic
+            # benchmark molecule whenever the corpus contains one unrelated
+            # acyclic molecule.
+            if scaffold:
+                out.add(scaffold)
         except Exception:
             continue
     return out
@@ -84,36 +91,72 @@ def _fps(smiles_list):
     return fps, keep
 
 
-def molecule_overlap(test_smiles, corpus_smiles, tanimoto_cutoff=0.9):
-    """Per-test-item leakage mask against a molecular corpus.
+def prepare_molecule_corpus(smiles_list):
+    """Parse a molecular exposure corpus once for reuse across tasks."""
+    canonical, scaffolds, fingerprints = set(), set(), []
+    for value in smiles_list:
+        molecule = Chem.MolFromSmiles(str(value))
+        if molecule is None:
+            continue
+        canonical.add(Chem.MolToSmiles(molecule))
+        try:
+            scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                mol=molecule, includeChirality=False)
+            if scaffold:
+                scaffolds.add(scaffold)
+        except Exception:
+            pass
+        fingerprints.append(AllChem.GetMorganFingerprintAsBitVect(
+            molecule, 2, nBits=1024))
+    return {"canonical": canonical, "scaffolds": scaffolds,
+            "fingerprints": fingerprints}
 
-    An item is flagged if its Murcko scaffold occurs in the corpus, or if any
-    corpus molecule is within ``tanimoto_cutoff`` ECFP4 similarity.
+
+def molecule_overlap_components(test_smiles, corpus_smiles,
+                                tanimoto_cutoff=0.9, corpus_index=None):
+    """Exact, near-duplicate and scaffold exposure masks.
+
+    These dimensions are reported separately because a shared chemotype is a
+    much weaker form of familiarity than an exact canonical molecule.
     """
     n = len(test_smiles)
-    mask = np.zeros(n, dtype=bool)
+    exact = np.zeros(n, dtype=bool)
+    near = np.zeros(n, dtype=bool)
+    scaffold = np.zeros(n, dtype=bool)
 
-    corpus_scaffolds = scaffold_set(corpus_smiles)
+    prepared = (corpus_index if corpus_index is not None
+                else prepare_molecule_corpus(corpus_smiles))
+    canonical_corpus = prepared["canonical"]
+    corpus_scaffolds = prepared["scaffolds"]
     for i, smi in enumerate(test_smiles):
         mol = Chem.MolFromSmiles(str(smi))
         if mol is None:
             continue
+        exact[i] = Chem.MolToSmiles(mol) in canonical_corpus
         try:
-            if MurckoScaffold.MurckoScaffoldSmiles(mol=mol, includeChirality=False) in corpus_scaffolds:
-                mask[i] = True
+            test_scaffold = MurckoScaffold.MurckoScaffoldSmiles(
+                mol=mol, includeChirality=False)
+            if test_scaffold and test_scaffold in corpus_scaffolds:
+                scaffold[i] = True
         except Exception:
             pass
 
-    corpus_fps, _ = _fps(corpus_smiles)
+    corpus_fps = prepared["fingerprints"]
     if corpus_fps:
         test_fps, keep = _fps(test_smiles)
         for fp, idx in zip(test_fps, keep):
-            if mask[idx]:
-                continue
             sims = DataStructs.BulkTanimotoSimilarity(fp, corpus_fps)
             if sims and max(sims) >= tanimoto_cutoff:
-                mask[idx] = True
-    return mask
+                near[idx] = True
+    return {"exact_identity": exact, "near_duplicate": near,
+            "shared_scaffold": scaffold,
+            "any_proxy_hit": exact | near | scaffold}
+
+
+def molecule_overlap(test_smiles, corpus_smiles, tanimoto_cutoff=0.9):
+    """Compatibility wrapper returning the union exposure mask."""
+    return molecule_overlap_components(test_smiles, corpus_smiles,
+                                       tanimoto_cutoff)["any_proxy_hit"]
 
 
 # ------------------------------------------------------- sequences (mmseqs)
@@ -125,7 +168,7 @@ def _write_fasta(path, seqs, prefix):
 
 
 def sequence_overlap(test_seqs, corpus_seqs, min_identity=0.3, coverage=0.5):
-    """Per-test-item leakage mask via MMseqs2 search.
+    """Per-test-item homology-exposure mask via MMseqs2 search.
 
     A test sequence is flagged if any corpus sequence aligns to it at or above
     ``min_identity`` sequence identity with at least ``coverage`` coverage.
@@ -158,7 +201,7 @@ def sequence_overlap(test_seqs, corpus_seqs, min_identity=0.3, coverage=0.5):
 # ------------------------------------------------------------------ driver
 
 def audit_task(task_name, test_inputs, modality, corpora):
-    """Compute leakage masks for one task against each supplied corpus.
+    """Compute input-exposure masks for one task against supplied corpus proxies.
 
     ``corpora`` maps corpus name -> list of items (SMILES or sequences).
     """

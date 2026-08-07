@@ -13,7 +13,7 @@ strength is chosen from one fixed grid by cross-validation on the training
 split, using the same grid and the same folds for every model; nothing else is
 tuned, and the test split is touched exactly once.
 
-**Diagnostic metric -- fixed MLP.** A pinned 2-layer MLP, identical
+**Diagnostic metric -- fixed MLP.** A pinned one-hidden-layer MLP, identical
 hyperparameters for all models. It is reported but never ranked: ranking on it
 would measure the MLP's capacity rather than the representation. Its value is
 the *gap* to the linear probe, which separates representations that encode
@@ -21,7 +21,7 @@ information linearly from those that need a non-linear head.
 
 Metrics follow the task, not convenience:
   binary classification  ROC-AUC
-  multi-class            accuracy and macro-F1
+  multi-label            macro ROC-AUC, subset accuracy and macro-F1
   regression             Spearman rho (ranked), with RMSE and R^2 reported
 
 Spearman is ranked for regression because RMSE is not comparable across tasks
@@ -33,9 +33,12 @@ import numpy as np
 from scipy.stats import spearmanr
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import (accuracy_score, f1_score, r2_score,
-                             roc_auc_score, root_mean_squared_error)
+                             roc_auc_score, root_mean_squared_error,
+                             make_scorer)
 from sklearn.model_selection import GridSearchCV
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 SEED = 42
@@ -56,11 +59,18 @@ MLP_KWARGS = dict(hidden_layer_sizes=(256,), activation="relu", alpha=1e-4,
                   early_stopping=True, n_iter_no_change=10,
                   validation_fraction=0.1, random_state=SEED)
 
+PROBE_PROTOCOL_VERSION = 4
+
+
+def _valid_rows(y):
+    values = np.asarray(y)
+    return ~np.isnan(values).any(axis=1) if values.ndim == 2 else ~np.isnan(values)
+
 
 def _prepare(X_train, y_train, X_test, y_test):
     """Drop NaN targets, standardise features on train statistics only."""
-    tr = ~np.isnan(y_train)
-    te = ~np.isnan(y_test)
+    tr = _valid_rows(y_train)
+    te = _valid_rows(y_test)
     X_tr, y_tr = X_train[tr], y_train[tr]
     X_te, y_te = X_test[te], y_test[te]
 
@@ -73,7 +83,29 @@ def _prepare(X_train, y_train, X_test, y_test):
     return X_tr, y_tr, X_te, y_te
 
 
-def _classification_metrics(y_true, y_pred, y_prob, n_classes):
+def _valid_unscaled(X, y):
+    """Return finite-target rows without fitting any feature transform.
+
+    Hyperparameter selection uses these raw features in a scikit-learn
+    Pipeline so each cross-validation fold learns its own scaling statistics.
+    The final estimator is still refit after scaling the complete training
+    partition in ``_prepare``.
+    """
+    valid = _valid_rows(y)
+    return X[valid], y[valid]
+
+
+def _classification_metrics(y_true, y_pred, y_prob, n_classes,
+                            task_type="classification"):
+    if task_type == "multilabel":
+        return {
+            "metric": "Macro ROC-AUC",
+            "score": round(float(roc_auc_score(y_true, y_prob,
+                                                average="macro")), 4),
+            "subset_accuracy": round(float(accuracy_score(y_true, y_pred)), 4),
+            "macro_f1": round(float(f1_score(y_true, y_pred,
+                                              average="macro")), 4),
+        }
     if n_classes == 2:
         return {"metric": "ROC-AUC",
                 "score": round(float(roc_auc_score(y_true, y_prob[:, 1])), 4),
@@ -91,11 +123,22 @@ def _regression_metrics(y_true, y_pred):
             "r2": round(float(r2_score(y_true, y_pred)), 4)}
 
 
+def _multilabel_auc_scorer(estimator, X, y_true):
+    """Grid-search scorer that preserves OneVsRest's 2-D probabilities."""
+    probabilities = estimator.predict_proba(X)
+    return float(roc_auc_score(y_true, probabilities, average="macro"))
+
+
 def _score_only(y_true, y_pred, y_prob, task_type, n_classes):
     """Recompute just the ranked metric, for bootstrap resampling."""
     if task_type == "regression":
         rho = spearmanr(y_true, y_pred).statistic
         return float(rho) if np.isfinite(rho) else np.nan
+    if task_type == "multilabel":
+        if any(len(np.unique(y_true[:, j])) < 2
+               for j in range(y_true.shape[1])):
+            return np.nan
+        return float(roc_auc_score(y_true, y_prob, average="macro"))
     if n_classes == 2:
         if len(np.unique(y_true)) < 2:
             return np.nan          # resample lost a class; ROC-AUC undefined
@@ -104,7 +147,7 @@ def _score_only(y_true, y_pred, y_prob, task_type, n_classes):
 
 
 def bootstrap_ci(y_true, y_pred, y_prob, task_type, n_classes,
-                 n_boot=1000, alpha=0.05, seed=SEED):
+                 n_boot=1000, alpha=0.05, seed=SEED, groups=None):
     """Percentile bootstrap interval for the ranked metric.
 
     Resamples the test set rather than refitting, so the interval describes
@@ -114,9 +157,16 @@ def bootstrap_ci(y_true, y_pred, y_prob, task_type, n_classes,
     """
     rng = np.random.RandomState(seed)
     n = len(y_true)
+    group_values = None if groups is None else np.asarray(groups)
+    unique_groups = None if group_values is None else np.unique(group_values)
     scores = np.empty(n_boot)
     for b in range(n_boot):
-        idx = rng.randint(0, n, n)
+        if unique_groups is None:
+            idx = rng.randint(0, n, n)
+        else:
+            sampled = rng.choice(unique_groups, len(unique_groups), replace=True)
+            idx = np.concatenate([np.where(group_values == group)[0]
+                                  for group in sampled])
         scores[b] = _score_only(
             y_true[idx], y_pred[idx],
             y_prob[idx] if y_prob is not None else None,
@@ -134,7 +184,7 @@ def _search_subset(X, y, stratify):
     if len(y) <= SEARCH_CAP:
         return X, y
     rng = np.random.RandomState(SEED)
-    if stratify:
+    if stratify and np.asarray(y).ndim == 1:
         idx = []
         per_class = max(1, SEARCH_CAP // len(np.unique(y)))
         for cls in np.unique(y):
@@ -146,42 +196,85 @@ def _search_subset(X, y, stratify):
     return X[idx], y[idx]
 
 
-def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4):
+def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4,
+                 groups=None, n_boot=1000):
     """Ranked linear probe with CV-selected regularisation."""
+    test_groups = (None if groups is None else
+                   np.asarray(groups)[_valid_rows(y_test)])
+    X_search_raw, y_search_raw = _valid_unscaled(X_train, y_train)
     X_tr, y_tr, X_te, y_te = _prepare(X_train, y_train, X_test, y_test)
 
-    if task_type == "classification":
+    if task_type in ("classification", "multilabel"):
         y_tr, y_te = y_tr.astype(int), y_te.astype(int)
-        n_classes = int(max(y_tr.max(), y_te.max())) + 1
-        Xs, ys = _search_subset(X_tr, y_tr, stratify=True)
-        search = GridSearchCV(
-            LogisticRegression(max_iter=1000, random_state=SEED),
-            {"C": C_GRID}, cv=3, n_jobs=n_jobs,
-            scoring="roc_auc" if n_classes == 2 else "accuracy")
+        n_classes = (y_tr.shape[1] if task_type == "multilabel"
+                     else int(max(y_tr.max(), y_te.max())) + 1)
+        Xs, ys = _search_subset(
+            X_search_raw, y_search_raw.astype(int),
+            stratify=task_type == "classification")
+        if task_type == "multilabel":
+            estimator = Pipeline([
+                ("scale", StandardScaler()),
+                ("model", OneVsRestClassifier(
+                    LogisticRegression(max_iter=1000, random_state=SEED))),
+            ])
+            parameters = {"model__estimator__C": C_GRID}
+            scoring = _multilabel_auc_scorer
+            parameter_name = "model__estimator__C"
+        else:
+            estimator = Pipeline([
+                ("scale", StandardScaler()),
+                ("model", LogisticRegression(max_iter=1000,
+                                               random_state=SEED)),
+            ])
+            parameters = {"model__C": C_GRID}
+            scoring = "roc_auc" if n_classes == 2 else "accuracy"
+            parameter_name = "model__C"
+        search = GridSearchCV(estimator, parameters, cv=3, n_jobs=n_jobs,
+                              scoring=scoring)
         search.fit(Xs, ys)
-        model = LogisticRegression(C=search.best_params_["C"], max_iter=1000,
-                                   random_state=SEED).fit(X_tr, y_tr)
+        best_c = search.best_params_[parameter_name]
+        if task_type == "multilabel":
+            model = OneVsRestClassifier(LogisticRegression(
+                C=best_c, max_iter=1000, random_state=SEED)).fit(X_tr, y_tr)
+        else:
+            model = LogisticRegression(C=best_c, max_iter=1000,
+                                       random_state=SEED).fit(X_tr, y_tr)
         y_pred, y_prob = model.predict(X_te), model.predict_proba(X_te)
-        out = _classification_metrics(y_te, y_pred, y_prob, n_classes)
-        out["hyperparameter"] = {"C": search.best_params_["C"]}
-        ci = bootstrap_ci(y_te, y_pred, y_prob, task_type, n_classes)
-        if ci:
-            out.update(ci)
+        out = _classification_metrics(y_te, y_pred, y_prob, n_classes,
+                                      task_type)
+        out["hyperparameter"] = {"C": best_c}
+        if n_boot:
+            ci = bootstrap_ci(y_te, y_pred, y_prob, task_type, n_classes,
+                              groups=test_groups, n_boot=n_boot)
+            if ci:
+                out.update(ci)
     else:
-        Xs, ys = _search_subset(X_tr, y_tr, stratify=False)
-        search = GridSearchCV(Ridge(random_state=SEED), {"alpha": ALPHA_GRID},
-                              cv=3, n_jobs=n_jobs, scoring="r2")
+        Xs, ys = _search_subset(X_search_raw, y_search_raw, stratify=False)
+        spearman_scorer = make_scorer(
+            lambda truth, prediction: float(
+                np.nan_to_num(spearmanr(truth, prediction).statistic)))
+        estimator = Pipeline([
+            ("scale", StandardScaler()),
+            ("model", Ridge(random_state=SEED)),
+        ])
+        search = GridSearchCV(
+            estimator, {"model__alpha": ALPHA_GRID}, cv=3, n_jobs=n_jobs,
+            scoring=spearman_scorer)
         search.fit(Xs, ys)
-        model = Ridge(alpha=search.best_params_["alpha"],
+        model = Ridge(alpha=search.best_params_["model__alpha"],
                       random_state=SEED).fit(X_tr, y_tr)
         y_pred = model.predict(X_te)
         out = _regression_metrics(y_te, y_pred)
-        out["hyperparameter"] = {"alpha": search.best_params_["alpha"]}
-        ci = bootstrap_ci(y_te, y_pred, None, task_type, None)
-        if ci:
-            out.update(ci)
+        out["hyperparameter"] = {"alpha": search.best_params_["model__alpha"]}
+        if n_boot:
+            ci = bootstrap_ci(y_te, y_pred, None, task_type, None,
+                              groups=test_groups, n_boot=n_boot)
+            if ci:
+                out.update(ci)
 
     out["probe"] = "linear"
+    out["protocol_version"] = PROBE_PROTOCOL_VERSION
+    out["regularisation_search_rows"] = int(min(len(y_tr), SEARCH_CAP))
     out["embedding_dim"] = int(X_train.shape[1])
     out["n_train"] = int(len(y_tr))
     out["n_test"] = int(len(y_te))
@@ -192,16 +285,19 @@ def mlp_probe(X_train, y_train, X_test, y_test, task_type):
     """Diagnostic MLP probe. Fixed hyperparameters, never ranked."""
     X_tr, y_tr, X_te, y_te = _prepare(X_train, y_train, X_test, y_test)
 
-    if task_type == "classification":
+    if task_type in ("classification", "multilabel"):
         y_tr, y_te = y_tr.astype(int), y_te.astype(int)
-        n_classes = int(max(y_tr.max(), y_te.max())) + 1
+        n_classes = (y_tr.shape[1] if task_type == "multilabel"
+                     else int(max(y_tr.max(), y_te.max())) + 1)
         model = MLPClassifier(**MLP_KWARGS).fit(X_tr, y_tr)
         out = _classification_metrics(y_te, model.predict(X_te),
-                                      model.predict_proba(X_te), n_classes)
+                                      model.predict_proba(X_te), n_classes,
+                                      task_type)
     else:
         model = MLPRegressor(**MLP_KWARGS).fit(X_tr, y_tr)
         out = _regression_metrics(y_te, model.predict(X_te))
 
     out["probe"] = "mlp"
+    out["architecture"] = "one hidden layer with 256 ReLU units"
     out["embedding_dim"] = int(X_train.shape[1])
     return out
