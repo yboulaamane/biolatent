@@ -6,7 +6,7 @@ import StudyTab from './components/StudyTab';
 
 export default function Home() {
   // Navigation Tabs. The measured study is the landing tab: it is the only
-  // content on this site where every number was produced by running the model.
+  // content on this site where results were generated locally under one protocol.
   const [activeTab, setActiveTab] = useState<'study' | 'directory' | 'wizard' | 'benchmarks'>('study');
 
   // Search & Filtering States
@@ -46,7 +46,6 @@ export default function Home() {
   const [wizardAnswers, setWizardAnswers] = useState({
     modality: '',
     inputType: '',
-    datasetSize: '',
     resourceBudget: '',
   });
 
@@ -54,7 +53,6 @@ export default function Home() {
   const [chartMetric, setChartMetric] = useState<'bbbp' | 'cb513'>('bbbp');
   const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
   const [showMethodology, setShowMethodology] = useState(false);
-  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
   // Sorting States
   const [molSortConfig, setMolSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'bbbp', direction: 'desc' });
@@ -72,6 +70,13 @@ export default function Home() {
       return (emb as FixedDescriptor).dimensionality;
     }
     return (emb as LearnedEmbedding | HybridRepresentation).embeddingDimension;
+  };
+
+  const artifactAvailability = (emb: RepresentationEntry): string => {
+    if (emb.codeRepositoryUrl && emb.weightsUrl) return 'Code + weights';
+    if (emb.codeRepositoryUrl) return 'Code linked';
+    if (emb.weightsUrl) return 'Weights linked';
+    return 'No artifact link';
   };
 
   // Helper to format labels
@@ -233,7 +238,7 @@ export default function Home() {
 
   // Recommendation logic based on wizard answers
   const recommendedEmbeddings = useMemo(() => {
-    if (wizardStep !== 5) return [];
+    if (wizardStep !== 4) return [];
 
     return EMBEDDINGS.filter((emb) => {
       // Modality match
@@ -242,7 +247,7 @@ export default function Home() {
       }
       
       // Input type compatibility
-      if (wizardAnswers.inputType === 'Graph' && emb.inputRepresentation !== 'graph' && emb.inputRepresentation !== '3D') {
+      if (wizardAnswers.inputType === 'Graph' && emb.inputRepresentation !== 'graph') {
         return false;
       }
       if (wizardAnswers.inputType === 'SMILES' && emb.inputRepresentation !== 'SMILES' && emb.inputRepresentation !== 'engineered_features') {
@@ -258,14 +263,14 @@ export default function Home() {
         return false;
       }
 
-      // Hardware/resource filters (dimension check)
-      const dim = getDim(emb);
-      if (wizardAnswers.resourceBudget === 'Low (Local CPU)' && typeof dim === 'number' && dim > 1200) {
+      // Embedding dimension is not a compute requirement. Only entries
+      // explicitly catalogued as CPU-compatible pass the local CPU filter.
+      if (wizardAnswers.resourceBudget === 'Low (Local CPU)' && emb.computeProfile !== 'cpu') {
         return false;
       }
 
       return true;
-    }).slice(0, 3); // top 3 recommendations
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }, [wizardStep, wizardAnswers]);
 
   // Handle Wizard Option Selection
@@ -295,10 +300,6 @@ export default function Home() {
       inputRepresentation: submitForm.inputRepresentation,
       yearReleased: new Date().getFullYear(),
       computeProfile: isFixed ? 'cpu' : 'gpu',
-      dataLeakageRisk: 'unknown',
-      reproducibilityScore: 1.0,
-      domainGeneralization: 'medium',
-      smallDataPerformance: 'medium',
       benchmarks: [],
       tags: [submitForm.inputRepresentation, submitForm.modality],
       codeSnippet: `# Python load code for ${submitForm.name}`,
@@ -335,7 +336,6 @@ export default function Home() {
     setWizardAnswers({
       modality: '',
       inputType: '',
-      datasetSize: '',
       resourceBudget: '',
     });
   };
@@ -344,9 +344,11 @@ export default function Home() {
     <div className="app-container">
       {/* HEADER SECTION */}
       <header className="header">
-        <div 
+        <button
+          type="button"
+          aria-label="Open the BioLatent registry"
           className="logo-container" 
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', background: 'none', border: 0, padding: 0, color: 'inherit' }}
           onClick={() => {
             setActiveTab('directory');
             setSearchQuery('');
@@ -364,7 +366,7 @@ export default function Home() {
             <div className="logo-text">BioLatent</div>
             <div className="logo-tagline">Biological & Chemical Vector Registry</div>
           </div>
-        </div>
+        </button>
 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button className="badge-btn active" onClick={() => {
@@ -394,7 +396,7 @@ export default function Home() {
                 resetWizard();
               }}
             >
-              Latent Finder
+              Compatibility Finder
             </button>
             <button
               className={`tab-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
@@ -540,9 +542,9 @@ export default function Home() {
                           </span>
                         </div>
                         <div className="meta-item">
-                          <span className="meta-label">Repro Score</span>
-                          <span className="meta-value" style={{ color: emb.reproducibilityScore > 0.9 ? 'var(--accent-emerald)' : 'var(--text-secondary)' }}>
-                            {(emb.reproducibilityScore * 100).toFixed(0)}%
+                          <span className="meta-label">Artifacts</span>
+                          <span className="meta-value" style={{ color: emb.codeRepositoryUrl || emb.weightsUrl ? 'var(--accent-emerald)' : 'var(--text-secondary)' }}>
+                            {artifactAvailability(emb)}
                           </span>
                         </div>
                       </div>
@@ -578,12 +580,12 @@ export default function Home() {
       {activeTab === 'wizard' && (
         <div style={{ maxWidth: '700px', margin: '2rem auto' }} className="glass-card">
           <div className="wizard-header">
-            <h2 className="wizard-title">Latent Space Finder</h2>
-            <p className="wizard-tagline">Find the optimal chemical or biological vector representations for your target pipeline</p>
+            <h2 className="wizard-title">Representation Compatibility Finder</h2>
+            <p className="wizard-tagline">Filter by input compatibility and compute profile; validate performance on your own task</p>
           </div>
 
           <div className="wizard-steps-indicator">
-            {[1, 2, 3, 4, 5].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div
                 key={step}
                 className={`indicator-dot ${wizardStep === step ? 'active' : ''} ${
@@ -600,18 +602,18 @@ export default function Home() {
                 1. What is your biological target modality?
               </h3>
               <div className="wizard-option-grid">
-                <div className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Molecule')}>
-                  <div className="wizard-option-title">Small Molecules</div>
-                  <div className="wizard-option-desc">SMILES strings, Graphs, or 3D coordinate ligand vectors.</div>
-                </div>
-                <div className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Protein')}>
-                  <div className="wizard-option-title">Proteins / Enzymes</div>
-                  <div className="wizard-option-desc">Amino acid sequences, structural graphs, active pockets.</div>
-                </div>
-                <div className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Complex')}>
-                  <div className="wizard-option-title">Complexes / Pockets</div>
-                  <div className="wizard-option-desc">3D binding site structures and ligand-protein interaction complexes.</div>
-                </div>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Molecule')}>
+                  <span className="wizard-option-title">Small Molecules</span>
+                  <span className="wizard-option-desc">SMILES strings, Graphs, or 3D coordinate ligand vectors.</span>
+                </button>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Protein')}>
+                  <span className="wizard-option-title">Proteins / Enzymes</span>
+                  <span className="wizard-option-desc">Amino acid sequences, structural graphs, active pockets.</span>
+                </button>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Complex')}>
+                  <span className="wizard-option-title">Complexes / Pockets</span>
+                  <span className="wizard-option-desc">3D binding site structures and ligand-protein interaction complexes.</span>
+                </button>
               </div>
             </div>
           )}
@@ -625,36 +627,36 @@ export default function Home() {
               <div className="wizard-option-grid">
                 {wizardAnswers.modality === 'Molecule' ? (
                   <>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'SMILES')}>
-                      <div className="wizard-option-title">SMILES strings</div>
-                      <div className="wizard-option-desc">Easiest to process text representations (e.g. Aspirin as CC(=O)OC1=CC=CC=C1C(=O)O).</div>
-                    </div>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Graph')}>
-                      <div className="wizard-option-title">2D Molecular Graphs</div>
-                      <div className="wizard-option-desc">Nodes representing atoms, edges representing bonds.</div>
-                    </div>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
-                      <div className="wizard-option-title">3D Conformers</div>
-                      <div className="wizard-option-desc">Atomic coordinates (requires prior conformer generation).</div>
-                    </div>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'SMILES')}>
+                      <span className="wizard-option-title">SMILES strings</span>
+                      <span className="wizard-option-desc">Easiest to process text representations (e.g. Aspirin as CC(=O)OC1=CC=CC=C1C(=O)O).</span>
+                    </button>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Graph')}>
+                      <span className="wizard-option-title">2D Molecular Graphs</span>
+                      <span className="wizard-option-desc">Nodes representing atoms, edges representing bonds.</span>
+                    </button>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
+                      <span className="wizard-option-title">3D Conformers</span>
+                      <span className="wizard-option-desc">Atomic coordinates (requires prior conformer generation).</span>
+                    </button>
                   </>
                 ) : wizardAnswers.modality === 'Complex' ? (
                   <>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Pocket/3D')}>
-                      <div className="wizard-option-title">Pocket / 3D Complex</div>
-                      <div className="wizard-option-desc">3D spatial pocket coordinates and bounding box structures.</div>
-                    </div>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Pocket/3D')}>
+                      <span className="wizard-option-title">Pocket / 3D Complex</span>
+                      <span className="wizard-option-desc">3D spatial pocket coordinates and bounding box structures.</span>
+                    </button>
                   </>
                 ) : (
                   <>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
-                      <div className="wizard-option-title">FASTA Sequence</div>
-                      <div className="wizard-option-desc">Pure amino acid string sequences (e.g., MSKGEE...).</div>
-                    </div>
-                    <div className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
-                      <div className="wizard-option-title">3D PDB Structure</div>
-                      <div className="wizard-option-desc">3D tertiary coordinates (e.g., from AlphaFold / PDB).</div>
-                    </div>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
+                      <span className="wizard-option-title">FASTA Sequence</span>
+                      <span className="wizard-option-desc">Pure amino acid string sequences (e.g., MSKGEE...).</span>
+                    </button>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
+                      <span className="wizard-option-title">3D PDB Structure</span>
+                      <span className="wizard-option-desc">3D tertiary coordinates (e.g., from AlphaFold / PDB).</span>
+                    </button>
                   </>
                 )}
               </div>
@@ -666,25 +668,21 @@ export default function Home() {
             </div>
           )}
 
-          {/* STEP 3: Dataset Size */}
+          {/* STEP 3: Resource Constraints */}
           {wizardStep === 3 && (
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
-                3. What is the size of your downstream screening dataset?
+                3. What compute environment can generate the embeddings?
               </h3>
               <div className="wizard-option-grid">
-                <div className="wizard-option-card" onClick={() => selectWizardOption('datasetSize', 'Low')}>
-                  <div className="wizard-option-title">Low (&lt; 200 data points)</div>
-                  <div className="wizard-option-desc">High risk of overfitting. Fixed descriptors or small learned models recommended.</div>
-                </div>
-                <div className="wizard-option-card" onClick={() => selectWizardOption('datasetSize', 'Medium')}>
-                  <div className="wizard-option-title">Medium (1k - 10k data points)</div>
-                  <div className="wizard-option-desc">Optimal size for training lightweight top-heads or linear probing on static embeddings.</div>
-                </div>
-                <div className="wizard-option-card" onClick={() => selectWizardOption('datasetSize', 'High')}>
-                  <div className="wizard-option-title">High (&gt; 10k data points)</div>
-                  <div className="wizard-option-desc">Possibility to fine-tune end-to-end representations or use large-dimensional outputs.</div>
-                </div>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'Low (Local CPU)')}>
+                  <span className="wizard-option-title">Local CPU</span>
+                  <span className="wizard-option-desc">Show only entries explicitly catalogued as CPU-compatible. Runtime still depends on input count, length and software version.</span>
+                </button>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'High (GPU Server)')}>
+                  <span className="wizard-option-title">GPU Available</span>
+                  <span className="wizard-option-desc">Include CPU, mixed and GPU profiles; memory and runtime are not guaranteed by this filter.</span>
+                </button>
               </div>
               <div className="wizard-actions">
                 <button className="btn-wizard-back" onClick={() => setWizardStep(2)}>
@@ -694,44 +692,24 @@ export default function Home() {
             </div>
           )}
 
-          {/* STEP 4: Resource Constraints */}
+          {/* STEP 4: Compatible entries */}
           {wizardStep === 4 && (
-            <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
-                4. What is your compute environment budget?
-              </h3>
-              <div className="wizard-option-grid">
-                <div className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'Low (Local CPU)')}>
-                  <div className="wizard-option-title">Low (Local CPU)</div>
-                  <div className="wizard-option-desc">Requires fast inference, lightweight models (dimension &lt; 1200, small parameter size).</div>
-                </div>
-                <div className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'High (GPU Server)')}>
-                  <div className="wizard-option-title">High (V100/A100 GPU)</div>
-                  <div className="wizard-option-desc">Can host large language models, large graph networks, and high dimensional vectors.</div>
-                </div>
-              </div>
-              <div className="wizard-actions">
-                <button className="btn-wizard-back" onClick={() => setWizardStep(3)}>
-                  Back
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5: Results */}
-          {wizardStep === 5 && (
             <div className="wizard-results">
               <h3 style={{ fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', color: '#fff', marginBottom: '1.5rem', textAlign: 'center' }}>
-                Recommended Representations
+                Compatible Registry Entries
               </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6, marginBottom: '1.25rem', textAlign: 'center' }}>
+                Alphabetical, not ranked. Compatibility does not establish predictive performance;
+                compare candidates under the same split and probe on your own endpoint.
+              </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                {recommendedEmbeddings.map((emb, idx) => (
+                {recommendedEmbeddings.map((emb) => (
                   <div
                     key={emb.id}
                     className="glass-card"
                     style={{
-                      borderLeft: idx === 0 ? '4px solid var(--accent-indigo)' : '1px solid var(--border-card)',
+                      borderLeft: '1px solid var(--border-card)',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -741,11 +719,6 @@ export default function Home() {
                     <div>
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.25rem' }}>
                         <h4 style={{ fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>{emb.name}</h4>
-                        {idx === 0 && (
-                          <span style={{ fontSize: '0.7rem', background: 'rgba(99,102,241,0.2)', color: '#a5b4fc', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--accent-indigo)' }}>
-                            Top Fit
-                          </span>
-                        )}
                       </div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                         Type: {formatLabel(emb.representationType)} • Input: {formatLabel(emb.inputRepresentation)} • Dim: {getDim(emb)}d
@@ -766,7 +739,7 @@ export default function Home() {
 
                 {recommendedEmbeddings.length === 0 && (
                   <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No exact matches found. Reset parameters and try less restrictive inputs.
+                    No catalog entries match those objective filters. Reset the finder and try another supported input or compute profile.
                   </div>
                 )}
               </div>
@@ -784,9 +757,9 @@ export default function Home() {
       {/* ==================== TAB 3: BENCHMARKS ==================== */}
       {activeTab === 'benchmarks' && (
         <div className="glass-card">
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Literature Scores — as reported by their authors</h2>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Reported Literature and Database Scores</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1rem' }}>
-            Benchmark values transcribed from primary publications, each linked to its source table, split and DOI.
+            Benchmark values transcribed from the cited publication or official benchmark database, with a source link and row-level provenance note.
           </p>
           <div style={{
             marginBottom: '1.5rem', padding: '0.9rem 1.15rem',
@@ -797,9 +770,8 @@ export default function Home() {
             <strong style={{ color: '#fbbf24' }}>These numbers were not measured by us, and they are not comparable with each other.</strong>{' '}
             Each was computed by a different group under a different split, readout and downstream head, so the ordering of a column here
             reflects those choices as much as the representations. They carry no uncertainty and no significance test.
-            For values produced under one protocol on our hardware, with confidence intervals, paired significance tests and a
-            leakage audit, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab — which finds that most
-            differences of this size cannot be established at all.
+            For locally generated values under one protocol, with confidence intervals, paired significance tests and a
+            pretraining input-exposure audit, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
           </div>
 
           {/* Scientific Methodology Card */}
@@ -835,7 +807,10 @@ export default function Home() {
                   <div>
                     <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Molecule Benchmarking Protocols</h4>
                     <p style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                      All molecular evaluations are reported under standardized <strong>Bemis-Murcko Scaffold Splits (80/10/10)</strong>, ensuring the test set contains entirely novel chemical scaffolds to test model generalization.
+                      These values are transcribed from heterogeneous publications. Split
+                      strategy, seed, readout and downstream tuning can differ by row; the
+                      stored source note is authoritative. A shared task name does not make
+                      two literature values directly comparable.
                     </p>
                     <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <li><strong>BBBP, ClinTox, CYP3A4 Substrate</strong>: Evaluated using Classification Area Under the ROC Curve (ROC-AUC) ↑.</li>
@@ -846,10 +821,16 @@ export default function Home() {
                   <div>
                     <h4 style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Protein & Genomics Protocols</h4>
                     <p style={{ marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                      Protein benchmarks are <strong>reported</strong> under homology-split protocols (sequence identity clusters or CATH topology limits), which are intended to limit leakage from homologous training sequences.
+                      Protein literature protocols also vary. Where authors use sequence-
+                      identity clusters or CATH topology limits, those choices are recorded
+                      in the source note; no uniform split is implied across this registry.
                     </p>
                     <p style={{ marginBottom: '0.75rem', lineHeight: '1.4', color: '#fbbf24' }}>
-                      <strong>Measured correction.</strong> Those protocols do not prevent pretraining leakage, which is a separate problem. Our own audit (see the Measured Benchmark tab) finds <strong>99.5% of DeepLoc</strong> and <strong>100% of Fluorescence</strong> test proteins aligning at ≥50% identity to a Swiss-Prot entry — and every ESM-2 variant and ProtBERT declares UniRef50, which clusters that same UniProt. A homology-split test set can still be almost entirely contained in the pretraining corpus.
+                      <strong>Measured clarification.</strong> A downstream homology split does
+                      not answer whether related inputs occurred during self-supervised
+                      pretraining. The Measured Benchmark tab therefore reports Swiss-Prot
+                      homology as an input-exposure proxy. It is not proof of exact checkpoint
+                      membership and does not imply that downstream labels were exposed.
                     </p>
                     <ul style={{ paddingLeft: '1.25rem', lineHeight: '1.5', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <li><strong>CB513 Secondary Structure</strong>: Predicts 3-state or 8-state amino acid structure, reported in 3-state Accuracy (Q3) ↑.</li>
@@ -1224,168 +1205,38 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Utility & Quality Scores */}
+                  {/* Objective availability metadata */}
                   <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', marginBottom: '2rem' }}>
-                    <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 700 }}>Reproduction & Safety Profile</h4>
+                    <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 700 }}>Availability & Evidence</h4>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', lineHeight: 1.5, marginBottom: '0.85rem' }}>
+                      These are factual catalog fields, not inferred quality, safety or generalization scores.
+                    </p>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem' }}>
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
-                        <div 
-                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
-                          onMouseEnter={() => setHoveredTooltip('leakage')}
-                          onMouseLeave={() => setHoveredTooltip(null)}
-                        >
-                          Leakage Risk
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                          Artifacts
                         </div>
-                        {hoveredTooltip === 'leakage' && (
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '105%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '200px',
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            color: '#f1f5f9',
-                            fontSize: '0.7rem',
-                            textAlign: 'left',
-                            zIndex: 999,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                            pointerEvents: 'none',
-                            textTransform: 'none',
-                            fontWeight: 'normal',
-                            lineHeight: '1.3'
-                          }}>
-                            Flags the risk of structural train/test overlap. HIGH indicates random splitting was used instead of strict scaffold/identity clustering.
-                          </div>
-                        )}
-                        <span style={{
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          color: selectedEmbedding.dataLeakageRisk === 'high' ? 'var(--accent-purple)' : selectedEmbedding.dataLeakageRisk === 'low' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
-                        }}>
-                          {selectedEmbedding.dataLeakageRisk.toUpperCase()}
-                        </span>
-                      </div>
-
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
-                        <div 
-                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
-                          onMouseEnter={() => setHoveredTooltip('repro')}
-                          onMouseLeave={() => setHoveredTooltip(null)}
-                        >
-                          Repro Index
-                        </div>
-                        {hoveredTooltip === 'repro' && (
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '105%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '200px',
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            color: '#f1f5f9',
-                            fontSize: '0.7rem',
-                            textAlign: 'left',
-                            zIndex: 999,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                            pointerEvents: 'none',
-                            textTransform: 'none',
-                            fontWeight: 'normal',
-                            lineHeight: '1.3'
-                          }}>
-                            Reproduction Index. Measures the ease of running the model (100% means open weights with standard HuggingFace/GitHub setup, lower means custom environment builds are required).
-                          </div>
-                        )}
                         <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--accent-indigo)' }}>
-                          {(selectedEmbedding.reproducibilityScore * 100).toFixed(0)}%
+                          {artifactAvailability(selectedEmbedding)}
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
-                        <div 
-                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
-                          onMouseEnter={() => setHoveredTooltip('gen')}
-                          onMouseLeave={() => setHoveredTooltip(null)}
-                        >
-                          Generalization
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                          Compute profile
                         </div>
-                        {hoveredTooltip === 'gen' && (
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '105%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '200px',
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            color: '#f1f5f9',
-                            fontSize: '0.7rem',
-                            textAlign: 'left',
-                            zIndex: 999,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                            pointerEvents: 'none',
-                            textTransform: 'none',
-                            fontWeight: 'normal',
-                            lineHeight: '1.3'
-                          }}>
-                            Domain Generalization. Evaluates representation transferability to out-of-distribution cohorts or completely new chemical/biological families.
-                          </div>
-                        )}
-                        <span style={{
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          color: selectedEmbedding.domainGeneralization === 'high' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
-                        }}>
-                          {selectedEmbedding.domainGeneralization.toUpperCase()}
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                          {selectedEmbedding.computeProfile.toUpperCase()}
                         </span>
                       </div>
 
-                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center', position: 'relative' }}>
-                        <div 
-                          style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}
-                          onMouseEnter={() => setHoveredTooltip('lowdata')}
-                          onMouseLeave={() => setHoveredTooltip(null)}
-                        >
-                          Low-data QSAR
+                      <div className="glass-card" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                          Sourced benchmark rows
                         </div>
-                        {hoveredTooltip === 'lowdata' && (
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '105%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '200px',
-                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            color: '#f1f5f9',
-                            fontSize: '0.7rem',
-                            textAlign: 'left',
-                            zIndex: 999,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-                            pointerEvents: 'none',
-                            textTransform: 'none',
-                            fontWeight: 'normal',
-                            lineHeight: '1.3'
-                          }}>
-                            Evaluates model robustness and fine-tuning performance when the downstream training dataset is very small (under 1,000 samples).
-                          </div>
-                        )}
-                        <span style={{
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          color: selectedEmbedding.smallDataPerformance === 'high' ? 'var(--accent-emerald)' : 'var(--text-secondary)'
-                        }}>
-                          {selectedEmbedding.smallDataPerformance.toUpperCase()}
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                          {selectedEmbedding.benchmarks.filter((entry) => entry.citation?.doi).length}
                         </span>
                       </div>
                     </div>

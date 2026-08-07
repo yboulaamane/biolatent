@@ -19,7 +19,8 @@ scikit-learn==1.8.0
 pandas==2.3.3
 rdkit==2023.9.6
 PyTDC==1.1.15
+python-docx==1.2.0
 
-# Protein leakage audit. Not a Python package -- install via conda/mamba
+# Protein input-exposure audit. Not a Python package -- install via conda/mamba
 # (`mamba install -c bioconda mmseqs2`) or from the upstream release.
 # Version used: MMseqs2 18.8cc5c

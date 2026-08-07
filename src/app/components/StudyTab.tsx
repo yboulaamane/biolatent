@@ -2,13 +2,16 @@
 
 import React, { useState } from 'react';
 import {
-  LEAKAGE,
-  LEAKAGE_SAMPLE,
+  EXPOSURE,
+  EXPOSURE_SAMPLE,
   MODALITY_LABEL,
   MODEL_LABELS,
   Modality,
   PAIRED,
+  RESOLUTION,
+  RESOLUTION_REPEATS,
   RESULTS,
+  ResolutionPoint,
   Row,
   Verdict,
   formatPct,
@@ -22,21 +25,27 @@ import {
 } from '../data/study';
 
 /**
- * The measured study. Every score on this tab was produced by running the
- * model, unlike the Literature Registry tab which transcribes published
- * values. The two are deliberately never mixed.
+ * The measured study. Every score on this tab was generated locally under the
+ * benchmark protocol, unlike the Literature Registry tab which transcribes
+ * published values. The two are deliberately never mixed.
  */
 
 const CORPUS_LABELS: Record<string, string> = {
   zinc: 'ZINC', pubchem: 'PubChem', swissprot: 'Swiss-Prot',
-  uniref50: 'UniRef50', human_ref_genome: 'human reference genome',
+  uniref50: 'UniRef50', uniref100: 'UniRef100',
+  human_ref_genome: 'human reference genome',
 };
 
 const VERDICT_STYLE: Record<Verdict, { bg: string; fg: string; text: string }> = {
-  leader: { bg: 'rgba(99, 102, 241, 0.18)', fg: '#a5b4fc', text: 'leader' },
-  tied: { bg: 'rgba(148, 163, 184, 0.12)', fg: '#94a3b8', text: 'tied with leader' },
-  below: { bg: 'rgba(244, 63, 94, 0.14)', fg: '#fb7185', text: 'below leader' },
+  reference: { bg: 'rgba(99, 102, 241, 0.18)', fg: '#a5b4fc', text: 'validation reference' },
+  indistinguishable: { bg: 'rgba(148, 163, 184, 0.12)', fg: '#94a3b8', text: 'not resolved' },
+  better: { bg: 'rgba(16, 185, 129, 0.14)', fg: '#34d399', text: 'better than reference' },
+  worse: { bg: 'rgba(244, 63, 94, 0.14)', fg: '#fb7185', text: 'worse than reference' },
 };
+
+function exposureFraction(value: { fraction?: number; measures?: Record<string, { fraction: number }> }) {
+  return value.measures?.any_proxy_hit?.fraction ?? value.fraction;
+}
 
 function VerdictBadge({ verdict }: { verdict: Verdict }) {
   const s = VERDICT_STYLE[verdict];
@@ -72,16 +81,19 @@ function TaskCard({ task }: { task: string }) {
   const meta = RESULTS[task];
   const paired = PAIRED[task];
   const rows = taskRows(task);
-  const leak = LEAKAGE[task];
+  const exposure = EXPOSURE[task];
   const metric = rows[0] ? RESULTS[task].models[rows[0].model].linear.metric : '';
 
-  const leakBits: string[] = [];
-  if (leak) {
-    for (const [corpus, v] of Object.entries(leak.empirical)) {
-      leakBits.push(`${CORPUS_LABELS[corpus] ?? corpus} ${formatPct(v.fraction)}`);
+  const exposureBits: string[] = [];
+  if (exposure) {
+    for (const [corpus, v] of Object.entries(exposure.empirical)) {
+      const fraction = exposureFraction(v);
+      if (fraction !== undefined) {
+        exposureBits.push(`${CORPUS_LABELS[corpus] ?? corpus} ${formatPct(fraction)}`);
+      }
     }
-    if (Object.keys(leak.structural).length > 0 && leakBits.length === 0) {
-      leakBits.push('total by construction');
+    if (Object.keys(exposure.structural).length > 0 && exposureBits.length === 0) {
+      exposureBits.push('input exposure by construction');
     }
   }
 
@@ -95,19 +107,24 @@ function TaskCard({ task }: { task: string }) {
           {meta.dataset_label ?? task}
         </h3>
         <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-          {metric} · test n = {meta.n_test.toLocaleString()} · {meta.split_source} split
+          {metric} · test n = {meta.n_test.toLocaleString()} · {meta.split_source}
           {meta.dataset_source ? ` · ${meta.dataset_source}` : ''}
         </div>
       </div>
 
       <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
+        {meta.dataset_variant && (
+          <>Variant: <strong style={{ color: '#fff' }}>{meta.dataset_variant}</strong>. </>
+        )}
         {paired
-          ? <>Compared against <strong style={{ color: '#a5b4fc' }}>{rows[0]?.label}</strong> by
-            paired bootstrap ({paired.n_boot.toLocaleString()} resamples), {paired.correction}.</>
+          ? <>Reference selected on held-out data: <strong style={{ color: '#a5b4fc' }}>
+            {MODEL_LABELS[paired.reference] ?? paired.reference}</strong>. Difference intervals use
+            paired {paired.resampling_unit.toLowerCase()} bootstrap ({paired.n_boot.toLocaleString()} resamples);
+            p-values use {paired.n_permutations.toLocaleString()} paired randomisations with study-wide Holm correction.</>
           : <>No paired comparison available for this task.</>}
-        {leakBits.length > 0 && (
-          <> Pretraining overlap of the test split: <strong style={{ color: '#fbbf24' }}>
-            {leakBits.join(', ')}</strong>.</>
+        {exposureBits.length > 0 && (
+          <> Pretraining input-exposure proxy: <strong style={{ color: '#fbbf24' }}>
+            {exposureBits.join(', ')}</strong>.</>
         )}
       </div>
 
@@ -119,7 +136,7 @@ function TaskCard({ task }: { task: string }) {
               <th style={{ textAlign: 'right' }}>Dim</th>
               <th style={{ textAlign: 'right' }}>Linear probe</th>
               <th>95% interval</th>
-              <th>vs leader</th>
+              <th>vs validation reference</th>
               <th style={{ textAlign: 'right' }}>MLP gap</th>
             </tr>
           </thead>
@@ -152,7 +169,7 @@ function TaskCard({ task }: { task: string }) {
                 </td>
                 <td>
                   <VerdictBadge verdict={r.verdict} />
-                  {r.verdict === 'below' && r.pHolm !== undefined && (
+                  {(r.verdict === 'worse' || r.verdict === 'better') && r.pHolm !== undefined && (
                     <span style={{
                       marginLeft: '0.5rem', color: 'var(--text-muted)',
                       fontSize: '0.72rem', fontVariantNumeric: 'tabular-nums',
@@ -256,19 +273,19 @@ function LadderPanel() {
   );
 }
 
-function LeakagePanel() {
-  const rows = Object.entries(LEAKAGE);
+function ExposurePanel() {
+  const rows = Object.entries(EXPOSURE);
   return (
     <div className="glass-card" style={{ marginBottom: '1.25rem' }}>
       <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff' }}>
-        Pretraining leakage audit
+        Pretraining input-exposure audit
       </h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.5rem 0 1rem' }}>
-        Fraction of each <strong style={{ color: '#fff' }}>test split</strong> recoverable
-        from the corpora the models declare. Molecules: Bemis-Murcko scaffold identity or
-        ECFP4 Tanimoto ≥ 0.9 against random {LEAKAGE_SAMPLE.toLocaleString()}-molecule
-        samples, so every molecular figure is a <em>lower bound</em>. Proteins: MMseqs2
-        alignment at ≥ 50% identity and ≥ 50% coverage against the whole of Swiss-Prot.
+        This measures input familiarity, not downstream label leakage. Molecular values are
+        exact identity / near-duplicate / shared-scaffold fractions against random{' '}
+        {EXPOSURE_SAMPLE.toLocaleString()}-molecule database samples, which are proxies rather
+        than the checkpoints&apos; exact dated training subsets. Protein values are homology
+        proxies from MMseqs2 at ≥ 50% identity and ≥ 50% coverage against Swiss-Prot.
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="benchmark-table">
@@ -287,14 +304,22 @@ function LeakagePanel() {
               const cell = (key: string) => {
                 const v = e.empirical[key];
                 if (!v) return <span style={{ color: 'var(--text-muted)' }}>—</span>;
-                const hot = v.fraction >= 0.5;
+                const fraction = exposureFraction(v);
+                if (fraction === undefined) return <span style={{ color: 'var(--text-muted)' }}>—</span>;
+                const hot = fraction >= 0.5;
+                const measures = v.measures;
                 return (
                   <span style={{ color: hot ? '#f87171' : '#fbbf24', fontWeight: 700 }}>
-                    {formatPct(v.fraction)}
+                    {measures
+                      ? `${formatPct(measures.exact_identity.fraction)} / ${formatPct(measures.near_duplicate.fraction)} / ${formatPct(measures.shared_scaffold.fraction)}`
+                      : formatPct(fraction)}
                   </span>
                 );
               };
               const structural = Object.keys(e.structural);
+              const affected = [...new Set(Object.values(e.empirical)
+                .flatMap((value) => value.affected_models ?? []))]
+                .map((model) => MODEL_LABELS[model] ?? model);
               return (
                 <tr key={task}>
                   <td style={{ color: '#fff', fontWeight: 600 }}>{task}</td>
@@ -306,8 +331,8 @@ function LeakagePanel() {
                   <td style={{ textAlign: 'right' }}>{cell('swissprot')}</td>
                   <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                     {structural.length > 0
-                      ? `${structural.map((s) => CORPUS_LABELS[s] ?? s).join(', ')}: covered by construction`
-                      : ''}
+                      ? `${structural.map((s) => CORPUS_LABELS[s] ?? s).join(', ')}: input exposure by construction; labels not implied`
+                      : affected.length > 0 ? `proxy applies to declared corpora for ${affected.join(', ')}` : ''}
                   </td>
                 </tr>
               );
@@ -325,11 +350,11 @@ function TopGroupPanel({ modality }: { modality: Modality }) {
   return (
     <div className="glass-card" style={{ marginBottom: '1.25rem' }}>
       <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
-        How often each representation is in the tied top group
+        How often each representation is not resolved as worse than the reference
       </h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '0.5rem 0 0.75rem' }}>
-        Deliberately a count, not a ranking. A representation is in the top group when the
-        paired test cannot separate it from that task&apos;s leader.
+        Deliberately a count, not a ranking. The comparator is selected on held-out
+        validation data, so the test set is not used to choose the reference it judges.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {counts.map((c) => (
@@ -364,6 +389,86 @@ function TopGroupPanel({ modality }: { modality: Modality }) {
   );
 }
 
+function ResolutionPanel({ modality }: { modality: Modality }) {
+  const rows = tasksByModality(modality).flatMap((task) => {
+    const entry = RESOLUTION[task];
+    if (!entry) return [];
+    const curves = Object.values(entry.comparisons)
+      .map((comparison) => comparison.curve)
+      .filter((curve) => curve.length > 0);
+    if (curves.length === 0) return [];
+    const nearest = (curve: ResolutionPoint[], target: number) =>
+      curve.reduce((best, point) =>
+        Math.abs(point.median_effective_n - target)
+          < Math.abs(best.median_effective_n - target) ? point : best);
+    const median = (values: number[]) => {
+      const sorted = [...values].sort((a, b) => a - b);
+      const middle = Math.floor(sorted.length / 2);
+      return sorted.length % 2
+        ? sorted[middle]
+        : (sorted[middle - 1] + sorted[middle]) / 2;
+    };
+    const lowPoints = curves.map((curve) => nearest(curve, 100));
+    const highPoints = curves.map((curve) => curve.at(-1)!);
+    return [{
+      task,
+      nTest: entry.n_test,
+      lowN: Math.round(median(lowPoints.map((point) => point.median_effective_n))),
+      lowSign: median(lowPoints.map((point) => point.sign_consistency)),
+      highN: Math.round(median(highPoints.map((point) => point.median_effective_n))),
+      highSign: median(highPoints.map((point) => point.sign_consistency)),
+      highWidth: median(highPoints.map((point) => point.central_95_width)),
+    }];
+  });
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="glass-card" style={{ marginBottom: '1.25rem' }}>
+      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
+        Fixed-test-set subsampling stability
+      </h3>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', margin: '0.5rem 0 0.75rem' }}>
+        Across {RESOLUTION_REPEATS.toLocaleString()} repeated subsets, this shows the median
+        consistency of each reference comparison&apos;s direction. It is conditional on the
+        observed test set and is not a causal estimate of how adding data would change a task.
+        Molecular subsets retain whole scaffold groups, so their effective n can exceed the target.
+      </p>
+      <div style={{ overflowX: 'auto' }}>
+        <table className="benchmark-table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th style={{ textAlign: 'right' }}>Test n</th>
+              <th style={{ textAlign: 'right' }}>Direction at smaller n</th>
+              <th style={{ textAlign: 'right' }}>Direction at larger n</th>
+              <th style={{ textAlign: 'right' }}>Median central-range width</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.task}>
+                <td style={{ color: '#fff', fontWeight: 600 }}>{row.task}</td>
+                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  {row.nTest.toLocaleString()}
+                </td>
+                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  {formatPct(row.lowSign)} at n ≈ {row.lowN.toLocaleString()}
+                </td>
+                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  {formatPct(row.highSign)} at n ≈ {row.highN.toLocaleString()}
+                </td>
+                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  {row.highWidth.toFixed(4)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function StudyTab() {
   const [modality, setModality] = useState<Modality>('molecule');
   const mol = separationSummary('molecule');
@@ -377,14 +482,14 @@ export default function StudyTab() {
           Measured Benchmark — Frozen Embedding Study
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          Every number below was produced by running the model on this hardware, not
-          transcribed from a paper. {totalModels()} representations were embedded once
+          Results shown below were generated locally under the same evaluation protocol,
+          not transcribed from a paper. {totalModels()} representations were embedded once
           per dataset and evaluated with one standardised linear probe — the same
           regularisation grid, folds and seed for all of them — across {Object.keys(RESULTS).length} tasks,
-          giving {totalCells()} model-task cells. Each model is then compared against its
-          task leader by <strong style={{ color: '#fff' }}>paired bootstrap</strong> with
-          Holm correction, because all models are scored on the same test items and
-          comparing independent intervals is markedly less powerful.
+          giving {totalCells()} model-task cells. A comparator is selected on held-out
+          validation data before the test set is examined. Paired cluster bootstrap gives
+          the difference interval, paired randomisation gives the p-value, and the primary
+          Holm correction spans all reference comparisons in the study.
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
@@ -394,10 +499,10 @@ export default function StudyTab() {
           <Stat value={`${prot.reliable} of ${prot.total}`}
                 label="protein comparisons that are statistically reliable"
                 tone="#34d399" />
-          <Stat value={`${mol.leadersSeparatedFromRunnerUp} of ${mol.tasks}`}
-                label="molecular tasks where the leader beats its runner-up"
+          <Stat value={`${mol.referencesDifferFromTestBest} of ${mol.tasks}`}
+                label="molecular validation references separated from the numerical test best"
                 tone="#fb7185" />
-          <Stat value={`${totalCells()}`} label="model-task cells, all really run" />
+          <Stat value={`${totalCells()}`} label="measured model-task cells" />
         </div>
 
         <div style={{
@@ -409,13 +514,12 @@ export default function StudyTab() {
             The headline result is about the benchmarks, not the models
           </div>
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6 }}>
-            On the molecular tasks, {mol.reliable} of {mol.total} comparisons survive
-            correction and <strong style={{ color: '#fff' }}>not one separates a task
-            leader from its runner-up</strong>. The same protocol on the protein tasks
-            resolves {prot.reliable} of {prot.total}, including gaps as small as 0.014.
-            The difference is test-set size, not modality: ClinTox cannot establish a
-            0.113 gap on 148 molecules, while Fluorescence establishes a 0.014 gap on
-            27,217 sequences.
+            On the molecular tasks, {mol.reliable} of {mol.total} reference comparisons
+            survive study-wide correction. The same protocol resolves {prot.reliable} of{' '}
+            {prot.total} protein comparisons. Larger test sets plausibly contribute to
+            that contrast, but task structure, label noise, dependence and effect size also
+            matter; the study therefore reports an empirical subsampling analysis instead
+            of attributing the pattern to modality or sample size alone.
           </div>
         </div>
       </div>
@@ -433,8 +537,9 @@ export default function StudyTab() {
       {tasks.map((t) => <TaskCard key={t} task={t} />)}
 
       <TopGroupPanel modality={modality} />
+      <ResolutionPanel modality={modality} />
       {modality === 'protein' && <LadderPanel />}
-      <LeakagePanel />
+      <ExposurePanel />
 
       <div className="glass-card">
         <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
@@ -444,23 +549,19 @@ export default function StudyTab() {
           color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.7,
           paddingLeft: '1.25rem', marginTop: '0.6rem',
         }}>
-          <li><strong style={{ color: '#fff' }}>&ldquo;Tied&rdquo; does not mean equal.</strong> It
-            means the paired test could not separate that model from the leader on this
-            test set.</li>
-          <li><strong style={{ color: '#fff' }}>Ties are the safer conclusion.</strong> Each
-            task&apos;s leader is selected as the maximum on the same test set that then
-            judges it, so leader-versus-challenger gaps carry a winner&apos;s curse and are
-            biased upward. A reported separation may be optimistic; a reported tie is
-            conservative.</li>
+          <li><strong style={{ color: '#fff' }}>&ldquo;Not resolved&rdquo; does not mean equal.</strong> It
+            means this test set could not separate the model from the validation-selected
+            reference at the stated multiplicity correction.</li>
+          <li><strong style={{ color: '#fff' }}>The numerical test best is descriptive.</strong>{' '}
+            It is shown for orientation but is not selected and tested on the same outcomes.</li>
           <li><strong style={{ color: '#fff' }}>Intervals cover the test set only</strong>, not
             variance from the split itself.</li>
           <li><strong style={{ color: '#fff' }}>The MLP column is a diagnostic, never ranked.</strong> Ranking
             it would measure the MLP&apos;s capacity rather than the representation; the
             informative part is its gap to the linear probe.</li>
-          <li><strong style={{ color: '#fff' }}>Values are internally comparable, not externally.</strong> The
-            balanced scaffold split is easier than DeepChem&apos;s deterministic splitter,
-            so these numbers sit above commonly cited figures for the same task names.
-            That is the point: benchmark values do not transfer across protocols.</li>
+          <li><strong style={{ color: '#fff' }}>Values are internally comparable, not externally.</strong> Every
+            dataset variant and split is stated beside its result. These values must
+            not be mixed with literature values produced under different protocols.</li>
         </ul>
       </div>
     </div>

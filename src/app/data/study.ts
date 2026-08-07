@@ -1,19 +1,21 @@
 /**
  * Measured frozen-embedding study — typed view over the committed result files.
  *
- * The three JSON files are imported from `results/` rather than copied into
+ * The result JSON files are imported from `results/` rather than copied into
  * `src/`, so the page and the manuscript are rendered from the same artefacts
  * the evaluation suite writes. Nothing here restates a number; every value is
  * read from disk at build time.
  *
  *   results/benchmark_results.json   scores, intervals, MLP diagnostic
- *   results/paired_comparisons.json  paired bootstrap vs each task's leader
- *   results/leakage_report.json      test-split overlap with pretraining corpora
+ *   results/paired_comparisons.json  validation-selected paired inference
+ *   results/exposure_report.json     pretraining input-exposure proxies
+ *   results/resolution_curves.json   fixed-test-set subsampling stability
  */
 
 import benchmarkResultsRaw from '../../../results/benchmark_results.json';
 import pairedRaw from '../../../results/paired_comparisons.json';
-import leakageRaw from '../../../results/leakage_report.json';
+import exposureRaw from '../../../results/exposure_report.json';
+import resolutionRaw from '../../../results/resolution_curves.json';
 
 export type Modality = 'molecule' | 'protein' | 'genomics';
 
@@ -45,7 +47,8 @@ export interface TaskResult {
   dataset_source?: string;
   dataset_sha256?: string;
   modality: Modality;
-  task_type: 'classification' | 'regression';
+  task_type: 'classification' | 'multilabel' | 'regression';
+  dataset_variant?: string;
   split_source: string;
   n_total: number;
   n_train: number;
@@ -61,6 +64,10 @@ export interface Comparison {
   p_raw: number;
   p_holm: number;
   significant: boolean;
+  p_holm_task?: number;
+  p_holm_modality?: number;
+  p_holm_global?: number;
+  significant_global?: boolean;
 }
 
 export interface LadderStep {
@@ -74,29 +81,73 @@ export interface LadderStep {
 }
 
 export interface PairedTask {
-  leader: string;
-  leader_score: number;
+  reference: string;
+  reference_selection: string;
+  reference_selection_score: number;
+  reference_test_score: number;
+  observed_test_best: string;
+  observed_test_best_score: number;
   n_test: number;
   n_boot: number;
-  correction: string;
+  n_permutations: number;
+  n_resampling_groups: number;
+  resampling_unit: string;
+  primary_correction: string;
   comparisons: Record<string, Comparison>;
   ladders?: Record<string, { rungs: string[]; steps: Record<string, LadderStep> }>;
 }
 
-export interface LeakageTask {
+export interface ExposureMeasure {
+  n_flagged: number;
+  fraction: number;
+  basis: string;
+}
+
+export interface ExposureEmpirical extends Partial<ExposureMeasure> {
+  affected_models?: string[];
+  sample_role?: string;
+  measures?: Record<string, ExposureMeasure>;
+}
+
+export interface ExposureTask {
   modality: Modality;
   n_test: number;
-  empirical: Record<string, { n_flagged: number; fraction: number; basis: string }>;
+  empirical: Record<string, ExposureEmpirical>;
   structural: Record<string, { affected_models: string[]; claim: string }>;
+}
+
+export interface ResolutionPoint {
+  requested_n: number;
+  median_effective_n: number;
+  median_delta: number;
+  central_95_low: number;
+  central_95_high: number;
+  central_95_width: number;
+  sign_consistency: number;
+  valid_repeats: number;
+}
+
+export interface ResolutionTask {
+  n_test: number;
+  reference: string;
+  comparisons: Record<string, {
+    full_test_delta: number;
+    curve: ResolutionPoint[];
+  }>;
 }
 
 export const RESULTS = benchmarkResultsRaw as unknown as Record<string, TaskResult>;
 export const PAIRED = pairedRaw as unknown as Record<string, PairedTask>;
-export const LEAKAGE = (leakageRaw as unknown as {
+export const EXPOSURE = (exposureRaw as unknown as {
   sample_size: number;
-  tasks: Record<string, LeakageTask>;
+  tasks: Record<string, ExposureTask>;
 }).tasks;
-export const LEAKAGE_SAMPLE = (leakageRaw as unknown as { sample_size: number }).sample_size;
+export const EXPOSURE_SAMPLE = (exposureRaw as unknown as { sample_size: number }).sample_size;
+export const RESOLUTION = (resolutionRaw as unknown as {
+  repeats: number;
+  tasks: Record<string, ResolutionTask>;
+}).tasks;
+export const RESOLUTION_REPEATS = (resolutionRaw as unknown as { repeats: number }).repeats;
 
 /** Display names. The registry uses different ids, so this map is local. */
 export const MODEL_LABELS: Record<string, string> = {
@@ -130,7 +181,7 @@ export const MODALITY_LABEL: Record<Modality, string> = {
   genomics: 'Genomics',
 };
 
-export type Verdict = 'leader' | 'tied' | 'below';
+export type Verdict = 'reference' | 'indistinguishable' | 'better' | 'worse';
 
 export interface Row {
   model: string;
@@ -149,8 +200,7 @@ export interface Row {
 
 /**
  * Rows for one task, ordered by score, each carrying its verdict against the
- * task leader. `tied` means the paired test could not separate it from the
- * leader — not that the scores are equal.
+ * representation selected on validation data.
  */
 export function taskRows(task: string): Row[] {
   const result = RESULTS[task];
@@ -160,12 +210,13 @@ export function taskRows(task: string): Row[] {
   return Object.entries(result.models)
     .map(([model, cell]) => {
       const comparison = paired?.comparisons?.[model];
-      const isLeader = paired?.leader === model;
-      const verdict: Verdict = isLeader
-        ? 'leader'
-        : comparison?.significant
-          ? 'below'
-          : 'tied';
+      const isReference = paired?.reference === model;
+      const significant = comparison?.significant_global ?? comparison?.significant;
+      const verdict: Verdict = isReference
+        ? 'reference'
+        : significant
+          ? comparison.delta > 0 ? 'worse' : 'better'
+          : 'indistinguishable';
       return {
         model,
         label: MODEL_LABELS[model] ?? cell.label ?? model,
@@ -192,7 +243,7 @@ export function tasksByModality(modality: Modality): string[] {
 export function separationSummary(modality: Modality) {
   let reliable = 0;
   let total = 0;
-  let leadersSeparatedFromRunnerUp = 0;
+  let referencesDifferFromTestBest = 0;
   const tasks = tasksByModality(modality);
   for (const task of tasks) {
     const paired = PAIRED[task];
@@ -200,15 +251,13 @@ export function separationSummary(modality: Modality) {
     const comparisons = Object.values(paired.comparisons);
     total += comparisons.length;
     reliable += comparisons.filter((c) => c.significant).length;
-    // The runner-up is the smallest positive delta from the leader.
-    const runnerUp = comparisons.reduce<Comparison | null>(
-      (best, c) => (best === null || c.delta < best.delta ? c : best), null);
-    if (runnerUp?.significant) leadersSeparatedFromRunnerUp += 1;
+    const bestComparison = paired.comparisons[paired.observed_test_best];
+    if (bestComparison?.significant) referencesDifferFromTestBest += 1;
   }
-  return { reliable, total, tasks: tasks.length, leadersSeparatedFromRunnerUp };
+  return { reliable, total, tasks: tasks.length, referencesDifferFromTestBest };
 }
 
-/** How often a representation sits in the statistically tied top group. */
+/** How often a representation is not resolved as worse than the reference. */
 export function topGroupCounts(modality: Modality) {
   const tasks = tasksByModality(modality);
   const counts = new Map<string, { top: number; total: number }>();
@@ -216,7 +265,7 @@ export function topGroupCounts(modality: Modality) {
     for (const row of taskRows(task)) {
       const entry = counts.get(row.model) ?? { top: 0, total: 0 };
       entry.total += 1;
-      if (row.verdict !== 'below') entry.top += 1;
+      if (row.verdict !== 'worse') entry.top += 1;
       counts.set(row.model, entry);
     }
   }

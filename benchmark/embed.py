@@ -24,6 +24,7 @@ revision hash, pooling, truncation and dtype, so any row can be regenerated.
 import hashlib
 import json
 import os
+import platform
 import subprocess
 import sys
 
@@ -38,10 +39,9 @@ EMB_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "embeddings")
 os.makedirs(EMB_DIR, exist_ok=True)
 
 MAX_LEN = {"protein": 512, "genomics": 512, "molecule": 256}
-
-# Some checkpoints need a different library stack than the main environment.
-# Rather than upgrade globally and disturb results already computed, such a
-# model declares its own interpreter and is embedded in that environment.
+RAW_MAX = {"protein": 510, "genomics": 510, "molecule": None}
+RARE_AA_TRANSLATION = str.maketrans({residue: "X" for residue in "UZOB"})
+EMBED_PROTOCOL_VERSION = 2
 MOLFORMER_ENV = os.path.expanduser("~/biolatent_molformer_env/bin/python")
 
 # ---------------------------------------------------------------------------
@@ -57,17 +57,17 @@ MODEL_REGISTRY = {
     # --- molecules: pretrained transformers ---
     "chemberta_77m": {"kind": "hf", "modality": "molecule",
                       "checkpoint": "DeepChem/ChemBERTa-77M-MLM",
+                      "revision": "ed8a5374f2024ec8da53760af91a33fb8f6a15ff",
                       "label": "ChemBERTa-2 77M MLM"},
     "chemberta_zinc": {"kind": "hf", "modality": "molecule",
                        "checkpoint": "seyonec/ChemBERTa-zinc-base-v1",
+                       "revision": "761d6a18cf99db371e0b43baf3e2d21b3e865a20",
                        "label": "ChemBERTa ZINC base"},
-    # MoLFormer-XL's remote modelling code imports transformers.masking_utils,
-    # absent from the main environment's transformers 4.50.3. Because embedding
-    # already runs in a subprocess, this model just points at a second
-    # environment holding a newer transformers; the main environment, and every
-    # result already computed in it, are untouched.
+    # Remote-code models are still isolated in a subprocess, but use the same
+    # pinned project interpreter as the rest of the suite.
     "molformer_xl": {"kind": "hf", "modality": "molecule",
                      "checkpoint": "ibm/MoLFormer-XL-both-10pct",
+                     "revision": "361063d0ad524ef77cf39b08469f6be770dc550f",
                      "trust_remote_code": True,
                      "force_float32": True,
                      "inference_seed": 42,
@@ -79,15 +79,26 @@ MODEL_REGISTRY = {
                       "label": "3-mer frequency"},
     # --- proteins: pretrained language models ---
     "esm2_8m":   {"kind": "hf", "modality": "protein",
-                  "checkpoint": "facebook/esm2_t6_8M_UR50D",   "label": "ESM-2 8M"},
+                  "checkpoint": "facebook/esm2_t6_8M_UR50D",
+                  "revision": "c731040fcd8d73dceaa04b0a8e6329b345b0f5df",
+                  "label": "ESM-2 8M"},
     "esm2_35m":  {"kind": "hf", "modality": "protein",
-                  "checkpoint": "facebook/esm2_t12_35M_UR50D", "label": "ESM-2 35M"},
+                  "checkpoint": "facebook/esm2_t12_35M_UR50D",
+                  "revision": "6fbf070e65b0b7291e7bbcd451118c216cff79d8",
+                  "label": "ESM-2 35M"},
     "esm2_150m": {"kind": "hf", "modality": "protein",
-                  "checkpoint": "facebook/esm2_t30_150M_UR50D", "label": "ESM-2 150M"},
+                  "checkpoint": "facebook/esm2_t30_150M_UR50D",
+                  "revision": "a695f6045e2e32885fa60af20c13cb35398ce30c",
+                  "label": "ESM-2 150M"},
     "esm2_650m": {"kind": "hf", "modality": "protein",
-                  "checkpoint": "facebook/esm2_t33_650M_UR50D", "label": "ESM-2 650M"},
+                  "checkpoint": "facebook/esm2_t33_650M_UR50D",
+                  "revision": "08e4846e537177426273712802403f7ba8261b6c",
+                  "label": "ESM-2 650M"},
     "protbert":  {"kind": "hf", "modality": "protein", "space_tokens": True,
-                  "checkpoint": "Rostlab/prot_bert", "label": "ProtBERT"},
+                  "replace_rare_amino_acids": True,
+                  "checkpoint": "Rostlab/prot_bert",
+                  "revision": "7a894481acdc12202f0a415dd567f6cfdb698908",
+                  "label": "ProtBERT"},
 
     # --- genomics: classical baseline ---
     "kmer5_dna": {"kind": "kmer", "modality": "genomics", "k": 5,
@@ -95,10 +106,12 @@ MODEL_REGISTRY = {
     # --- genomics: pretrained models ---
     "nucleotide_transformer": {"kind": "hf", "modality": "genomics",
                                "checkpoint": "InstaDeepAI/nucleotide-transformer-500m-human-ref",
+                               "revision": "f87b5d7233295242e79c951873d290f4cf992045",
                                "trust_remote_code": True,
                                "label": "Nucleotide Transformer 500M"},
     "hyenadna": {"kind": "hf", "modality": "genomics",
                  "checkpoint": "LongSafari/hyenadna-tiny-1k-seqlen-hf",
+                 "revision": "e8c1effa8673814e257e627d2e1eda9ea5a373f6",
                  "trust_remote_code": True, "label": "HyenaDNA tiny"},
 }
 
@@ -180,23 +193,42 @@ def _token_budget_batches(order, sequences, max_len, budget):
         yield batch
 
 
+def _prepare_text(value, spec):
+    text = str(value)
+    if spec.get("replace_rare_amino_acids"):
+        text = text.translate(RARE_AA_TRANSLATION)
+    raw_max = RAW_MAX[spec["modality"]]
+    if raw_max is not None:
+        text = text[:raw_max]
+    if spec.get("space_tokens"):
+        text = " ".join(text)
+    return text
+
+
 def _forward_pooled(model, tok, batch, max_len, device, spec):
     """Tokenise, run, and mean-pool one batch. Returns a numpy array."""
     import torch
 
-    texts = [str(s)[:max_len * 6] for s in batch]
-    if spec.get("space_tokens"):
-        # ProtBERT expects residues separated by spaces.
-        texts = [" ".join(list(s[:max_len])) for s in texts]
+    texts = [_prepare_text(value, spec) for value in batch]
 
     enc = tok(texts, return_tensors="pt", padding=True,
-              truncation=True, max_length=max_len)
+              truncation=True, max_length=max_len,
+              return_special_tokens_mask=True)
     enc = {k: v.to(device) for k, v in enc.items()}
+    special_mask = enc.pop("special_tokens_mask", None)
     hidden = model(**enc).last_hidden_state
 
     mask = enc.get("attention_mask")
     if mask is None:
         mask = torch.ones(hidden.shape[:2], device=device)
+    if special_mask is None:
+        special_mask = torch.zeros_like(mask)
+        input_ids = enc.get("input_ids")
+        if input_ids is not None:
+            for token_id in tok.all_special_ids:
+                special_mask = torch.maximum(
+                    special_mask, (input_ids == token_id).to(mask.dtype))
+    mask = mask * (1 - special_mask.to(mask.dtype))
     mask = mask.unsqueeze(-1).to(hidden.dtype)
     pooled = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1)
     return pooled.float().cpu().numpy()
@@ -250,7 +282,9 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = (torch.float16 if device == "cuda" and not spec.get("force_float32")
              else torch.float32)
-    kw = {"trust_remote_code": True} if spec.get("trust_remote_code") else {}
+    kw = {"revision": spec["revision"]}
+    if spec.get("trust_remote_code"):
+        kw["trust_remote_code"] = True
 
     tok = AutoTokenizer.from_pretrained(spec["checkpoint"], **kw)
     model = AutoModel.from_pretrained(spec["checkpoint"], torch_dtype=dtype, **kw)
@@ -291,7 +325,28 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
         raise RuntimeError(
             f"{spec.get('checkpoint')}: {len(missing)} sequences produced no "
             f"embedding (first index {missing[0]})")
-    return np.vstack(pooled_by_index).astype(np.float32)
+    # Measure truncation with the pinned tokenizer. This is deliberately kept
+    # separate from raw-character truncation because tokenizers use different
+    # vocabularies and therefore consume different token budgets for the same
+    # sequence.
+    token_lengths = []
+    for start in range(0, len(sequences), 512):
+        texts = [_prepare_text(value, spec)
+                 for value in sequences[start:start + 512]]
+        encoded = tok(texts, add_special_tokens=True, truncation=False,
+                      return_length=True)
+        lengths = encoded.get("length")
+        if lengths is None:
+            lengths = [len(ids) for ids in encoded["input_ids"]]
+        token_lengths.extend(int(length) for length in lengths)
+    stats = {
+        "inference_device_type": device,
+        "inference_parameter_dtype": str(dtype),
+        "n_tokenized_inputs_truncated": int(sum(
+            length > max_len for length in token_lengths)),
+        "maximum_untruncated_token_length": int(max(token_lengths, default=0)),
+    }
+    return np.vstack(pooled_by_index).astype(np.float32), stats
 
 
 # ------------------------------------------------------------------ driver
@@ -313,7 +368,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     path = cache_path(model_id, dataset_name)
     input_sha256 = hashlib.sha256(
         "\0".join(str(value) for value in inputs).encode("utf-8")
-    ).hexdigest()[:16]
+    ).hexdigest()
     if os.path.exists(path) and not force:
         cached = np.load(path)
         meta_path = path.replace(".npy", ".json")
@@ -323,7 +378,11 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
                 meta = json.load(fh)
         content_matches = (
             cached.shape[0] == len(inputs)
-            and meta.get("input_sha256", input_sha256) == input_sha256
+            and meta.get("input_sha256") == input_sha256
+            and meta.get("protocol_version") == EMBED_PROTOCOL_VERSION
+            and meta.get("revision") == spec.get("revision")
+            and (not spec.get("replace_rare_amino_acids")
+                 or meta.get("rare_amino_acid_mapping") == "UZOB->X")
             and ("inference_seed" not in spec
                  or meta.get("inference_seed") == spec["inference_seed"])
         )
@@ -333,6 +392,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
               flush=True)
 
     kind = spec["kind"]
+    extra_meta = {}
 
     if kind == "hf" and isolate:
         interpreter = spec.get("interpreter", sys.executable)
@@ -360,7 +420,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     elif kind == "kmer":
         mat = embed_kmer(inputs, spec["k"], modality)
     elif kind == "hf":
-        mat = embed_hf(inputs, spec, modality)
+        mat, extra_meta = embed_hf(inputs, spec, modality)
     else:
         raise ValueError(f"Unknown model kind '{kind}' for {model_id}")
 
@@ -370,20 +430,45 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
             f"{len(inputs)} inputs")
 
     np.save(path, mat)
+    runtime = None
+    if kind == "hf":
+        import torch
+        import transformers
+        runtime = {"python": platform.python_version(),
+                   "torch": torch.__version__,
+                   "transformers": transformers.__version__}
     meta = {
         "model_id": model_id,
         "label": spec["label"],
         "dataset": dataset_name,
         "kind": kind,
         "checkpoint": spec.get("checkpoint"),
+        "revision": spec.get("revision"),
+        "protocol_version": EMBED_PROTOCOL_VERSION,
         "modality": modality,
         "n": int(mat.shape[0]),
         "dim": int(mat.shape[1]),
-        "pooling": "mean over non-padding tokens" if kind == "hf" else "n/a",
-        "max_length": MAX_LEN[modality] if kind == "hf" else None,
+        "matrix_dtype": str(mat.dtype),
+        "inference_precision_policy": (
+            "float32 on all devices" if spec.get("force_float32")
+            else "float16 on CUDA; float32 when CUDA is unavailable"),
+        "pooling": ("mean over attention-mask tokens with tokenizer special "
+                    "tokens excluded" if kind == "hf" else "n/a"),
+        "max_token_length_including_special_tokens": (
+            MAX_LEN[modality] if kind == "hf" else None),
+        "raw_character_limit_before_tokenisation": (
+            RAW_MAX[modality] if kind == "hf" else None),
+        "n_raw_inputs_truncated": (int(sum(
+            RAW_MAX[modality] is not None and len(str(value)) > RAW_MAX[modality]
+            for value in inputs)) if kind == "hf" and RAW_MAX[modality] is not None
+            else None),
         "input_sha256": input_sha256,
         "inference_seed": spec.get("inference_seed"),
-        "sha256": hashlib.sha256(mat.tobytes()).hexdigest()[:16],
+        "rare_amino_acid_mapping": (
+            "UZOB->X" if spec.get("replace_rare_amino_acids") else None),
+        "sha256": hashlib.sha256(mat.tobytes()).hexdigest(),
+        "embedding_runtime": runtime,
+        **extra_meta,
     }
     with open(path.replace(".npy", ".json"), "w") as fh:
         json.dump(meta, fh, indent=2)

@@ -584,18 +584,27 @@ body {
 }
 
 .wizard-option-card {
+  appearance: none;
+  width: 100%;
   background: rgba(15, 23, 42, 0.4);
   border: 1px solid var(--border-card);
   padding: 1.5rem;
   border-radius: 12px;
   cursor: pointer;
   text-align: center;
+  color: inherit;
+  font: inherit;
   transition: all 0.25s ease;
 }
 
 .wizard-option-card:hover {
   border-color: rgba(99, 102, 241, 0.35);
   background: rgba(15, 23, 42, 0.7);
+}
+
+.wizard-option-card:focus-visible {
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 3px;
 }
 
 .wizard-option-card.selected {
@@ -605,6 +614,7 @@ body {
 }
 
 .wizard-option-title {
+  display: block;
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
@@ -612,6 +622,7 @@ body {
 }
 
 .wizard-option-desc {
+  display: block;
   font-size: 0.8rem;
   color: var(--text-muted);
 }

@@ -87,7 +87,7 @@ rather than filled.
 | Task | Split | Source |
 | :--- | :--- | :--- |
 | BBBP, ClinTox, BACE, ESOL, Lipophilicity | Balanced Bemis-Murcko scaffold, seed 42 | computed |
-| CYP3A4 | Scaffold | TDC official |
+| CYP3A4 Substrate | Scaffold, seed 42 | TDC `CYP3A4_Substrate_CarbonMangels` |
 | DeepLoc | Author partition | official |
 | Fluorescence | Author partition | official (TAPE) |
 | Promoters | Author partition | official (NT) |
@@ -124,15 +124,15 @@ shared SMILES between train and test on BBBP, BACE and ClinTox.
 
 Ranked metric, linear probe. Best score per task in bold.
 
-| Model | BBBP | ClinTox | BACE | ESOL | Lipo | CYP3A4 |
+| Model | BBBP | ClinTox | BACE | ESOL | Lipo | CYP3A4 Substrate |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
-| ECFP4 (1024d) | 0.8826 | 0.8109 | 0.8601 | 0.5924 | 0.5883 | **0.8463** |
-| RDKit2D (210d) | **0.9176** | 0.8003 | 0.8170 | **0.9185** | 0.6409 | 0.8333 |
-| ChemBERTa-77M (384d) | 0.8927 | 0.7837 | 0.8402 | 0.8398 | 0.6376 | 0.8194 |
-| ChemBERTa-ZINC (768d) | 0.9048 | 0.8597 | 0.8571 | 0.7930 | 0.5100 | 0.8160 |
-| MoLFormer-XL (768d) | 0.9013 | **0.8968** | **0.8635** | 0.9063 | **0.6410** | 0.8462 |
+| ECFP4 (1024d) | 0.8826 | 0.8109 | 0.8601 | 0.5924 | 0.5883 | 0.6946 |
+| RDKit2D (210d) | **0.9176** | 0.8003 | 0.8170 | **0.9185** | 0.6409 | 0.6946 |
+| ChemBERTa-77M (384d) | 0.8927 | 0.7837 | 0.8402 | 0.8398 | 0.6376 | **0.7614** |
+| ChemBERTa-ZINC (768d) | 0.9048 | 0.8597 | 0.8571 | 0.7930 | 0.5100 | 0.6337 |
+| MoLFormer-XL (768d) | 0.9013 | **0.8968** | **0.8635** | 0.9063 | **0.6410** | 0.6429 |
 
-Metrics: ROC-AUC for BBBP/ClinTox/BACE/CYP3A4, Spearman ρ for ESOL/Lipophilicity.
+Metrics: ROC-AUC for BBBP/ClinTox/BACE/CYP3A4 Substrate, Spearman ρ for ESOL/Lipophilicity.
 
 ### Which of these differences are real
 
@@ -151,14 +151,14 @@ the task**.
 | BACE | 152 | MoLFormer-XL 0.8635 | — | all 4 |
 | ESOL | 114 | RDKit2D 0.9185 | ECFP4, ChemBERTa-ZINC, ChemBERTa-77M | MoLFormer-XL |
 | Lipophilicity | 420 | MoLFormer-XL 0.6410 | ChemBERTa-ZINC | RDKit2D, ChemBERTa-77M, ECFP4 |
-| CYP3A4 | 1234 | ECFP4 0.8463 | ChemBERTa-77M, ChemBERTa-ZINC | MoLFormer-XL, RDKit2D |
+| CYP3A4 Substrate | 67 | ChemBERTa-77M 0.7614 | — | all 4 |
 
 Per-comparison deltas, intervals and Holm-adjusted p-values are in
 `results/paired_comparisons.json`.
 
-Six of twenty-four comparisons survive. **No task separates its leader from the
+Four of twenty-four comparisons survive. **No task separates its leader from the
 whole field** — every task's top is a statistical tie of two or more
-representations — but on three tasks the *bottom* of the table is real.
+representations — but on two tasks the *bottom* of the table is real.
 
 Counting how often each representation sits in the statistically tied top group
 is the most that these six tasks support, and it is deliberately not a ranking:
@@ -168,15 +168,15 @@ is the most that these six tasks support, and it is deliberately not a ranking:
 | RDKit2D (210d) | 6 of 6 |
 | MoLFormer-XL (768d) | 6 of 6 |
 | ECFP4 (1024d) | 5 of 6 |
-| ChemBERTa-77M (384d) | 4 of 6 |
-| ChemBERTa-ZINC (768d) | 3 of 6 |
+| ChemBERTa-77M (384d) | 5 of 6 |
+| ChemBERTa-ZINC (768d) | 4 of 6 |
 
 > **A note on the test itself, because an earlier version of this document got
 > it wrong.** The first analysis compared each model's independent 95% interval
 > against the leader's and called any overlap a tie. That is a real test but a
 > badly conservative one, since it discards the fact that both models saw the
 > same test items; it found only 2 separations. The paired test finds 10 before
-> correction and 6 after. The conclusion below is similar to the one that wrong
+> correction and 4 after. The conclusion below is similar to the one that wrong
 > test produced, but it is now reached by a test that could have contradicted it.
 
 What holds up:
@@ -187,29 +187,33 @@ What holds up:
   RDKit2D's 0.918, Δ = 0.326, Holm p = 0.004). A binary fingerprint is a poor
   substrate for a continuous physicochemical target — this is the largest
   effect anywhere in the molecular suite.
-- **The two ChemBERTa variants are the weakest entries.** ChemBERTa-ZINC falls
-  reliably below the leader on three of six tasks and ChemBERTa-77M on two;
-  MoLFormer-XL and RDKit2D never do. Small SMILES BERTs are not
-  interchangeable with the pretrained model they are often used to stand in for.
+- **ChemBERTa-ZINC is the weakest entry.** It falls reliably below the leader
+  on two of six tasks. ChemBERTa-77M is below the leader only on ESOL and is
+  the numerical leader on CYP3A4 Substrate, although that lead is unresolved.
+  Small SMILES BERTs are therefore not interchangeable, even with each other.
 - **Pretraining is not distinguishable from descriptors.** MoLFormer-XL
   (~1.1B molecules) and a 210-dimensional RDKit descriptor vector are in the
   tied top group on all six tasks and are never separated from each other in
   either direction.
 
-Where separations survive, it is because the effect is large (ESOL, Δ up to
-0.33) or the test set is (CYP3A4, n = 1234). BBBP, ClinTox and BACE have
-neither: their scaffold-split test sets hold 148–205 molecules, and ClinTox's
-148 yield a leader interval **0.19 wide**. At that resolution the differences
-these benchmarks appear to show — and that the wider literature routinely
-reports on these same task names — are smaller than the measurement.
+Where separations survive, the effect is large enough to clear a limited test
+set: ESOL reaches Δ = 0.33 and the one Lipophilicity separation reaches 0.13.
+BBBP, ClinTox and BACE have smaller gaps on 148–205 test molecules. CYP3A4
+Substrate is smaller still: 67 test compounds give its leader an interval 0.24
+wide, so even an apparent 0.128 ROC-AUC gap does not survive correction. At
+that resolution the differences these benchmarks appear to show — and that the
+wider literature routinely reports on these same task names — are smaller than
+the measurement.
 
-> **This is the fourth time these results changed a conclusion, and the pattern
+> **This is the fifth time these results changed a conclusion, and the pattern
 > is the finding.** With only two small SMILES BERTs standing in for pretrained
 > models, the data said "classical descriptors win five of six". Adding
 > MoLFormer-XL turned that into "two wins each, two ties". Adding confidence
 > intervals turned *that* into "almost nothing is distinguishable". Replacing
 > the interval-overlap test with the correct paired one brought six separations
-> back — none of them at the top of a table. Each intermediate claim was a
+> back. Finally, replacing the mismatched CYP3A4 inhibition task with the
+> audited substrate task reduced that to four — still none at the top of a
+> table. Each intermediate claim was a
 > faithful reading of the numbers then in hand, and each was wrong. A
 > single-number leaderboard over small test sets will produce a ranking whatever
 > the data does, and it will look convincing.
@@ -221,7 +225,7 @@ a pretrained model on any of these six tasks. But the stronger reading is that
 **these benchmarks lack the resolution to support either claim**, theirs or its
 opposite.
 
-**The linear-to-MLP gap is small and usually negative** (range −0.157 to +0.040).
+**The linear-to-MLP gap is small and usually negative** (range −0.157 to +0.081).
 Adding non-linear capacity on top of these frozen embeddings rarely helps, so
 what the representations encode is largely linearly accessible.
 
@@ -241,7 +245,7 @@ what the representations encode is largely linearly accessible.
 **Unlike the molecular tasks, these separations are real.** DeepLoc's test set
 holds 2,782 proteins and Fluorescence's 27,217. Under the same paired bootstrap
 and the same Holm correction that erased almost everything in §4, **every single
-comparison on both protein tasks survives** — ten of ten, against six of
+comparison on both protein tasks survives** — ten of ten, against four of
 twenty-four on the molecular side.
 
 | Task | Leader | Reliably below the leader (Holm-corrected) |
@@ -390,7 +394,7 @@ sample. Proteins: MMseqs2 alignment at ≥50% identity and ≥50% coverage again
 | BBBP | 29.8% | 46.3% | — |
 | Lipophilicity | 22.6% | 42.4% | — |
 | ClinTox | 29.7% | 38.5% | — |
-| CYP3A4 | 20.2% | 30.1% | — |
+| CYP3A4 Substrate | 43.3% | 70.1% | — |
 | BACE | 1.3% | **0.7%** | — |
 | DeepLoc | — | — | **99.5%** |
 | Fluorescence | — | — | **100.0%** |
@@ -496,8 +500,12 @@ registry.
 3. **DeepLoc is a simplification.** The source is multi-label over ten
    compartments; the argmax compartment is used as a single-label 10-class
    target. This is not the original multi-label task.
-4. **CYP3A4 is inhibition, not substrate** (TDC `CYP3A4_Veith`). The substrate
-   dataset is a different and much smaller one.
+4. **CYP3A4 is substrate prediction**, using the 670-compound TDC
+   `CYP3A4_Substrate_CarbonMangels` dataset so the measured and literature
+   surfaces refer to the same biological task. They remain numerically
+   incomparable because the literature rows use different downstream heads
+   and evaluation procedures. The measured scaffold split has only 67 test
+   compounds, producing wide intervals and no corrected separation.
 5. **Mean pooling is imposed on every model**, including those whose authors
    recommend a different readout. This is deliberate for comparability, but §4b
    shows it is not free: on Fluorescence it costs the protein language models

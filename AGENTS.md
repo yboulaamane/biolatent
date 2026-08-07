@@ -18,9 +18,9 @@ This log registers the core design rules, constraints, and features established 
 * **Missing Scores (N/A)**: If a model was not evaluated on a task (e.g. structural models like AlphaFold 2 on 2D property classifiers), report `N/A`. Do not synthesize values to fill empty grid fields.
 
 ## 3. Implemented Features
-* **Measured Benchmark tab (landing tab)**: Renders the frozen-embedding study from `results/*.json` via `src/app/data/study.ts` and `src/app/components/StudyTab.tsx`. Scores, 95% intervals, paired-bootstrap verdicts against each task leader, ESM-2 scale ladders and the leakage audit. **Never mix these with registry values** — these were measured here, registry values were transcribed from papers under incompatible protocols. Headline counts (45 cells, 6/24, 10/10) are *computed* from the JSON, never hardcoded, so they cannot go stale when the study is re-run.
+* **Measured Benchmark tab (landing tab)**: Renders the frozen-embedding study from `results/*.json` via `src/app/data/study.ts` and `src/app/components/StudyTab.tsx`. Scores, dependence-aware 95% intervals, paired-randomisation verdicts against a validation-selected reference, ESM-2 scale ladders and the pretraining input-exposure audit are generated locally. **Never mix these with registry values**; registry values were transcribed from papers under incompatible protocols. Headline counts are computed from JSON, never hardcoded.
 * **Registry & Filter Sidebar**: Fully searchable directory filtering by biological modality, license, representation type, and input format.
-* **Selection Wizard**: Rules recommending optimal representations based on targets, datasets, and hardware budgets.
+* **Compatibility Finder**: Objective filtering by modality, input format, and declared compute profile. It does not rank candidates or claim an optimal representation.
 * **Interactive SVG Scatter Plot**: Maps embedding dimension size (log-scale X-axis) against scores (linear Y-axis) with custom hover tooltips.
 * **Dynamic Table Sorting**: Both Molecule and Protein tables are sortable in ascending/descending order with indicators.
 * **JSON GET API Route**: `/api/representations` allows dynamic programmatic representation lookups.
@@ -28,7 +28,5 @@ This log registers the core design rules, constraints, and features established 
 ## 4. Active Benchmarking Vision (Frozen Embedding Suite)
 * **Architecture Proposal**: Documented in `BENCHMARK_PROPOSAL.md`.
 * **Concept**: Transition BioLatent from a literature registry to an active benchmarking suite using **Frozen Embedding Probing** (separating inference from evaluation).
-* **Multi-Modal Task Suite**: 9 curated tasks across Molecules (BBBP, ClinTox, BACE, ESOL, Lipophilicity, CYP3A4), Proteins (DeepLoc, Fluorescence), and Genomics (Promoters). CB513 was dropped (per Design Decision D2 in `BENCHMARK_PROPOSAL.md`) in favour of a whole-protein regression task so the entire suite uses one per-object probing harness.
-* **Zero Infrastructure Cost**: Evaluation requires < 90s on CPU per submission, run via GitHub Actions on hosted Hugging Face Datasets.
-
-
+* **Multi-Modal Task Suite**: 9 curated tasks across Molecules (BBBP, two-endpoint ClinTox, BACE, ESOL, Lipophilicity, CYP3A4 Substrate), Proteins (multi-label DeepLoc 2.0, Fluorescence), and Genomics (Promoters). The measured and literature CYP3A4 surfaces both use TDC `CYP3A4_Substrate_CarbonMangels`; do not substitute the distinct `CYP3A4_Veith` inhibition task. CB513 was dropped (per Design Decision D2 in `BENCHMARK_PROPOSAL.md`) in favour of a whole-protein regression task so the suite uses one vector per object.
+* **Compute boundary**: Frozen matrices make repeated probing CPU-only, but neither embedding generation nor evaluation has a universal zero-cost or sub-90-second guarantee. Report measured runtimes only with cache state, software and hardware context.
