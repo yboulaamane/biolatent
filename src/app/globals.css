@@ -67,15 +67,18 @@ body {
 
 /* Core Dashboard Layout */
 .app-container {
+  --page-gutter: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--page-gutter);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: calc(100vw - var(--page-gutter) - var(--page-gutter));
+  margin-left: calc(50% - 50vw + var(--page-gutter));
   margin-bottom: 2.5rem;
   border-bottom: 1px solid var(--border-card);
   padding-bottom: 1.5rem;
@@ -757,7 +760,7 @@ body {
 
 @media (max-width: 600px) {
   .app-container {
-    padding: 1rem;
+    --page-gutter: 1rem;
   }
 
   .modal-body {
