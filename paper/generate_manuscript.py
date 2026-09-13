@@ -28,7 +28,9 @@ TASK_ORDER = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
 MODEL_LABELS = {
     "ecfp4": "ECFP4", "rdkit2d": "RDKit2D",
     "chemberta_77m": "ChemBERTa-77M", "chemberta_zinc": "ChemBERTa-ZINC",
-    "molformer_xl": "MoLFormer-XL", "kmer3_protein": "3-mer frequency",
+    "molformer_xl": "MoLFormer-XL", "unimol_v1": "Uni-Mol v1",
+    "molclr_gin": "MolCLR GIN", "grover_base": "GROVER Base",
+    "grover_large": "GROVER Large", "kmer3_protein": "3-mer frequency",
     "esm2_8m": "ESM-2 8M", "esm2_35m": "ESM-2 35M",
     "esm2_150m": "ESM-2 150M", "esm2_650m": "ESM-2 650M",
     "protbert": "ProtBERT", "kmer5_dna": "5-mer frequency",
@@ -337,14 +339,20 @@ def build():
     add_body(document, "Every model was used only on its native modality. Classical baselines "
              "were ECFP4 and RDKit2D for molecules, amino-acid 3-mer frequencies for proteins, "
              "and DNA 5-mer frequencies for genomes. Neural checkpoints included ChemBERTa, "
-             "MoLFormer, four ESM-2 scales, ProtBERT, Nucleotide Transformer and HyenaDNA "
-             "[4,9-13]. Missing cross-modality cells are not imputed.")
-    add_body(document, "All checkpoints were pinned to immutable Hugging Face revisions. Raw "
+             "MoLFormer, Uni-Mol, MolCLR GIN, GROVER Base/Large, four ESM-2 scales, ProtBERT, "
+             "Nucleotide Transformer and HyenaDNA [4,9-13,17-19]. The MolCLR-ClinTox cell was "
+             "N/A because the checkpoint's native featuriser cannot represent every structure "
+             "in that task. Missing cells are not imputed.")
+    add_body(document, "All neural checkpoints were pinned to immutable source revisions and "
+             "weight hashes. Raw "
              "protein and DNA input was capped at 510 characters before tokenization, and the "
              "token budget was 512 including special tokens; molecular tokenization was capped "
              "at 256. ProtBERT inputs followed its documented U/Z/O/B-to-X mapping. Transformer "
              "outputs were averaged over attention-mask tokens after "
-             "tokenizer-designated special tokens were removed. Each sidecar stores the input "
+             "tokenizer-designated special tokens were removed. Uni-Mol used mean atom pooling; "
+             "MolCLR used its 512-dimensional encoder feature before the contrastive projection "
+             "head; GROVER used the official concatenated atom- and bond-view mean fingerprint. "
+             "Each sidecar stores the input "
              "hash, matrix hash, revision, dimensions, pooling text, truncation count and the "
              "embedding subprocess software versions. The inference-precision policy and float32 "
              "output-matrix dtype are recorded in the public run manifest, which aggregates these "
@@ -414,6 +422,8 @@ def build():
              "than confirmed membership. Proteins were aligned to Swiss-Prot with MMseqs2 at 50% "
              "identity and 50% coverage as a homology proxy for UniRef50/UniRef100. Promoters derive from the "
              "human reference assembly used in genomic pretraining, so input exposure is structural. "
+             "GROVER also declares ChEMBL pretraining, for which no pinned local snapshot was "
+             "available; that source is marked unmeasured rather than represented by ZINC. "
              "None of these analyses establishes that downstream labels were present in pretraining.")
 
     add_heading(document, "2.7 Web implementation", 2)
@@ -511,12 +521,15 @@ def build():
         entry = exposure["tasks"].get(task, {})
         empirical = entry.get("empirical", {})
         structural = entry.get("structural", {})
+        unmeasured = entry.get("unmeasured", {})
+        notes = [value["claim"] for value in structural.values()]
+        notes.extend(f"{corpus}: {value['reason']}" for corpus, value in unmeasured.items())
         exposure_rows.append([
             task,
             exposure_text(empirical["zinc"]) if "zinc" in empirical else "N/A",
             exposure_text(empirical["pubchem"]) if "pubchem" in empirical else "N/A",
             exposure_text(empirical["swissprot"]) if "swissprot" in empirical else "N/A",
-            "; ".join(value["claim"] for value in structural.values()) or "",
+            "; ".join(notes),
         ])
     add_caption(document, "Table 9. Pretraining input-exposure proxies. Molecular cells report exact, near-duplicate and shared-scaffold fractions separately.")
     add_table(document, ["Task", "ZINC sample", "PubChem sample", "Swiss-Prot", "Structural note"],
@@ -599,6 +612,9 @@ def build():
         ("[14] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
         ("[15] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
         ("[16] Sultan A et al. Transformers for molecular property prediction: domain adaptation efficiently improves performance. Journal of Cheminformatics. 2026;18:107. ", "https://doi.org/10.1186/s13321-026-01252-z"),
+        ("[17] Zhou G et al. Uni-Mol: a universal 3D molecular representation learning framework. ICLR. 2023. ", "https://openreview.net/forum?id=6K2RM6wVqKu"),
+        ("[18] Wang Y et al. Molecular contrastive learning of representations via graph neural networks. Nature Machine Intelligence. 2022;4:279-287. ", "https://doi.org/10.1038/s42256-022-00447-x"),
+        ("[19] Rong Y et al. Self-supervised graph transformer on large-scale molecular data. NeurIPS. 2020;33:12559-12571. ", "https://doi.org/10.48550/arXiv.2007.02835"),
     ]
     for text, url in references:
         paragraph = document.add_paragraph(style="Bibliography")

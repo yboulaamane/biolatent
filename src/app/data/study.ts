@@ -115,6 +115,7 @@ export interface ExposureTask {
   n_test: number;
   empirical: Record<string, ExposureEmpirical>;
   structural: Record<string, { affected_models: string[]; claim: string }>;
+  unmeasured?: Record<string, { affected_models: string[]; reason: string }>;
 }
 
 export interface ResolutionPoint {
@@ -157,6 +158,10 @@ export const MODEL_LABELS: Record<string, string> = {
   chemberta_77m: 'ChemBERTa-77M',
   chemberta_zinc: 'ChemBERTa-ZINC',
   molformer_xl: 'MoLFormer-XL',
+  unimol_v1: 'Uni-Mol v1',
+  molclr_gin: 'MolCLR GIN',
+  grover_base: 'GROVER Base',
+  grover_large: 'GROVER Large',
   kmer3_protein: '3-mer frequency',
   esm2_8m: 'ESM-2 8M',
   esm2_35m: 'ESM-2 35M',

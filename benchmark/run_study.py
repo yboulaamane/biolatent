@@ -229,8 +229,8 @@ def precompute_embeddings(task_names=None):
     """Populate valid embedding caches without fitting downstream probes."""
     for task in (task_names or ALL_DATASETS):
         data = load_benchmark_dataset(task)
-        applicable = [model for model, spec in embed.MODEL_REGISTRY.items()
-                      if spec["modality"] == data["modality"]]
+        applicable = [model for model in embed.MODEL_REGISTRY
+                      if embed.is_applicable(model, task, data["modality"])]
         print(f"\n{task}: precomputing {len(applicable)} representations", flush=True)
         for model_id in applicable:
             print(f"  -> {model_id}", flush=True)
@@ -245,8 +245,8 @@ def run(task_names=None, run_mlp=True):
     for task in tasks:
         data = load_benchmark_dataset(task)
         modality = data["modality"]
-        applicable = [m for m, s in embed.MODEL_REGISTRY.items()
-                      if s["modality"] == modality]
+        applicable = [model for model in embed.MODEL_REGISTRY
+                      if embed.is_applicable(model, task, modality)]
 
         print(f"\n{'=' * 72}\n{task}  ({modality}, {data['task_type']}, "
               f"{data['split_source']} split, n={len(data['inputs'])})\n{'=' * 72}",

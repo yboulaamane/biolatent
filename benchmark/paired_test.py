@@ -256,8 +256,8 @@ def run_task(task):
     selection_train, selection_idx, selection_source = _selection_indices(data)
 
     test_predictions, selection_scores = {}, {}
-    for model_id, spec in embed.MODEL_REGISTRY.items():
-        if spec["modality"] != modality:
+    for model_id in embed.MODEL_REGISTRY:
+        if not embed.is_applicable(model_id, task, modality):
             continue
         path = embed.cache_path(model_id, task)
         if not os.path.exists(path):

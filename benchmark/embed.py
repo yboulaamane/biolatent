@@ -48,6 +48,10 @@ UNIMOL_ENV = os.environ.get(
     "BIOLATENT_UNIMOL_PYTHON",
     os.path.expanduser("~/miniforge3/envs/unimol/bin/python"),
 )
+GRAPH_ENV = os.environ.get(
+    "BIOLATENT_GRAPH_PYTHON",
+    "/home/yboulaamane/biolatent_graph_env/bin/python",
+)
 
 # ---------------------------------------------------------------------------
 # Model registry. Every entry is a real, downloadable checkpoint or a
@@ -93,6 +97,33 @@ MODEL_REGISTRY = {
                   "conformer_seed": 42, "max_atoms": 256,
                   "interpreter": UNIMOL_ENV,
                   "label": "Uni-Mol v1 84M (mean atom pooling)"},
+    "molclr_gin": {"kind": "molclr", "modality": "molecule", "dim": 512,
+                   "checkpoint": ("https://github.com/yuyangw/MolCLR/blob/"
+                                  "3d3bc1912be27b0c97435fd9134f4d4c73d4c5ab/"
+                                  "ckpt/pretrained_gin/checkpoints/model.pth"),
+                   "revision": "3d3bc1912be27b0c97435fd9134f4d4c73d4c5ab",
+                   "checkpoint_sha256": ("93bc4f02ea8847cd44fa21ec3f65600ff"
+                                         "2f4a7ae6d3a85e8519a5bcc56afc20a"),
+                   "supported_tasks": ["BBBP", "BACE", "ESOL",
+                                       "Lipophilicity", "CYP3A4"],
+                   "interpreter": GRAPH_ENV,
+                   "label": "MolCLR GIN (encoder feature)"},
+    "grover_base": {"kind": "grover", "modality": "molecule", "dim": 3200,
+                    "checkpoint": ("https://drive.google.com/file/d/"
+                                   "1hiGwOzoRfbJQPWj0V_mtOffsqIIAMgjl/view"),
+                    "revision": "40b6d97098e4508687912f3c05eca369fc2c6213",
+                    "checkpoint_sha256": ("47e095880d71baf29ea6f6253473cd56"
+                                          "d5406213fa82959c6e14ea469e06b1de"),
+                    "interpreter": GRAPH_ENV,
+                    "label": "GROVER Base (both fingerprint)"},
+    "grover_large": {"kind": "grover", "modality": "molecule", "dim": 4800,
+                     "checkpoint": ("https://drive.google.com/file/d/"
+                                    "1bMg_ntUKEoOmHM0KoUi1XYJvzPBnHeWw/view"),
+                     "revision": "40b6d97098e4508687912f3c05eca369fc2c6213",
+                     "checkpoint_sha256": ("4b0c436fbd6ed8539fa92a0c9f890878"
+                                           "f5e3dd8591d959315e773efb6302baaa"),
+                     "interpreter": GRAPH_ENV,
+                     "label": "GROVER Large (both fingerprint)"},
 
     # --- proteins: classical baseline ---
     "kmer3_protein": {"kind": "kmer", "modality": "protein", "k": 3,
@@ -140,9 +171,18 @@ def cache_path(model_id, dataset):
     return os.path.join(EMB_DIR, f"{model_id}__{dataset}.npy")
 
 
+def is_applicable(model_id, dataset, modality):
+    """Whether a model natively supports this complete model-task cell."""
+    spec = MODEL_REGISTRY[model_id]
+    supported = spec.get("supported_tasks")
+    return spec["modality"] == modality and (
+        supported is None or dataset in supported
+    )
+
+
 def inference_precision_policy(spec):
     """Human-readable precision policy recorded beside every matrix."""
-    if spec["kind"] == "unimol":
+    if spec["kind"] in {"unimol", "molclr", "grover"}:
         return "float32 model inference and output matrix"
     if spec["kind"] != "hf":
         return "not applicable"
@@ -471,7 +511,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     model queued behind it. Isolating each run confines that to its own cell.
     """
     spec = MODEL_REGISTRY[model_id]
-    if spec["modality"] != modality:
+    if not is_applicable(model_id, dataset_name, modality):
         return None  # not applicable -- reported as N/A, never imputed
 
     path = cache_path(model_id, dataset_name)
@@ -490,6 +530,9 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
             and meta.get("input_sha256") == input_sha256
             and meta.get("protocol_version") == EMBED_PROTOCOL_VERSION
             and meta.get("revision") == spec.get("revision")
+            and ("checkpoint_sha256" not in spec
+                 or meta.get("checkpoint_sha256") ==
+                 spec["checkpoint_sha256"])
             and (not spec.get("replace_rare_amino_acids")
                  or meta.get("rare_amino_acid_mapping") == "UZOB->X")
             and ("inference_seed" not in spec
@@ -510,7 +553,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     kind = spec["kind"]
     extra_meta = {}
 
-    if kind in {"hf", "unimol"} and isolate:
+    if kind in {"hf", "unimol", "molclr", "grover"} and isolate:
         interpreter = spec.get("interpreter", sys.executable)
         if not os.path.exists(interpreter):
             raise RuntimeError(
@@ -539,6 +582,12 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         mat, extra_meta = embed_hf(inputs, spec, modality)
     elif kind == "unimol":
         mat, extra_meta = embed_unimol(inputs, spec)
+    elif kind == "molclr":
+        from benchmark.molclr_adapter import embed as embed_molclr
+        mat, extra_meta = embed_molclr(inputs)
+    elif kind == "grover":
+        from benchmark.grover_adapter import embed as embed_grover
+        mat, extra_meta = embed_grover(inputs, model_id)
     else:
         raise ValueError(f"Unknown model kind '{kind}' for {model_id}")
 
@@ -549,17 +598,23 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
 
     np.save(path, mat)
     runtime = None
-    if kind in {"hf", "unimol"}:
+    if kind in {"hf", "unimol", "molclr", "grover"}:
         import torch
         runtime = {"python": platform.python_version(),
                    "torch": torch.__version__}
         if kind == "hf":
             import transformers
             runtime["transformers"] = transformers.__version__
-        else:
+        elif kind == "unimol":
             from rdkit import rdBase
             runtime.update({
                 "unimol_tools": importlib.metadata.version("unimol_tools"),
+                "rdkit": rdBase.rdkitVersion,
+            })
+        else:
+            from rdkit import rdBase
+            runtime.update({
+                "torch_geometric": importlib.metadata.version("torch-geometric"),
                 "rdkit": rdBase.rdkitVersion,
             })
     meta = {
@@ -579,7 +634,11 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
             "mean over attention-mask tokens with tokenizer special tokens excluded"
             if kind == "hf" else
             "mean over Uni-Mol atom vectors with tokenizer special vectors excluded"
-            if kind == "unimol" else "n/a"),
+            if kind == "unimol" else
+            "official mean atom pooling before the contrastive projection head"
+            if kind == "molclr" else
+            "official concatenated atom-view and bond-view mean readouts"
+            if kind == "grover" else "n/a"),
         "max_token_length_including_special_tokens": (
             MAX_LEN[modality] if kind == "hf" else None),
         "raw_character_limit_before_tokenisation": (
