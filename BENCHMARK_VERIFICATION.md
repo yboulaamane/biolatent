@@ -929,8 +929,8 @@ user-agent — the earlier 403s were from a different fetch path).
 tables as images, or use font encodings the stream-inflation extractor cannot decode. A human opening the
 same PDFs will read the tables without difficulty.
 
-**All eight PDFs are cached at `/tmp/vpapers/` for this session** should you want them, though they are
-equally easy to re-download from the links in `TODO_VERIFY.md`.
+**All eight PDFs were inspected locally during verification.** Primary source
+links are retained beside the corresponding registry rows and in this report.
 
 ---
 
