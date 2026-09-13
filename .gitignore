@@ -73,3 +73,7 @@ BioLatent Model Input-*.png
 run_*.log
 /results/*.lock
 /results/slurm/
+
+# Local coding-assistant configuration is never part of a BioLatent release.
+/.claude/
+/.codex/

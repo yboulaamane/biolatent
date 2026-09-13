@@ -8,13 +8,13 @@
 
 The measured benchmark uses real, externally published datasets. No dataset
 row, label, sequence, molecule, split, or reported numeric result is
-LLM-invented or filled with synthetic placeholder data. Fresh upstream copies
+fabricated or filled with synthetic placeholder data. Fresh upstream copies
 were compared with the local benchmark files; the only transformations are the
 documented column selection, invalid-row filtering, canonical identity
 deduplication, split mapping, and within-split deduplication below. Neural
 embeddings are, by design, actual outputs of the named public checkpoints on
-those real inputs; benchmark scores are then computed from probe predictions
-and labels rather than authored by a generative model.
+those real inputs; benchmark scores are computed directly from probe
+predictions and labels.
 
 This establishes source provenance and rules out a locally synthetic fallback.
 It cannot independently re-audit how each upstream research group originally
