@@ -22,6 +22,7 @@ revision hash, pooling, truncation and dtype, so any row can be regenerated.
 """
 
 import hashlib
+import importlib.metadata
 import json
 import os
 import platform
@@ -43,6 +44,10 @@ RAW_MAX = {"protein": 510, "genomics": 510, "molecule": None}
 RARE_AA_TRANSLATION = str.maketrans({residue: "X" for residue in "UZOB"})
 EMBED_PROTOCOL_VERSION = 2
 MOLFORMER_ENV = os.path.expanduser("~/biolatent_molformer_env/bin/python")
+UNIMOL_ENV = os.environ.get(
+    "BIOLATENT_UNIMOL_PYTHON",
+    os.path.expanduser("~/miniforge3/envs/unimol/bin/python"),
+)
 
 # ---------------------------------------------------------------------------
 # Model registry. Every entry is a real, downloadable checkpoint or a
@@ -73,6 +78,21 @@ MODEL_REGISTRY = {
                      "inference_seed": 42,
                      "interpreter": MOLFORMER_ENV,
                      "label": "MoLFormer-XL"},
+    "unimol_v1": {"kind": "unimol", "modality": "molecule", "dim": 512,
+                  "checkpoint": ("https://github.com/deepmodeling/Uni-Mol/"
+                                 "releases/download/v0.1/"
+                                 "mol_pre_all_h_220816.pt"),
+                  "revision": ("sha256:7f5f14bb28bf479a0b8f38ebab4bb9d7"
+                               "ae867383f14c4d694d056500fa3446a7"),
+                  "weight_filename": "mol_pre_all_h_220816.pt",
+                  "weight_sha256": ("7f5f14bb28bf479a0b8f38ebab4bb9d7"
+                                    "ae867383f14c4d694d056500fa3446a7"),
+                  "dictionary_filename": "mol.dict.txt",
+                  "dictionary_sha256": ("94135cb9a9198f988de684cb61e2c3728"
+                                        "82a3bd59b8320effbae704c38057127"),
+                  "conformer_seed": 42, "max_atoms": 256,
+                  "interpreter": UNIMOL_ENV,
+                  "label": "Uni-Mol v1 84M (mean atom pooling)"},
 
     # --- proteins: classical baseline ---
     "kmer3_protein": {"kind": "kmer", "modality": "protein", "k": 3,
@@ -122,6 +142,8 @@ def cache_path(model_id, dataset):
 
 def inference_precision_policy(spec):
     """Human-readable precision policy recorded beside every matrix."""
+    if spec["kind"] == "unimol":
+        return "float32 model inference and output matrix"
     if spec["kind"] != "hf":
         return "not applicable"
     if spec.get("force_float32"):
@@ -176,6 +198,80 @@ def embed_kmer(sequences, k, modality):
         if total > 0:
             out[i] /= total
     return out
+
+
+def _file_sha256(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def embed_unimol(smiles_list, spec):
+    """Frozen Uni-Mol v1 atom embeddings under the common mean-pooling rule."""
+    import torch
+    from rdkit.Chem import AllChem as UniMolAllChem
+    from unimol_tools import UniMolRepr
+    from unimol_tools.weights import get_weight_dir
+
+    weight_dir = get_weight_dir()
+    weight_path = os.path.join(weight_dir, spec["weight_filename"])
+    dictionary_path = os.path.join(weight_dir, spec["dictionary_filename"])
+    for path, expected in ((weight_path, spec["weight_sha256"]),
+                           (dictionary_path, spec["dictionary_sha256"])):
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"required pinned Uni-Mol file is missing: {path}")
+        observed = _file_sha256(path)
+        if observed != expected:
+            raise RuntimeError(
+                f"Uni-Mol file hash mismatch for {path}: {observed} != {expected}")
+
+    seed = spec["conformer_seed"]
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+    runner = UniMolRepr(
+        data_type="molecule", batch_size=32, remove_hs=False,
+        use_cuda=torch.cuda.is_available(), model_name="unimolv1",
+        pretrained_model_path=weight_path,
+        pretrained_dict_path=dictionary_path,
+        max_atoms=spec["max_atoms"],
+    )
+    output = runner.get_repr(list(smiles_list), return_atomic_reprs=True)
+    rows = []
+    for atomic, symbols in zip(output["atomic_reprs"],
+                               output["atomic_symbol"]):
+        # unimol-tools includes the terminal [SEP] vector in atomic_reprs.
+        # Remove tokenizer special vectors before applying the benchmark's
+        # common mean-pooling rule.
+        keep = [index for index, symbol in enumerate(symbols)
+                if symbol not in {"[CLS]", "[SEP]", "[PAD]"}]
+        if not keep:
+            raise RuntimeError("Uni-Mol produced no non-special atom vectors")
+        rows.append(np.asarray(atomic, dtype=np.float32)[keep].mean(axis=0))
+
+    atom_counts = []
+    for smiles in smiles_list:
+        molecule = Chem.MolFromSmiles(str(smiles))
+        atom_counts.append(
+            UniMolAllChem.AddHs(molecule).GetNumAtoms() if molecule else 0)
+    matrix = np.vstack(rows).astype(np.float32)
+    stats = {
+        "inference_device_type": "cuda" if torch.cuda.is_available() else "cpu",
+        "inference_parameter_dtype": str(next(runner.model.parameters()).dtype),
+        "conformer_generation": "RDKit 3D, fixed seed 42; 2D fallback",
+        "conformer_seed": seed,
+        "hydrogen_policy": "explicit hydrogens retained",
+        "maximum_atoms": spec["max_atoms"],
+        "n_inputs_atom_truncated": int(sum(
+            count > spec["max_atoms"] for count in atom_counts)),
+        "weight_sha256": spec["weight_sha256"],
+        "dictionary_sha256": spec["dictionary_sha256"],
+    }
+    return matrix, stats
 
 
 # ---------------------------------------------------------- transformers
@@ -414,7 +510,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     kind = spec["kind"]
     extra_meta = {}
 
-    if kind == "hf" and isolate:
+    if kind in {"hf", "unimol"} and isolate:
         interpreter = spec.get("interpreter", sys.executable)
         if not os.path.exists(interpreter):
             raise RuntimeError(
@@ -441,6 +537,8 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         mat = embed_kmer(inputs, spec["k"], modality)
     elif kind == "hf":
         mat, extra_meta = embed_hf(inputs, spec, modality)
+    elif kind == "unimol":
+        mat, extra_meta = embed_unimol(inputs, spec)
     else:
         raise ValueError(f"Unknown model kind '{kind}' for {model_id}")
 
@@ -451,12 +549,19 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
 
     np.save(path, mat)
     runtime = None
-    if kind == "hf":
+    if kind in {"hf", "unimol"}:
         import torch
-        import transformers
         runtime = {"python": platform.python_version(),
-                   "torch": torch.__version__,
-                   "transformers": transformers.__version__}
+                   "torch": torch.__version__}
+        if kind == "hf":
+            import transformers
+            runtime["transformers"] = transformers.__version__
+        else:
+            from rdkit import rdBase
+            runtime.update({
+                "unimol_tools": importlib.metadata.version("unimol_tools"),
+                "rdkit": rdBase.rdkitVersion,
+            })
     meta = {
         "model_id": model_id,
         "label": spec["label"],
@@ -470,8 +575,11 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         "dim": int(mat.shape[1]),
         "matrix_dtype": str(mat.dtype),
         "inference_precision_policy": inference_precision_policy(spec),
-        "pooling": ("mean over attention-mask tokens with tokenizer special "
-                    "tokens excluded" if kind == "hf" else "n/a"),
+        "pooling": (
+            "mean over attention-mask tokens with tokenizer special tokens excluded"
+            if kind == "hf" else
+            "mean over Uni-Mol atom vectors with tokenizer special vectors excluded"
+            if kind == "unimol" else "n/a"),
         "max_token_length_including_special_tokens": (
             MAX_LEN[modality] if kind == "hf" else None),
         "raw_character_limit_before_tokenisation": (
