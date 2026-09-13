@@ -1,7 +1,8 @@
 # BioLatent benchmark — main environment
 #
-# Versions are the ones the reported results in STUDY.md were produced under,
-# on Python 3.11.15. They are pinned rather than bounded because probe scores
+# Versions are the final probe/release environment, on Python 3.11.15. Each
+# neural matrix sidecar separately records the runtime that produced that
+# immutable cached embedding. Versions are pinned rather than bounded because probe scores
 # are sensitive to solver defaults: scikit-learn has changed LogisticRegression
 # and Ridge convergence behaviour across minor releases, and a different
 # version can move a ROC-AUC in the third decimal without any error.
@@ -9,7 +10,11 @@
 # MoLFormer-XL does NOT run here. It needs transformers >= 5, which the rest of
 # the pipeline is not pinned to; see setup_molformer_env.sh.
 
-torch==2.13.0
+# CUDA 12.8 is the newest build supported by the benchmark GPU nodes' driver.
+# Keep the explicit local-version suffix so pip cannot silently select a CUDA
+# 13 wheel from PyPI (which imports on the login node but cannot use the GPUs).
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0+cu128
 transformers==4.50.3
 tokenizers==0.21.4
 datasets==2.19.2

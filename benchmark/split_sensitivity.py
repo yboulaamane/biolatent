@@ -25,7 +25,7 @@ OUTPUT = os.path.join(os.path.dirname(__file__), "..", "results",
 
 def main():
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "seeds": SEEDS,
         "interpretation": ("Sensitivity to balanced Murcko-scaffold split seed. "
                            "These resplits are diagnostic and do not replace the "
@@ -37,7 +37,12 @@ def main():
         by_model = {}
         rankings = []
         for seed in SEEDS:
-            train, _, test = scaffold_split(data["inputs"], seed=seed)
+            train, validation, test = scaffold_split(data["inputs"], seed=seed)
+            # Match the primary score: validation participates in model
+            # selection, then the reported probe is refit on every non-test
+            # item. The sensitivity run has no separate reported validation
+            # score, so its final fit likewise uses train + validation.
+            final_train = np.concatenate([train, validation])
             scores = {}
             for model_id, spec in embed.MODEL_REGISTRY.items():
                 if spec["modality"] != "molecule":
@@ -47,7 +52,7 @@ def main():
                     continue
                 X = np.load(path, mmap_mode="r")
                 result = linear_probe(
-                    X[train], data["targets"][train], X[test],
+                    X[final_train], data["targets"][final_train], X[test],
                     data["targets"][test], data["task_type"], n_jobs=4,
                     groups=data["resampling_groups"][test], n_boot=0)
                 scores[model_id] = result["score"]

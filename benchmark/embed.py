@@ -120,6 +120,15 @@ def cache_path(model_id, dataset):
     return os.path.join(EMB_DIR, f"{model_id}__{dataset}.npy")
 
 
+def inference_precision_policy(spec):
+    """Human-readable precision policy recorded beside every matrix."""
+    if spec["kind"] != "hf":
+        return "not applicable"
+    if spec.get("force_float32"):
+        return "float32 on all devices"
+    return "float16 on CUDA; float32 when CUDA is unavailable"
+
+
 # ------------------------------------------------------------ classical
 
 def embed_ecfp4(smiles_list, n_bits=1024, radius=2):
@@ -221,7 +230,11 @@ def _forward_pooled(model, tok, batch, max_len, device, spec):
     mask = enc.get("attention_mask")
     if mask is None:
         mask = torch.ones(hidden.shape[:2], device=device)
-    if special_mask is None:
+    # Some remote-code tokenizers (notably the pinned Nucleotide Transformer)
+    # return a special-token mask one element wider than ``input_ids``. Never
+    # broadcast or trim that malformed mask: rebuild it from the actual ids so
+    # the pooling denominator describes exactly the tokens seen by the model.
+    if special_mask is None or special_mask.shape != mask.shape:
         special_mask = torch.zeros_like(mask)
         input_ids = enc.get("input_ids")
         if input_ids is not None:
@@ -387,6 +400,13 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
                  or meta.get("inference_seed") == spec["inference_seed"])
         )
         if content_matches:
+            expected_policy = inference_precision_policy(spec)
+            if meta.get("inference_precision_policy") != expected_policy:
+                meta["inference_precision_policy"] = expected_policy
+                temporary = f"{meta_path}.{os.getpid()}.tmp"
+                with open(temporary, "w") as fh:
+                    json.dump(meta, fh, indent=2)
+                os.replace(temporary, meta_path)
             return cached
         print(f"      stale cache for {model_id}/{dataset_name}; regenerating",
               flush=True)
@@ -449,9 +469,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         "n": int(mat.shape[0]),
         "dim": int(mat.shape[1]),
         "matrix_dtype": str(mat.dtype),
-        "inference_precision_policy": (
-            "float32 on all devices" if spec.get("force_float32")
-            else "float16 on CUDA; float32 when CUDA is unavailable"),
+        "inference_precision_policy": inference_precision_policy(spec),
         "pooling": ("mean over attention-mask tokens with tokenizer special "
                     "tokens excluded" if kind == "hf" else "n/a"),
         "max_token_length_including_special_tokens": (

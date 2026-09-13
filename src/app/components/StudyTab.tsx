@@ -217,9 +217,8 @@ function LadderPanel() {
       </h3>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0.5rem 0 1rem' }}>
         Each consecutive ESM-2 checkpoint is tested against the one below it, as a
-        pre-specified family corrected within itself. The same four checkpoints
-        under the same probe give <strong style={{ color: '#fff' }}>opposite
-        answers</strong> on the two protein tasks.
+        pre-specified family corrected within itself. This separates an observed
+        scale trend from a claim that larger checkpoints are universally better.
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="benchmark-table">
@@ -473,6 +472,7 @@ export default function StudyTab() {
   const [modality, setModality] = useState<Modality>('molecule');
   const mol = separationSummary('molecule');
   const prot = separationSummary('protein');
+  const genomic = separationSummary('genomics');
   const tasks = tasksByModality(modality);
 
   return (
@@ -499,6 +499,9 @@ export default function StudyTab() {
           <Stat value={`${prot.reliable} of ${prot.total}`}
                 label="protein comparisons that are statistically reliable"
                 tone="#34d399" />
+          <Stat value={`${genomic.reliable} of ${genomic.total}`}
+                label="genomic comparisons that are statistically reliable"
+                tone="#fbbf24" />
           <Stat value={`${mol.referencesDifferFromTestBest} of ${mol.tasks}`}
                 label="molecular validation references separated from the numerical test best"
                 tone="#fb7185" />

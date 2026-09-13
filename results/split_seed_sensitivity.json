@@ -1,0 +1,739 @@
+{
+  "schema_version": 2,
+  "seeds": [
+    7,
+    21,
+    42,
+    73,
+    101
+  ],
+  "interpretation": "Sensitivity to balanced Murcko-scaffold split seed. These resplits are diagnostic and do not replace the primary published or fixed benchmark partition.",
+  "tasks": {
+    "BBBP": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.9017,
+          "minimum": 0.894,
+          "maximum": 0.9141,
+          "range": 0.0201
+        },
+        "rdkit2d": {
+          "mean": 0.908,
+          "minimum": 0.8783,
+          "maximum": 0.9227,
+          "range": 0.0444
+        },
+        "chemberta_77m": {
+          "mean": 0.9531,
+          "minimum": 0.9259,
+          "maximum": 0.9668,
+          "range": 0.0409
+        },
+        "chemberta_zinc": {
+          "mean": 0.9477,
+          "minimum": 0.9021,
+          "maximum": 0.9713,
+          "range": 0.0692
+        },
+        "molformer_xl": {
+          "mean": 0.9511,
+          "minimum": 0.9302,
+          "maximum": 0.9615,
+          "range": 0.0313
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "chemberta_77m",
+            "molformer_xl",
+            "chemberta_zinc",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.894,
+            "rdkit2d": 0.909,
+            "chemberta_77m": 0.9614,
+            "chemberta_zinc": 0.9529,
+            "molformer_xl": 0.9547
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "molformer_xl",
+            "chemberta_77m",
+            "ecfp4",
+            "chemberta_zinc",
+            "rdkit2d"
+          ],
+          "scores": {
+            "ecfp4": 0.9025,
+            "rdkit2d": 0.8783,
+            "chemberta_77m": 0.9259,
+            "chemberta_zinc": 0.9021,
+            "molformer_xl": 0.9302
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "chemberta_zinc",
+            "molformer_xl",
+            "chemberta_77m",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.9141,
+            "rdkit2d": 0.9227,
+            "chemberta_77m": 0.9538,
+            "chemberta_zinc": 0.9713,
+            "molformer_xl": 0.9541
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "chemberta_77m",
+            "molformer_xl",
+            "chemberta_zinc",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.9024,
+            "rdkit2d": 0.917,
+            "chemberta_77m": 0.9668,
+            "chemberta_zinc": 0.9578,
+            "molformer_xl": 0.9615
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "chemberta_77m",
+            "molformer_xl",
+            "chemberta_zinc",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.8953,
+            "rdkit2d": 0.9129,
+            "chemberta_77m": 0.9576,
+            "chemberta_zinc": 0.9545,
+            "molformer_xl": 0.9549
+          }
+        }
+      ]
+    },
+    "ClinTox": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.7897,
+          "minimum": 0.72,
+          "maximum": 0.8482,
+          "range": 0.1282
+        },
+        "rdkit2d": {
+          "mean": 0.8161,
+          "minimum": 0.6899,
+          "maximum": 0.8767,
+          "range": 0.1868
+        },
+        "chemberta_77m": {
+          "mean": 0.9749,
+          "minimum": 0.9669,
+          "maximum": 0.9809,
+          "range": 0.014
+        },
+        "chemberta_zinc": {
+          "mean": 0.9845,
+          "minimum": 0.9585,
+          "maximum": 0.9986,
+          "range": 0.0401
+        },
+        "molformer_xl": {
+          "mean": 0.9738,
+          "minimum": 0.9638,
+          "maximum": 0.9829,
+          "range": 0.0191
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "chemberta_zinc",
+            "molformer_xl",
+            "chemberta_77m",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.84,
+            "rdkit2d": 0.8408,
+            "chemberta_77m": 0.9731,
+            "chemberta_zinc": 0.995,
+            "molformer_xl": 0.9772
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "chemberta_zinc",
+            "chemberta_77m",
+            "molformer_xl",
+            "ecfp4",
+            "rdkit2d"
+          ],
+          "scores": {
+            "ecfp4": 0.7949,
+            "rdkit2d": 0.6899,
+            "chemberta_77m": 0.9786,
+            "chemberta_zinc": 0.9854,
+            "molformer_xl": 0.9638
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "chemberta_zinc",
+            "chemberta_77m",
+            "molformer_xl",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.8482,
+            "rdkit2d": 0.8529,
+            "chemberta_77m": 0.9751,
+            "chemberta_zinc": 0.9851,
+            "molformer_xl": 0.9718
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "chemberta_zinc",
+            "molformer_xl",
+            "chemberta_77m",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.72,
+            "rdkit2d": 0.8767,
+            "chemberta_77m": 0.9809,
+            "chemberta_zinc": 0.9986,
+            "molformer_xl": 0.9829
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc",
+            "rdkit2d",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.7453,
+            "rdkit2d": 0.8201,
+            "chemberta_77m": 0.9669,
+            "chemberta_zinc": 0.9585,
+            "molformer_xl": 0.9731
+          }
+        }
+      ]
+    },
+    "BACE": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.8642,
+          "minimum": 0.8382,
+          "maximum": 0.894,
+          "range": 0.0558
+        },
+        "rdkit2d": {
+          "mean": 0.8466,
+          "minimum": 0.8266,
+          "maximum": 0.8836,
+          "range": 0.057
+        },
+        "chemberta_77m": {
+          "mean": 0.8247,
+          "minimum": 0.7873,
+          "maximum": 0.8584,
+          "range": 0.0711
+        },
+        "chemberta_zinc": {
+          "mean": 0.8038,
+          "minimum": 0.7706,
+          "maximum": 0.8548,
+          "range": 0.0842
+        },
+        "molformer_xl": {
+          "mean": 0.8284,
+          "minimum": 0.7981,
+          "maximum": 0.8758,
+          "range": 0.0777
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "rdkit2d",
+            "ecfp4",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.8382,
+            "rdkit2d": 0.8458,
+            "chemberta_77m": 0.8259,
+            "chemberta_zinc": 0.7706,
+            "molformer_xl": 0.8367
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "ecfp4",
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.894,
+            "rdkit2d": 0.8836,
+            "chemberta_77m": 0.8584,
+            "chemberta_zinc": 0.794,
+            "molformer_xl": 0.8758
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "ecfp4",
+            "chemberta_77m",
+            "rdkit2d",
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "scores": {
+            "ecfp4": 0.8904,
+            "rdkit2d": 0.8315,
+            "chemberta_77m": 0.8391,
+            "chemberta_zinc": 0.8265,
+            "molformer_xl": 0.8102
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "ecfp4",
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.8481,
+            "rdkit2d": 0.8266,
+            "chemberta_77m": 0.7873,
+            "chemberta_zinc": 0.7732,
+            "molformer_xl": 0.7981
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "chemberta_zinc",
+            "ecfp4",
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m"
+          ],
+          "scores": {
+            "ecfp4": 0.8501,
+            "rdkit2d": 0.8456,
+            "chemberta_77m": 0.8128,
+            "chemberta_zinc": 0.8548,
+            "molformer_xl": 0.8214
+          }
+        }
+      ]
+    },
+    "ESOL": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.6356,
+          "minimum": 0.6137,
+          "maximum": 0.6605,
+          "range": 0.0468
+        },
+        "rdkit2d": {
+          "mean": 0.9198,
+          "minimum": 0.884,
+          "maximum": 0.9568,
+          "range": 0.0728
+        },
+        "chemberta_77m": {
+          "mean": 0.8817,
+          "minimum": 0.8469,
+          "maximum": 0.934,
+          "range": 0.0871
+        },
+        "chemberta_zinc": {
+          "mean": 0.8512,
+          "minimum": 0.7913,
+          "maximum": 0.893,
+          "range": 0.1017
+        },
+        "molformer_xl": {
+          "mean": 0.8971,
+          "minimum": 0.8576,
+          "maximum": 0.9373,
+          "range": 0.0797
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6355,
+            "rdkit2d": 0.884,
+            "chemberta_77m": 0.8481,
+            "chemberta_zinc": 0.8475,
+            "molformer_xl": 0.8691
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6605,
+            "rdkit2d": 0.9434,
+            "chemberta_77m": 0.9071,
+            "chemberta_zinc": 0.8816,
+            "molformer_xl": 0.9287
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6161,
+            "rdkit2d": 0.9049,
+            "chemberta_77m": 0.8469,
+            "chemberta_zinc": 0.8428,
+            "molformer_xl": 0.8928
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "rdkit2d",
+            "chemberta_77m",
+            "molformer_xl",
+            "chemberta_zinc",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6524,
+            "rdkit2d": 0.9098,
+            "chemberta_77m": 0.8723,
+            "chemberta_zinc": 0.7913,
+            "molformer_xl": 0.8576
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "chemberta_zinc",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6137,
+            "rdkit2d": 0.9568,
+            "chemberta_77m": 0.934,
+            "chemberta_zinc": 0.893,
+            "molformer_xl": 0.9373
+          }
+        }
+      ]
+    },
+    "Lipophilicity": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.5645,
+          "minimum": 0.5247,
+          "maximum": 0.603,
+          "range": 0.0783
+        },
+        "rdkit2d": {
+          "mean": 0.6951,
+          "minimum": 0.673,
+          "maximum": 0.7218,
+          "range": 0.0488
+        },
+        "chemberta_77m": {
+          "mean": 0.628,
+          "minimum": 0.5929,
+          "maximum": 0.658,
+          "range": 0.0651
+        },
+        "chemberta_zinc": {
+          "mean": 0.525,
+          "minimum": 0.457,
+          "maximum": 0.5922,
+          "range": 0.1352
+        },
+        "molformer_xl": {
+          "mean": 0.6196,
+          "minimum": 0.5865,
+          "maximum": 0.6531,
+          "range": 0.0666
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "rdkit2d",
+            "chemberta_77m",
+            "molformer_xl",
+            "ecfp4",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.5617,
+            "rdkit2d": 0.6933,
+            "chemberta_77m": 0.658,
+            "chemberta_zinc": 0.5461,
+            "molformer_xl": 0.6522
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "ecfp4",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.5247,
+            "rdkit2d": 0.6994,
+            "chemberta_77m": 0.5929,
+            "chemberta_zinc": 0.457,
+            "molformer_xl": 0.6075
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "rdkit2d",
+            "chemberta_77m",
+            "molformer_xl",
+            "ecfp4",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.5868,
+            "rdkit2d": 0.673,
+            "chemberta_77m": 0.6029,
+            "chemberta_zinc": 0.5483,
+            "molformer_xl": 0.5988
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "rdkit2d",
+            "chemberta_77m",
+            "molformer_xl",
+            "ecfp4",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.603,
+            "rdkit2d": 0.7218,
+            "chemberta_77m": 0.6561,
+            "chemberta_zinc": 0.5922,
+            "molformer_xl": 0.6531
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "rdkit2d",
+            "chemberta_77m",
+            "molformer_xl",
+            "ecfp4",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.5463,
+            "rdkit2d": 0.688,
+            "chemberta_77m": 0.6302,
+            "chemberta_zinc": 0.4812,
+            "molformer_xl": 0.5865
+          }
+        }
+      ]
+    },
+    "CYP3A4": {
+      "models": {
+        "ecfp4": {
+          "mean": 0.6695,
+          "minimum": 0.5972,
+          "maximum": 0.7561,
+          "range": 0.1589
+        },
+        "rdkit2d": {
+          "mean": 0.6943,
+          "minimum": 0.5963,
+          "maximum": 0.7821,
+          "range": 0.1858
+        },
+        "chemberta_77m": {
+          "mean": 0.695,
+          "minimum": 0.6073,
+          "maximum": 0.7561,
+          "range": 0.1488
+        },
+        "chemberta_zinc": {
+          "mean": 0.6996,
+          "minimum": 0.646,
+          "maximum": 0.7674,
+          "range": 0.1214
+        },
+        "molformer_xl": {
+          "mean": 0.7045,
+          "minimum": 0.678,
+          "maximum": 0.7517,
+          "range": 0.0737
+        }
+      },
+      "runs": [
+        {
+          "seed": 7,
+          "order": [
+            "chemberta_zinc",
+            "rdkit2d",
+            "molformer_xl",
+            "chemberta_77m",
+            "ecfp4"
+          ],
+          "scores": {
+            "ecfp4": 0.6415,
+            "rdkit2d": 0.7622,
+            "chemberta_77m": 0.7431,
+            "chemberta_zinc": 0.7674,
+            "molformer_xl": 0.7517
+          }
+        },
+        {
+          "seed": 21,
+          "order": [
+            "chemberta_zinc",
+            "molformer_xl",
+            "rdkit2d",
+            "ecfp4",
+            "chemberta_77m"
+          ],
+          "scores": {
+            "ecfp4": 0.6808,
+            "rdkit2d": 0.686,
+            "chemberta_77m": 0.6073,
+            "chemberta_zinc": 0.6972,
+            "molformer_xl": 0.6938
+          }
+        },
+        {
+          "seed": 42,
+          "order": [
+            "rdkit2d",
+            "ecfp4",
+            "chemberta_77m",
+            "molformer_xl",
+            "chemberta_zinc"
+          ],
+          "scores": {
+            "ecfp4": 0.7561,
+            "rdkit2d": 0.7821,
+            "chemberta_77m": 0.724,
+            "chemberta_zinc": 0.6641,
+            "molformer_xl": 0.678
+          }
+        },
+        {
+          "seed": 73,
+          "order": [
+            "chemberta_77m",
+            "chemberta_zinc",
+            "molformer_xl",
+            "ecfp4",
+            "rdkit2d"
+          ],
+          "scores": {
+            "ecfp4": 0.6719,
+            "rdkit2d": 0.645,
+            "chemberta_77m": 0.7561,
+            "chemberta_zinc": 0.7231,
+            "molformer_xl": 0.7196
+          }
+        },
+        {
+          "seed": 101,
+          "order": [
+            "molformer_xl",
+            "chemberta_zinc",
+            "chemberta_77m",
+            "ecfp4",
+            "rdkit2d"
+          ],
+          "scores": {
+            "ecfp4": 0.5972,
+            "rdkit2d": 0.5963,
+            "chemberta_77m": 0.6443,
+            "chemberta_zinc": 0.646,
+            "molformer_xl": 0.6792
+          }
+        }
+      ]
+    }
+  }
+}

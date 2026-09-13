@@ -1,0 +1,449 @@
+{
+  "report_kind": "pretraining_input_exposure_proxy",
+  "interpretation": "Input familiarity audit; not evidence of downstream label leakage or exact checkpoint-corpus membership.",
+  "sample_size": 200000,
+  "tasks": {
+    "BBBP": {
+      "modality": "molecule",
+      "n_test": 205,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 62,
+              "fraction": 0.3024,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 62,
+              "fraction": 0.3024,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 7,
+              "fraction": 0.0341,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 91,
+              "fraction": 0.4439,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 91,
+              "fraction": 0.4439,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "ClinTox": {
+      "modality": "molecule",
+      "n_test": 148,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 5,
+              "fraction": 0.0338,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 47,
+              "fraction": 0.3176,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 47,
+              "fraction": 0.3176,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 6,
+              "fraction": 0.0405,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 64,
+              "fraction": 0.4324,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 64,
+              "fraction": 0.4324,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "BACE": {
+      "modality": "molecule",
+      "n_test": 152,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 2,
+              "fraction": 0.0132,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 2,
+              "fraction": 0.0132,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 4,
+              "fraction": 0.0263,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 4,
+              "fraction": 0.0263,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "ESOL": {
+      "modality": "molecule",
+      "n_test": 114,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 55,
+              "fraction": 0.4825,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 55,
+              "fraction": 0.4825,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 13,
+              "fraction": 0.114,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 98,
+              "fraction": 0.8596,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 98,
+              "fraction": 0.8596,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "Lipophilicity": {
+      "modality": "molecule",
+      "n_test": 420,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 1,
+              "fraction": 0.0024,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 96,
+              "fraction": 0.2286,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 96,
+              "fraction": 0.2286,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 1,
+              "fraction": 0.0024,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 4,
+              "fraction": 0.0095,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 163,
+              "fraction": 0.3881,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 163,
+              "fraction": 0.3881,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "CYP3A4": {
+      "modality": "molecule",
+      "n_test": 68,
+      "empirical": {
+        "zinc": {
+          "affected_models": [
+            "chemberta_zinc",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 2,
+              "fraction": 0.0294,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 28,
+              "fraction": 0.4118,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 28,
+              "fraction": 0.4118,
+              "basis": "union of the three proxies"
+            }
+          }
+        },
+        "pubchem": {
+          "affected_models": [
+            "chemberta_77m",
+            "molformer_xl"
+          ],
+          "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
+          "measures": {
+            "exact_identity": {
+              "n_flagged": 0,
+              "fraction": 0.0,
+              "basis": "canonical SMILES identity"
+            },
+            "near_duplicate": {
+              "n_flagged": 2,
+              "fraction": 0.0294,
+              "basis": "ECFP4 Tanimoto >= 0.9"
+            },
+            "shared_scaffold": {
+              "n_flagged": 50,
+              "fraction": 0.7353,
+              "basis": "Murcko scaffold identity"
+            },
+            "any_proxy_hit": {
+              "n_flagged": 50,
+              "fraction": 0.7353,
+              "basis": "union of the three proxies"
+            }
+          }
+        }
+      },
+      "structural": {}
+    },
+    "DeepLoc": {
+      "modality": "protein",
+      "n_test": 5963,
+      "empirical": {
+        "swissprot": {
+          "affected_models": [
+            "esm2_8m",
+            "esm2_35m",
+            "esm2_150m",
+            "esm2_650m",
+            "protbert"
+          ],
+          "n_flagged": 5936,
+          "fraction": 0.9955,
+          "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% coverage against all of Swiss-Prot. This is a homology exposure proxy for UniRef50/UniRef100, not confirmation of exact checkpoint training membership."
+        }
+      },
+      "structural": {}
+    },
+    "Fluorescence": {
+      "modality": "protein",
+      "n_test": 27217,
+      "empirical": {
+        "swissprot": {
+          "affected_models": [
+            "esm2_8m",
+            "esm2_35m",
+            "esm2_150m",
+            "esm2_650m",
+            "protbert"
+          ],
+          "n_flagged": 27217,
+          "fraction": 1.0,
+          "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% coverage against all of Swiss-Prot. This is a homology exposure proxy for UniRef50/UniRef100, not confirmation of exact checkpoint training membership."
+        }
+      },
+      "structural": {}
+    },
+    "Promoters": {
+      "modality": "genomics",
+      "n_test": 1571,
+      "empirical": {},
+      "structural": {
+        "human_ref_genome": {
+          "affected_models": [
+            "nucleotide_transformer",
+            "hyenadna"
+          ],
+          "claim": "Promoter sequences are excerpts of the human reference assembly used for pretraining, so the benchmark inputs are exposed by construction. This does not imply label exposure."
+        }
+      }
+    }
+  }
+}

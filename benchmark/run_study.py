@@ -24,10 +24,10 @@ Usage:
 import json
 import hashlib
 import importlib.metadata
+import fcntl
 import os
 import platform
 import sys
-import time
 import traceback
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -40,6 +40,7 @@ from benchmark.probe import (PROBE_PROTOCOL_VERSION, SEARCH_CAP, SEED,
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 RESULTS_PATH = os.path.join(RESULTS_DIR, "benchmark_results.json")
+RESULTS_LOCK_PATH = os.path.join(RESULTS_DIR, ".benchmark_results.lock")
 MANIFEST_PATH = os.path.join(RESULTS_DIR, "run_manifest.json")
 PUBLIC_RESULT_FILES = [
     "benchmark_results.json", "paired_comparisons.json",
@@ -64,28 +65,38 @@ def save_results(results):
     concurrent runs on disjoint tasks safe, which matters because the natural
     way to use this harness is one runner per modality.
     """
-    merged = load_results()
-    for task, info in results.items():
-        if task not in merged:
-            merged[task] = info
-            continue
-        incoming_hash = info.get("dataset_sha256")
-        stored_hash = merged[task].get("dataset_sha256")
-        identity_changed = (
-            (incoming_hash and incoming_hash != stored_hash)
-            or info.get("input_sha256") != merged[task].get("input_sha256")
-            or info.get("protocol_version") != merged[task].get("protocol_version")
-        )
-        if identity_changed:
-            merged[task] = info
-            continue
-        merged[task].update({k: v for k, v in info.items() if k != "models"})
-        merged[task].setdefault("models", {}).update(info.get("models", {}))
+    # Atomic rename prevents partial JSON, while the advisory lock prevents two
+    # workers from both reading the same old snapshot and then losing whichever
+    # task happens to rename first. The lock lives on the same shared filesystem
+    # as the result file, so it also coordinates separate Slurm nodes.
+    with open(RESULTS_LOCK_PATH, "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        merged = load_results()
+        for task, info in results.items():
+            if task not in merged:
+                merged[task] = info
+                continue
+            incoming_hash = info.get("dataset_sha256")
+            stored_hash = merged[task].get("dataset_sha256")
+            identity_changed = (
+                (incoming_hash and incoming_hash != stored_hash)
+                or info.get("input_sha256") != merged[task].get("input_sha256")
+                or info.get("protocol_version") != merged[task].get(
+                    "protocol_version")
+            )
+            if identity_changed:
+                merged[task] = info
+                continue
+            merged[task].update({k: v for k, v in info.items()
+                                 if k != "models"})
+            merged[task].setdefault("models", {}).update(
+                info.get("models", {}))
 
-    tmp = f"{RESULTS_PATH}.{os.getpid()}.tmp"
-    with open(tmp, "w") as fh:
-        json.dump(merged, fh, indent=2)
-    os.replace(tmp, RESULTS_PATH)
+        tmp = f"{RESULTS_PATH}.{os.getpid()}.tmp"
+        with open(tmp, "w") as fh:
+            json.dump(merged, fh, indent=2)
+        os.replace(tmp, RESULTS_PATH)
+        fcntl.flock(lock, fcntl.LOCK_UN)
     return merged
 
 
@@ -164,11 +175,8 @@ def write_manifest(results):
                     metadata = json.load(handle)
                 spec = embed.MODEL_REGISTRY[model_id]
                 metadata.setdefault("matrix_dtype", "float32")
-                metadata.setdefault(
-                    "inference_precision_policy",
-                    ("float32 on all devices" if spec.get("force_float32")
-                     else "float16 on CUDA; float32 when CUDA is unavailable")
-                    if spec["kind"] == "hf" else "not applicable")
+                metadata["inference_precision_policy"] = \
+                    embed.inference_precision_policy(spec)
                 task_entry["embeddings"][model_id] = metadata
         manifest["tasks"][task] = task_entry
         prediction_path = os.path.join(RESULTS_DIR, "predictions", f"{task}.npz")
@@ -272,27 +280,40 @@ def run(task_names=None, run_mlp=True):
             results[task]["models"] = existing_models
 
         for model_id in applicable:
-            if (model_id in results[task]["models"]
-                    and results[task]["models"][model_id].get("linear", {}).get(
-                        "protocol_version") == PROBE_PROTOCOL_VERSION):
-                print(f"  .. {model_id} cached, skipping", flush=True)
-                continue
-
             spec = embed.MODEL_REGISTRY[model_id]
             print(f"  -> {model_id} ({spec['label']})", flush=True)
-            t0 = time.time()
             try:
+                # Validate or regenerate the embedding before deciding whether
+                # a result cell can be reused. A protocol-current score backed
+                # by a stale matrix is still stale, and older result files did
+                # not bind the score to the matrix content at all.
                 X = embed.generate(model_id, task, data["inputs"], modality)
                 if X is None:
                     continue
-                embed_time = time.time() - t0
+                sidecar_path = embed.cache_path(model_id, task).replace(
+                    ".npy", ".json")
+                with open(sidecar_path) as handle:
+                    embedding_sha256 = json.load(handle)["sha256"]
+                existing = results[task]["models"].get(model_id, {})
+                if (existing.get("linear", {}).get("protocol_version") ==
+                        PROBE_PROTOCOL_VERSION
+                        and existing.get("embedding_sha256") ==
+                        embedding_sha256):
+                    print(f"     score and embedding cached, skipping",
+                          flush=True)
+                    continue
 
                 y = data["targets"]
                 tr, te = data["final_train_idx"], data["test_idx"]
                 lin = linear_probe(
                     X[tr], y[tr], X[te], y[te], data["task_type"],
-                    groups=data["resampling_groups"][te])
-                entry = {"label": spec["label"], "linear": lin}
+                    groups=data["resampling_groups"][te],
+                    n_jobs=4 if modality == "molecule" else 1)
+                entry = {
+                    "label": spec["label"],
+                    "embedding_sha256": embedding_sha256,
+                    "linear": lin,
+                }
 
                 if run_mlp:
                     entry["mlp"] = mlp_probe(X[tr], y[tr], X[te], y[te],
@@ -301,12 +322,15 @@ def run(task_names=None, run_mlp=True):
                         entry["mlp"]["score"] - lin["score"], 4)
 
                 results[task]["models"][model_id] = entry
-                save_results(results)
+                # Persist only the task this worker owns. Passing the complete
+                # startup snapshot here can overwrite newer cells written by a
+                # concurrent runner on another task.
+                save_results({task: results[task]})
 
                 gap = (f", MLP {entry['mlp']['score']:.4f} "
                        f"(gap {entry['linear_mlp_gap']:+.4f})") if run_mlp else ""
                 print(f"     {lin['metric']} = {lin['score']:.4f} "
-                      f"(dim {lin['embedding_dim']}, {embed_time:.0f}s){gap}",
+                      f"(dim {lin['embedding_dim']}){gap}",
                       flush=True)
 
             except Exception as exc:
@@ -314,7 +338,7 @@ def run(task_names=None, run_mlp=True):
                 print(f"     FAILED: {type(exc).__name__}: {exc}", flush=True)
                 traceback.print_exc()
 
-    save_results(results)
+    save_results({task: results[task] for task in tasks if task in results})
     write_manifest(load_results())
     print(f"\nWrote {RESULTS_PATH}", flush=True)
     return results

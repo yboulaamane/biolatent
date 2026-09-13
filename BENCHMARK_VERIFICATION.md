@@ -1,9 +1,15 @@
-# BioLatent benchmark verification checklist
-Generated from `src/app/data/embeddings.ts` — **75 benchmark entries across 31 source papers**.
-Grouped by source paper so one PDF covers several rows. Work top-down: the first 10 papers cover 46 of the 75 entries.
-For each row open the cited paper, find the stated table, and either tick the box or write the correct value in **Actual**.
+# BioLatent literature benchmark verification log
 
-> Rows already checked this session are pre-filled. Everything else is **unverified** — assume nothing.
+**Current status (2026-09-13): 61 score rows, all source-audited.** This file
+retains the chronological audit trail, including rows that were corrected or
+removed. Its earlier checklist counts describe the pre-cleanup registry and
+must not be read as the current inventory. Dataset provenance for the measured
+suite is audited separately in `DATA_PROVENANCE_AUDIT.md`.
+
+Rows are grouped by source paper so one primary-source check can cover several
+entries. For each retained row the value, metric, model variant, split, and
+claimed table or figure were checked rather than accepting a plausible-looking
+number.
 
 **Legend** — `[x] OK` verified correct · `[ ] **WRONG**` confirmed wrong, fix value · `[ ] **NO SOURCE**` cited paper does not contain this benchmark · blank = not yet checked
 
@@ -1087,6 +1093,11 @@ lDDT-Cα and a note recording that the paper tabulates no headline figure.
 
 ---
 
-## ✅ Audit complete — all 56 entries verified
+## ✅ Original audit complete — all 56 retained entries verified
 
 Every benchmark value in the registry has now been checked against its primary publication.
+
+Five additional source-checked rows were later added in commit `47941a3`:
+three ChemXTree results from Xu et al. (2024) and two intermediate-layer
+CYP3A4 Substrate results from Pinto (2025). Together these make the current 61
+rows. See `DATA_PROVENANCE_AUDIT.md` for their values and sources.

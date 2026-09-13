@@ -23,6 +23,7 @@ The website keeps two evidence surfaces separate. The **Literature Registry** tr
 4. **Curated Methods & Citations**: Collapsible details providing direct links to primary literature papers (e.g. TDC, MoleculeNet, FLIP).
 5. **Programmatic JSON API**: Exposes query-parameter filters to fetch representation metadata dynamically (e.g. `/api/representations?modality=protein`).
 6. **Reproducible Measured Study**: Imports public JSON artefacts produced by the benchmark scripts, with checkpoint revisions, dataset hashes, pooling, truncation, and software versions recorded in `results/run_manifest.json`.
+7. **Audited Data Provenance**: Every measured task was compared with a fresh upstream copy, and every literature row carries source-level provenance. See [`DATA_PROVENANCE_AUDIT.md`](DATA_PROVENANCE_AUDIT.md).
 
 ---
 
@@ -116,9 +117,10 @@ python benchmark/download_real_datasets.py
 python benchmark/run_study.py --embeddings-only  # optional cache-only stage
 python benchmark/run_study.py
 python benchmark/paired_test.py
-python benchmark/run_leakage.py --sample 150000
-python benchmark/split_sensitivity.py
+python benchmark/run_leakage.py --sample 200000
 python benchmark/resolution_analysis.py
+python benchmark/split_sensitivity.py
+python benchmark/run_study.py --refresh-metadata
 python benchmark/validate_release.py --full-hash
 python paper/generate_manuscript.py
 ```
