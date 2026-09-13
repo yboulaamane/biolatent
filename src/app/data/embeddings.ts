@@ -1194,3 +1194,18 @@ results = rxn_mapper.get_attention_guided_maps([rxn_smiles])
 print("Mapped reaction:", results[0]['mapped_rxn'])`
   }
 ];
+
+// Provenance is a build-time invariant, not a curation convention. An uncited
+// number must never reach either the registry UI or its JSON API.
+const uncitedBenchmarkRows = EMBEDDINGS.flatMap((representation) =>
+  representation.benchmarks
+    .filter((benchmark) =>
+      !benchmark.citation?.doi?.trim() || !benchmark.citation?.note?.trim())
+    .map((benchmark) => `${representation.id}/${benchmark.dataset}`)
+);
+
+if (uncitedBenchmarkRows.length > 0) {
+  throw new Error(
+    `Registry benchmark rows require a source URL and provenance note: ${uncitedBenchmarkRows.join(', ')}`
+  );
+}

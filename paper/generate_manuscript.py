@@ -114,7 +114,14 @@ def add_caption(document, text):
 
 def add_table(document, headers, rows, widths=None, font_size=7.5):
     table = document.add_table(rows=1, cols=len(headers))
-    table.style = "Table Grid"
+    # The retained manuscript template was exported without Word's built-in
+    # ``Table Grid`` style. Prefer it when present, but fall back to the
+    # template's own table style rather than making generation depend on a
+    # hidden style that may not exist in another DOCX.
+    try:
+        table.style = "Table Grid"
+    except KeyError:
+        table.style = "Table"
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     header = table.rows[0]
     repeat_header(header)
@@ -410,7 +417,7 @@ def build():
              "None of these analyses establishes that downstream labels were present in pretraining.")
 
     add_heading(document, "2.7 Web implementation", 2)
-    add_body(document, "The public interface is implemented in Next.js 16.2.10 and TypeScript. The "
+    add_body(document, "The public interface is implemented in Next.js 16.3.5 and TypeScript. The "
              "Measured Benchmark imports the result JSON directly at build time. Literature values "
              "remain in a separate registry because their protocols are heterogeneous. Headline "
              "counts are computed from the result files rather than hard-coded.")

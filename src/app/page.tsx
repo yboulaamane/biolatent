@@ -4,6 +4,43 @@ import React, { useState, useMemo } from 'react';
 import { EMBEDDINGS, RepresentationEntry, FixedDescriptor, LearnedEmbedding, HybridRepresentation } from './data/embeddings';
 import StudyTab from './components/StudyTab';
 
+interface ChartPoint {
+  id: string;
+  name: string;
+  type: RepresentationEntry['representationType'];
+  dim: number;
+  score: number;
+  x: number;
+  y: number;
+}
+
+interface SubmissionDraft {
+  id: string;
+  name: string;
+  developer: string;
+  representationType: string;
+  modality: string;
+  inputRepresentation: string;
+  yearReleased: number;
+  computeProfile: 'cpu' | 'gpu';
+  benchmarks: never[];
+  tags: string[];
+  codeSnippet: string;
+  architectureType?: string;
+  pretrainingObjective?: string;
+  embeddingDimension?: number;
+  trainingData?: { name: string; size: string; license: string };
+  descriptorFamily?: string;
+  algorithmType?: 'hashed';
+  vectorType?: 'binary';
+  dimensionality?: number;
+  components?: {
+    learnedModel: string;
+    descriptorsUsed: string[];
+    fusionMethod: 'concatenation';
+  };
+}
+
 export default function Home() {
   // Navigation Tabs. The measured study is the landing tab: it is the only
   // content on this site where results were generated locally under one protocol.
@@ -51,7 +88,7 @@ export default function Home() {
 
   // Chart Visualization States
   const [chartMetric, setChartMetric] = useState<'bbbp' | 'cb513'>('bbbp');
-  const [hoveredPoint, setHoveredPoint] = useState<any | null>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null);
   const [showMethodology, setShowMethodology] = useState(false);
 
   // Sorting States
@@ -133,11 +170,10 @@ export default function Home() {
     const plotWidth = svgWidth - margin.left - margin.right;
     const plotHeight = svgHeight - margin.top - margin.bottom;
 
-    const datasetName = chartMetric === 'bbbp' ? 'BBBP' : 'Secondary Structure (CB513)';
     const yMin = chartMetric === 'bbbp' ? 0.55 : 0.65;
     const yMax = chartMetric === 'bbbp' ? 0.80 : 0.90;
 
-    const points: any[] = [];
+    const points: ChartPoint[] = [];
 
     EMBEDDINGS.forEach((emb) => {
       const benchmark = emb.benchmarks.find((b) => b.dataset.startsWith(chartMetric === 'bbbp' ? 'BBBP' : 'Secondary Structure'));
@@ -173,8 +209,8 @@ export default function Home() {
     if (!config) return data;
 
     return [...data].sort((a, b) => {
-      let valA: any = '';
-      let valB: any = '';
+      let valA: string | number = '';
+      let valB: string | number = '';
 
       if (config.key === 'name') {
         valA = a.name.toLowerCase();
@@ -291,7 +327,7 @@ export default function Home() {
     const isLearned = submitForm.representationType === 'learned_embedding';
     const isFixed = submitForm.representationType === 'fixed_descriptor';
     
-    let formatted: any = {
+    const formatted: SubmissionDraft = {
       id: submitForm.name.toLowerCase().replace(/\s+/g, '_'),
       name: submitForm.name,
       developer: submitForm.developer,
@@ -538,7 +574,7 @@ export default function Home() {
                         <div className="meta-item">
                           <span className="meta-label">Pretrained Size</span>
                           <span className="meta-value">
-                            {emb.representationType === 'fixed_descriptor' ? 'N/A (Hashed)' : (emb as any).trainingData?.size || 'N/A'}
+                            {emb.representationType === 'fixed_descriptor' ? 'N/A (Hashed)' : emb.trainingData?.size || 'N/A'}
                           </span>
                         </div>
                         <div className="meta-item">
@@ -1196,11 +1232,11 @@ export default function Home() {
                   )}
 
                   {/* Pretrained Metadata */}
-                  {selectedEmbedding.representationType !== 'fixed_descriptor' && (selectedEmbedding as any).trainingData && (
+                  {selectedEmbedding.representationType !== 'fixed_descriptor' && selectedEmbedding.trainingData && (
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem', marginBottom: '2.0rem' }}>
                       <h4 style={{ color: '#fff', fontSize: '0.9rem', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: 700 }}>Training Dataset</h4>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                        Pretrained on <strong>{(selectedEmbedding as any).trainingData.name}</strong> containing <strong>{(selectedEmbedding as any).trainingData.size}</strong>.
+                        Pretrained on <strong>{selectedEmbedding.trainingData.name}</strong> containing <strong>{selectedEmbedding.trainingData.size}</strong>.
                       </p>
                     </div>
                   )}

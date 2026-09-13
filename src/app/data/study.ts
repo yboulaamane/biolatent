@@ -36,6 +36,7 @@ export interface ProbeResult {
 
 export interface ModelCell {
   label: string;
+  embedding_sha256: string;
   linear: ProbeResult;
   mlp?: { score: number };
   linear_mlp_gap?: number;

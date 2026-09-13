@@ -13,6 +13,7 @@ separate family.
 """
 
 import gc
+import fcntl
 import json
 import os
 import subprocess
@@ -40,6 +41,8 @@ N_PERM = 2000
 INFERENCE_PROTOCOL_VERSION = 4
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
                            "paired_comparisons.json")
+REPORT_LOCK_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
+                                ".paired_comparisons.lock")
 PREDICTION_DIR = os.path.join(os.path.dirname(__file__), "..", "results",
                               "predictions")
 
@@ -156,9 +159,16 @@ def holm(pvalues):
 
 
 def _sample_indices(rng, groups):
-    unique = np.unique(groups)
-    sampled = rng.choice(unique, len(unique), replace=True)
-    return np.concatenate([np.where(groups == group)[0] for group in sampled])
+    unique, membership = np.unique(groups, return_inverse=True)
+    sampled = rng.choice(len(unique), len(unique), replace=True)
+    if len(unique) == len(groups):
+        # Item-level resampling is the common protein/genomics case. Preserve
+        # the original sorted-group RNG mapping without constructing tens of
+        # thousands of one-element arrays for every bootstrap replicate.
+        sorted_to_original = np.argsort(membership)
+        return sorted_to_original[sampled]
+    return np.concatenate([np.where(membership == group)[0]
+                           for group in sampled])
 
 
 def _swapped_bundle(left, right, swap_items):
@@ -191,16 +201,14 @@ def paired_inference(left, right, groups, seed=SEED):
     boot = boot[np.isfinite(boot)]
     lo, hi = np.percentile(boot, [2.5, 97.5])
 
-    unique_groups = np.unique(groups)
-    group_membership = {group: np.where(groups == group)[0]
-                        for group in unique_groups}
+    unique_groups, membership = np.unique(groups, return_inverse=True)
     extreme, valid = 0, 0
     for _ in range(N_PERM):
         selected = rng.randint(0, 2, len(unique_groups)).astype(bool)
-        swap = np.zeros(len(groups), dtype=bool)
-        for group, enabled in zip(unique_groups, selected):
-            if enabled:
-                swap[group_membership[group]] = True
+        # membership maps every item to its sorted unique-group index, so this
+        # is identical to the former Python group loop and substantially faster
+        # for item-level protein/genomics tests.
+        swap = selected[membership]
         perm_left, perm_right = _swapped_bundle(left, right, swap)
         value = score(perm_left) - score(perm_right)
         if np.isfinite(value):
@@ -287,6 +295,12 @@ def run_task(task):
     groups = np.asarray(data["resampling_groups"]
                         [data["test_idx"]][valid], dtype=str)
 
+    # Persist the fitted test predictions before the expensive resampling
+    # analyses. A pre-emption can then be diagnosed from a complete prediction
+    # bundle instead of discarding hours of successful model fitting. The
+    # release gate still refuses the task until its paired report is complete.
+    _save_predictions(task, data, test_predictions)
+
     comparisons = {}
     challengers = [model for model in sorted(names,
                                              key=lambda item: -test_scores[item])
@@ -324,7 +338,6 @@ def run_task(task):
         "comparisons": comparisons,
     }
     entry["ladders"] = _ladder_steps(names, test_predictions, test_scores, groups)
-    _save_predictions(task, data, test_predictions)
     return entry
 
 
@@ -356,20 +369,36 @@ def _ladder_steps(names, predictions, test_scores, groups):
 
 
 def merge_report(task, entry):
-    report = {}
-    if os.path.exists(REPORT_PATH):
-        with open(REPORT_PATH) as handle:
-            report = json.load(handle)
-    report[task] = entry
-    temporary = f"{REPORT_PATH}.{os.getpid()}.tmp"
-    with open(temporary, "w") as handle:
-        json.dump(report, handle, indent=2)
-    os.replace(temporary, REPORT_PATH)
+    with open(REPORT_LOCK_PATH, "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        report = {}
+        if os.path.exists(REPORT_PATH):
+            with open(REPORT_PATH) as handle:
+                report = json.load(handle)
+        report[task] = entry
+        temporary = f"{REPORT_PATH}.{os.getpid()}.tmp"
+        with open(temporary, "w") as handle:
+            json.dump(report, handle, indent=2)
+        os.replace(temporary, REPORT_PATH)
+        fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 def apply_familywise_corrections():
     with open(REPORT_PATH) as handle:
         report = json.load(handle)
+    if set(report) != set(ALL_DATASETS):
+        missing = sorted(set(ALL_DATASETS) - set(report))
+        extra = sorted(set(report) - set(ALL_DATASETS))
+        raise RuntimeError(
+            "Study-wide correction requires the complete task family; "
+            f"missing={missing}, extra={extra}")
+    stale = sorted(task for task, entry in report.items()
+                   if entry.get("protocol_version") !=
+                   INFERENCE_PROTOCOL_VERSION)
+    if stale:
+        raise RuntimeError(
+            "Study-wide correction refuses stale task entries: "
+            f"{stale}; rerun those tasks first")
     records = []
     for task, entry in report.items():
         modality = load_benchmark_dataset(task)["modality"]
@@ -392,13 +421,21 @@ def apply_familywise_corrections():
         record[3]["p_holm"] = record[3]["p_holm_global"]
         record[3]["significant"] = record[3]["significant_global"]
 
-    with open(REPORT_PATH, "w") as handle:
-        json.dump(report, handle, indent=2)
+    with open(REPORT_LOCK_PATH, "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        temporary = f"{REPORT_PATH}.{os.getpid()}.tmp"
+        with open(temporary, "w") as handle:
+            json.dump(report, handle, indent=2)
+        os.replace(temporary, REPORT_PATH)
+        fcntl.flock(lock, fcntl.LOCK_UN)
 
 
 if __name__ == "__main__":
     requested = sys.argv[1:]
-    if len(requested) == 1:
+    if requested == ["--apply-corrections"]:
+        apply_familywise_corrections()
+        print(f"\nApplied study-wide corrections to {REPORT_PATH}", flush=True)
+    elif len(requested) == 1:
         result = run_task(requested[0])
         if result:
             merge_report(requested[0], result)

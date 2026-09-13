@@ -71,3 +71,5 @@ BioLatent Model Input-*.png
 
 # run logs
 run_*.log
+/results/*.lock
+/results/slurm/

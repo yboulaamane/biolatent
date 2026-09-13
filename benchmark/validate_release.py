@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
+from benchmark.paired_test import INFERENCE_PROTOCOL_VERSION, score as paired_score
 from benchmark.probe import PROBE_PROTOCOL_VERSION
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,6 +34,69 @@ def file_hash(path):
     return digest.hexdigest()
 
 
+def valid_target_rows(values):
+    """Return the finite-label rows used by both probe implementations."""
+    values = np.asarray(values)
+    return (np.isfinite(values).all(axis=1) if values.ndim == 2
+            else np.isfinite(values))
+
+
+def validate_prediction_bundle(path, task, data, result, comparison,
+                               expected_models):
+    """Bind paired statistics to the saved labels and model predictions."""
+    expected_keys = {"y_true", "groups"}
+    for model in expected_models:
+        expected_keys.add(f"{model}__pred")
+        if data["task_type"] in ("classification", "multilabel"):
+            expected_keys.add(f"{model}__prob")
+
+    target = np.asarray(data["targets"])[data["test_idx"]]
+    valid = valid_target_rows(target)
+    expected_y = target[valid]
+    expected_groups = np.asarray(
+        data["resampling_groups"][data["test_idx"]][valid], dtype=str)
+
+    with np.load(path) as predictions:
+        assert set(predictions.files) == expected_keys, \
+            f"{task}: unexpected or missing arrays in prediction bundle"
+        assert np.array_equal(predictions["y_true"], expected_y), \
+            f"{task}: saved prediction labels differ from the dataset test labels"
+        assert np.array_equal(predictions["groups"].astype(str), expected_groups), \
+            f"{task}: saved resampling groups differ from the dataset"
+
+        computed_scores = {}
+        for model in expected_models:
+            y_pred = predictions[f"{model}__pred"]
+            y_prob = (predictions[f"{model}__prob"]
+                      if f"{model}__prob" in predictions.files else None)
+            assert len(y_pred) == len(expected_y) and np.isfinite(y_pred).all(), \
+                f"{task}/{model}: invalid saved predictions"
+            if y_prob is not None:
+                assert len(y_prob) == len(expected_y) and np.isfinite(y_prob).all(), \
+                    f"{task}/{model}: invalid saved probabilities"
+            n_classes = (int(np.max(expected_y)) + 1
+                         if data["task_type"] == "classification" else None)
+            bundle = {
+                "y_true": predictions["y_true"], "y_pred": y_pred,
+                "y_prob": y_prob, "task_type": data["task_type"],
+                "n_classes": n_classes,
+            }
+            computed_scores[model] = round(float(paired_score(bundle)), 4)
+
+        reference = comparison["reference"]
+        assert computed_scores[reference] == comparison["reference_test_score"], \
+            f"{task}: reference score differs from saved predictions"
+        for model, reported in comparison["comparisons"].items():
+            assert computed_scores[model] == reported["score"], \
+                f"{task}/{model}: comparison score differs from saved predictions"
+        observed_best = max(computed_scores, key=computed_scores.get)
+        assert observed_best == comparison["observed_test_best"]
+        assert computed_scores[observed_best] == comparison["observed_test_best_score"]
+        for model, computed in computed_scores.items():
+            assert computed == result["models"][model]["linear"]["score"], \
+                f"{task}/{model}: headline score differs from saved predictions"
+
+
 def main(full_hash=False):
     results = read_result("benchmark_results.json")
     paired = read_result("paired_comparisons.json")
@@ -46,6 +110,8 @@ def main(full_hash=False):
     assert set(sensitivity["tasks"]) == set(ALL_DATASETS[:6])
     assert set(resolution["tasks"]) == set(ALL_DATASETS)
     assert exposure["report_kind"] == "pretraining_input_exposure_proxy"
+    assert sensitivity["schema_version"] == 2
+    assert resolution["schema_version"] == 1
 
     for task in ALL_DATASETS:
         data = load_benchmark_dataset(task)
@@ -76,6 +142,8 @@ def main(full_hash=False):
             sidecar_path = embed.cache_path(model, task).replace(".npy", ".json")
             with open(sidecar_path) as handle:
                 sidecar = json.load(handle)
+            assert cell.get("embedding_sha256") == sidecar["sha256"], \
+                f"{task}/{model}: score is not bound to its embedding matrix"
             assert sidecar["input_sha256"] == data["input_sha256"]
             assert sidecar["protocol_version"] == embed.EMBED_PROTOCOL_VERSION
             assert sidecar.get("revision") == embed.MODEL_REGISTRY[model].get("revision")
@@ -88,13 +156,33 @@ def main(full_hash=False):
                 assert digest.hexdigest() == sidecar["sha256"]
 
         comparison = paired[task]
+        assert comparison["protocol_version"] == INFERENCE_PROTOCOL_VERSION
         assert comparison["reference"] in expected_models
         assert len(comparison["comparisons"]) == len(expected_models) - 1
         for value in comparison["comparisons"].values():
             assert "p_holm_global" in value and "significant_global" in value
             assert 0 <= value["p_raw"] <= 1
+            assert value["p_holm"] == value["p_holm_global"]
+            assert value["significant"] == value["significant_global"]
         prediction_path = os.path.join(ROOT, "results", "predictions", f"{task}.npz")
         assert os.path.exists(prediction_path)
+        validate_prediction_bundle(prediction_path, task, data, result,
+                                   comparison, expected_models)
+
+        curve_task = resolution["tasks"][task]
+        assert curve_task["n_test"] == result["n_test"]
+        assert curve_task["reference"] == comparison["reference"]
+        assert set(curve_task["comparisons"]) == set(comparison["comparisons"])
+        for model, curve_report in curve_task["comparisons"].items():
+            assert curve_report["full_test_delta"] == \
+                comparison["comparisons"][model]["delta"]
+            for point in curve_report["curve"]:
+                assert 20 <= point["requested_n"] < curve_task["n_test"]
+                assert 0 <= point["sign_consistency"] <= 1
+                assert 0 < point["valid_repeats"] <= resolution["repeats"]
+                for key in ("median_delta", "central_95_low",
+                            "central_95_high", "central_95_width"):
+                    assert np.isfinite(point[key])
 
     result_hash = file_hash(os.path.join(ROOT, "results", "benchmark_results.json"))
     assert manifest["benchmark_results_sha256"] == result_hash

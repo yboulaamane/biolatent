@@ -18,6 +18,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "f7fd79df31fb7d557667751c8b637f63953df2bc9d0c3e2aa1cd464b60acbb40",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9141,
@@ -48,6 +49,7 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "45f538982843d8ff2d10a8c938e9b71420974a0026e8d9c8e2ef2647cec074b0",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9227,
@@ -78,6 +80,7 @@
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "f1498194ea5deeb93f783beff37764e0b8b9c492000fd944bd383c42e4ff5528",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9538,
@@ -108,6 +111,7 @@
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "87ef5e40c5d5e3d5f4b974969efc74695da431b6899a14418d2542bbaff20c60",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9713,
@@ -138,6 +142,7 @@
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "a18dbba6a9e08bcbcdc14d174bc4dce1b6a2490ea9eb4dc0ccdc884d5b4c7dad",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9541,
@@ -188,6 +193,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "5e081c77039ed83396b56d406e8db3d519f19ccd4150afe4f178aa4beede589c",
         "linear": {
           "metric": "Macro ROC-AUC",
           "score": 0.8482,
@@ -220,17 +226,18 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "40c9e1960d458df85a11dc64dd3756a40facf052b9093f0f520f4dbd0b87bc1a",
         "linear": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8524,
+          "score": 0.8529,
           "subset_accuracy": 0.9324,
           "macro_f1": 0.6362,
           "hyperparameter": {
             "C": 0.1
           },
-          "ci_low": 0.7202,
-          "ci_high": 0.9612,
-          "ci_width": 0.241,
+          "ci_low": 0.7206,
+          "ci_high": 0.9627,
+          "ci_width": 0.2421,
           "n_boot": 1000,
           "probe": "linear",
           "protocol_version": 4,
@@ -248,10 +255,11 @@
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.1115
+        "linear_mlp_gap": -0.112
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "ece69d2aa5ff5873388e9bb67f86c2f70aff1c7f4f95f36ac83eeb854f299bb4",
         "linear": {
           "metric": "Macro ROC-AUC",
           "score": 0.9751,
@@ -284,6 +292,7 @@
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "32baa0731cce813001dcc50b23888e0ede8a55c2042c2a035386bec53b51a2f2",
         "linear": {
           "metric": "Macro ROC-AUC",
           "score": 0.9851,
@@ -316,6 +325,7 @@
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "51e5748b258a8e1cc70bd671647336501403f8eb8f269bdf57d950e97f7a1a57",
         "linear": {
           "metric": "Macro ROC-AUC",
           "score": 0.9718,
@@ -367,6 +377,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "ccc0c971c88b397f59a19fe022a28f492c93b93e61758c1adde5e7ea52b00cb3",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.8904,
@@ -397,6 +408,7 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "6789268a22adffd4f817287aa067aa126eae2b3a79ab2710ea7d2bf093449a95",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.8315,
@@ -427,6 +439,7 @@
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "da9a024f679badee732c88280cc79bc41ba15b159ec5ce9598d22228fd265451",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.8391,
@@ -457,6 +470,7 @@
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "92e4066f29b7bf536ebb733eb24f1188000b8e01873ac21e0ac2d2f11ec801c0",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.8265,
@@ -487,6 +501,7 @@
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "825ae70ef83cfd19f637697c6d82a846631e2243ea95c0140b61fc261469aa54",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.8102,
@@ -536,6 +551,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "44f58c17cce56573438f28a3a7941d43d23f6f87a680f6563b7d6175d4cf6b43",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.6161,
@@ -568,6 +584,7 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "95acdb9f6ab73c55c8d659473323149c301538557e630230908f6a9e7cb66e38",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.9049,
@@ -589,17 +606,18 @@
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.8799,
-          "rmse": 0.9562,
-          "r2": 0.8091,
+          "score": 0.8796,
+          "rmse": 0.9566,
+          "r2": 0.809,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 210
         },
-        "linear_mlp_gap": -0.025
+        "linear_mlp_gap": -0.0253
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "f56819009559ece3d5996ec17018215370981c550313bb3b13fe7de74f4c84d2",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.8469,
@@ -632,6 +650,7 @@
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "266244b8320ccc65117aed98fb8067f52c090369a16d2d5c029f48d846625ca9",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.8428,
@@ -664,6 +683,7 @@
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "41964cf04e41c5734e51990638868f525c94ac0300b678071f7560898a283099",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.8928,
@@ -715,6 +735,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "14d82b44905e1a9718e5af14c04454f2a3f5eac5e7c5170d84cfebb9d4b9407c",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.5868,
@@ -747,6 +768,7 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "b7a0d128c3d0184cc547777e08e00cbb49f18c6b0bf74126a532a5bb9e4de561",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.673,
@@ -755,9 +777,9 @@
           "hyperparameter": {
             "alpha": 0.1
           },
-          "ci_low": 0.5834,
+          "ci_low": 0.5835,
           "ci_high": 0.7569,
-          "ci_width": 0.1735,
+          "ci_width": 0.1734,
           "n_boot": 1000,
           "probe": "linear",
           "protocol_version": 4,
@@ -779,6 +801,7 @@
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "19ba7f7094d43d170057ba7bbeba7adef27e5b3120612068ec6c713a7853ff7a",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.6029,
@@ -800,17 +823,18 @@
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.6173,
-          "rmse": 0.913,
-          "r2": 0.4182,
+          "score": 0.6171,
+          "rmse": 0.9129,
+          "r2": 0.4183,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 384
         },
-        "linear_mlp_gap": 0.0144
+        "linear_mlp_gap": 0.0142
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "6d3e5ad2bf475a07a5e79cc7349edd5ec63420ffb577c927ece2908780899048",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.5483,
@@ -832,17 +856,18 @@
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.5706,
-          "rmse": 0.9959,
-          "r2": 0.3076,
+          "score": 0.5701,
+          "rmse": 0.9958,
+          "r2": 0.3078,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0223
+        "linear_mlp_gap": 0.0218
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "8922e61fbf41cdeb7938a7971c7d5f0bb68d9a2c84d2437c27c46287f1bfdf4c",
         "linear": {
           "metric": "Spearman rho",
           "score": 0.5988,
@@ -864,14 +889,14 @@
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.6035,
-          "rmse": 0.9354,
-          "r2": 0.3892,
+          "score": 0.6028,
+          "rmse": 0.9364,
+          "r2": 0.3879,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 768
         },
-        "linear_mlp_gap": 0.0047
+        "linear_mlp_gap": 0.004
       }
     }
   },
@@ -894,6 +919,7 @@
     "models": {
       "ecfp4": {
         "label": "ECFP4 (Morgan, r=2, 1024 bits)",
+        "embedding_sha256": "6a503146ea873e1a712039ea1ebe3202ea8cb9b3fc85b6603ea0b8d6a49240b6",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.6838,
@@ -924,6 +950,7 @@
       },
       "rdkit2d": {
         "label": "RDKit 2D descriptors",
+        "embedding_sha256": "881130a7fc46a1e1ffe7035ac3b698871f0550726eae4d79f4c1bb73b081840b",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.6873,
@@ -954,6 +981,7 @@
       },
       "chemberta_77m": {
         "label": "ChemBERTa-2 77M MLM",
+        "embedding_sha256": "e2f5be7d49f0c3271c9c6e0da262ce1bc935f754ec1b97991ad70a7b5c8461df",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.7285,
@@ -984,6 +1012,7 @@
       },
       "chemberta_zinc": {
         "label": "ChemBERTa ZINC base",
+        "embedding_sha256": "fc0b66e3900f8ee151b87e491859411da74807120584f724f92683f97241d81b",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.6579,
@@ -1014,6 +1043,7 @@
       },
       "molformer_xl": {
         "label": "MoLFormer-XL",
+        "embedding_sha256": "f1496de91c9ae5145c06d908cd234dfdb88e9ff9e6c64dec4677852cff1955ce",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.6518,
@@ -1071,131 +1101,201 @@
     "models": {
       "kmer3_protein": {
         "label": "3-mer frequency",
+        "embedding_sha256": "0b9d559d871e418f61fb42d7c552be78150eb6034d0208c1260d2c454647f80b",
         "linear": {
           "metric": "Macro ROC-AUC",
-          "score": 0.7162,
-          "subset_accuracy": 0.1816,
-          "macro_f1": 0.2025,
+          "score": 0.7169,
+          "subset_accuracy": 0.1892,
+          "macro_f1": 0.2168,
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.7074,
-          "ci_high": 0.7246,
-          "ci_width": 0.0172,
+          "ci_low": 0.7082,
+          "ci_high": 0.7256,
+          "ci_width": 0.0174,
           "n_boot": 1000,
           "probe": "linear",
-          "protocol_version": 2,
+          "protocol_version": 4,
           "regularisation_search_rows": 6000,
           "embedding_dim": 8000,
-          "n_train": 16889,
+          "n_train": 22340,
           "n_test": 5963
         },
         "mlp": {
           "metric": "Macro ROC-AUC",
-          "score": 0.6779,
-          "subset_accuracy": 0.2061,
-          "macro_f1": 0.2173,
+          "score": 0.684,
+          "subset_accuracy": 0.2148,
+          "macro_f1": 0.2325,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 8000
         },
-        "linear_mlp_gap": -0.0383
+        "linear_mlp_gap": -0.0329
       },
       "esm2_8m": {
         "label": "ESM-2 8M",
+        "embedding_sha256": "c2bd1107efbb3cb6928abd55982761753f39b640aa9df5e73769291105e59be8",
         "linear": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8444,
-          "subset_accuracy": 0.386,
-          "macro_f1": 0.4042,
+          "score": 0.8464,
+          "subset_accuracy": 0.3914,
+          "macro_f1": 0.4089,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8367,
-          "ci_high": 0.8521,
-          "ci_width": 0.0155,
+          "ci_low": 0.8386,
+          "ci_high": 0.8542,
+          "ci_width": 0.0156,
           "n_boot": 1000,
           "probe": "linear",
-          "protocol_version": 2,
+          "protocol_version": 4,
           "regularisation_search_rows": 6000,
           "embedding_dim": 320,
-          "n_train": 16889,
+          "n_train": 22340,
           "n_test": 5963
         },
         "mlp": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8412,
-          "subset_accuracy": 0.4115,
-          "macro_f1": 0.4772,
+          "score": 0.849,
+          "subset_accuracy": 0.4166,
+          "macro_f1": 0.4876,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 320
         },
-        "linear_mlp_gap": -0.0032
+        "linear_mlp_gap": 0.0026
       },
       "esm2_35m": {
         "label": "ESM-2 35M",
+        "embedding_sha256": "ed1251c8e12fc91b146b4cfc3f250da9734819d3816c5628b089aa86fb0ff387",
         "linear": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8622,
-          "subset_accuracy": 0.4478,
-          "macro_f1": 0.4609,
+          "score": 0.8666,
+          "subset_accuracy": 0.4473,
+          "macro_f1": 0.4705,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8546,
-          "ci_high": 0.8695,
-          "ci_width": 0.0149,
+          "ci_low": 0.859,
+          "ci_high": 0.8738,
+          "ci_width": 0.0148,
           "n_boot": 1000,
           "probe": "linear",
-          "protocol_version": 2,
+          "protocol_version": 4,
           "regularisation_search_rows": 6000,
           "embedding_dim": 480,
-          "n_train": 16889,
+          "n_train": 22340,
           "n_test": 5963
         },
         "mlp": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8613,
-          "subset_accuracy": 0.4511,
-          "macro_f1": 0.5076,
+          "score": 0.8678,
+          "subset_accuracy": 0.4506,
+          "macro_f1": 0.5194,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 480
         },
-        "linear_mlp_gap": -0.0009
+        "linear_mlp_gap": 0.0012
       },
       "esm2_150m": {
         "label": "ESM-2 150M",
+        "embedding_sha256": "49f803851aa87cf3417ee4bff78c397e0bfb3581558aee66fab110be54e8c26c",
         "linear": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8766,
-          "subset_accuracy": 0.4825,
-          "macro_f1": 0.5024,
+          "score": 0.8799,
+          "subset_accuracy": 0.4863,
+          "macro_f1": 0.5165,
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8696,
-          "ci_high": 0.8825,
-          "ci_width": 0.0129,
+          "ci_low": 0.8732,
+          "ci_high": 0.8859,
+          "ci_width": 0.0127,
           "n_boot": 1000,
           "probe": "linear",
-          "protocol_version": 2,
+          "protocol_version": 4,
           "regularisation_search_rows": 6000,
           "embedding_dim": 640,
-          "n_train": 16889,
+          "n_train": 22340,
           "n_test": 5963
         },
         "mlp": {
           "metric": "Macro ROC-AUC",
-          "score": 0.8676,
-          "subset_accuracy": 0.4722,
-          "macro_f1": 0.5563,
+          "score": 0.8744,
+          "subset_accuracy": 0.4679,
+          "macro_f1": 0.5623,
           "probe": "mlp",
           "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 640
         },
-        "linear_mlp_gap": -0.009
+        "linear_mlp_gap": -0.0055
+      },
+      "esm2_650m": {
+        "label": "ESM-2 650M",
+        "embedding_sha256": "3baac8746a404c7688d1b923e1821019af6f2230ed76819c1d964f9ab3f22caf",
+        "linear": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8924,
+          "subset_accuracy": 0.5075,
+          "macro_f1": 0.5497,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.886,
+          "ci_high": 0.8989,
+          "ci_width": 0.013,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
+          "embedding_dim": 1280,
+          "n_train": 22340,
+          "n_test": 5963
+        },
+        "mlp": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8819,
+          "subset_accuracy": 0.479,
+          "macro_f1": 0.5689,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 1280
+        },
+        "linear_mlp_gap": -0.0105
+      },
+      "protbert": {
+        "label": "ProtBERT",
+        "embedding_sha256": "f53122df69c0870f259fbd20d985b80aa80daeca3c7176d5f63811c57f0776f0",
+        "linear": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8614,
+          "subset_accuracy": 0.4454,
+          "macro_f1": 0.4829,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.8542,
+          "ci_high": 0.868,
+          "ci_width": 0.0138,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
+          "embedding_dim": 1024,
+          "n_train": 22340,
+          "n_test": 5963
+        },
+        "mlp": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8449,
+          "subset_accuracy": 0.4104,
+          "macro_f1": 0.5182,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 1024
+        },
+        "linear_mlp_gap": -0.0165
       }
     },
     "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3"
@@ -1210,177 +1310,201 @@
     "models": {
       "kmer3_protein": {
         "label": "3-mer frequency",
+        "embedding_sha256": "21f7e5a989a66a75d96ab972f757e6a585b8ef442f5f2aef664c7b5d68e336ff",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.6755,
-          "rmse": 1.0599,
-          "r2": -0.1837,
+          "score": 0.6739,
+          "rmse": 1.1081,
+          "r2": -0.2938,
           "hyperparameter": {
-            "alpha": 1000.0
+            "alpha": 100.0
           },
-          "ci_low": 0.6676,
-          "ci_high": 0.6842,
+          "ci_low": 0.6659,
+          "ci_high": 0.6826,
           "ci_width": 0.0167,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 8000,
-          "n_train": 21446,
+          "n_train": 26808,
           "n_test": 27217
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.3572,
-          "rmse": 3.7091,
-          "r2": -13.4955,
+          "score": 0.5698,
+          "rmse": 2.6069,
+          "r2": -6.1606,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 8000
         },
-        "linear_mlp_gap": -0.3183
+        "linear_mlp_gap": -0.1041
       },
       "esm2_8m": {
         "label": "ESM-2 8M",
+        "embedding_sha256": "cd668da05074cc462c7cac0092b29ce2917f3407e89ef9cf663a14181e35813c",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.5724,
-          "rmse": 0.9678,
-          "r2": 0.0131,
+          "score": 0.5733,
+          "rmse": 0.9674,
+          "r2": 0.0139,
           "hyperparameter": {
             "alpha": 10.0
           },
-          "ci_low": 0.5635,
-          "ci_high": 0.5813,
-          "ci_width": 0.0178,
-          "n_boot": 1000,
-          "probe": "linear",
-          "embedding_dim": 320,
-          "n_train": 21446,
-          "n_test": 27217
-        },
-        "mlp": {
-          "metric": "Spearman rho",
-          "score": 0.5847,
-          "rmse": 0.971,
-          "r2": 0.0065,
-          "probe": "mlp",
-          "embedding_dim": 320
-        },
-        "linear_mlp_gap": 0.0123
-      },
-      "esm2_35m": {
-        "label": "ESM-2 35M",
-        "linear": {
-          "metric": "Spearman rho",
-          "score": 0.5924,
-          "rmse": 0.9885,
-          "r2": -0.0297,
-          "hyperparameter": {
-            "alpha": 1.0
-          },
-          "ci_low": 0.5841,
-          "ci_high": 0.6014,
-          "ci_width": 0.0173,
-          "n_boot": 1000,
-          "probe": "linear",
-          "embedding_dim": 480,
-          "n_train": 21446,
-          "n_test": 27217
-        },
-        "mlp": {
-          "metric": "Spearman rho",
-          "score": 0.5985,
-          "rmse": 0.9017,
-          "r2": 0.1433,
-          "probe": "mlp",
-          "embedding_dim": 480
-        },
-        "linear_mlp_gap": 0.0061
-      },
-      "esm2_150m": {
-        "label": "ESM-2 150M",
-        "linear": {
-          "metric": "Spearman rho",
-          "score": 0.5835,
-          "rmse": 0.9737,
-          "r2": 0.001,
-          "hyperparameter": {
-            "alpha": 10.0
-          },
-          "ci_low": 0.5747,
-          "ci_high": 0.5926,
+          "ci_low": 0.5643,
+          "ci_high": 0.5822,
           "ci_width": 0.0179,
           "n_boot": 1000,
           "probe": "linear",
-          "embedding_dim": 640,
-          "n_train": 21446,
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
+          "embedding_dim": 320,
+          "n_train": 26808,
           "n_test": 27217
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.584,
-          "rmse": 0.9303,
-          "r2": 0.0881,
+          "score": 0.5981,
+          "rmse": 0.9284,
+          "r2": 0.0918,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 320
+        },
+        "linear_mlp_gap": 0.0248
+      },
+      "esm2_35m": {
+        "label": "ESM-2 35M",
+        "embedding_sha256": "84fe44c8e35e746467030f093b6ea996b9ede5199832ed2524229e16bc31129d",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5936,
+          "rmse": 0.9827,
+          "r2": -0.0175,
+          "hyperparameter": {
+            "alpha": 1.0
+          },
+          "ci_low": 0.5855,
+          "ci_high": 0.6025,
+          "ci_width": 0.017,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
+          "embedding_dim": 480,
+          "n_train": 26808,
+          "n_test": 27217
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6039,
+          "rmse": 0.9067,
+          "r2": 0.1337,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 480
+        },
+        "linear_mlp_gap": 0.0103
+      },
+      "esm2_150m": {
+        "label": "ESM-2 150M",
+        "embedding_sha256": "b15fbaee549017ac05d7d8e8db42905523c08948039d278e524dd773ece11a37",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5843,
+          "rmse": 0.9657,
+          "r2": 0.0173,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "ci_low": 0.5757,
+          "ci_high": 0.5936,
+          "ci_width": 0.0179,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
+          "embedding_dim": 640,
+          "n_train": 26808,
+          "n_test": 27217
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.5877,
+          "rmse": 0.9067,
+          "r2": 0.1338,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 640
         },
-        "linear_mlp_gap": 0.0005
+        "linear_mlp_gap": 0.0034
       },
       "esm2_650m": {
         "label": "ESM-2 650M",
+        "embedding_sha256": "c293c5c17bd88af8a123e4be2f9878cd4dc17b66b22bb614b0c3d75e405b2570",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.6138,
-          "rmse": 0.9559,
-          "r2": 0.0372,
+          "score": 0.6133,
+          "rmse": 0.9523,
+          "r2": 0.0445,
           "hyperparameter": {
             "alpha": 10.0
           },
           "ci_low": 0.6047,
-          "ci_high": 0.6219,
-          "ci_width": 0.0172,
+          "ci_high": 0.6212,
+          "ci_width": 0.0166,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 1280,
-          "n_train": 21446,
+          "n_train": 26808,
           "n_test": 27217
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.5854,
-          "rmse": 0.8659,
-          "r2": 0.21,
+          "score": 0.597,
+          "rmse": 0.8756,
+          "r2": 0.1922,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1280
         },
-        "linear_mlp_gap": -0.0284
+        "linear_mlp_gap": -0.0163
       },
       "protbert": {
         "label": "ProtBERT",
+        "embedding_sha256": "ef6665c58b70a3f1af03c875a96bd71b433e134e0296f875e967b8c23aaad9a5",
         "linear": {
           "metric": "Spearman rho",
-          "score": 0.6615,
-          "rmse": 1.024,
-          "r2": -0.1049,
+          "score": 0.6622,
+          "rmse": 1.0272,
+          "r2": -0.1118,
           "hyperparameter": {
             "alpha": 10.0
           },
-          "ci_low": 0.6536,
-          "ci_high": 0.67,
-          "ci_width": 0.0164,
+          "ci_low": 0.6545,
+          "ci_high": 0.6706,
+          "ci_width": 0.016,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 1024,
-          "n_train": 21446,
+          "n_train": 26808,
           "n_test": 27217
         },
         "mlp": {
           "metric": "Spearman rho",
-          "score": 0.641,
-          "rmse": 0.8477,
-          "r2": 0.2428,
+          "score": 0.6475,
+          "rmse": 0.8303,
+          "r2": 0.2735,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
-        "linear_mlp_gap": -0.0205
+        "linear_mlp_gap": -0.0147
       }
     },
     "dataset_label": "Fluorescence",
@@ -1403,6 +1527,7 @@
     "models": {
       "kmer5_dna": {
         "label": "5-mer frequency",
+        "embedding_sha256": "3e3ca65f895a5f061aea054ebb177f56f6fce73e22b4c73b4adc8ad36ddf3683",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9304,
@@ -1415,6 +1540,8 @@
           "ci_width": 0.0241,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 1024,
           "n_train": 29872,
           "n_test": 1571
@@ -1424,12 +1551,14 @@
           "score": 0.9283,
           "accuracy": 0.853,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1024
         },
         "linear_mlp_gap": -0.0021
       },
       "nucleotide_transformer": {
         "label": "Nucleotide Transformer 500M",
+        "embedding_sha256": "229f40f91055a2200da3b50bcabbfc3b3b49d8db77cfb956a117186dc07709ee",
         "linear": {
           "metric": "ROC-AUC",
           "score": 0.9363,
@@ -1438,49 +1567,56 @@
             "C": 0.001
           },
           "ci_low": 0.925,
-          "ci_high": 0.947,
+          "ci_high": 0.9469,
           "ci_width": 0.0219,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 1280,
           "n_train": 29872,
           "n_test": 1571
         },
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.9297,
-          "accuracy": 0.8466,
+          "score": 0.9316,
+          "accuracy": 0.8472,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 1280
         },
-        "linear_mlp_gap": -0.0066
+        "linear_mlp_gap": -0.0047
       },
       "hyenadna": {
         "label": "HyenaDNA tiny",
+        "embedding_sha256": "ebd148eafc35fa048f903a7a4bd0c609a7f37447d66411bdab45b525de2f1566",
         "linear": {
           "metric": "ROC-AUC",
-          "score": 0.9381,
-          "accuracy": 0.8581,
+          "score": 0.9382,
+          "accuracy": 0.8568,
           "hyperparameter": {
             "C": 0.1
           },
-          "ci_low": 0.9264,
+          "ci_low": 0.9266,
           "ci_high": 0.9488,
-          "ci_width": 0.0224,
+          "ci_width": 0.0223,
           "n_boot": 1000,
           "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 6000,
           "embedding_dim": 128,
           "n_train": 29872,
           "n_test": 1571
         },
         "mlp": {
           "metric": "ROC-AUC",
-          "score": 0.9403,
-          "accuracy": 0.8631,
+          "score": 0.9397,
+          "accuracy": 0.8593,
           "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
           "embedding_dim": 128
         },
-        "linear_mlp_gap": 0.0022
+        "linear_mlp_gap": 0.0015
       }
     },
     "dataset_label": "Promoters",

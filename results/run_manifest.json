@@ -18,9 +18,9 @@
     "scipy": "1.17.1",
     "scikit_learn": "1.8.0",
     "rdkit": "2023.9.6",
-    "torch": "2.13.0",
-    "torch_build": "2.13.0+cu130",
-    "torch_cuda": "13.0",
+    "torch": "2.8.0+cu128",
+    "torch_build": "2.8.0+cu128",
+    "torch_cuda": "12.8",
     "transformers": "4.50.3",
     "datasets": "2.19.2"
   },
@@ -49,7 +49,7 @@
           "n": 2039,
           "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -72,7 +72,7 @@
           "n": 2039,
           "dim": 210,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -202,7 +202,7 @@
           "n": 1480,
           "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -225,7 +225,7 @@
           "n": 1480,
           "dim": 210,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -355,7 +355,7 @@
           "n": 1513,
           "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -378,7 +378,7 @@
           "n": 1513,
           "dim": 210,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -508,7 +508,7 @@
           "n": 1128,
           "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -531,7 +531,7 @@
           "n": 1128,
           "dim": 210,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -661,7 +661,7 @@
           "n": 4200,
           "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -684,7 +684,7 @@
           "n": 4200,
           "dim": 210,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
@@ -821,8 +821,8 @@
           "inference_seed": null,
           "sha256": "6a503146ea873e1a712039ea1ebe3202ea8cb9b3fc85b6603ea0b8d6a49240b6",
           "embedding_runtime": null,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "not applicable"
+          "inference_precision_policy": "not applicable",
+          "matrix_dtype": "float32"
         },
         "rdkit2d": {
           "model_id": "rdkit2d",
@@ -843,8 +843,8 @@
           "inference_seed": null,
           "sha256": "881130a7fc46a1e1ffe7035ac3b698871f0550726eae4d79f4c1bb73b081840b",
           "embedding_runtime": null,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "not applicable"
+          "inference_precision_policy": "not applicable",
+          "matrix_dtype": "float32"
         },
         "chemberta_77m": {
           "model_id": "chemberta_77m",
@@ -871,8 +871,8 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 175,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
         },
         "chemberta_zinc": {
           "model_id": "chemberta_zinc",
@@ -899,8 +899,8 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 186,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
         },
         "molformer_xl": {
           "model_id": "molformer_xl",
@@ -927,8 +927,8 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 175,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "float32 on all devices"
+          "inference_precision_policy": "float32 on all devices",
+          "matrix_dtype": "float32"
         }
       }
     },
@@ -963,8 +963,8 @@
           "inference_seed": null,
           "sha256": "0b9d559d871e418f61fb42d7c552be78150eb6034d0208c1260d2c454647f80b",
           "embedding_runtime": null,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "not applicable"
+          "inference_precision_policy": "not applicable",
+          "matrix_dtype": "float32"
         },
         "esm2_8m": {
           "model_id": "esm2_8m",
@@ -991,8 +991,8 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 512,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
         },
         "esm2_35m": {
           "model_id": "esm2_35m",
@@ -1019,8 +1019,8 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 512,
-          "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
         },
         "esm2_150m": {
           "model_id": "esm2_150m",
@@ -1047,8 +1047,67 @@
           },
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 512,
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
+        },
+        "esm2_650m": {
+          "model_id": "esm2_650m",
+          "label": "ESM-2 650M",
+          "dataset": "DeepLoc",
+          "kind": "hf",
+          "checkpoint": "facebook/esm2_t33_650M_UR50D",
+          "revision": "08e4846e537177426273712802403f7ba8261b6c",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1280,
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "sha256": "3baac8746a404c7688d1b923e1821019af6f2230ed76819c1d964f9ab3f22caf",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.13.0+cu130",
+            "transformers": "4.50.3"
+          },
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 512,
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "matrix_dtype": "float32"
+        },
+        "protbert": {
+          "model_id": "protbert",
+          "label": "ProtBERT",
+          "dataset": "DeepLoc",
+          "kind": "hf",
+          "checkpoint": "Rostlab/prot_bert",
+          "revision": "7a894481acdc12202f0a415dd567f6cfdb698908",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1024,
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": "UZOB->X",
+          "sha256": "f53122df69c0870f259fbd20d985b80aa80daeca3c7176d5f63811c57f0776f0",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.13.0+cu130",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 512
         }
       }
     },
@@ -1070,14 +1129,22 @@
           "dataset": "Fluorescence",
           "kind": "kmer",
           "checkpoint": null,
+          "revision": null,
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 8000,
-          "pooling": "n/a",
-          "max_length": null,
-          "sha256": "21f7e5a989a66a75",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "not applicable"
+          "inference_precision_policy": "not applicable",
+          "pooling": "n/a",
+          "max_token_length_including_special_tokens": null,
+          "raw_character_limit_before_tokenisation": null,
+          "n_raw_inputs_truncated": null,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "21f7e5a989a66a75d96ab972f757e6a585b8ef442f5f2aef664c7b5d68e336ff",
+          "embedding_runtime": null
         },
         "esm2_8m": {
           "model_id": "esm2_8m",
@@ -1085,14 +1152,30 @@
           "dataset": "Fluorescence",
           "kind": "hf",
           "checkpoint": "facebook/esm2_t6_8M_UR50D",
+          "revision": "c731040fcd8d73dceaa04b0a8e6329b345b0f5df",
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 320,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "d85aaba33a2a73cc",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "cd668da05074cc462c7cac0092b29ce2917f3407e89ef9cf663a14181e35813c",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
         },
         "esm2_35m": {
           "model_id": "esm2_35m",
@@ -1100,14 +1183,30 @@
           "dataset": "Fluorescence",
           "kind": "hf",
           "checkpoint": "facebook/esm2_t12_35M_UR50D",
+          "revision": "6fbf070e65b0b7291e7bbcd451118c216cff79d8",
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 480,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "d7c07da372704db9",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "84fe44c8e35e746467030f093b6ea996b9ede5199832ed2524229e16bc31129d",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
         },
         "esm2_150m": {
           "model_id": "esm2_150m",
@@ -1115,14 +1214,30 @@
           "dataset": "Fluorescence",
           "kind": "hf",
           "checkpoint": "facebook/esm2_t30_150M_UR50D",
+          "revision": "a695f6045e2e32885fa60af20c13cb35398ce30c",
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 640,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "6cd9f0eaa99bd664",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "b15fbaee549017ac05d7d8e8db42905523c08948039d278e524dd773ece11a37",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
         },
         "esm2_650m": {
           "model_id": "esm2_650m",
@@ -1130,14 +1245,30 @@
           "dataset": "Fluorescence",
           "kind": "hf",
           "checkpoint": "facebook/esm2_t33_650M_UR50D",
+          "revision": "08e4846e537177426273712802403f7ba8261b6c",
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 1280,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "987d1338de7f9e20",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "c293c5c17bd88af8a123e4be2f9878cd4dc17b66b22bb614b0c3d75e405b2570",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
         },
         "protbert": {
           "model_id": "protbert",
@@ -1145,14 +1276,30 @@
           "dataset": "Fluorescence",
           "kind": "hf",
           "checkpoint": "Rostlab/prot_bert",
+          "revision": "7a894481acdc12202f0a415dd567f6cfdb698908",
+          "protocol_version": 2,
           "modality": "protein",
           "n": 54025,
           "dim": 1024,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "733d84955516dd70",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": "UZOB->X",
+          "sha256": "ef6665c58b70a3f1af03c875a96bd71b433e134e0296f875e967b8c23aaad9a5",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
         }
       }
     },
@@ -1174,14 +1321,22 @@
           "dataset": "Promoters",
           "kind": "kmer",
           "checkpoint": null,
+          "revision": null,
+          "protocol_version": 2,
           "modality": "genomics",
           "n": 31443,
           "dim": 1024,
-          "pooling": "n/a",
-          "max_length": null,
-          "sha256": "3e3ca65f895a5f06",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "not applicable"
+          "inference_precision_policy": "not applicable",
+          "pooling": "n/a",
+          "max_token_length_including_special_tokens": null,
+          "raw_character_limit_before_tokenisation": null,
+          "n_raw_inputs_truncated": null,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "3e3ca65f895a5f061aea054ebb177f56f6fce73e22b4c73b4adc8ad36ddf3683",
+          "embedding_runtime": null
         },
         "nucleotide_transformer": {
           "model_id": "nucleotide_transformer",
@@ -1189,14 +1344,30 @@
           "dataset": "Promoters",
           "kind": "hf",
           "checkpoint": "InstaDeepAI/nucleotide-transformer-500m-human-ref",
+          "revision": "f87b5d7233295242e79c951873d290f4cf992045",
+          "protocol_version": 2,
           "modality": "genomics",
           "n": 31443,
           "dim": 1280,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "9861d46a490272b7",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "229f40f91055a2200da3b50bcabbfc3b3b49d8db77cfb956a117186dc07709ee",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 51
         },
         "hyenadna": {
           "model_id": "hyenadna",
@@ -1204,22 +1375,51 @@
           "dataset": "Promoters",
           "kind": "hf",
           "checkpoint": "LongSafari/hyenadna-tiny-1k-seqlen-hf",
+          "revision": "e8c1effa8673814e257e627d2e1eda9ea5a373f6",
+          "protocol_version": 2,
           "modality": "genomics",
           "n": 31443,
           "dim": 128,
-          "pooling": "mean over non-padding tokens",
-          "max_length": 512,
-          "sha256": "002c34ad6cc79dd1",
           "matrix_dtype": "float32",
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable"
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "ebd148eafc35fa048f903a7a4bd0c609a7f37447d66411bdab45b525de2f1566",
+          "embedding_runtime": {
+            "python": "3.11.15",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 301
         }
       }
     }
   },
   "public_artifacts": {
-    "benchmark_results.json": "615d1c637635d2b1462538823941fa036f28310991852a983b519d44989cce8c",
-    "paired_comparisons.json": "ab1dddc0dd47fb355e7422487a6235ded18f5d0e53b56b61000ace0aa48de895"
+    "benchmark_results.json": "a4dc8dd863aa01d89c670e408de87ebabdf64005f95188b288b0e262b7dc9637",
+    "paired_comparisons.json": "e59647c292216a53e9365ed47a893c50e7f651262034364ea22724fe78b5f369",
+    "exposure_report.json": "33d7433069febe7d45b7729cdd9bd57e927873ce462859ad10c0e6b9272e8117",
+    "split_seed_sensitivity.json": "e5559fc32f8c9b81715e563ed77a58ecb29004bebe3eb3a2f51d1ee44f63574f",
+    "resolution_curves.json": "79b596e786cf902edf0fdf5d9bf483d43d47b76cbfe4e0a969b3e9e37e18e2bb"
   },
-  "prediction_artifacts": {},
-  "benchmark_results_sha256": "615d1c637635d2b1462538823941fa036f28310991852a983b519d44989cce8c"
+  "prediction_artifacts": {
+    "predictions/BBBP.npz": "14c4cbcac07d3161671f08c41d02b0efe941e741d94d19015824051463d79d21",
+    "predictions/ClinTox.npz": "ce50e6f9b6dcc2cef0d1de5d04b5e9c07346d0ca5b0df6ac7cdbcb99005a9d4b",
+    "predictions/BACE.npz": "fbf401a51a30c3f910c7259195934239a02259706980ba4783933fd8ca24f84d",
+    "predictions/ESOL.npz": "901938b80a3588b4c013a2dfcb0071f4c9cbd99be36a084d64560903b3c5814f",
+    "predictions/Lipophilicity.npz": "564259ed1fc00ad54096ad15a14b1fef9c44a092a1996a900ab7f58ab8647e37",
+    "predictions/CYP3A4.npz": "3d1552247ec5dc85946d84fe662d08dfd3f9300af6f8eb149422bb83ec85ed75",
+    "predictions/DeepLoc.npz": "553fb43fa0565c4a9d66c10a3f9404c5214592f89959af131e775e544b9f2da8",
+    "predictions/Fluorescence.npz": "cb129255deaaed83c10c529d1a878eaa3ccb682fa3c25af4d61e6202aa002876",
+    "predictions/Promoters.npz": "648bc2ef4c4920f112c787c970ff9484b3c6ee470fdcb11c361d5479ac90295f"
+  },
+  "benchmark_results_sha256": "a4dc8dd863aa01d89c670e408de87ebabdf64005f95188b288b0e262b7dc9637"
 }

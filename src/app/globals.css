@@ -30,7 +30,8 @@
   --glow-purple: 0 0 25px rgba(168, 85, 247, 0.15);
   --glow-indigo: 0 0 25px rgba(99, 102, 241, 0.15);
   
-  --font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-outfit), 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 /* Base resets & fonts */
