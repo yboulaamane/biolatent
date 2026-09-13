@@ -31,7 +31,7 @@ import {
  */
 
 const CORPUS_LABELS: Record<string, string> = {
-  zinc: 'ZINC', pubchem: 'PubChem', swissprot: 'Swiss-Prot',
+  zinc: 'ZINC', pubchem: 'PubChem', chembl: 'ChEMBL', swissprot: 'Swiss-Prot',
   uniref50: 'UniRef50', uniref100: 'UniRef100',
   human_ref_genome: 'human reference genome',
 };
@@ -316,9 +316,18 @@ function ExposurePanel() {
                 );
               };
               const structural = Object.keys(e.structural);
+              const unmeasured = Object.entries(e.unmeasured ?? {});
               const affected = [...new Set(Object.values(e.empirical)
                 .flatMap((value) => value.affected_models ?? []))]
                 .map((model) => MODEL_LABELS[model] ?? model);
+              const note = structural.length > 0
+                ? `${structural.map((s) => CORPUS_LABELS[s] ?? s).join(', ')}: input exposure by construction; labels not implied`
+                : affected.length > 0 ? `proxy applies to declared corpora for ${affected.join(', ')}` : '';
+              const missing = unmeasured.map(([corpus, value]) => {
+                const models = value.affected_models
+                  .map((model) => MODEL_LABELS[model] ?? model).join(', ');
+                return `${CORPUS_LABELS[corpus] ?? corpus}: unmeasured for ${models}`;
+              }).join('; ');
               return (
                 <tr key={task}>
                   <td style={{ color: '#fff', fontWeight: 600 }}>{task}</td>
@@ -329,9 +338,7 @@ function ExposurePanel() {
                   <td style={{ textAlign: 'right' }}>{cell('pubchem')}</td>
                   <td style={{ textAlign: 'right' }}>{cell('swissprot')}</td>
                   <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    {structural.length > 0
-                      ? `${structural.map((s) => CORPUS_LABELS[s] ?? s).join(', ')}: input exposure by construction; labels not implied`
-                      : affected.length > 0 ? `proxy applies to declared corpora for ${affected.join(', ')}` : ''}
+                    {[note, missing].filter(Boolean).join('; ')}
                   </td>
                 </tr>
               );

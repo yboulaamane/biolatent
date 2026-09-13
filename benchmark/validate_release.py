@@ -132,8 +132,9 @@ def main(full_hash=False):
             assert not train_groups.intersection(test_groups), \
                 f"{task}: molecular scaffold overlap"
 
-        expected_models = {model for model, spec in embed.MODEL_REGISTRY.items()
-                           if spec["modality"] == data["modality"]}
+        expected_models = {model for model in embed.MODEL_REGISTRY
+                           if embed.is_applicable(
+                               model, task, data["modality"])}
         assert set(result["models"]) == expected_models
         for model, cell in result["models"].items():
             linear = cell["linear"]

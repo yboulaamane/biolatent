@@ -7,6 +7,7 @@ so BioLatent records that 512-dimensional vector, not the training-only
 contrastive projection.
 """
 
+import importlib.util
 import os
 import subprocess
 import sys
@@ -121,9 +122,16 @@ def embed(smiles_list, batch_size=256):
     from torch_geometric.loader import DataLoader
 
     checkpoint = _verify_source()
-    if SOURCE_DIR not in sys.path:
-        sys.path.insert(0, SOURCE_DIR)
-    from models.ginet_molclr import GINet
+    module_path = os.path.join(SOURCE_DIR, "models", "ginet_molclr.py")
+    module_spec = importlib.util.spec_from_file_location(
+        "biolatent_official_molclr_ginet", module_path
+    )
+    if module_spec is None or module_spec.loader is None:
+        raise RuntimeError(f"Cannot load the pinned MolCLR model from {module_path}")
+    module = importlib.util.module_from_spec(module_spec)
+    sys.modules[module_spec.name] = module
+    module_spec.loader.exec_module(module)
+    GINet = module.GINet
 
     torch.manual_seed(42)
     if torch.cuda.is_available():

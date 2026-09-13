@@ -217,7 +217,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     license: "MIT",
     architectureType: "GNN + Transformer",
     pretrainingObjective: "Masked subgraph node/edge classification",
-    embeddingDimension: 1000,
+    embeddingDimension: 3200,
     yearReleased: 2020,
     trainingData: {
       name: "ZINC15 & ChEMBL",
@@ -247,7 +247,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     license: "MIT",
     architectureType: "GNN + Transformer",
     pretrainingObjective: "Masked subgraph node/edge classification (Larger params)",
-    embeddingDimension: 2000,
+    embeddingDimension: 4800,
     yearReleased: 2020,
     trainingData: {
       name: "ZINC15 & ChEMBL",

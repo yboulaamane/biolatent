@@ -23,6 +23,9 @@ Corpus coverage is uneven and the report says so per row:
   construction, so the audit records the structural claim instead of a
   misleading percentage. This is input exposure, not evidence that downstream
   labels were seen during pretraining.
+* **ChEMBL** is declared for GROVER but no local ChEMBL snapshot is available.
+  It is listed as unmeasured rather than silently represented by another
+  chemical database.
 
 A corpus is never reported both ways. Once it has an empirical measurement the
 structural claim is dropped, so a reader is not offered a percentage and a
@@ -69,6 +72,11 @@ STRUCTURAL = {
                          "assembly used for pretraining, so the benchmark inputs "
                          "are exposed by construction. This does not imply label "
                          "exposure."),
+}
+
+UNMEASURED = {
+    "chembl": ("No pinned local ChEMBL snapshot is available; the ZINC proxy "
+               "covers only the other declared GROVER pretraining source."),
 }
 
 # Declared-corpus name -> the corpus actually sampled in the empirical audit.
@@ -176,6 +184,35 @@ def _structural_for(modality, empirical):
     return out
 
 
+def _unmeasured_for(modality):
+    if modality != "molecule":
+        return {}
+    return {
+        corpus: {
+            "affected_models": [model for model, corpora in DECLARED_CORPORA.items()
+                                if corpus in corpora],
+            "reason": reason,
+        }
+        for corpus, reason in UNMEASURED.items()
+        if any(corpus in corpora for corpora in DECLARED_CORPORA.values())
+    }
+
+
+def refresh_model_mapping():
+    """Refresh model names without recomputing model-independent overlaps."""
+    with open(REPORT_PATH) as handle:
+        report = json.load(handle)
+    for entry in report["tasks"].values():
+        for corpus, empirical in entry.get("empirical", {}).items():
+            empirical["affected_models"] = affected_models(corpus)
+        entry["unmeasured"] = _unmeasured_for(entry["modality"])
+    temporary = f"{REPORT_PATH}.{os.getpid()}.tmp"
+    with open(temporary, "w") as handle:
+        json.dump(report, handle, indent=2)
+    os.replace(temporary, REPORT_PATH)
+    print(f"Refreshed model-to-corpus mapping in {REPORT_PATH}", flush=True)
+
+
 def main(sample_n, task_names=None):
     tasks = task_names or ALL_DATASETS
     unknown = sorted(set(tasks) - set(ALL_DATASETS))
@@ -222,7 +259,8 @@ def main(sample_n, task_names=None):
         data = load_benchmark_dataset(task)
         test_inputs = [data["inputs"][i] for i in data["test_idx"]]
         entry = {"modality": data["modality"], "n_test": len(test_inputs),
-                 "empirical": {}, "structural": {}}
+                 "empirical": {}, "structural": {},
+                 "unmeasured": _unmeasured_for(data["modality"])}
 
         if data["modality"] == "molecule":
             for corpus_name, corpus in mol_corpora.items():
@@ -288,6 +326,13 @@ def _measure(mask, basis):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", type=int, default=200000)
+    ap.add_argument("--refresh-model-mapping", action="store_true",
+                    help="update declared model names without recomputing overlaps")
     ap.add_argument("tasks", nargs="*", help="optional task names to refresh")
     args = ap.parse_args()
-    main(args.sample, args.tasks or None)
+    if args.refresh_model_mapping:
+        if args.tasks:
+            ap.error("--refresh-model-mapping does not accept task names")
+        refresh_model_mapping()
+    else:
+        main(args.sample, args.tasks or None)

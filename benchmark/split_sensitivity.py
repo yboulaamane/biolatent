@@ -44,8 +44,8 @@ def main():
             # score, so its final fit likewise uses train + validation.
             final_train = np.concatenate([train, validation])
             scores = {}
-            for model_id, spec in embed.MODEL_REGISTRY.items():
-                if spec["modality"] != "molecule":
+            for model_id in embed.MODEL_REGISTRY:
+                if not embed.is_applicable(model_id, task, "molecule"):
                     continue
                 path = embed.cache_path(model_id, task)
                 if not os.path.exists(path):
