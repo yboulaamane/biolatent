@@ -5,6 +5,42 @@ This proposal outlines the strategic transition of **BioLatent** from a literatu
 
 Instead of end-to-end model fine-tuning, BioLatent adopts a **Frozen Embedding Probing** methodology. This decouples one-time representation generation from downstream evaluation. Repeated probing is CPU-only, but neither embedding generation nor evaluation is described as universally free or sub-90-second.
 
+## Representation inclusion rule
+
+The literature registry is broader than the measured benchmark. A registry
+entry enters the frozen benchmark only when all of the following are true
+before its task scores are examined:
+
+1. An official, publicly released checkpoint and inference implementation can
+   be pinned by revision and file hash.
+2. The checkpoint produces one deterministic, task-independent vector from the
+   benchmark's native object input without fitting on benchmark labels.
+3. Its native featuriser can represent every object in a task. An unsupported
+   chemistry or input type makes that model-task cell N/A; rows are not dropped,
+   imputed, or chemically rewritten to make a model run.
+4. The extracted layer, pooling, precision, truncation, software environment,
+   and any native conformer fallback are recorded with the matrix.
+5. Model choice and extraction policy are fixed before inspecting downstream
+   test performance. Failed or inconvenient cells remain absent rather than
+   being replaced by a related model.
+
+Consequently, supervised task-trained systems such as the standard Chemprop
+D-MPNN and ChemXTree are not frozen-representation comparators. They may be
+reported later in a separately labelled end-to-end track, with their own
+nested model-selection protocol, but their scores must not enter the frozen
+embedding ranking or its multiple-testing family. The registry's
+"Supervised + ContextPred" checkpoint is also excluded because its supervised
+pretraining task family overlaps the downstream MoleculeNet endpoints.
+
+The graph-encoder expansion is pre-specified as Uni-Mol v1, MolCLR GIN, and
+GROVER Base/Large. Uni-Mol uses the pinned official molecular checkpoint and a
+fixed mean atom readout. MolCLR uses the 512-dimensional encoder feature before
+its contrastive projection head; its ClinTox cell is N/A because the official
+featuriser cannot encode all real ClinTox structures, including dative bonds.
+GROVER uses the official `both` fingerprint, concatenating its atom- and
+bond-view mean readouts. Graphormer is deferred until its legacy Fairseq stack
+and checkpoint can be reproduced without an implementation substitution.
+
 ---
 
 ## 1. Core Architecture & Methodology
