@@ -17,7 +17,7 @@ import numpy as np
 
 SOURCE_DIR = os.environ.get(
     "BIOLATENT_MOLCLR_SOURCE",
-    "/home/yboulaamane/biolatent_model_sources/MolCLR",
+    os.path.expanduser("~/biolatent_model_sources/MolCLR"),
 )
 SOURCE_COMMIT = "3d3bc1912be27b0c97435fd9134f4d4c73d4c5ab"
 CHECKPOINT_RELATIVE_PATH = "ckpt/pretrained_gin/checkpoints/model.pth"

@@ -8,7 +8,9 @@
 # version can move a ROC-AUC in the third decimal without any error.
 #
 # MoLFormer-XL does NOT run here. It needs transformers >= 5, which the rest of
-# the pipeline is not pinned to; see setup_molformer_env.sh.
+# the pipeline is not pinned to; see setup_molformer_env.sh. Uni-Mol and the
+# MolCLR/GROVER graph adapters also use isolated compatibility environments;
+# their interpreters and official source trees are documented in README.md.
 
 # CUDA 12.8 is the newest build supported by the benchmark GPU nodes' driver.
 # Keep the explicit local-version suffix so pip cannot silently select a CUDA

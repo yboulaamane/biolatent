@@ -21,7 +21,9 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = ROOT / "BioLatent_methods.docx"
+TEMPLATE = Path(os.environ.get(
+    "BIOLATENT_MANUSCRIPT_TEMPLATE", ROOT / "BioLatent_methods.docx"
+))
 OUTPUT = ROOT / "paper" / "BioLatent_methods_revised.docx"
 TASK_ORDER = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
               "DeepLoc", "Fluorescence", "Promoters"]
@@ -108,8 +110,19 @@ def add_body(document, text, style=None):
     return paragraph
 
 
+def available_style(document, preferred, fallback="Normal"):
+    """Use a template style when present without making it a requirement."""
+    try:
+        document.styles[preferred]
+        return preferred
+    except KeyError:
+        return fallback
+
+
 def add_caption(document, text):
-    paragraph = document.add_paragraph(text, style="Caption")
+    paragraph = document.add_paragraph(
+        text, style=available_style(document, "Caption")
+    )
     paragraph.paragraph_format.keep_with_next = True
     return paragraph
 
@@ -231,7 +244,10 @@ def build():
 
     model_count, cell_count = score_summary(results, TASK_ORDER)
     inference = inference_summary(results, paired)
-    document = Document(TEMPLATE)
+    # The local house-style template is optional and intentionally not part of
+    # the public repository. A clean clone must still be able to generate the
+    # complete manuscript with python-docx's standard document styles.
+    document = Document(TEMPLATE) if TEMPLATE.exists() else Document()
     clear_body(document)
     document.core_properties.title = (
         "Resolution and uncertainty in a cross-modal frozen-embedding benchmark")
@@ -246,7 +262,10 @@ def build():
     title.add_run("What can a frozen-embedding benchmark resolve? ")
     title.add_run("A validation-selected, uncertainty-aware comparison of molecular, "
                   "protein and genomic representations")
-    author = document.add_paragraph("Yassir Boulaamane", style="Author")
+    author = document.add_paragraph(
+        "Yassir Boulaamane",
+        style=available_style(document, "Author", "Subtitle"),
+    )
     author.alignment = WD_ALIGN_PARAGRAPH.CENTER
     affiliation = document.add_paragraph(
         "Àrea de Química Física, Departament de Química, Universitat Autònoma de "
@@ -255,7 +274,9 @@ def build():
     email = document.add_paragraph("Correspondence: yassir.boulaamane@uab.cat")
     email.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    document.add_paragraph("Abstract", style="Abstract Title")
+    document.add_paragraph(
+        "Abstract", style=available_style(document, "Abstract Title", "Heading 1")
+    )
     abstract = (
         f"Published representation leaderboards often combine scores produced under "
         f"different splits, pooling rules and downstream heads. We evaluated {model_count} "
@@ -280,7 +301,9 @@ def build():
         f"under a specified pooling and truncation protocol, not intrinsic representation "
         f"quality. Its value is a reproducible cross-modal estimate with uncertainty and "
         f"provenance, rather than another single-number leaderboard.")
-    document.add_paragraph(abstract, style="Abstract")
+    document.add_paragraph(
+        abstract, style=available_style(document, "Abstract")
+    )
     add_body(document, "Keywords: frozen embeddings; linear probing; molecular property "
              "prediction; protein language models; genomic foundation models; paired "
              "randomisation; benchmark uncertainty")
@@ -617,7 +640,9 @@ def build():
         ("[19] Rong Y et al. Self-supervised graph transformer on large-scale molecular data. NeurIPS. 2020;33:12559-12571. ", "https://doi.org/10.48550/arXiv.2007.02835"),
     ]
     for text, url in references:
-        paragraph = document.add_paragraph(style="Bibliography")
+        paragraph = document.add_paragraph(
+            style=available_style(document, "Bibliography")
+        )
         paragraph.add_run(text)
         add_hyperlink(paragraph, url.replace("https://doi.org/", "doi:"), url)
 

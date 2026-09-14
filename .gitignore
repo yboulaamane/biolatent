@@ -50,7 +50,7 @@ paper.out
 *.synctex.gz
 
 # source papers — fetched locally for verification, never committed
-# (publisher PDFs are not redistributable; all are freely downloadable — see TODO_VERIFY.md)
+# (publisher PDFs are not redistributable; see BENCHMARK_VERIFICATION.md)
 *.pdf
 *.pdf:Zone.Identifier
 __pycache__/

@@ -16,10 +16,24 @@ In computer-aided drug discovery and computational biology, the landscape of fou
 
 The website keeps two evidence surfaces separate. The **Literature Registry** transcribes values from source publications and explicitly warns that their protocols differ. The **Measured Benchmark** recomputes frozen embeddings under one local protocol and reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. Values from the two surfaces must not be mixed.
 
+### Measured release snapshot
+
+The validated 2026-09-14 release contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed.
+
+| Modality | Tasks | Measured cells | Study-wide resolved comparisons |
+|---|---:|---:|---:|
+| Molecules | 6 | 53 | 14 of 47 |
+| Proteins | 2 | 12 | 10 of 10 |
+| Genomics | 1 | 3 | 0 of 2 |
+
+“Resolved” means that a paired comparison with the validation-selected reference survived Holm correction across all 59 primary comparisons. It does not mean that unresolved representations are equivalent, and the scores are not comparable across tasks that use different metrics. See [`STUDY.md`](STUDY.md) for the complete results and interpretation.
+
+The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer-XL, Uni-Mol v1, MolCLR GIN, and GROVER Base/Large. MolCLR is intentionally N/A on ClinTox because its official featurizer cannot represent every structure; no molecule was removed or rewritten to force that cell. Supervised task-trained systems such as standard Chemprop and ChemXTree are outside the frozen-representation estimand, while Graphormer is deferred until its legacy official stack can be reproduced without approximation.
+
 ### Key Features
 1. **Interactive Registry**: Browse, filter, and search representations by modality, licensing, pretraining sizes, and compute requirements.
 2. **Compatibility Finder**: An objective catalog filter for modality, available input representation, and declared CPU/GPU profile. Results are alphabetical rather than ranked and must be validated on the user’s endpoint.
-3. **Interactive Benchmark Chart**: A log-scale SVG scatter plot mapping embedding dimensions against standard benchmarks (MoleculeNet BBBP classification for molecules, and Q3 accuracy on CB513 for proteins).
+3. **Interactive Literature Chart**: A log-scale SVG scatter plot mapping embedding dimensions against selected literature-reported benchmarks. These heterogeneous values are descriptive and separate from the measured study.
 4. **Curated Methods & Citations**: Collapsible details providing direct links to primary literature papers (e.g. TDC, MoleculeNet, FLIP).
 5. **Programmatic JSON API**: Exposes query-parameter filters to fetch representation metadata dynamically (e.g. `/api/representations?modality=protein`).
 6. **Reproducible Measured Study**: Imports public JSON artefacts produced by the benchmark scripts, with checkpoint revisions, dataset hashes, pooling, truncation, and software versions recorded in `results/run_manifest.json`.
@@ -41,7 +55,7 @@ Fetch all curated representations or filter them programmatically using query pa
 
 #### Example Request
 ```bash
-curl "https://biolatent.org/api/representations?modality=molecule&representationType=learned_embedding"
+curl "https://biolatent.org/api/representations?search=ChemBERTa-2&modality=molecule&representationType=learned_embedding"
 ```
 
 #### Example Response
@@ -112,9 +126,28 @@ curl "https://biolatent.org/api/representations?modality=molecule&representation
 
 The raw datasets and embedding matrices are regenerated locally and are intentionally not committed. Public outputs in `results/` drive both the manuscript and website.
 
+Install the pinned main evaluation environment first. The supplied requirements target the CUDA 12.8 environment used for this release; CPU-only or other CUDA systems need the matching PyTorch wheel while retaining the recorded package versions where possible.
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install -r benchmark/requirements.txt
+```
+
+Most Hugging Face checkpoints download automatically at their pinned revisions. Four molecular encoders use isolated compatibility environments or official external source trees:
+
+| Encoder | Required configuration |
+|---|---|
+| MoLFormer-XL | Run `benchmark/setup_molformer_env.sh`, or provide the resulting interpreter at `~/biolatent_molformer_env/bin/python`. |
+| Uni-Mol v1 | Set `BIOLATENT_UNIMOL_PYTHON` to an interpreter containing `unimol_tools==0.1.6`; the adapter verifies the official weight and dictionary hashes. |
+| MolCLR GIN | Set `BIOLATENT_GRAPH_PYTHON` and `BIOLATENT_MOLCLR_SOURCE`; the source checkout and official checkpoint must match the revision and hash pinned in the adapter. |
+| GROVER Base/Large | Set `BIOLATENT_GRAPH_PYTHON`, `BIOLATENT_GROVER_SOURCE`, and `BIOLATENT_GROVER_CHECKPOINT_DIR`; both official checkpoints are hash-verified. |
+
+The exact source commits, checkpoint URLs, hashes, pooling policies, and expected dimensions are enforced in [`benchmark/embed.py`](benchmark/embed.py), [`benchmark/molclr_adapter.py`](benchmark/molclr_adapter.py), and [`benchmark/grover_adapter.py`](benchmark/grover_adapter.py). Environment variables override portable defaults under the current user's home directory; no machine-specific path is required.
+
 ```bash
 python benchmark/download_real_datasets.py
-python benchmark/run_study.py --embeddings-only  # optional cache-only stage
+python benchmark/run_study.py --embeddings-only
 python benchmark/run_study.py
 python benchmark/paired_test.py
 python benchmark/run_leakage.py --sample 200000
@@ -125,13 +158,15 @@ python benchmark/validate_release.py --full-hash
 python paper/generate_manuscript.py
 ```
 
-The final manuscript is written to `paper/BioLatent_methods_revised.docx`; the retained source template stays local.
+The final manuscript is written to `paper/BioLatent_methods_revised.docx`. If the optional local `BioLatent_methods.docx` template is present it supplies the house style; a clean clone falls back to a standard Word document.
 
 MoLFormer requires its compatibility environment once:
 
 ```bash
 bash benchmark/setup_molformer_env.sh /path/to/project/python
 ```
+
+The full-hash release gate requires the regenerated embedding matrices and their sidecars. It reloads all nine datasets, checks split disjointness and provenance, verifies every matrix hash, and recomputes the ranked metric from the saved predictions. The committed public results can be inspected without downloading the local embedding cache.
 
 ## Curation methodology
 

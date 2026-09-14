@@ -50,7 +50,7 @@ UNIMOL_ENV = os.environ.get(
 )
 GRAPH_ENV = os.environ.get(
     "BIOLATENT_GRAPH_PYTHON",
-    "/home/yboulaamane/biolatent_graph_env/bin/python",
+    os.path.expanduser("~/biolatent_graph_env/bin/python"),
 )
 
 # ---------------------------------------------------------------------------
