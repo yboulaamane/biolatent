@@ -10,7 +10,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -39,7 +42,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -66,7 +70,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "ClinTox": {
       "modality": "molecule",
@@ -75,7 +88,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -104,7 +120,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -131,7 +148,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "BACE": {
       "modality": "molecule",
@@ -140,7 +166,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -169,7 +198,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -196,7 +226,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "ESOL": {
       "modality": "molecule",
@@ -205,7 +244,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -234,7 +276,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -261,7 +304,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "Lipophilicity": {
       "modality": "molecule",
@@ -270,7 +322,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -299,7 +354,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -326,7 +382,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "CYP3A4": {
       "modality": "molecule",
@@ -335,7 +400,10 @@
         "zinc": {
           "affected_models": [
             "chemberta_zinc",
-            "molformer_xl"
+            "molformer_xl",
+            "unimol_v1",
+            "grover_base",
+            "grover_large"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -364,7 +432,8 @@
         "pubchem": {
           "affected_models": [
             "chemberta_77m",
-            "molformer_xl"
+            "molformer_xl",
+            "molclr_gin"
           ],
           "sample_role": "random 200,000-molecule database sample used as an exposure proxy; not the checkpoint's exact training subset",
           "measures": {
@@ -391,7 +460,16 @@
           }
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {
+        "chembl": {
+          "affected_models": [
+            "grover_base",
+            "grover_large"
+          ],
+          "reason": "No pinned local ChEMBL snapshot is available; the ZINC proxy covers only the other declared GROVER pretraining source."
+        }
+      }
     },
     "DeepLoc": {
       "modality": "protein",
@@ -410,7 +488,8 @@
           "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% coverage against all of Swiss-Prot. This is a homology exposure proxy for UniRef50/UniRef100, not confirmation of exact checkpoint training membership."
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {}
     },
     "Fluorescence": {
       "modality": "protein",
@@ -429,7 +508,8 @@
           "basis": "MMseqs2 alignment at >=50% sequence identity and >=50% coverage against all of Swiss-Prot. This is a homology exposure proxy for UniRef50/UniRef100, not confirmation of exact checkpoint training membership."
         }
       },
-      "structural": {}
+      "structural": {},
+      "unmeasured": {}
     },
     "Promoters": {
       "modality": "genomics",
@@ -443,7 +523,8 @@
           ],
           "claim": "Promoter sequences are excerpts of the human reference assembly used for pretraining, so the benchmark inputs are exposed by construction. This does not imply label exposure."
         }
-      }
+      },
+      "unmeasured": {}
     }
   }
 }

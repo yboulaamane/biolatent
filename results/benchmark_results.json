@@ -170,6 +170,130 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0093
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "23484cbc640ed51c0b91abf99ba5498f4db48c1b0075251f48b7ca07aad1310f",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.909,
+          "accuracy": 0.8488,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.8609,
+          "ci_high": 0.9457,
+          "ci_width": 0.0848,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
+          "embedding_dim": 512,
+          "n_train": 1834,
+          "n_test": 205
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.907,
+          "accuracy": 0.8488,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.002
+      },
+      "molclr_gin": {
+        "label": "MolCLR GIN (encoder feature)",
+        "embedding_sha256": "e7b791555ba3a3e6f6cd3c61f9e1b7952643ac235ba7dda6e7f45a0eaf3719cc",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8839,
+          "accuracy": 0.7756,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.8141,
+          "ci_high": 0.9285,
+          "ci_width": 0.1144,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
+          "embedding_dim": 512,
+          "n_train": 1834,
+          "n_test": 205
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9285,
+          "accuracy": 0.8439,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": 0.0446
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "7332f1e8d0f1eefeb5b86fd43df0876731d0b6200bf2f41d829b9a43c964938d",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.9182,
+          "accuracy": 0.878,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.8665,
+          "ci_high": 0.9561,
+          "ci_width": 0.0897,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
+          "embedding_dim": 3200,
+          "n_train": 1834,
+          "n_test": 205
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.9021,
+          "accuracy": 0.8488,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": -0.0161
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "6544a675f6955c200cf931d81fee5b60dbe065f8790f4641eb36b4c46ba95609",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.934,
+          "accuracy": 0.878,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.8916,
+          "ci_high": 0.9664,
+          "ci_width": 0.0748,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1834,
+          "embedding_dim": 4800,
+          "n_train": 1834,
+          "n_test": 205
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8947,
+          "accuracy": 0.839,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.0393
       }
     }
   },
@@ -355,6 +479,105 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.006
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "1a740780a4df3adfa72cfb39a1e2335f3235ad15288c4484bd559ccaf7945a14",
+        "linear": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.6755,
+          "subset_accuracy": 0.9189,
+          "macro_f1": 0.6138,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "ci_low": 0.467,
+          "ci_high": 0.8554,
+          "ci_width": 0.3883,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
+          "embedding_dim": 512,
+          "n_train": 1332,
+          "n_test": 148
+        },
+        "mlp": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.6148,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.4807,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.0607
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "3d1389e1bb63335263969c6ed27dcf93105ff968f9dc94c822fe624b0305d3bf",
+        "linear": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8879,
+          "subset_accuracy": 0.9324,
+          "macro_f1": 0.5657,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.7994,
+          "ci_high": 0.9578,
+          "ci_width": 0.1584,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
+          "embedding_dim": 3200,
+          "n_train": 1332,
+          "n_test": 148
+        },
+        "mlp": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8484,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.6821,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": -0.0395
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "de9ea8786030334ad8978718272486a73a4b08c686b68e6aa5347f248fa2198b",
+        "linear": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8889,
+          "subset_accuracy": 0.9324,
+          "macro_f1": 0.6715,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.7897,
+          "ci_high": 0.971,
+          "ci_width": 0.1813,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1332,
+          "embedding_dim": 4800,
+          "n_train": 1332,
+          "n_test": 148
+        },
+        "mlp": {
+          "metric": "Macro ROC-AUC",
+          "score": 0.8276,
+          "subset_accuracy": 0.9257,
+          "macro_f1": 0.7173,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.0613
       }
     }
   },
@@ -529,6 +752,130 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": 0.0075
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "09811e04887c27c573c1fa7d79023abb8cec88d64a4771463ff4a7bc43da4270",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8156,
+          "accuracy": 0.7434,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.7239,
+          "ci_high": 0.8907,
+          "ci_width": 0.1668,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 512,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.7967,
+          "accuracy": 0.7368,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.0189
+      },
+      "molclr_gin": {
+        "label": "MolCLR GIN (encoder feature)",
+        "embedding_sha256": "c0bf6849314b6db2198fe991e15e3e921e582410587cd1d5284f8e2227292ee9",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8203,
+          "accuracy": 0.75,
+          "hyperparameter": {
+            "C": 1.0
+          },
+          "ci_low": 0.7287,
+          "ci_high": 0.8953,
+          "ci_width": 0.1667,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 512,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8326,
+          "accuracy": 0.7303,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": 0.0123
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "8a14025df140c479bdc83b6ee9b16454c0703ca18d2c44d72a040e259d10f403",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.885,
+          "accuracy": 0.8224,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "ci_low": 0.8019,
+          "ci_high": 0.95,
+          "ci_width": 0.1481,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 3200,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.819,
+          "accuracy": 0.7303,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": -0.066
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "28d8672b8b935e94974e01b14e85bc656542151e58ff5c2ba727f946657ed480",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.8817,
+          "accuracy": 0.7961,
+          "hyperparameter": {
+            "C": 0.1
+          },
+          "ci_low": 0.7943,
+          "ci_high": 0.9493,
+          "ci_width": 0.155,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1361,
+          "embedding_dim": 4800,
+          "n_train": 1361,
+          "n_test": 152
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.8419,
+          "accuracy": 0.75,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.0398
       }
     }
   },
@@ -713,6 +1060,138 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0275
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "8bf0082564baf280a928c7cc0a059e8952b201a0df3f4c223f12688692ae088c",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.8906,
+          "rmse": 0.936,
+          "r2": 0.8171,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "ci_low": 0.812,
+          "ci_high": 0.9283,
+          "ci_width": 0.1162,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
+          "embedding_dim": 512,
+          "n_train": 1014,
+          "n_test": 114
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8761,
+          "rmse": 0.9857,
+          "r2": 0.7972,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.0145
+      },
+      "molclr_gin": {
+        "label": "MolCLR GIN (encoder feature)",
+        "embedding_sha256": "82a6d87e43464a286c2f25134762aeded99abdb61d08af979ad3c5b1745bb810",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6052,
+          "rmse": 1.6414,
+          "r2": 0.4376,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "ci_low": 0.4131,
+          "ci_high": 0.7294,
+          "ci_width": 0.3163,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
+          "embedding_dim": 512,
+          "n_train": 1014,
+          "n_test": 114
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6321,
+          "rmse": 1.5922,
+          "r2": 0.4708,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": 0.0269
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "ebc96423256e19a281ee1d0f5ba80576a73f16066e8526ff14f440ff162edc6b",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.9128,
+          "rmse": 0.9618,
+          "r2": 0.8069,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "ci_low": 0.8336,
+          "ci_high": 0.9499,
+          "ci_width": 0.1162,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
+          "embedding_dim": 3200,
+          "n_train": 1014,
+          "n_test": 114
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.928,
+          "rmse": 0.8885,
+          "r2": 0.8352,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": 0.0152
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "f82cbcad0666da8f06e4c52b49fefdabec35e06fcff6f9a7820b7cbe04b64521",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.9153,
+          "rmse": 0.9672,
+          "r2": 0.8047,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "ci_low": 0.8392,
+          "ci_high": 0.9503,
+          "ci_width": 0.1111,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 1014,
+          "embedding_dim": 4800,
+          "n_train": 1014,
+          "n_test": 114
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.8954,
+          "rmse": 1.0417,
+          "r2": 0.7735,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.0199
       }
     }
   },
@@ -897,6 +1376,138 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": 0.004
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "14dec82d1b1c13fc4b5a0599a40a6a708bf6a19986880829b632ac3a65c973f2",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.6055,
+          "rmse": 0.8721,
+          "r2": 0.4691,
+          "hyperparameter": {
+            "alpha": 100.0
+          },
+          "ci_low": 0.4985,
+          "ci_high": 0.706,
+          "ci_width": 0.2075,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
+          "embedding_dim": 512,
+          "n_train": 3780,
+          "n_test": 420
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.636,
+          "rmse": 0.8861,
+          "r2": 0.4519,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": 0.0305
+      },
+      "molclr_gin": {
+        "label": "MolCLR GIN (encoder feature)",
+        "embedding_sha256": "8d57d34bade15a48e51d871daae0c98b65051b1d3b3c88a5e976c638b08c1705",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.5863,
+          "rmse": 0.9362,
+          "r2": 0.3882,
+          "hyperparameter": {
+            "alpha": 1.0
+          },
+          "ci_low": 0.494,
+          "ci_high": 0.6634,
+          "ci_width": 0.1693,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
+          "embedding_dim": 512,
+          "n_train": 3780,
+          "n_test": 420
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6089,
+          "rmse": 0.9087,
+          "r2": 0.4236,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": 0.0226
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "778e0821181f656a2865908642c3b2d77bccd77b683bf5666e0f103f09fd16c3",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.7811,
+          "rmse": 0.7715,
+          "r2": 0.5845,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "ci_low": 0.7105,
+          "ci_high": 0.8329,
+          "ci_width": 0.1224,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
+          "embedding_dim": 3200,
+          "n_train": 3780,
+          "n_test": 420
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6643,
+          "rmse": 0.8942,
+          "r2": 0.4418,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": -0.1168
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "274de1ad8a3131d8ad779e320619f81964229ca455f751e2b6608c52c64ecc76",
+        "linear": {
+          "metric": "Spearman rho",
+          "score": 0.7787,
+          "rmse": 0.8056,
+          "r2": 0.5469,
+          "hyperparameter": {
+            "alpha": 10.0
+          },
+          "ci_low": 0.7145,
+          "ci_high": 0.8305,
+          "ci_width": 0.116,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 3780,
+          "embedding_dim": 4800,
+          "n_train": 3780,
+          "n_test": 420
+        },
+        "mlp": {
+          "metric": "Spearman rho",
+          "score": 0.6807,
+          "rmse": 0.8827,
+          "r2": 0.4561,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.098
       }
     }
   },
@@ -1071,6 +1682,130 @@
           "embedding_dim": 768
         },
         "linear_mlp_gap": -0.0071
+      },
+      "unimol_v1": {
+        "label": "Uni-Mol v1 84M (mean atom pooling)",
+        "embedding_sha256": "19b98b7a83adf5d651c90bf9feea9b93623e6392014ad81b55854e8946851880",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.5772,
+          "accuracy": 0.6029,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.3882,
+          "ci_high": 0.7314,
+          "ci_width": 0.3432,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
+          "embedding_dim": 512,
+          "n_train": 599,
+          "n_test": 68
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.5614,
+          "accuracy": 0.5882,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.0158
+      },
+      "molclr_gin": {
+        "label": "MolCLR GIN (encoder feature)",
+        "embedding_sha256": "ba2e2c0627a1cd9a6814f6301db90c34a70b078699953a94c3f614915876ee32",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.6702,
+          "accuracy": 0.5882,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.5236,
+          "ci_high": 0.7861,
+          "ci_width": 0.2625,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
+          "embedding_dim": 512,
+          "n_train": 599,
+          "n_test": 68
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.6123,
+          "accuracy": 0.6029,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 512
+        },
+        "linear_mlp_gap": -0.0579
+      },
+      "grover_base": {
+        "label": "GROVER Base (both fingerprint)",
+        "embedding_sha256": "8e783190d01191c331fa7737c4ad67d121bf5bd4a6242059be08f7a5a0030b29",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.614,
+          "accuracy": 0.5882,
+          "hyperparameter": {
+            "C": 0.01
+          },
+          "ci_low": 0.4443,
+          "ci_high": 0.7567,
+          "ci_width": 0.3123,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
+          "embedding_dim": 3200,
+          "n_train": 599,
+          "n_test": 68
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.6079,
+          "accuracy": 0.5735,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 3200
+        },
+        "linear_mlp_gap": -0.0061
+      },
+      "grover_large": {
+        "label": "GROVER Large (both fingerprint)",
+        "embedding_sha256": "1296069159e0e8009780615560564a6857334d4e15ceb2dd5829afd23603d835",
+        "linear": {
+          "metric": "ROC-AUC",
+          "score": 0.6579,
+          "accuracy": 0.6324,
+          "hyperparameter": {
+            "C": 0.001
+          },
+          "ci_low": 0.4903,
+          "ci_high": 0.7875,
+          "ci_width": 0.2972,
+          "n_boot": 1000,
+          "probe": "linear",
+          "protocol_version": 4,
+          "regularisation_search_rows": 599,
+          "embedding_dim": 4800,
+          "n_train": 599,
+          "n_test": 68
+        },
+        "mlp": {
+          "metric": "ROC-AUC",
+          "score": 0.5772,
+          "accuracy": 0.5882,
+          "probe": "mlp",
+          "architecture": "one hidden layer with 256 ReLU units",
+          "embedding_dim": 4800
+        },
+        "linear_mlp_gap": -0.0807
       }
     }
   },
