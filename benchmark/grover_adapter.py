@@ -10,12 +10,12 @@ import numpy as np
 
 SOURCE_DIR = os.environ.get(
     "BIOLATENT_GROVER_SOURCE",
-    "/home/yboulaamane/biolatent_model_sources/grover",
+    os.path.expanduser("~/biolatent_model_sources/grover"),
 )
 SOURCE_COMMIT = "40b6d97098e4508687912f3c05eca369fc2c6213"
 CHECKPOINT_DIR = os.environ.get(
     "BIOLATENT_GROVER_CHECKPOINT_DIR",
-    "/home/yboulaamane/biolatent_model_sources/grover_checkpoints",
+    os.path.expanduser("~/biolatent_model_sources/grover_checkpoints"),
 )
 CHECKPOINTS = {
     "grover_base": {
