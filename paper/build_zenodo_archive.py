@@ -21,35 +21,9 @@ def sha256(data: bytes) -> str:
 
 
 def required_files() -> list[Path]:
-    files = [
-        ROOT / name
-        for name in (
-            "README.md",
-            "STUDY.md",
-            "DATA_PROVENANCE_AUDIT.md",
-            "LICENSE",
-            "CITATION.cff",
-        )
-    ]
-    for optional in ("BENCHMARK_PROPOSAL.md", "BENCHMARK_VERIFICATION.md"):
-        path = ROOT / optional
-        if path.exists():
-            files.append(path)
-    files.extend(sorted((ROOT / "benchmark").glob("*.py")))
-    files.extend(sorted((ROOT / "benchmark").glob("*.sh")))
-    files.append(ROOT / "benchmark" / "requirements.txt")
+    files = [ROOT / "LICENSE"]
     files.extend(sorted((ROOT / "results").glob("*.json")))
     files.extend(sorted((ROOT / "results" / "predictions").glob("*.npz")))
-    files.extend(
-        [
-            ROOT / "paper" / "generate_figures.py",
-            ROOT / "paper" / "generate_manuscript.py",
-            ROOT / "paper" / "FIGURE_LEGENDS.md",
-            ROOT / "paper" / "BioLatent_methods_revised.docx",
-        ]
-    )
-    files.extend(sorted((ROOT / "paper" / "figures").glob("*.png")))
-    files.extend(sorted((ROOT / "paper" / "figures").glob("*.svg")))
     files.extend(sorted((ROOT / "paper" / "figure_data").glob("*.csv")))
     missing = [path for path in files if not path.is_file()]
     if missing:
@@ -87,28 +61,21 @@ def zenodo_readme() -> bytes:
     tasks, models, cells, counts = release_summary()
     text = f"""# BioLatent benchmark data release {VERSION}
 
-This deposit is the publication companion for **What can a frozen-embedding
-benchmark resolve? A validation-selected, uncertainty-aware comparison of
-molecular, protein and genomic representations**.
+Data accompanying **BioLatent: An Uncertainty-Aware Benchmark of Frozen
+Molecular, Protein, and Genomic Representations**.
 
 ## Release scope
 
 - {tasks} real-data tasks, {models} frozen representations and {cells} measured model-task cells.
 - Study-wide Holm-resolved comparisons: {counts['molecule'][0]}/{counts['molecule'][1]} molecular, {counts['protein'][0]}/{counts['protein'][1]} protein and {counts['genomics'][0]}/{counts['genomics'][1]} genomic.
-- Complete aggregate result JSON and per-example compressed prediction arrays.
-- Publication figures in PNG and editable SVG form, plotted source data in CSV form, complete legends and the generated DOCX manuscript.
-- Evaluation, inference, validation and figure-generation source code.
+- Aggregate result JSON, per-example compressed prediction arrays and figure source CSVs.
 
 ## Directory guide
 
 - `results/`: benchmark scores, paired comparisons, sensitivity analyses,
   exposure proxies, run manifest and per-example predictions.
 - `paper/figure_data/`: exact source tables plotted in every figure.
-- `paper/figures/`: 300 dpi PNG and vector SVG publication figures.
-- `paper/BioLatent_methods_revised.docx`: generated manuscript.
-- `benchmark/` and `paper/*.py`: reproducibility and release-generation code.
-- `MANIFEST.json` and `SHA256SUMS.txt`: file inventory and integrity hashes.
-- `zenodo_metadata.json`: suggested Zenodo deposit metadata.
+- `SHA256SUMS.txt`: file integrity hashes.
 
 ## Data provenance and redistribution
 
@@ -116,73 +83,16 @@ The benchmark uses public experimental/curated datasets from MoleculeNet,
 Therapeutics Data Commons, DeepLoc 2.0, TAPE and the Nucleotide Transformer task
 suite; the benchmark inputs are not synthetic. Raw third-party datasets and
 pretrained embedding matrices are intentionally not redistributed in this
-archive; `DATA_PROVENANCE_AUDIT.md`, `STUDY.md` and the pinned download code
-describe how to retrieve and verify them. This avoids silently relicensing
-upstream data while keeping the complete derived measurements reproducible.
+archive. Provenance documentation and pinned reproduction code are maintained at
+https://github.com/yboulaamane/biolatent.
 
 The MolCLR-ClinTox model-task cell is N/A because its native featurizer cannot
 represent every retained structure; it is not imputed.
 
-## Reproduction
-
-Create the pinned Python environment described in `README.md`, regenerate the
-datasets and embeddings, then run the evaluation commands listed there. To
-regenerate publication outputs from the committed results:
-
-```bash
-python paper/generate_figures.py
-python paper/generate_manuscript.py
-python paper/build_zenodo_archive.py
-```
-
-The code and original project documentation are licensed under MIT. Upstream
-datasets and pretrained models remain subject to their respective source terms.
+BioLatent code is licensed under MIT. Upstream datasets and pretrained models
+remain subject to their respective source terms.
 """
     return text.encode("utf-8")
-
-
-def zenodo_metadata() -> bytes:
-    metadata = {
-        "metadata": {
-            "title": (
-                "BioLatent: validation-selected, uncertainty-aware frozen-embedding "
-                "benchmark data"
-            ),
-            "upload_type": "dataset",
-            "publication_date": RELEASE_DATE,
-            "version": VERSION,
-            "creators": [
-                {
-                    "name": "Boulaamane, Yassir",
-                    "affiliation": "Universitat Autònoma de Barcelona",
-                }
-            ],
-            "description": (
-                "Publication companion containing derived benchmark results, per-example "
-                "predictions, figure source data, publication figures, the generated "
-                "manuscript and reproducibility code for nine real-data molecular, protein "
-                "and genomic tasks evaluated under one frozen-embedding protocol."
-            ),
-            "access_right": "open",
-            "license": "MIT",
-            "keywords": [
-                "frozen embeddings",
-                "molecular representations",
-                "protein language models",
-                "genomic foundation models",
-                "benchmark uncertainty",
-                "paired randomisation",
-            ],
-            "related_identifiers": [
-                {
-                    "identifier": "https://github.com/yboulaamane/biolatent",
-                    "relation": "isSupplementTo",
-                    "resource_type": "software",
-                }
-            ],
-        }
-    }
-    return (json.dumps(metadata, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
 
 
 def write_member(archive: zipfile.ZipFile, name: str, data: bytes) -> None:
@@ -199,20 +109,6 @@ def build() -> None:
         path.relative_to(ROOT).as_posix(): path.read_bytes() for path in source_files
     }
     payload["README_ZENODO.md"] = zenodo_readme()
-    payload["zenodo_metadata.json"] = zenodo_metadata()
-
-    manifest = {
-        "release": VERSION,
-        "created": RELEASE_DATE,
-        "archive_root": ARCHIVE_ROOT,
-        "files": [
-            {"path": name, "bytes": len(data), "sha256": sha256(data)}
-            for name, data in sorted(payload.items())
-        ],
-    }
-    payload["MANIFEST.json"] = (
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
-    ).encode("utf-8")
     checksums = "".join(
         f"{sha256(data)}  {name}\n" for name, data in sorted(payload.items())
     )

@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use the BioLatent benchmark, please cite this software and data release."
-title: "BioLatent: an uncertainty-aware frozen-embedding benchmark"
+title: "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations"
 type: software
 version: 2026.09.16
 date-released: 2026-09-16
