@@ -8,6 +8,7 @@ rerun.
 
 import json
 import os
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -25,6 +26,8 @@ TEMPLATE = Path(os.environ.get(
     "BIOLATENT_MANUSCRIPT_TEMPLATE", ROOT / "BioLatent_methods.docx"
 ))
 OUTPUT = ROOT / "paper" / "BioLatent_methods_revised.docx"
+FIGURE_DIR = ROOT / "paper" / "figures"
+FIGURE_LEGENDS_PATH = ROOT / "paper" / "FIGURE_LEGENDS.md"
 TASK_ORDER = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
               "DeepLoc", "Fluorescence", "Promoters"]
 MODEL_LABELS = {
@@ -125,6 +128,34 @@ def add_caption(document, text):
     )
     paragraph.paragraph_format.keep_with_next = True
     return paragraph
+
+
+def load_figure_legends():
+    """Read the single source of truth for manuscript figure captions."""
+    if not FIGURE_LEGENDS_PATH.exists():
+        raise FileNotFoundError(
+            f"Missing {FIGURE_LEGENDS_PATH}; run paper/generate_figures.py first"
+        )
+    text = FIGURE_LEGENDS_PATH.read_text()
+    sections = re.findall(
+        r"^## (Figure[^\n]+)\n\n(.*?)(?=\n## Figure|\Z)", text, flags=re.MULTILINE | re.DOTALL
+    )
+    return {
+        title.split(".", 1)[0]: f"{title}. {body.strip()}"
+        for title, body in sections
+    }
+
+
+def add_publication_figure(document, filename, legend, width):
+    """Insert a centred, publication-resolution figure and its full legend."""
+    path = FIGURE_DIR / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Missing {path}; run paper/generate_figures.py first")
+    paragraph = document.add_paragraph()
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    paragraph.paragraph_format.keep_with_next = True
+    paragraph.add_run().add_picture(str(path), width=Inches(width))
+    add_caption(document, legend)
 
 
 def add_table(document, headers, rows, widths=None, font_size=7.5):
@@ -238,6 +269,7 @@ def build():
     manifest = load_json("run_manifest.json")
     sensitivity = load_json("split_seed_sensitivity.json")
     resolution = load_json("resolution_curves.json")
+    figure_legends = load_figure_legends()
     missing = [task for task in TASK_ORDER if task not in results or task not in paired]
     if missing:
         raise RuntimeError(f"Incomplete study artefacts; missing tasks: {missing}")
@@ -332,6 +364,9 @@ def build():
              "pretraining input exposure is reported as a proxy and is not called label leakage. "
              "The result is intended as an auditable measurement study and web resource, not a "
              "claim that one representation is universally best.")
+    add_publication_figure(
+        document, "figure1_study_design.png", figure_legends["Figure 1"], 6.55
+    )
 
     add_heading(document, "2. Methods", 1)
     add_heading(document, "2.1 Tasks and dataset variants", 2)
@@ -471,6 +506,13 @@ def build():
     add_caption(document, "Table 5. Genomic ranked metric. Promoters uses ROC-AUC.")
     add_table(document, ["Representation", "Promoters"],
               result_rows(results, ["Promoters"]), widths=[2.5, 1.2])
+    add_publication_figure(
+        document, "figure2_molecular_performance.png", figure_legends["Figure 2"], 5.55
+    )
+    add_publication_figure(
+        document, "figure3_protein_genomic_performance.png",
+        figure_legends["Figure 3"], 6.15
+    )
 
     add_heading(document, "3.2 Validation-selected paired comparisons", 2)
     inference_rows = []
@@ -496,6 +538,10 @@ def build():
              f"{inference['genomics']['significant']} of {inference['genomics']['total']}. "
              "These counts describe this model roster and these fixed task variants; they are "
              "not evidence that one biological modality is intrinsically easier to benchmark.")
+    add_publication_figure(
+        document, "figure4_inference_and_split_sensitivity.png",
+        figure_legends["Figure 4"], 5.65
+    )
 
     add_heading(document, "3.3 Scale, split and sample-size sensitivity", 2)
     ladder_rows = []
@@ -539,6 +585,9 @@ def build():
                      "supports test size as a contributor to precision, while the substantial "
                      "between-task spread shows that it is not the sole determinant.")
         add_body(document, text)
+    add_publication_figure(
+        document, "figure5_subsampling_resolution.png", figure_legends["Figure 5"], 5.95
+    )
 
     add_heading(document, "3.4 Input-exposure proxies", 2)
     exposure_rows = []
@@ -563,6 +612,9 @@ def build():
              "representation score: they indicate that input familiarity may contribute. They "
              "do not demonstrate memorized downstream labels, and a low random-sample fraction "
              "does not prove absence from the checkpoint's exact training corpus.")
+    add_publication_figure(
+        document, "figureS1_exposure_proxies.png", figure_legends["Figure S1"], 5.95
+    )
 
     add_heading(document, "4. Discussion", 1)
     add_body(document, "The study has practical value because it turns a literature directory "

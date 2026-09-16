@@ -1,0 +1,10 @@
+task,modality,resolved,unresolved,total,validation_reference,numerical_test_best,reference_differs_from_test_best,most_frequent_split_winner,split_winner_frequency,maximum_score_range,maximum_range_model
+BBBP,molecule,1,7,8,ChemBERTa-77M,ChemBERTa-ZINC,True,ChemBERTa-77M,3,0.1083,MolCLR GIN
+ClinTox,molecule,4,3,7,ChemBERTa-ZINC,ChemBERTa-ZINC,False,ChemBERTa-ZINC,4,0.1868,RDKit2D
+BACE,molecule,0,8,8,ChemBERTa-ZINC,ECFP4,True,ECFP4,2,0.0842,ChemBERTa-ZINC
+ESOL,molecule,2,6,8,GROVER Large,GROVER Large,False,RDKit2D,3,0.279,MolCLR GIN
+Lipophilicity,molecule,7,1,8,GROVER Large,GROVER Base,True,GROVER Base,4,0.1352,ChemBERTa-ZINC
+CYP3A4,molecule,0,8,8,RDKit2D,ChemBERTa-77M,True,ChemBERTa-ZINC,2,0.1858,RDKit2D
+DeepLoc,protein,5,0,5,ESM-2 650M,ESM-2 650M,False,,,,
+Fluorescence,protein,5,0,5,3-mer frequency,3-mer frequency,False,,,,
+Promoters,genomics,0,2,2,Nucleotide Transformer 500M,HyenaDNA-tiny,True,,,,

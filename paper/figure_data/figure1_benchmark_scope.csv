@@ -1,0 +1,4 @@
+modality,tasks,representations,measured_cells,resolved_comparisons,total_comparisons,split_policy
+Molecules,6,9,53,14,47,Murcko-scaffold splits
+Proteins,2,6,12,10,10,Published sequence splits
+Genomics,1,3,3,0,2,Published chromosome split

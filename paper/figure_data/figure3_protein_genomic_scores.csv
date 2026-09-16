@@ -1,0 +1,16 @@
+task,modality,model_id,representation,metric,score,ci_low,ci_high,n_test,validation_reference,numerical_test_best,significant_global,p_holm_global
+DeepLoc,protein,kmer3_protein,3-mer frequency,Macro ROC-AUC,0.7169,0.7082,0.7256,5963,False,False,True,0.0295
+DeepLoc,protein,esm2_8m,ESM-2 8M,Macro ROC-AUC,0.8464,0.8386,0.8542,5963,False,False,True,0.0295
+DeepLoc,protein,esm2_35m,ESM-2 35M,Macro ROC-AUC,0.8666,0.859,0.8738,5963,False,False,True,0.0295
+DeepLoc,protein,esm2_150m,ESM-2 150M,Macro ROC-AUC,0.8799,0.8732,0.8859,5963,False,False,True,0.0295
+DeepLoc,protein,esm2_650m,ESM-2 650M,Macro ROC-AUC,0.8924,0.886,0.8989,5963,True,True,False,
+DeepLoc,protein,protbert,ProtBERT,Macro ROC-AUC,0.8614,0.8542,0.868,5963,False,False,True,0.0295
+Fluorescence,protein,kmer3_protein,3-mer frequency,Spearman rho,0.6739,0.6659,0.6826,27217,True,True,False,
+Fluorescence,protein,esm2_8m,ESM-2 8M,Spearman rho,0.5733,0.5643,0.5822,27217,False,False,True,0.0295
+Fluorescence,protein,esm2_35m,ESM-2 35M,Spearman rho,0.5936,0.5855,0.6025,27217,False,False,True,0.0295
+Fluorescence,protein,esm2_150m,ESM-2 150M,Spearman rho,0.5843,0.5757,0.5936,27217,False,False,True,0.0295
+Fluorescence,protein,esm2_650m,ESM-2 650M,Spearman rho,0.6133,0.6047,0.6212,27217,False,False,True,0.0295
+Fluorescence,protein,protbert,ProtBERT,Spearman rho,0.6622,0.6545,0.6706,27217,False,False,True,0.0295
+Promoters,genomics,kmer5_dna,5-mer frequency,ROC-AUC,0.9304,0.9178,0.9419,1571,False,False,False,1.0
+Promoters,genomics,nucleotide_transformer,Nucleotide Transformer 500M,ROC-AUC,0.9363,0.925,0.9469,1571,True,False,False,
+Promoters,genomics,hyenadna,HyenaDNA-tiny,ROC-AUC,0.9382,0.9266,0.9488,1571,False,True,False,1.0
