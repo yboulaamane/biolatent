@@ -1,0 +1,266 @@
+task,seed,rank,model_id,representation,score
+BBBP,7,1,chemberta_77m,ChemBERTa-77M,0.9614
+BBBP,7,2,molformer_xl,MoLFormer-XL,0.9547
+BBBP,7,3,chemberta_zinc,ChemBERTa-ZINC,0.9529
+BBBP,7,4,grover_large,GROVER Large,0.9254
+BBBP,7,5,grover_base,GROVER Base,0.911
+BBBP,7,6,rdkit2d,RDKit2D,0.909
+BBBP,7,7,ecfp4,ECFP4,0.894
+BBBP,7,8,unimol_v1,Uni-Mol v1,0.8837
+BBBP,7,9,molclr_gin,MolCLR GIN,0.8179
+BBBP,21,1,molformer_xl,MoLFormer-XL,0.9302
+BBBP,21,2,chemberta_77m,ChemBERTa-77M,0.9259
+BBBP,21,3,ecfp4,ECFP4,0.9025
+BBBP,21,4,chemberta_zinc,ChemBERTa-ZINC,0.9021
+BBBP,21,5,rdkit2d,RDKit2D,0.8783
+BBBP,21,6,grover_large,GROVER Large,0.874
+BBBP,21,7,unimol_v1,Uni-Mol v1,0.8601
+BBBP,21,8,grover_base,GROVER Base,0.8304
+BBBP,21,9,molclr_gin,MolCLR GIN,0.8214
+BBBP,42,1,chemberta_zinc,ChemBERTa-ZINC,0.9713
+BBBP,42,2,molformer_xl,MoLFormer-XL,0.9541
+BBBP,42,3,chemberta_77m,ChemBERTa-77M,0.9538
+BBBP,42,4,grover_large,GROVER Large,0.934
+BBBP,42,5,rdkit2d,RDKit2D,0.9227
+BBBP,42,6,grover_base,GROVER Base,0.9182
+BBBP,42,7,ecfp4,ECFP4,0.9141
+BBBP,42,8,unimol_v1,Uni-Mol v1,0.909
+BBBP,42,9,molclr_gin,MolCLR GIN,0.8839
+BBBP,73,1,chemberta_77m,ChemBERTa-77M,0.9668
+BBBP,73,2,molformer_xl,MoLFormer-XL,0.9615
+BBBP,73,3,chemberta_zinc,ChemBERTa-ZINC,0.9578
+BBBP,73,4,grover_large,GROVER Large,0.9229
+BBBP,73,5,rdkit2d,RDKit2D,0.917
+BBBP,73,6,grover_base,GROVER Base,0.915
+BBBP,73,7,unimol_v1,Uni-Mol v1,0.905
+BBBP,73,8,ecfp4,ECFP4,0.9024
+BBBP,73,9,molclr_gin,MolCLR GIN,0.8516
+BBBP,101,1,chemberta_77m,ChemBERTa-77M,0.9576
+BBBP,101,2,molformer_xl,MoLFormer-XL,0.9549
+BBBP,101,3,chemberta_zinc,ChemBERTa-ZINC,0.9545
+BBBP,101,4,grover_base,GROVER Base,0.9349
+BBBP,101,5,grover_large,GROVER Large,0.9338
+BBBP,101,6,rdkit2d,RDKit2D,0.9129
+BBBP,101,7,ecfp4,ECFP4,0.8953
+BBBP,101,8,unimol_v1,Uni-Mol v1,0.8614
+BBBP,101,9,molclr_gin,MolCLR GIN,0.7756
+ClinTox,7,1,chemberta_zinc,ChemBERTa-ZINC,0.995
+ClinTox,7,2,molformer_xl,MoLFormer-XL,0.9772
+ClinTox,7,3,chemberta_77m,ChemBERTa-77M,0.9731
+ClinTox,7,4,grover_large,GROVER Large,0.9015
+ClinTox,7,5,grover_base,GROVER Base,0.8723
+ClinTox,7,6,rdkit2d,RDKit2D,0.8408
+ClinTox,7,7,ecfp4,ECFP4,0.84
+ClinTox,7,8,unimol_v1,Uni-Mol v1,0.7073
+ClinTox,21,1,chemberta_zinc,ChemBERTa-ZINC,0.9854
+ClinTox,21,2,chemberta_77m,ChemBERTa-77M,0.9786
+ClinTox,21,3,molformer_xl,MoLFormer-XL,0.9638
+ClinTox,21,4,grover_large,GROVER Large,0.8223
+ClinTox,21,5,grover_base,GROVER Base,0.8036
+ClinTox,21,6,ecfp4,ECFP4,0.7949
+ClinTox,21,7,rdkit2d,RDKit2D,0.6899
+ClinTox,21,8,unimol_v1,Uni-Mol v1,0.6271
+ClinTox,42,1,chemberta_zinc,ChemBERTa-ZINC,0.9851
+ClinTox,42,2,chemberta_77m,ChemBERTa-77M,0.9751
+ClinTox,42,3,molformer_xl,MoLFormer-XL,0.9718
+ClinTox,42,4,grover_large,GROVER Large,0.8889
+ClinTox,42,5,grover_base,GROVER Base,0.8879
+ClinTox,42,6,rdkit2d,RDKit2D,0.8529
+ClinTox,42,7,ecfp4,ECFP4,0.8482
+ClinTox,42,8,unimol_v1,Uni-Mol v1,0.6755
+ClinTox,73,1,chemberta_zinc,ChemBERTa-ZINC,0.9986
+ClinTox,73,2,molformer_xl,MoLFormer-XL,0.9829
+ClinTox,73,3,chemberta_77m,ChemBERTa-77M,0.9809
+ClinTox,73,4,rdkit2d,RDKit2D,0.8767
+ClinTox,73,5,grover_large,GROVER Large,0.8592
+ClinTox,73,6,grover_base,GROVER Base,0.8011
+ClinTox,73,7,ecfp4,ECFP4,0.72
+ClinTox,73,8,unimol_v1,Uni-Mol v1,0.6364
+ClinTox,101,1,molformer_xl,MoLFormer-XL,0.9731
+ClinTox,101,2,chemberta_77m,ChemBERTa-77M,0.9669
+ClinTox,101,3,chemberta_zinc,ChemBERTa-ZINC,0.9585
+ClinTox,101,4,grover_large,GROVER Large,0.8525
+ClinTox,101,5,rdkit2d,RDKit2D,0.8201
+ClinTox,101,6,grover_base,GROVER Base,0.8179
+ClinTox,101,7,ecfp4,ECFP4,0.7453
+ClinTox,101,8,unimol_v1,Uni-Mol v1,0.7321
+BACE,7,1,rdkit2d,RDKit2D,0.8458
+BACE,7,2,grover_large,GROVER Large,0.8438
+BACE,7,3,ecfp4,ECFP4,0.8382
+BACE,7,4,molformer_xl,MoLFormer-XL,0.8367
+BACE,7,5,grover_base,GROVER Base,0.8346
+BACE,7,6,chemberta_77m,ChemBERTa-77M,0.8259
+BACE,7,7,unimol_v1,Uni-Mol v1,0.8064
+BACE,7,8,chemberta_zinc,ChemBERTa-ZINC,0.7706
+BACE,7,9,molclr_gin,MolCLR GIN,0.755
+BACE,21,1,ecfp4,ECFP4,0.894
+BACE,21,2,grover_large,GROVER Large,0.8837
+BACE,21,3,rdkit2d,RDKit2D,0.8836
+BACE,21,4,molformer_xl,MoLFormer-XL,0.8758
+BACE,21,5,chemberta_77m,ChemBERTa-77M,0.8584
+BACE,21,6,grover_base,GROVER Base,0.8472
+BACE,21,7,unimol_v1,Uni-Mol v1,0.8325
+BACE,21,8,molclr_gin,MolCLR GIN,0.7956
+BACE,21,9,chemberta_zinc,ChemBERTa-ZINC,0.794
+BACE,42,1,ecfp4,ECFP4,0.8904
+BACE,42,2,grover_base,GROVER Base,0.885
+BACE,42,3,grover_large,GROVER Large,0.8817
+BACE,42,4,chemberta_77m,ChemBERTa-77M,0.8391
+BACE,42,5,rdkit2d,RDKit2D,0.8315
+BACE,42,6,chemberta_zinc,ChemBERTa-ZINC,0.8265
+BACE,42,7,molclr_gin,MolCLR GIN,0.8203
+BACE,42,8,unimol_v1,Uni-Mol v1,0.8156
+BACE,42,9,molformer_xl,MoLFormer-XL,0.8102
+BACE,73,1,unimol_v1,Uni-Mol v1,0.8494
+BACE,73,2,ecfp4,ECFP4,0.8481
+BACE,73,3,grover_base,GROVER Base,0.8365
+BACE,73,4,grover_large,GROVER Large,0.836
+BACE,73,5,molclr_gin,MolCLR GIN,0.8343
+BACE,73,6,rdkit2d,RDKit2D,0.8266
+BACE,73,7,molformer_xl,MoLFormer-XL,0.7981
+BACE,73,8,chemberta_77m,ChemBERTa-77M,0.7873
+BACE,73,9,chemberta_zinc,ChemBERTa-ZINC,0.7732
+BACE,101,1,grover_large,GROVER Large,0.8593
+BACE,101,2,chemberta_zinc,ChemBERTa-ZINC,0.8548
+BACE,101,3,ecfp4,ECFP4,0.8501
+BACE,101,4,rdkit2d,RDKit2D,0.8456
+BACE,101,5,grover_base,GROVER Base,0.8337
+BACE,101,6,unimol_v1,Uni-Mol v1,0.8253
+BACE,101,7,molformer_xl,MoLFormer-XL,0.8214
+BACE,101,8,chemberta_77m,ChemBERTa-77M,0.8128
+BACE,101,9,molclr_gin,MolCLR GIN,0.7922
+ESOL,7,1,grover_large,GROVER Large,0.9243
+ESOL,7,2,grover_base,GROVER Base,0.9086
+ESOL,7,3,rdkit2d,RDKit2D,0.884
+ESOL,7,4,unimol_v1,Uni-Mol v1,0.8833
+ESOL,7,5,molformer_xl,MoLFormer-XL,0.8691
+ESOL,7,6,chemberta_77m,ChemBERTa-77M,0.8481
+ESOL,7,7,chemberta_zinc,ChemBERTa-ZINC,0.8475
+ESOL,7,8,molclr_gin,MolCLR GIN,0.75
+ESOL,7,9,ecfp4,ECFP4,0.6355
+ESOL,21,1,rdkit2d,RDKit2D,0.9434
+ESOL,21,2,grover_base,GROVER Base,0.9431
+ESOL,21,3,grover_large,GROVER Large,0.9431
+ESOL,21,4,unimol_v1,Uni-Mol v1,0.9397
+ESOL,21,5,molformer_xl,MoLFormer-XL,0.9287
+ESOL,21,6,chemberta_77m,ChemBERTa-77M,0.9071
+ESOL,21,7,molclr_gin,MolCLR GIN,0.8842
+ESOL,21,8,chemberta_zinc,ChemBERTa-ZINC,0.8816
+ESOL,21,9,ecfp4,ECFP4,0.6605
+ESOL,42,1,grover_large,GROVER Large,0.9153
+ESOL,42,2,grover_base,GROVER Base,0.9128
+ESOL,42,3,rdkit2d,RDKit2D,0.9049
+ESOL,42,4,molformer_xl,MoLFormer-XL,0.8928
+ESOL,42,5,unimol_v1,Uni-Mol v1,0.8906
+ESOL,42,6,chemberta_77m,ChemBERTa-77M,0.8469
+ESOL,42,7,chemberta_zinc,ChemBERTa-ZINC,0.8428
+ESOL,42,8,ecfp4,ECFP4,0.6161
+ESOL,42,9,molclr_gin,MolCLR GIN,0.6052
+ESOL,73,1,rdkit2d,RDKit2D,0.9098
+ESOL,73,2,unimol_v1,Uni-Mol v1,0.8988
+ESOL,73,3,grover_base,GROVER Base,0.8953
+ESOL,73,4,grover_large,GROVER Large,0.8799
+ESOL,73,5,chemberta_77m,ChemBERTa-77M,0.8723
+ESOL,73,6,molformer_xl,MoLFormer-XL,0.8576
+ESOL,73,7,chemberta_zinc,ChemBERTa-ZINC,0.7913
+ESOL,73,8,molclr_gin,MolCLR GIN,0.7416
+ESOL,73,9,ecfp4,ECFP4,0.6524
+ESOL,101,1,rdkit2d,RDKit2D,0.9568
+ESOL,101,2,grover_base,GROVER Base,0.9534
+ESOL,101,3,grover_large,GROVER Large,0.9526
+ESOL,101,4,unimol_v1,Uni-Mol v1,0.9485
+ESOL,101,5,molformer_xl,MoLFormer-XL,0.9373
+ESOL,101,6,chemberta_77m,ChemBERTa-77M,0.934
+ESOL,101,7,chemberta_zinc,ChemBERTa-ZINC,0.893
+ESOL,101,8,molclr_gin,MolCLR GIN,0.7723
+ESOL,101,9,ecfp4,ECFP4,0.6137
+Lipophilicity,7,1,grover_base,GROVER Base,0.8023
+Lipophilicity,7,2,grover_large,GROVER Large,0.7877
+Lipophilicity,7,3,rdkit2d,RDKit2D,0.6933
+Lipophilicity,7,4,chemberta_77m,ChemBERTa-77M,0.658
+Lipophilicity,7,5,molformer_xl,MoLFormer-XL,0.6522
+Lipophilicity,7,6,unimol_v1,Uni-Mol v1,0.6072
+Lipophilicity,7,7,molclr_gin,MolCLR GIN,0.5888
+Lipophilicity,7,8,ecfp4,ECFP4,0.5617
+Lipophilicity,7,9,chemberta_zinc,ChemBERTa-ZINC,0.5461
+Lipophilicity,21,1,grover_base,GROVER Base,0.801
+Lipophilicity,21,2,grover_large,GROVER Large,0.7872
+Lipophilicity,21,3,rdkit2d,RDKit2D,0.6994
+Lipophilicity,21,4,molformer_xl,MoLFormer-XL,0.6075
+Lipophilicity,21,5,unimol_v1,Uni-Mol v1,0.5975
+Lipophilicity,21,6,chemberta_77m,ChemBERTa-77M,0.5929
+Lipophilicity,21,7,molclr_gin,MolCLR GIN,0.5809
+Lipophilicity,21,8,ecfp4,ECFP4,0.5247
+Lipophilicity,21,9,chemberta_zinc,ChemBERTa-ZINC,0.457
+Lipophilicity,42,1,grover_base,GROVER Base,0.7811
+Lipophilicity,42,2,grover_large,GROVER Large,0.7787
+Lipophilicity,42,3,rdkit2d,RDKit2D,0.673
+Lipophilicity,42,4,unimol_v1,Uni-Mol v1,0.6055
+Lipophilicity,42,5,chemberta_77m,ChemBERTa-77M,0.6029
+Lipophilicity,42,6,molformer_xl,MoLFormer-XL,0.5988
+Lipophilicity,42,7,ecfp4,ECFP4,0.5868
+Lipophilicity,42,8,molclr_gin,MolCLR GIN,0.5863
+Lipophilicity,42,9,chemberta_zinc,ChemBERTa-ZINC,0.5483
+Lipophilicity,73,1,grover_base,GROVER Base,0.8203
+Lipophilicity,73,2,grover_large,GROVER Large,0.792
+Lipophilicity,73,3,rdkit2d,RDKit2D,0.7218
+Lipophilicity,73,4,molclr_gin,MolCLR GIN,0.6792
+Lipophilicity,73,5,chemberta_77m,ChemBERTa-77M,0.6561
+Lipophilicity,73,6,molformer_xl,MoLFormer-XL,0.6531
+Lipophilicity,73,7,unimol_v1,Uni-Mol v1,0.6231
+Lipophilicity,73,8,ecfp4,ECFP4,0.603
+Lipophilicity,73,9,chemberta_zinc,ChemBERTa-ZINC,0.5922
+Lipophilicity,101,1,grover_large,GROVER Large,0.7696
+Lipophilicity,101,2,grover_base,GROVER Base,0.7528
+Lipophilicity,101,3,rdkit2d,RDKit2D,0.688
+Lipophilicity,101,4,chemberta_77m,ChemBERTa-77M,0.6302
+Lipophilicity,101,5,molclr_gin,MolCLR GIN,0.6135
+Lipophilicity,101,6,molformer_xl,MoLFormer-XL,0.5865
+Lipophilicity,101,7,ecfp4,ECFP4,0.5463
+Lipophilicity,101,8,unimol_v1,Uni-Mol v1,0.5365
+Lipophilicity,101,9,chemberta_zinc,ChemBERTa-ZINC,0.4812
+CYP3A4,7,1,chemberta_zinc,ChemBERTa-ZINC,0.7674
+CYP3A4,7,2,rdkit2d,RDKit2D,0.7622
+CYP3A4,7,3,unimol_v1,Uni-Mol v1,0.7595
+CYP3A4,7,4,molformer_xl,MoLFormer-XL,0.7517
+CYP3A4,7,5,chemberta_77m,ChemBERTa-77M,0.7431
+CYP3A4,7,6,grover_large,GROVER Large,0.7378
+CYP3A4,7,7,grover_base,GROVER Base,0.7109
+CYP3A4,7,8,molclr_gin,MolCLR GIN,0.6727
+CYP3A4,7,9,ecfp4,ECFP4,0.6415
+CYP3A4,21,1,chemberta_zinc,ChemBERTa-ZINC,0.6972
+CYP3A4,21,2,molformer_xl,MoLFormer-XL,0.6938
+CYP3A4,21,3,rdkit2d,RDKit2D,0.686
+CYP3A4,21,4,ecfp4,ECFP4,0.6808
+CYP3A4,21,5,unimol_v1,Uni-Mol v1,0.66
+CYP3A4,21,6,grover_large,GROVER Large,0.628
+CYP3A4,21,7,molclr_gin,MolCLR GIN,0.6099
+CYP3A4,21,8,grover_base,GROVER Base,0.609
+CYP3A4,21,9,chemberta_77m,ChemBERTa-77M,0.6073
+CYP3A4,42,1,rdkit2d,RDKit2D,0.7821
+CYP3A4,42,2,ecfp4,ECFP4,0.7561
+CYP3A4,42,3,chemberta_77m,ChemBERTa-77M,0.724
+CYP3A4,42,4,molclr_gin,MolCLR GIN,0.717
+CYP3A4,42,5,grover_base,GROVER Base,0.6997
+CYP3A4,42,6,grover_large,GROVER Large,0.6849
+CYP3A4,42,7,molformer_xl,MoLFormer-XL,0.678
+CYP3A4,42,8,unimol_v1,Uni-Mol v1,0.6719
+CYP3A4,42,9,chemberta_zinc,ChemBERTa-ZINC,0.6641
+CYP3A4,73,1,chemberta_77m,ChemBERTa-77M,0.7561
+CYP3A4,73,2,chemberta_zinc,ChemBERTa-ZINC,0.7231
+CYP3A4,73,3,unimol_v1,Uni-Mol v1,0.7222
+CYP3A4,73,4,molformer_xl,MoLFormer-XL,0.7196
+CYP3A4,73,5,ecfp4,ECFP4,0.6719
+CYP3A4,73,6,rdkit2d,RDKit2D,0.645
+CYP3A4,73,7,grover_large,GROVER Large,0.6311
+CYP3A4,73,8,molclr_gin,MolCLR GIN,0.6302
+CYP3A4,73,9,grover_base,GROVER Base,0.6181
+CYP3A4,101,1,molformer_xl,MoLFormer-XL,0.6792
+CYP3A4,101,2,chemberta_zinc,ChemBERTa-ZINC,0.646
+CYP3A4,101,3,chemberta_77m,ChemBERTa-77M,0.6443
+CYP3A4,101,4,ecfp4,ECFP4,0.5972
+CYP3A4,101,5,rdkit2d,RDKit2D,0.5963
+CYP3A4,101,6,unimol_v1,Uni-Mol v1,0.585
+CYP3A4,101,7,grover_large,GROVER Large,0.5728
+CYP3A4,101,8,molclr_gin,MolCLR GIN,0.544
+CYP3A4,101,9,grover_base,GROVER Base,0.5353

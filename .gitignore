@@ -74,6 +74,7 @@ run_*.log
 /logs/
 /results/*.lock
 /results/slurm/
+/dist/
 
 # Local coding-assistant configuration is never part of a BioLatent release.
 /.claude/
