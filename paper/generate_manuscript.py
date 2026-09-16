@@ -282,7 +282,8 @@ def build():
     document = Document(TEMPLATE) if TEMPLATE.exists() else Document()
     clear_body(document)
     document.core_properties.title = (
-        "Resolution and uncertainty in a cross-modal frozen-embedding benchmark")
+        "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
+        "Protein, and Genomic Representations")
     document.core_properties.author = "Yassir Boulaamane"
     document.core_properties.subject = "BioLatent frozen-embedding benchmark"
     document.core_properties.keywords = (
@@ -291,9 +292,8 @@ def build():
 
     title = document.add_paragraph(style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title.add_run("What can a frozen-embedding benchmark resolve? ")
-    title.add_run("A validation-selected, uncertainty-aware comparison of molecular, "
-                  "protein and genomic representations")
+    title.add_run("BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
+                  "Protein, and Genomic Representations")
     author = document.add_paragraph(
         "Yassir Boulaamane",
         style=available_style(document, "Author", "Subtitle"),

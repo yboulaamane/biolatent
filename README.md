@@ -187,7 +187,7 @@ If you use BioLatent in your research, please cite:
 
 ```bibtex
 @misc{boulaamane2026biolatent,
-  title={What can a frozen-embedding benchmark resolve? A validation-selected, uncertainty-aware comparison of molecular, protein and genomic representations},
+  title={BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations},
   author={Boulaamane, Yassir},
   year={2026},
   url={https://github.com/yboulaamane/biolatent}
