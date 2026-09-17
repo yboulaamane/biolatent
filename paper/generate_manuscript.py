@@ -671,6 +671,25 @@ def build():
              "public run manifest records dataset hashes, checkpoint revisions, pooling, "
              "truncation and software versions.")
 
+    add_heading(document, "Declarations", 1)
+    add_heading(document, "Author contributions", 2)
+    add_body(document, "Yassir Boulaamane conceived and designed the study, developed the "
+             "software, curated the data, performed and interpreted the analyses, prepared the "
+             "figures, and wrote and revised the manuscript.")
+    add_heading(document, "Funding", 2)
+    add_body(document, "This research received no specific grant from any funding agency in the "
+             "public, commercial or not-for-profit sectors.")
+    add_heading(document, "Competing interests", 2)
+    add_body(document, "The author declares no competing interests.")
+    add_heading(document, "Acknowledgements", 2)
+    add_body(document, "The author has no acknowledgements to declare.")
+    add_heading(document, "Ethics approval and consent to participate", 2)
+    add_body(document, "Not applicable. This computational study analysed public, "
+             "non-identifiable benchmark datasets and did not recruit human participants or "
+             "use animals.")
+    add_heading(document, "Consent for publication", 2)
+    add_body(document, "Not applicable.")
+
     add_heading(document, "References", 1)
     references = [
         ("[1] Wu Z et al. MoleculeNet: a benchmark for molecular machine learning. Chemical Science. 2018;9:513-530. ", "https://doi.org/10.1039/C7SC02664A"),
