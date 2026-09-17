@@ -747,8 +747,12 @@ def build():
              "aggregate leaderboard.")
 
     add_heading(document, "Data and code availability", 1)
-    paragraph = add_body(document, "Source code, derived results, test-set predictions, figure source "
-                         "data and the manuscript generator are available in the BioLatent repository: ")
+    paragraph = add_body(document, "The benchmark results, test-set predictions and figure source "
+                         "data are archived in Zenodo version 1.0.0: ")
+    add_hyperlink(paragraph, "https://doi.org/10.5281/zenodo.22813148",
+                  "https://doi.org/10.5281/zenodo.22813148")
+    paragraph = add_body(document, "Source code and the manuscript generator are available in the "
+                         "BioLatent repository: ")
     add_hyperlink(paragraph, "https://github.com/yboulaamane/biolatent",
                   "https://github.com/yboulaamane/biolatent")
     add_body(document, "Raw benchmark datasets and representation matrices are regenerated from "

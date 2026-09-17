@@ -16,7 +16,10 @@ export const metadata: Metadata = {
   title: "BioLatent | Measured Biological Embedding Benchmark",
   description: "A reproducible frozen-embedding benchmark and literature registry for molecular, protein, and genomic representations.",
   keywords: ["embeddings", "drug discovery", "protein language models", "molecular representations", "SMILES", "ESM-2", "ChemBERTa", "MolFormer", "bioinformatics", "chemoinformatics"],
-  authors: [{ name: "BioLatent team" }],
+  authors: [{ name: "Yassir Boulaamane", url: "https://github.com/yboulaamane" }],
+  other: {
+    citation_doi: "10.5281/zenodo.22813148",
+  },
 };
 
 export default function RootLayout({

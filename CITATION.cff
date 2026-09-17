@@ -1,14 +1,16 @@
 cff-version: 1.2.0
-message: "If you use the BioLatent benchmark, please cite this software and data release."
+message: "If you use the BioLatent benchmark, please cite this data release."
 title: "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations"
-type: software
-version: 2026.09.16
-date-released: 2026-09-16
+type: dataset
+version: 1.0.0
+date-released: 2026-09-17
+doi: "10.5281/zenodo.22813148"
 authors:
   - family-names: Boulaamane
     given-names: Yassir
-    affiliation: "Universitat Autònoma de Barcelona"
+    affiliation: "InSiliChem, Departament de Química, Universitat Autònoma de Barcelona, 08193, Bellaterra (Barcelona), Spain"
 repository-code: "https://github.com/yboulaamane/biolatent"
+url: "https://doi.org/10.5281/zenodo.22813148"
 license: MIT
 keywords:
   - frozen embeddings
