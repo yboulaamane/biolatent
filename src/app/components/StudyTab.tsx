@@ -486,31 +486,37 @@ export default function StudyTab() {
     <div>
       <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', marginBottom: '0.4rem' }}>
-          Measured Benchmark — Frozen Embedding Study
+          Measured benchmark under a common protocol
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          Results shown below were generated locally under the same evaluation protocol,
-          not transcribed from a paper. {totalModels()} representations were embedded once
-          per dataset and evaluated with one standardised linear probe — the same
-          regularisation grid, folds and seed for all of them — across {Object.keys(RESULTS).length} tasks,
-          giving {totalCells()} model-task cells. A comparator is selected on held-out
-          validation data before the test set is examined. Paired cluster bootstrap gives
-          the difference interval, paired randomisation gives the p-value, and the primary
-          Holm correction spans all reference comparisons in the study.
+          BioLatent began as a registry of results reported in the literature. Because those
+          studies used different datasets and evaluation procedures, their values cannot be
+          ranked fairly. This separate study evaluates compatible representations under one
+          prespecified procedure.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginTop: '0.7rem' }}>
+          We generated the results shown here rather than transcribing them from papers. Across the
+          study, {totalModels()} representations were assessed over {Object.keys(RESULTS).length}{' '}
+          tasks, giving {totalCells()} compatible model-task cells. Each compatible representation
+          was computed once per dataset and assessed with the same standardised linear model,
+          regularisation grid, folds and seed. The comparison method is selected using validation
+          data before the test set is examined. Paired cluster bootstrap provides the difference
+          interval, paired randomisation provides the p-value, and the primary Holm correction
+          covers every reference comparison in the study.
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
           <Stat value={`${mol.reliable} of ${mol.total}`}
-                label="molecular comparisons that are statistically reliable"
+                label="molecular comparisons distinguishable after study-wide correction"
                 tone="#fb7185" />
           <Stat value={`${prot.reliable} of ${prot.total}`}
-                label="protein comparisons that are statistically reliable"
+                label="protein comparisons distinguishable after study-wide correction"
                 tone="#34d399" />
           <Stat value={`${genomic.reliable} of ${genomic.total}`}
-                label="genomic comparisons that are statistically reliable"
+                label="genomic comparisons distinguishable after study-wide correction"
                 tone="#fbbf24" />
           <Stat value={`${mol.referencesDifferFromTestBest} of ${mol.tasks}`}
-                label="molecular validation references separated from the numerical test best"
+                label="molecular tasks where the test-set leader differed significantly from the preselected comparison"
                 tone="#fb7185" />
           <Stat value={`${totalCells()}`} label="measured model-task cells" />
         </div>
@@ -521,15 +527,15 @@ export default function StudyTab() {
           border: '1px solid rgba(244, 63, 94, 0.2)', borderRadius: '12px',
         }}>
           <div style={{ color: '#fb7185', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem' }}>
-            The headline result is about the benchmarks, not the models
+            What the statistical comparisons show
           </div>
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6 }}>
-            On the molecular tasks, {mol.reliable} of {mol.total} reference comparisons
-            survive study-wide correction. The same protocol resolves {prot.reliable} of{' '}
-            {prot.total} protein comparisons. Larger test sets plausibly contribute to
-            that contrast, but task structure, label noise, dependence and effect size also
-            matter; the study therefore reports an empirical subsampling analysis instead
-            of attributing the pattern to modality or sample size alone.
+            On the molecular tasks, {mol.reliable} of {mol.total} comparisons remain significant
+            after study-wide correction. The corresponding result is {prot.reliable} of{' '}
+            {prot.total} for the protein tasks. Larger protein test sets may contribute to this
+            difference, although endpoint structure, label noise, dependence and effect size also
+            affect precision. The subsampling analysis examines test-set size without attributing
+            the result to modality alone.
           </div>
         </div>
       </div>
