@@ -85,22 +85,30 @@ def load_json(name: str):
 def apply_style():
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
-        "font.size": 8.5,
-        "axes.titlesize": 10,
+        "font.size": 11,
+        "font.weight": "normal",
+        "axes.titlesize": 13,
         "axes.titleweight": "bold",
-        "axes.labelsize": 9,
+        "axes.titlepad": 8,
+        "axes.labelsize": 12.5,
+        "axes.labelweight": "bold",
         "axes.labelcolor": DARK,
         "axes.edgecolor": DARK,
-        "axes.linewidth": 0.9,
-        "xtick.labelsize": 8,
-        "ytick.labelsize": 8,
+        "axes.linewidth": 1.25,
+        "xtick.labelsize": 10.8,
+        "ytick.labelsize": 10.8,
         "xtick.color": DARK,
         "ytick.color": DARK,
         "xtick.direction": "out",
         "ytick.direction": "out",
-        "xtick.major.width": 0.8,
-        "ytick.major.width": 0.8,
-        "legend.fontsize": 8,
+        "xtick.major.size": 4.5,
+        "ytick.major.size": 4.5,
+        "xtick.major.width": 1.15,
+        "ytick.major.width": 1.15,
+        "legend.fontsize": 10.8,
+        "legend.title_fontsize": 11,
+        "lines.linewidth": 2.2,
+        "lines.markersize": 7,
         "figure.facecolor": "white",
         "axes.facecolor": "white",
         "savefig.facecolor": "white",
@@ -111,13 +119,17 @@ def apply_style():
 def clean_axes(ax, grid="x"):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_linewidth(1.25)
+    ax.spines["bottom"].set_linewidth(1.25)
     if grid:
-        ax.grid(axis=grid, color="#E8ECF2", linewidth=0.7, zorder=0)
+        ax.grid(axis=grid, color="#E7EBF2", linewidth=0.8, zorder=0)
     ax.set_axisbelow(True)
+    for label in [*ax.get_xticklabels(), *ax.get_yticklabels()]:
+        label.set_fontweight("bold")
 
 
-def panel_label(ax, label):
-    ax.text(-0.15, 1.06, label, transform=ax.transAxes, fontsize=12,
+def panel_label(ax, label, y=1.08):
+    ax.text(-0.22, y, label, transform=ax.transAxes, fontsize=15.5,
             fontweight="bold", color=DARK, va="top")
 
 
@@ -328,17 +340,17 @@ def plot_task_scores(ax, task, results, paired, order):
     highs = [item[2].get("ci_high", item[2]["score"]) for item in available]
     span = max(max(highs) - min(lows), 0.03)
     xmin = max(-1.0, min(lows) - 0.10 * span)
-    xmax = min(1.12, max(highs) + 0.38 * span)
+    xmax = min(1.12, max(highs) + 0.50 * span)
     if xmax - xmin < 0.08:
         xmax = min(1.12, xmin + 0.08)
     ref_score = pair["reference_test_score"]
-    ax.axvline(ref_score, color=PURPLE, linewidth=1.0, linestyle=(0, (3, 2)),
-               alpha=0.55, zorder=1)
+    ax.axvline(ref_score, color=PURPLE, linewidth=1.5, linestyle=(0, (3, 2)),
+               alpha=0.58, zorder=1)
     for yi, model in zip(y, order):
         cell = task_result["models"].get(model)
         if cell is None:
             ax.text(xmin + 0.02 * (xmax - xmin), yi, "N/A", color=MID,
-                    fontsize=7.6, va="center")
+                    fontsize=10, fontweight="bold", va="center")
             continue
         linear = cell["linear"]
         score = linear["score"]
@@ -357,17 +369,21 @@ def plot_task_scores(ax, task, results, paired, order):
         else:
             marker, face, edge = "o", BLUE, RED if sig else BLUE
         ax.errorbar(score, yi, xerr=[[score - low], [high - score]], fmt=marker,
-                    markersize=5.7, markerfacecolor=face, markeredgecolor=edge,
-                    markeredgewidth=1.3 if sig else 0.9, ecolor="#718096",
-                    elinewidth=1.1, capsize=2.4, capthick=1.0, zorder=3)
+                    markersize=7.2, markerfacecolor=face, markeredgecolor=edge,
+                    markeredgewidth=1.7 if sig else 1.1, ecolor="#718096",
+                    elinewidth=1.5, capsize=3.2, capthick=1.35, zorder=3)
         label = f"{score:.3f}{'*' if sig else ''}"
-        ax.text(high + 0.025 * (xmax - xmin), yi, label, fontsize=7.3,
-                va="center", color=RED if sig else DARK)
+        ax.text(high + 0.025 * (xmax - xmin), yi, label, fontsize=9.8,
+                fontweight="bold", va="center",
+                color=RED if sig else DARK)
     ax.set_xlim(xmin, xmax)
     ax.set_yticks(y, [MODEL_LABELS[model] for model in order])
     ax.invert_yaxis()
     metric = next(iter(task_result["models"].values()))["linear"]["metric"]
-    ax.set_title(f"{task}\n{metric}; test n = {task_result['n_test']:,}", pad=5)
+    ax.set_title(
+        f"{task}\n{metric}\nTest set: n = {task_result['n_test']:,}",
+        pad=5, linespacing=1.05,
+    )
     ax.set_xlabel(metric)
     ax.xaxis.set_major_locator(MaxNLocator(4))
     clean_axes(ax)
@@ -376,18 +392,20 @@ def plot_task_scores(ax, task, results, paired, order):
 def score_legend(fig, y=0.01):
     handles = [
         Line2D([0], [0], marker="D", color="none", markerfacecolor=PURPLE,
-               markeredgecolor=PURPLE, markersize=6,
+               markeredgecolor=PURPLE, markersize=7.5,
                label="Preselected comparison"),
         Line2D([0], [0], marker="s", color="none", markerfacecolor=TEAL,
-               markeredgecolor=TEAL, markersize=6, label="Highest observed score"),
-        Line2D([0], [0], marker="o", color="#718096", markerfacecolor=BLUE,
-               markeredgecolor=BLUE, markersize=5, label="Estimate and 95% CI"),
+               markeredgecolor=TEAL, markersize=7.5, label="Highest observed score"),
+        Line2D([0], [0], marker="o", color="#718096", linewidth=1.7,
+               markerfacecolor=BLUE, markeredgecolor=BLUE, markersize=6.5,
+               label="Estimate and 95% CI"),
         Line2D([0], [0], marker="o", color="none", markerfacecolor="white",
-               markeredgecolor=RED, markersize=6,
+               markeredgecolor=RED, markeredgewidth=1.6, markersize=7.5,
                label="* adjusted p < 0.05 vs comparison"),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False,
-               bbox_to_anchor=(0.5, y), columnspacing=1.5, handletextpad=0.6)
+               bbox_to_anchor=(0.5, y), columnspacing=1.6, handletextpad=0.7,
+               prop={"size": 10.5, "weight": "bold"})
 
 
 def make_score_figures(results, paired):
@@ -395,14 +413,14 @@ def make_score_figures(results, paired):
                                MODEL_ORDER["molecule"])
     write_csv("figure2_molecular_scores.csv", molecule_rows,
               list(molecule_rows[0]))
-    fig, axes = plt.subplots(3, 2, figsize=(7.2, 10.2))
+    fig, axes = plt.subplots(3, 2, figsize=(7.4, 10.8))
     for idx, (ax, task) in enumerate(zip(axes.flat, MOLECULE_TASKS)):
         plot_task_scores(ax, task, results, paired, MODEL_ORDER["molecule"])
-        panel_label(ax, chr(65 + idx))
+        panel_label(ax, chr(65 + idx), y=1.20)
     score_legend(fig, y=0.002)
-    fig.suptitle("Molecular property-prediction performance", fontsize=14,
+    fig.suptitle("Molecular property-prediction performance", fontsize=17,
                  fontweight="bold", color=DARK, y=0.995)
-    fig.tight_layout(rect=(0, 0.055, 1, 0.98), h_pad=2.1, w_pad=1.5)
+    fig.tight_layout(rect=(0, 0.07, 1, 0.97), h_pad=1.45, w_pad=1.9)
     save_figure(fig, "figure2_molecular_performance")
 
     other_order = MODEL_ORDER["protein"] + MODEL_ORDER["genomics"]
@@ -412,15 +430,15 @@ def make_score_figures(results, paired):
         other_rows.extend(score_rows(results, paired, [task], order))
     write_csv("figure3_protein_genomic_scores.csv", other_rows,
               list(other_rows[0]))
-    fig, axes = plt.subplots(3, 1, figsize=(7.2, 8.4))
+    fig, axes = plt.subplots(3, 1, figsize=(7.4, 9.8))
     for idx, (ax, task) in enumerate(zip(axes, PROTEIN_GENOMIC_TASKS)):
         plot_task_scores(ax, task, results, paired,
                          MODEL_ORDER[results[task]["modality"]])
-        panel_label(ax, chr(65 + idx))
+        panel_label(ax, chr(65 + idx), y=1.20)
     score_legend(fig, y=0.002)
-    fig.suptitle("Protein and genomic extension", fontsize=14,
+    fig.suptitle("Protein and genomic extension", fontsize=17,
                  fontweight="bold", color=DARK, y=0.995)
-    fig.tight_layout(rect=(0, 0.07, 1, 0.975), h_pad=2.0)
+    fig.tight_layout(rect=(0, 0.08, 1, 0.965), h_pad=2.5)
     save_figure(fig, "figure3_protein_genomic_performance")
 
 
@@ -469,7 +487,10 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
                 })
     write_csv("figure4_split_seed_source_data.csv", run_rows, list(run_rows[0]))
 
-    fig, axes = plt.subplots(3, 1, figsize=(7.2, 9.1))
+    fig, axes = plt.subplots(
+        3, 1, figsize=(7.4, 10.7),
+        gridspec_kw={"height_ratios": [1.28, 1.0, 1.0]},
+    )
     tasks = TASK_ORDER[::-1]
     y = np.arange(len(tasks))
     row_by_task = {row["task"]: row for row in summary_rows}
@@ -478,13 +499,14 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     resolved = [row_by_task[t]["resolved"] for t in tasks]
     unresolved = [row_by_task[t]["unresolved"] for t in tasks]
     colours = [modality_color[row_by_task[t]["modality"]] for t in tasks]
-    ax.barh(y, resolved, color=colours, edgecolor="none", height=0.68,
+    ax.barh(y, resolved, color=colours, edgecolor="white", linewidth=0.55,
+            height=0.68,
             label="Resolved")
-    ax.barh(y, unresolved, left=resolved, color=LIGHT, edgecolor="none",
-            height=0.68, label="Unresolved")
+    ax.barh(y, unresolved, left=resolved, color=LIGHT, edgecolor="white",
+            linewidth=0.55, height=0.68, label="Unresolved")
     for yi, task, r, u in zip(y, tasks, resolved, unresolved):
         ax.text(r + u + 0.15, yi, f"{r}/{r + u}", va="center",
-                fontsize=7.5, color=DARK)
+                fontsize=10.2, fontweight="bold", color=DARK)
     ax.set_yticks(y, tasks)
     ax.set_xlabel("Representations compared")
     ax.set_title("Statistically distinguishable comparisons after study-wide correction")
@@ -494,9 +516,10 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
         Patch(facecolor=GOLD, label="Genomics: distinguishable"),
         Patch(facecolor=LIGHT, label="Not distinguishable"),
     ]
-    ax.legend(handles=handles, frameon=False, loc="upper center", ncol=4,
-              bbox_to_anchor=(0.5, -0.18), fontsize=7.3,
-              columnspacing=1.1, handletextpad=0.5)
+    ax.legend(handles=handles, frameon=False, loc="upper center", ncol=2,
+              bbox_to_anchor=(0.5, -0.17),
+              prop={"size": 10.0, "weight": "bold"},
+              columnspacing=1.3, handletextpad=0.6)
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     clean_axes(ax)
     panel_label(ax, "A")
@@ -508,13 +531,13 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     same = [row_by_task[t]["most_frequent_split_winner"] ==
             row_by_task[t]["numerical_test_best"] for t in mol_tasks]
     ax.barh(y2, freq, color=[TEAL if item else ORANGE for item in same],
-            height=0.62)
+            edgecolor="white", linewidth=0.55, height=0.62)
     for yi, task, count in zip(y2, mol_tasks, freq):
         row = row_by_task[task]
         ax.text(count + 0.08, yi,
                 f"{row['most_frequent_split_winner']}  ({count}/5)",
-                va="center", fontsize=7.2, color=DARK)
-    ax.set_xlim(0, 8.2)
+                va="center", fontsize=10.0, fontweight="bold", color=DARK)
+    ax.set_xlim(0, 7.0)
     ax.set_yticks(y2, mol_tasks)
     ax.set_xticks(range(0, 6))
     ax.set_xlabel("Scaffold partitions led (of 5)")
@@ -523,18 +546,22 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
         Line2D([0], [0], color=TEAL, lw=6, label="Matches primary-partition leader"),
         Line2D([0], [0], color=ORANGE, lw=6, label="Different from primary-partition leader"),
     ]
-    ax.legend(handles=handles, frameon=False, loc="lower right")
+    ax.legend(handles=handles, frameon=False, loc="upper center", ncol=2,
+              bbox_to_anchor=(0.5, -0.24),
+              prop={"size": 9.8, "weight": "bold"},
+              columnspacing=1.3, handletextpad=0.6)
     clean_axes(ax)
     panel_label(ax, "B")
 
     ax = axes[2]
     ranges = [row_by_task[t]["maximum_score_range"] for t in mol_tasks]
-    ax.barh(y2, ranges, color=BLUE, height=0.62)
+    ax.barh(y2, ranges, color=BLUE, edgecolor="white", linewidth=0.55,
+            height=0.62)
     for yi, task, value in zip(y2, mol_tasks, ranges):
         row = row_by_task[task]
         ax.text(value + 0.006, yi,
                 f"{value:.3f}  ({row['maximum_range_model']})",
-                va="center", fontsize=7.2, color=DARK)
+                va="center", fontsize=10.0, fontweight="bold", color=DARK)
     ax.set_xlim(0, max(ranges) * 1.75)
     ax.set_yticks(y2, mol_tasks)
     ax.set_xlabel("Maximum score range across five seeds")
@@ -542,8 +569,8 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     clean_axes(ax)
     panel_label(ax, "C")
     fig.suptitle("Statistical comparisons and scaffold-partition sensitivity",
-                 fontsize=14, fontweight="bold", color=DARK, y=0.995)
-    fig.tight_layout(rect=(0, 0, 1, 0.975), h_pad=2.1)
+                 fontsize=17, fontweight="bold", color=DARK, y=0.995)
+    fig.tight_layout(rect=(0, 0, 1, 0.97), h_pad=2.8)
     save_figure(fig, "figure4_inference_and_split_sensitivity")
 
 
@@ -580,7 +607,7 @@ def make_resolution_figure(results, resolution):
               list(aggregate_rows[0]))
 
     task_colours = [PURPLE, TEAL, BLUE, ORANGE, RED, GOLD]
-    fig, axes = plt.subplots(3, 1, figsize=(7.2, 8.5))
+    fig, axes = plt.subplots(3, 1, figsize=(7.4, 9.7))
     groups = [MOLECULE_TASKS, ["DeepLoc", "Fluorescence"], ["Promoters"]]
     titles = ["Molecular tasks", "Protein tasks", "Genomic task"]
     for idx, (ax, tasks, title) in enumerate(zip(axes, groups, titles)):
@@ -589,18 +616,22 @@ def make_resolution_figure(results, resolution):
                                key=lambda row: row["median_effective_n"])
             ax.plot([row["median_effective_n"] for row in task_rows],
                     [row["median_central_95_width"] for row in task_rows],
-                    marker="o", markersize=4.5, linewidth=1.6, color=colour,
+                    marker="o", markersize=6.5, linewidth=2.2, color=colour,
+                    markeredgecolor="white", markeredgewidth=0.7,
                     label=task)
         ax.set_xscale("log")
         ax.set_xlabel("Median number of test observations (log scale)")
         ax.set_ylabel("Median width of 95% range")
         ax.set_title(title)
-        ax.legend(frameon=False, ncol=3 if idx == 0 else 2, loc="upper right")
+        ax.legend(frameon=False, ncol=3 if idx == 0 else 2,
+                  loc="upper right",
+                  prop={"size": 10.5, "weight": "bold"},
+                  handlelength=2.0, columnspacing=1.2)
         clean_axes(ax, grid="both")
         panel_label(ax, chr(65 + idx))
     fig.suptitle("Precision across test-set sizes",
-                 fontsize=14, fontweight="bold", color=DARK, y=0.995)
-    fig.tight_layout(rect=(0, 0, 1, 0.975), h_pad=2.0)
+                 fontsize=17, fontweight="bold", color=DARK, y=0.995)
+    fig.tight_layout(rect=(0, 0, 1, 0.97), h_pad=2.35)
     save_figure(fig, "figure5_subsampling_resolution")
 
 
@@ -623,7 +654,7 @@ def make_exposure_figure(exposure):
                 })
     write_csv("figureS1_exposure_proxy_source_data.csv", rows, list(rows[0]))
 
-    fig, axes = plt.subplots(2, 1, figsize=(7.2, 6.5), sharex=True)
+    fig, axes = plt.subplots(2, 1, figsize=(7.4, 7.4), sharex=True)
     plot_measures = ["exact_identity", "near_duplicate", "shared_scaffold"]
     labels = ["Exact identity", "Near duplicate", "Shared scaffold"]
     colours = ["#8290A6", ORANGE, BLUE]
@@ -637,11 +668,18 @@ def make_exposure_figure(exposure):
             values = [row_lookup[(task, corpus, measure)]["fraction"]
                       for task in MOLECULE_TASKS]
             offsets = task_y + (offset_idx - 1) * height
-            ax.barh(offsets, values, height=height, color=colour, label=label)
+            ax.barh(offsets, values, height=height, color=colour, label=label,
+                    edgecolor="white", linewidth=0.45)
             for yi, value in zip(offsets, values):
                 if value > 0:
-                    ax.text(value + 0.008, yi, f"{100 * value:.1f}%",
-                            fontsize=6.9, va="center", color=DARK)
+                    label_x = value + 0.008
+                    # Separate the two tiny Lipophilicity annotations rather
+                    # than letting their labels visually merge near zero.
+                    if value < 0.02:
+                        label_x += 0.028 * offset_idx
+                    ax.text(label_x, yi, f"{100 * value:.1f}%",
+                            fontsize=9.8, fontweight="bold",
+                            va="center", color=DARK)
         ax.set_yticks(task_y, MOLECULE_TASKS)
         ax.invert_yaxis()
         ax.set_xlim(0, 1.02)
@@ -653,10 +691,12 @@ def make_exposure_figure(exposure):
     handles = [Patch(facecolor=colour, label=label)
                for colour, label in zip(colours, labels)]
     fig.legend(handles=handles, frameon=False, ncol=3, loc="lower center",
-               bbox_to_anchor=(0.5, 0.005))
+               bbox_to_anchor=(0.5, 0.005),
+               prop={"size": 10.5, "weight": "bold"},
+               columnspacing=1.8, handletextpad=0.7)
     fig.suptitle("Molecular overlap with sampled pretraining sources",
-                 fontsize=14, fontweight="bold", color=DARK, y=0.995)
-    fig.tight_layout(rect=(0, 0.07, 1, 0.975), h_pad=1.8)
+                 fontsize=17, fontweight="bold", color=DARK, y=0.995)
+    fig.tight_layout(rect=(0, 0.08, 1, 0.97), h_pad=2.0)
     save_figure(fig, "figureS1_exposure_proxies")
 
 
