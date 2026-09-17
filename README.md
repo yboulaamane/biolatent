@@ -33,7 +33,7 @@ The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer
 
 ### Key Features
 1. **Interactive Registry**: Browse, filter, and search representations by modality, licensing, pretraining sizes, and compute requirements.
-2. **Compatibility Finder**: An objective catalog filter for modality, available input representation, and declared CPU/GPU profile. Results are alphabetical rather than ranked and must be validated on the user’s endpoint.
+2. **Compatibility Finder**: An objective catalog filter for modality, available input representation, and declared compute profile. It covers molecules, proteins, complexes, nucleic acids, and reactions; distinguishes catalogued inputs from structures derived from SMILES; and explains why each result matched. Results are alphabetical rather than ranked and must be validated on the user’s endpoint.
 3. **Interactive Literature Chart**: A log-scale SVG scatter plot mapping embedding dimensions against selected literature-reported benchmarks. These heterogeneous values are descriptive and separate from the measured study.
 4. **Curated Methods & Citations**: Collapsible details providing direct links to primary literature papers (e.g. TDC, MoleculeNet, FLIP).
 5. **Programmatic JSON API**: Exposes query-parameter filters to fetch representation metadata dynamically (e.g. `/api/representations?modality=protein`).
@@ -189,7 +189,7 @@ Registry metadata are descriptive catalog fields, not empirical quality or clini
 * **Artifact availability** records whether code and/or weights are linked; it is not a reproducibility score.
 * **Compute profile** is the declared CPU, GPU, or mixed execution category, not a runtime guarantee.
 * **Reported benchmarks** retain a source link and row-level provenance note. Values from heterogeneous papers are not treated as directly comparable.
-* **Compatibility Finder** filters by modality, input format, and compute profile. It lists matches alphabetically and does not claim an optimal model.
+* **Compatibility Finder** filters by modality, available input, and compute profile. It identifies catalogued or explicitly derivable input compatibility, lists matches alphabetically, and does not claim an optimal model.
 
 ---
 

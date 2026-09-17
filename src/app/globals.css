@@ -764,6 +764,11 @@ body {
     --page-gutter: 1rem;
   }
 
+  .logo-tagline {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+
   .modal-body {
     padding: 1.25rem;
   }

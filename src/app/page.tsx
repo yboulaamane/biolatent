@@ -260,26 +260,22 @@ export default function Home() {
   const recommendedEmbeddings = useMemo(() => {
     if (wizardStep !== 4) return [];
 
+    const compatibleInputs: Record<string, RepresentationEntry['inputRepresentation'][]> = {
+      'SMILES / 2D structure': ['SMILES', 'graph', 'engineered_features'],
+      'Prepared molecular graph': ['graph'],
+      '3D coordinates': ['3D'],
+      'Sequence': ['sequence'],
+      'Pocket / 3D complex': ['Pocket/3D'],
+      'Reaction SMILES': ['reaction_smiles'],
+    };
+
     return EMBEDDINGS.filter((emb) => {
-      // Modality match
       if (wizardAnswers.modality && emb.modality !== wizardAnswers.modality.toLowerCase()) {
         return false;
       }
-      
-      // Input type compatibility
-      if (wizardAnswers.inputType === 'Graph' && emb.inputRepresentation !== 'graph') {
-        return false;
-      }
-      if (wizardAnswers.inputType === 'SMILES' && emb.inputRepresentation !== 'SMILES' && emb.inputRepresentation !== 'engineered_features') {
-        return false;
-      }
-      if (wizardAnswers.inputType === '3D' && emb.inputRepresentation !== '3D') {
-        return false;
-      }
-      if (wizardAnswers.inputType === 'Sequence' && emb.inputRepresentation !== 'sequence') {
-        return false;
-      }
-      if (wizardAnswers.inputType === 'Pocket/3D' && emb.inputRepresentation !== 'Pocket/3D') {
+
+      const acceptedInputs = compatibleInputs[wizardAnswers.inputType] || [];
+      if (!acceptedInputs.includes(emb.inputRepresentation)) {
         return false;
       }
 
@@ -292,6 +288,15 @@ export default function Home() {
       return true;
     }).sort((a, b) => a.name.localeCompare(b.name));
   }, [wizardStep, wizardAnswers]);
+
+  const compatibilityBasis = (emb: RepresentationEntry) => {
+    if (wizardAnswers.inputType === 'SMILES / 2D structure' && emb.inputRepresentation !== 'SMILES') {
+      return emb.inputRepresentation === 'graph'
+        ? 'Molecular graph derived from the supplied 2D structure'
+        : 'Descriptors derived from the supplied 2D structure';
+    }
+    return `Catalogued input: ${formatLabel(emb.inputRepresentation)}`;
+  };
 
   // Handle Wizard Option Selection
   const selectWizardOption = (key: string, value: string) => {
@@ -447,7 +452,7 @@ export default function Home() {
           </svg>
           <div>
             <div className="logo-text">BioLatent</div>
-            <div className="logo-tagline">Registry &amp; Measured Benchmark</div>
+            <div className="logo-tagline">Representation Registry &amp; Benchmark</div>
           </div>
         </button>
 
@@ -666,13 +671,14 @@ export default function Home() {
         <div style={{ maxWidth: '700px', margin: '2rem auto' }} className="glass-card">
           <div className="wizard-header">
             <h2 className="wizard-title">Representation Compatibility Finder</h2>
-            <p className="wizard-tagline">Filter by input compatibility and compute profile; validate performance on your own task</p>
+            <p className="wizard-tagline">Find technically compatible registry entries by modality, available input and compute environment</p>
           </div>
 
           <div className="wizard-steps-indicator">
             {[1, 2, 3, 4].map((step) => (
               <div
                 key={step}
+                aria-label={`Step ${step} of 4`}
                 className={`indicator-dot ${wizardStep === step ? 'active' : ''} ${
                   wizardStep > step ? 'completed' : ''
                 }`}
@@ -684,7 +690,7 @@ export default function Home() {
           {wizardStep === 1 && (
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
-                1. What is your biological target modality?
+                1. What entity do you need to represent?
               </h3>
               <div className="wizard-option-grid">
                 <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Molecule')}>
@@ -699,6 +705,14 @@ export default function Home() {
                   <span className="wizard-option-title">Complexes / Pockets</span>
                   <span className="wizard-option-desc">3D binding site structures and ligand-protein interaction complexes.</span>
                 </button>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Nucleic_acid')}>
+                  <span className="wizard-option-title">DNA / RNA</span>
+                  <span className="wizard-option-desc">Nucleotide sequences represented by nucleic-acid language models.</span>
+                </button>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('modality', 'Reaction')}>
+                  <span className="wizard-option-title">Chemical Reactions</span>
+                  <span className="wizard-option-desc">Reactants and products encoded as reaction SMILES.</span>
+                </button>
               </div>
             </div>
           )}
@@ -707,40 +721,54 @@ export default function Home() {
           {wizardStep === 2 && (
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, textAlign: 'center', marginBottom: '1rem', color: '#fff' }}>
-                2. What data representation format do you have?
+                2. What input data do you have available?
               </h3>
               <div className="wizard-option-grid">
                 {wizardAnswers.modality === 'Molecule' ? (
                   <>
-                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'SMILES')}>
-                      <span className="wizard-option-title">SMILES strings</span>
-                      <span className="wizard-option-desc">Easiest to process text representations (e.g. Aspirin as CC(=O)OC1=CC=CC=C1C(=O)O).</span>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'SMILES / 2D structure')}>
+                      <span className="wizard-option-title">SMILES / 2D structures</span>
+                      <span className="wizard-option-desc">Includes models that consume SMILES directly and methods whose graphs or descriptors can be derived from the same structure.</span>
                     </button>
-                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Graph')}>
-                      <span className="wizard-option-title">2D Molecular Graphs</span>
-                      <span className="wizard-option-desc">Nodes representing atoms, edges representing bonds.</span>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Prepared molecular graph')}>
+                      <span className="wizard-option-title">Prepared molecular graphs</span>
+                      <span className="wizard-option-desc">Restrict results to methods catalogued with atom-bond graphs as their model input.</span>
                     </button>
-                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D coordinates')}>
                       <span className="wizard-option-title">3D Conformers</span>
-                      <span className="wizard-option-desc">Atomic coordinates (requires prior conformer generation).</span>
+                      <span className="wizard-option-desc">Atomic coordinates with conformers already available or generated upstream.</span>
                     </button>
                   </>
                 ) : wizardAnswers.modality === 'Complex' ? (
                   <>
-                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Pocket/3D')}>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Pocket / 3D complex')}>
                       <span className="wizard-option-title">Pocket / 3D Complex</span>
-                      <span className="wizard-option-desc">3D spatial pocket coordinates and bounding box structures.</span>
+                      <span className="wizard-option-desc">Three-dimensional binding-site or protein-ligand coordinates.</span>
+                    </button>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
+                      <span className="wizard-option-title">Sequence-based input</span>
+                      <span className="wizard-option-desc">Sequence or string inputs for catalogued interaction representations.</span>
                     </button>
                   </>
+                ) : wizardAnswers.modality === 'Nucleic_acid' ? (
+                  <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
+                    <span className="wizard-option-title">DNA / RNA sequence</span>
+                    <span className="wizard-option-desc">Nucleotide sequence supplied without requiring a three-dimensional structure.</span>
+                  </button>
+                ) : wizardAnswers.modality === 'Reaction' ? (
+                  <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Reaction SMILES')}>
+                    <span className="wizard-option-title">Reaction SMILES</span>
+                    <span className="wizard-option-desc">Atom-mapped or unmapped reaction strings, subject to the selected method&apos;s requirements.</span>
+                  </button>
                 ) : (
                   <>
                     <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
                       <span className="wizard-option-title">FASTA Sequence</span>
-                      <span className="wizard-option-desc">Pure amino acid string sequences (e.g., MSKGEE...).</span>
+                      <span className="wizard-option-desc">Amino-acid sequence without requiring an experimental or predicted structure.</span>
                     </button>
-                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D')}>
+                    <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D coordinates')}>
                       <span className="wizard-option-title">3D PDB Structure</span>
-                      <span className="wizard-option-desc">3D tertiary coordinates (e.g., from AlphaFold / PDB).</span>
+                      <span className="wizard-option-desc">Experimental or predicted tertiary coordinates.</span>
                     </button>
                   </>
                 )}
@@ -764,9 +792,9 @@ export default function Home() {
                   <span className="wizard-option-title">Local CPU</span>
                   <span className="wizard-option-desc">Show only entries explicitly catalogued as CPU-compatible. Runtime still depends on input count, length and software version.</span>
                 </button>
-                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'High (GPU Server)')}>
-                  <span className="wizard-option-title">GPU Available</span>
-                  <span className="wizard-option-desc">Include CPU, mixed and GPU profiles; memory and runtime are not guaranteed by this filter.</span>
+                <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'No restriction')}>
+                  <span className="wizard-option-title">No Compute Restriction</span>
+                  <span className="wizard-option-desc">Include CPU, mixed and GPU profiles. Memory and runtime are not guaranteed by this catalog field.</span>
                 </button>
               </div>
               <div className="wizard-actions">
@@ -780,13 +808,19 @@ export default function Home() {
           {/* STEP 4: Compatible entries */}
           {wizardStep === 4 && (
             <div className="wizard-results">
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', color: '#fff', marginBottom: '1.5rem', textAlign: 'center' }}>
-                Compatible Registry Entries
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem', textAlign: 'center' }}>
+                {recommendedEmbeddings.length} Compatible Registry {recommendedEmbeddings.length === 1 ? 'Entry' : 'Entries'}
               </h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6, marginBottom: '1.25rem', textAlign: 'center' }}>
-                Alphabetical, not ranked. Compatibility does not establish predictive performance;
-                compare candidates under the same split and probe on your own endpoint.
+                Listed alphabetically, not ranked. Technical compatibility does not establish predictive performance.
+                Compare candidates under the same split and predictive model on your endpoint.
               </p>
+
+              <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                <button type="button" className="badge-btn" onClick={() => setWizardStep(1)}>Entity: {formatLabel(wizardAnswers.modality.toLowerCase())}</button>
+                <button type="button" className="badge-btn" onClick={() => setWizardStep(2)}>Input: {wizardAnswers.inputType}</button>
+                <button type="button" className="badge-btn" onClick={() => setWizardStep(3)}>Compute: {wizardAnswers.resourceBudget === 'Low (Local CPU)' ? 'CPU only' : 'No restriction'}</button>
+              </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
                 {recommendedEmbeddings.map((emb) => (
@@ -798,15 +832,18 @@ export default function Home() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '1rem',
                       padding: '1.25rem'
                     }}
                   >
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.25rem' }}>
                         <h4 style={{ fontWeight: 700, color: '#fff', fontSize: '1.1rem' }}>{emb.name}</h4>
                       </div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Type: {formatLabel(emb.representationType)} • Input: {formatLabel(emb.inputRepresentation)} • Dim: {getDim(emb)}d
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem' }}>{compatibilityBasis(emb)}</div>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                        {formatLabel(emb.representationType)} · {emb.computeProfile.toUpperCase()} · {getDim(emb)} dimensions · {artifactAvailability(emb)} · {emb.license}
                       </span>
                     </div>
 
@@ -817,7 +854,7 @@ export default function Home() {
                         setModalTab('details');
                       }}
                     >
-                      Get Snippet
+                      View Entry
                     </button>
                   </div>
                 ))}
@@ -1183,7 +1220,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer style={{ marginTop: '4rem', padding: '2rem 0 1rem', borderTop: '1px solid var(--border-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
         <div>
-          © {new Date().getFullYear()} BioLatent • Registry and Measured Benchmark.
+          © {new Date().getFullYear()} BioLatent • Representation Registry and Benchmark.
         </div>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <a href="https://doi.org/10.5281/zenodo.22813148" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>Data DOI</a>
