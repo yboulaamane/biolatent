@@ -12,6 +12,7 @@ import csv
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
+from xml.etree import ElementTree
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -170,6 +171,49 @@ def make_scope_figure(results, paired):
         })
     write_csv("figure1_benchmark_scope.csv", rows, list(rows[0]))
 
+    overall_tasks = sum(row["tasks"] for row in rows)
+    overall_representations = sum(row["representations"] for row in rows)
+    overall_cells = sum(row["measured_cells"] for row in rows)
+    overall_resolved = sum(row["resolved_comparisons"] for row in rows)
+    overall_comparisons = sum(row["total_comparisons"] for row in rows)
+
+    # Figure 1 is maintained as native, editable Draw.io artwork.  Keep the
+    # data table generated above, verify that the artwork contains the current
+    # release totals, and preserve its publication exports on regeneration.
+    drawio_path = FIGURE_DIR / "figure1_study_design.drawio"
+    if drawio_path.exists():
+        exports = [
+            FIGURE_DIR / "figure1_study_design.png",
+            FIGURE_DIR / "figure1_study_design.svg",
+        ]
+        missing_exports = [path.name for path in exports if not path.exists()]
+        if missing_exports:
+            raise FileNotFoundError(
+                "Export the Draw.io Figure 1 source before generating the "
+                f"manuscript; missing: {', '.join(missing_exports)}"
+            )
+
+        cell_values = {
+            cell.attrib.get("value", "")
+            for cell in ElementTree.parse(drawio_path).iter("mxCell")
+        }
+        expected_values = {
+            *(f"{row['tasks']} {'task' if row['tasks'] == 1 else 'tasks'} · "
+              f"{row['representations']} representations" for row in rows),
+            *(f"{row['measured_cells']} evaluations" for row in rows),
+            str(overall_tasks),
+            str(overall_representations),
+            str(overall_cells),
+            f"{overall_resolved}/{overall_comparisons}",
+        }
+        missing_values = sorted(expected_values - cell_values)
+        if missing_values:
+            raise ValueError(
+                "Draw.io Figure 1 is out of sync with the benchmark results; "
+                f"missing labels: {', '.join(missing_values)}"
+            )
+        return
+
     fig, ax = plt.subplots(figsize=(7.2, 5.4))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -222,9 +266,6 @@ def make_scope_figure(results, paired):
                                          arrowstyle="-|>", mutation_scale=10,
                                          linewidth=1.0, color="#8C96A8"))
 
-    overall_cells = sum(row["measured_cells"] for row in rows)
-    overall_resolved = sum(row["resolved_comparisons"] for row in rows)
-    overall_comparisons = sum(row["total_comparisons"] for row in rows)
     ax.text(0.02, 0.265, "Validated release", fontsize=9.5,
             fontweight="bold", color=DARK)
     summary = [
