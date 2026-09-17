@@ -18,7 +18,7 @@ from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = Path(os.environ.get(
@@ -121,7 +121,11 @@ def add_hyperlink(paragraph, text, url):
     color.set(qn("w:val"), "365F91")
     underline = OxmlElement("w:u")
     underline.set(qn("w:val"), "single")
-    properties.extend([color, underline])
+    size = OxmlElement("w:sz")
+    size.set(qn("w:val"), "24")
+    complex_script_size = OxmlElement("w:szCs")
+    complex_script_size.set(qn("w:val"), "24")
+    properties.extend([color, underline, size, complex_script_size])
     run.append(properties)
     text_element = OxmlElement("w:t")
     text_element.text = text
@@ -133,13 +137,18 @@ def add_hyperlink(paragraph, text, url):
 def add_heading(document, text, level):
     paragraph = document.add_heading(text, level=level)
     paragraph.paragraph_format.keep_with_next = True
+    for run in paragraph.runs:
+        run.font.color.rgb = RGBColor(0, 0, 0)
     return paragraph
 
 
 def add_body(document, text, style=None):
     paragraph = document.add_paragraph(text, style=style)
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     paragraph.paragraph_format.space_after = Pt(6)
     paragraph.paragraph_format.line_spacing = 1.08
+    for run in paragraph.runs:
+        run.font.size = Pt(12)
     return paragraph
 
 
@@ -156,7 +165,10 @@ def add_caption(document, text):
     paragraph = document.add_paragraph(
         text, style=available_style(document, "Caption")
     )
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     paragraph.paragraph_format.keep_with_next = True
+    for run in paragraph.runs:
+        run.font.size = Pt(12)
     return paragraph
 
 
@@ -302,6 +314,19 @@ def build():
     # complete manuscript with python-docx's standard document styles.
     document = Document(TEMPLATE) if TEMPLATE.exists() else Document()
     clear_body(document)
+    for style_name in ("Normal", "Abstract", "Bibliography", "List Paragraph", "Caption"):
+        try:
+            style = document.styles[style_name]
+        except KeyError:
+            continue
+        style.font.name = "Arial"
+        style.font.size = Pt(12)
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
+    for style_name in ("Title", "Heading 1", "Heading 2", "Heading 3", "Abstract Title"):
+        try:
+            document.styles[style_name].font.color.rgb = RGBColor(0, 0, 0)
+        except KeyError:
+            continue
     document.core_properties.title = (
         "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
         "Protein, and Genomic Representations")
@@ -313,23 +338,26 @@ def build():
 
     title = document.add_paragraph(style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title.add_run("BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
-                  "Protein, and Genomic Representations")
+    title_run = title.add_run("BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
+                              "Protein, and Genomic Representations")
+    title_run.font.color.rgb = RGBColor(0, 0, 0)
     author = document.add_paragraph(
         "Yassir Boulaamane",
         style=available_style(document, "Author", "Subtitle"),
     )
     author.alignment = WD_ALIGN_PARAGRAPH.CENTER
     affiliation = document.add_paragraph(
-        "Àrea de Química Física, Departament de Química, Universitat Autònoma de "
-        "Barcelona, Cerdanyola del Vallès, Spain")
+        "InSiliChem, Departament de Química, Universitat Autònoma de Barcelona, "
+        "08193, Bellaterra (Barcelona), Spain")
     affiliation.alignment = WD_ALIGN_PARAGRAPH.CENTER
     email = document.add_paragraph("Correspondence: yassir.boulaamane@uab.cat")
     email.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    document.add_paragraph(
+    abstract_heading = document.add_paragraph(
         "Abstract", style=available_style(document, "Abstract Title", "Heading 1")
     )
+    for run in abstract_heading.runs:
+        run.font.color.rgb = RGBColor(0, 0, 0)
     abstract = (
         f"Comparisons of molecular representations are often confounded by differences in "
         f"dataset preparation, scaffold partitioning and predictive models. BioLatent compares "
@@ -351,9 +379,12 @@ def build():
         f"interpreted as stable rankings without uncertainty estimates and split-sensitivity "
         f"analysis. BioLatent provides a reproducible basis for comparing molecular "
         f"representations while preserving the endpoint-specific nature of their performance.")
-    document.add_paragraph(
+    abstract_paragraph = document.add_paragraph(
         abstract, style=available_style(document, "Abstract")
     )
+    abstract_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    for run in abstract_paragraph.runs:
+        run.font.size = Pt(12)
     add_body(document, "Keywords: molecular representations; molecular property prediction; "
              "chemical fingerprints; scaffold split; pretrained models; benchmark uncertainty")
 
@@ -699,7 +730,11 @@ def build():
         "No independent benchmark collection was used to establish that the observed rankings generalise to other chemical series or assay settings.",
     ]
     for item in limitations:
-        document.add_paragraph(item, style="List Paragraph").style = document.styles["List Paragraph"]
+        paragraph = document.add_paragraph(item, style="List Paragraph")
+        paragraph.style = document.styles["List Paragraph"]
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        for run in paragraph.runs:
+            run.font.size = Pt(12)
 
     add_heading(document, "6. Conclusion", 1)
     add_body(document, "Under a common evaluation procedure, molecular-representation performance "
@@ -772,7 +807,8 @@ def build():
         paragraph = document.add_paragraph(
             style=available_style(document, "Bibliography")
         )
-        paragraph.add_run(text)
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        paragraph.add_run(text).font.size = Pt(12)
         add_hyperlink(paragraph, url.replace("https://doi.org/", "doi:"), url)
 
     for section in document.sections:
@@ -783,7 +819,7 @@ def build():
         add_page_number(section)
     normal = document.styles["Normal"]
     normal.font.name = "Arial"
-    normal.font.size = Pt(9.5)
+    normal.font.size = Pt(12)
     normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
     document.save(OUTPUT)
     print(f"Wrote {OUTPUT}")
