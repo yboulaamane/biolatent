@@ -452,7 +452,7 @@ export default function Home() {
           </svg>
           <div>
             <div className="logo-text">BioLatent</div>
-            <div className="logo-tagline">Representation Registry &amp; Benchmark</div>
+            <div className="logo-tagline">Representation Registry &amp; Measured Benchmark</div>
           </div>
         </button>
 
@@ -1220,7 +1220,7 @@ export default function Home() {
       {/* FOOTER */}
       <footer style={{ marginTop: '4rem', padding: '2rem 0 1rem', borderTop: '1px solid var(--border-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
         <div>
-          © {new Date().getFullYear()} BioLatent • Representation Registry and Benchmark.
+          © {new Date().getFullYear()} BioLatent • Representation Registry and Measured Benchmark.
         </div>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <a href="https://doi.org/10.5281/zenodo.22813148" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>Data DOI</a>
