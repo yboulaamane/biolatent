@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BioLatent | Measured Biological Embedding Benchmark",
-  description: "A reproducible frozen-embedding benchmark and literature registry for molecular, protein, and genomic representations.",
+  title: "BioLatent | Representation Registry & Measured Benchmark",
+  description: "An open registry of chemical and biological representations with a reproducible measured benchmark for molecular, protein, and genomic tasks.",
   keywords: ["embeddings", "drug discovery", "protein language models", "molecular representations", "SMILES", "ESM-2", "ChemBERTa", "MolFormer", "bioinformatics", "chemoinformatics"],
   authors: [{ name: "Yassir Boulaamane", url: "https://github.com/yboulaamane" }],
   other: {
