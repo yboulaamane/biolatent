@@ -160,7 +160,7 @@ python paper/generate_manuscript.py
 python paper/build_zenodo_archive.py
 ```
 
-The figure generator writes publication-resolution PNG and editable SVG panels to `paper/figures/`, their plotted source values to `paper/figure_data/`, and complete legends to `paper/FIGURE_LEGENDS.md`. The final manuscript is written to `paper/BioLatent_methods_revised.docx`. If the optional local `BioLatent_methods.docx` template is present it supplies the house style; a clean clone falls back to a standard Word document. The final command creates a versioned, checksum-verified Zenodo deposit under `dist/`; raw third-party datasets and embedding matrices are deliberately excluded and remain reproducible from their pinned sources.
+The figure generator writes publication-resolution PNG and editable SVG panels to `paper/figures/`, their plotted source values to `paper/figure_data/`, and complete legends to `paper/FIGURE_LEGENDS.md`. Figure 1 is maintained in the editable Draw.io source `paper/figures/figure1_study_design.drawio`; the generator checks its displayed release totals and preserves its PNG and SVG exports. The final manuscript is written to `paper/BioLatent_methods_revised.docx`. If the optional local `BioLatent_methods.docx` template is present it supplies the house style; a clean clone falls back to a standard Word document. The final command creates a versioned, checksum-verified Zenodo deposit under `dist/`; raw third-party datasets and embedding matrices are deliberately excluded and remain reproducible from their pinned sources.
 
 MoLFormer requires its compatibility environment once:
 
