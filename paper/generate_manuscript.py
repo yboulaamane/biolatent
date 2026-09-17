@@ -361,7 +361,7 @@ def build():
     add_body(document, "Molecular-property models depend strongly on how chemical structure is "
              "represented. Circular fingerprints and calculated descriptors remain widely used, "
              "whereas recent methods learn representations from SMILES strings, molecular graphs "
-             "or three-dimensional structures [9,10,17-19]. Published comparisons do not always "
+             "or three-dimensional structures [1-5]. Published comparisons do not always "
              "use the same compounds, scaffold partitions, hyperparameter searches or predictive "
              "models. Consequently, differences between reported scores may reflect the evaluation "
              "procedure as much as the representation itself.")
@@ -375,9 +375,9 @@ def build():
              "registry and measured benchmark are complementary, but their numerical values are "
              "kept analytically separate.")
     add_body(document, "MoleculeNet and the Therapeutics Data Commons established valuable public "
-             "datasets and recommended evaluation practices [1,2]. Scaffold-based partitioning is "
+             "datasets and recommended evaluation practices [6,7]. Scaffold-based partitioning is "
              "particularly important because a random split can place closely related chemical "
-             "series in both training and test sets [6]. Even with a scaffold split, however, a "
+             "series in both training and test sets [8]. Even with a scaffold split, however, a "
              "single test score gives no indication of its uncertainty or its sensitivity to the "
              "chosen partition. This is especially problematic when several representations differ "
              "only in the second or third decimal place.")
@@ -396,18 +396,18 @@ def build():
     add_heading(document, "2. Methods", 1)
     add_heading(document, "2.1 Study design and datasets", 2)
     add_body(document, "The primary analysis comprised six molecular datasets. BBBP, ClinTox, "
-             "BACE, ESOL and Lipophilicity were obtained from MoleculeNet [1]. CYP3A4 used the "
+             "BACE, ESOL and Lipophilicity were obtained from MoleculeNet [6]. CYP3A4 used the "
              "667-compound Carbon–Mangels substrate dataset distributed through the Therapeutics "
-             "Data Commons [2,7]; it was not replaced by the larger CYP3A4 inhibition dataset. "
+             "Data Commons [7,9]; it was not replaced by the larger CYP3A4 inhibition dataset. "
              "ClinTox retained both its clinical-toxicity and FDA-approval endpoints.")
     add_body(document, "MoleculeNet structures were checked with RDKit while preserving source "
              "records that differed by salt form or stereochemistry. The five MoleculeNet datasets "
-             "were divided by a balanced Bemis–Murcko scaffold procedure [6]. CYP3A4 structures "
+             "were divided by a balanced Bemis–Murcko scaffold procedure [8]. CYP3A4 structures "
              "were standardized and deduplicated before applying the scaffold procedure supplied "
              "by the Therapeutics Data Commons. One partition was designated for model fitting, "
              "one for model selection and one for final evaluation.")
     add_body(document, "The extension analysis used DeepLoc 2.0 protein localisation, TAPE protein "
-             "fluorescence and Nucleotide Transformer promoter recognition [3,4,8]. Their published "
+             "fluorescence and Nucleotide Transformer promoter recognition [10-12]. Their published "
              "homology, extrapolation or chromosome-based partitions were retained. These datasets "
              "test whether the same comparison framework behaves similarly outside molecular "
              "property prediction; their absolute scores are not compared with molecular scores.")
@@ -425,13 +425,13 @@ def build():
     add_heading(document, "2.2 Molecular and sequence representations", 2)
     add_body(document, "The molecular comparison included ECFP4 circular fingerprints, RDKit2D "
              "descriptors, three SMILES-based models, two pretrained graph families, a contrastive "
-             "graph model and a three-dimensional molecular model [9,10,17-19]. Fingerprints and "
+             "graph model and a three-dimensional molecular model [1-5]. Fingerprints and "
              "descriptors provide established cheminformatics baselines; the remaining methods "
              "represent structures learned from large unlabelled molecular collections. Each "
              "representation was calculated once and held fixed during property-model fitting.")
     add_body(document, "The extension used amino-acid triplet frequencies, four ESM-2 sizes and "
-             "ProtBERT for proteins [11,12], together with nucleotide 5-mer frequencies, Nucleotide "
-             "Transformer and HyenaDNA for promoter sequences [4,13]. A representation was evaluated "
+             "ProtBERT for proteins [13,14], together with nucleotide 5-mer frequencies, Nucleotide "
+             "Transformer and HyenaDNA for promoter sequences [12,15]. A representation was evaluated "
              "only on its corresponding molecular or sequence domain. MolCLR could not process all "
              "ClinTox structures with its published molecular featurisation and is therefore shown "
              "as unavailable rather than estimated from a reduced dataset.")
@@ -468,8 +468,8 @@ def build():
              "For molecular datasets, complete Bemis–Murcko scaffold groups were resampled together "
              "to preserve dependence within a chemical series; individual acyclic compounds were kept "
              "as separate groups. Statistical evidence was estimated by paired randomisation with "
-             "2,000 repetitions [14]. Holm adjustment controlled the family-wise error rate across all "
-             "59 comparisons in the study [15]. A difference was considered statistically "
+             "2,000 repetitions [16]. Holm adjustment controlled the family-wise error rate across all "
+             "59 comparisons in the study [17]. A difference was considered statistically "
              "distinguishable when the adjusted p-value was below 0.05.")
 
     add_heading(document, "2.5 Robustness to scaffold partition and test-set size", 2)
@@ -718,25 +718,23 @@ def build():
 
     add_heading(document, "References", 1)
     references = [
-        ("[1] Wu Z et al. MoleculeNet: a benchmark for molecular machine learning. Chemical Science. 2018;9:513-530. ", "https://doi.org/10.1039/C7SC02664A"),
-        ("[2] Huang K et al. Therapeutics Data Commons: machine learning datasets and tasks for therapeutics. NeurIPS Datasets and Benchmarks. 2021. ", "https://doi.org/10.48550/arXiv.2102.09548"),
-        ("[3] Rao R et al. Evaluating protein transfer learning with TAPE. NeurIPS. 2019. ", "https://doi.org/10.48550/arXiv.1906.08230"),
-        ("[4] Dalla-Torre H et al. Nucleotide Transformer: building and evaluating robust foundation models for human genomics. Nature Methods. 2025;22:287-297. ", "https://doi.org/10.1038/s41592-024-02523-z"),
-        ("[5] Feng H et al. Benchmarking DNA foundation models for genomic and genetic tasks. Nature Communications. 2025;16:10780. ", "https://doi.org/10.1038/s41467-025-65823-8"),
-        ("[6] Bemis GW, Murcko MA. The properties of known drugs. 1. Molecular frameworks. Journal of Medicinal Chemistry. 1996;39:2887-2893. ", "https://doi.org/10.1021/jm9602928"),
-        ("[7] Carbon-Mangels M, Hutter MC. Selecting relevant descriptors for classification by Bayesian estimates: a comparison with decision trees and support vector machines approaches for discrimination of CYP3A4 substrates. Molecular Informatics. 2011;30:885-895. ", "https://doi.org/10.1002/minf.201100069"),
-        ("[8] Thumuluri V et al. DeepLoc 2.0: multi-label subcellular localization prediction using protein language models. Nucleic Acids Research. 2022;50:W228-W234. ", "https://doi.org/10.1093/nar/gkac278"),
-        ("[9] Chithrananda S, Grand G, Ramsundar B. ChemBERTa: large-scale self-supervised pretraining for molecular property prediction. 2020. ", "https://doi.org/10.48550/arXiv.2010.09885"),
-        ("[10] Ross J et al. Large-scale chemical language representations capture molecular structure and properties. Nature Machine Intelligence. 2022;4:1256-1264. ", "https://doi.org/10.1038/s42256-022-00580-7"),
-        ("[11] Lin Z et al. Evolutionary-scale prediction of atomic-level protein structure with a language model. Science. 2023;379:1123-1130. ", "https://doi.org/10.1126/science.ade2574"),
-        ("[12] Elnaggar A et al. ProtTrans: toward understanding the language of life through self-supervised learning. IEEE TPAMI. 2022;44:7112-7127. ", "https://doi.org/10.1109/TPAMI.2021.3095381"),
-        ("[13] Nguyen E et al. HyenaDNA: long-range genomic sequence modeling at single nucleotide resolution. NeurIPS. 2023. ", "https://doi.org/10.48550/arXiv.2306.15794"),
-        ("[14] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
-        ("[15] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
-        ("[16] Sultan A et al. Transformers for molecular property prediction: domain adaptation efficiently improves performance. Journal of Cheminformatics. 2026;18:107. ", "https://doi.org/10.1186/s13321-026-01252-z"),
-        ("[17] Zhou G et al. Uni-Mol: a universal 3D molecular representation learning framework. ICLR. 2023. ", "https://openreview.net/forum?id=6K2RM6wVqKu"),
-        ("[18] Wang Y et al. Molecular contrastive learning of representations via graph neural networks. Nature Machine Intelligence. 2022;4:279-287. ", "https://doi.org/10.1038/s42256-022-00447-x"),
-        ("[19] Rong Y et al. Self-supervised graph transformer on large-scale molecular data. NeurIPS. 2020;33:12559-12571. ", "https://doi.org/10.48550/arXiv.2007.02835"),
+        ("[1] Chithrananda S, Grand G, Ramsundar B. ChemBERTa: large-scale self-supervised pretraining for molecular property prediction. 2020. ", "https://doi.org/10.48550/arXiv.2010.09885"),
+        ("[2] Ross J et al. Large-scale chemical language representations capture molecular structure and properties. Nature Machine Intelligence. 2022;4:1256-1264. ", "https://doi.org/10.1038/s42256-022-00580-7"),
+        ("[3] Zhou G et al. Uni-Mol: a universal 3D molecular representation learning framework. ICLR. 2023. ", "https://openreview.net/forum?id=6K2RM6wVqKu"),
+        ("[4] Wang Y et al. Molecular contrastive learning of representations via graph neural networks. Nature Machine Intelligence. 2022;4:279-287. ", "https://doi.org/10.1038/s42256-022-00447-x"),
+        ("[5] Rong Y et al. Self-supervised graph transformer on large-scale molecular data. NeurIPS. 2020;33:12559-12571. ", "https://doi.org/10.48550/arXiv.2007.02835"),
+        ("[6] Wu Z et al. MoleculeNet: a benchmark for molecular machine learning. Chemical Science. 2018;9:513-530. ", "https://doi.org/10.1039/C7SC02664A"),
+        ("[7] Huang K et al. Therapeutics Data Commons: machine learning datasets and tasks for therapeutics. NeurIPS Datasets and Benchmarks. 2021. ", "https://doi.org/10.48550/arXiv.2102.09548"),
+        ("[8] Bemis GW, Murcko MA. The properties of known drugs. 1. Molecular frameworks. Journal of Medicinal Chemistry. 1996;39:2887-2893. ", "https://doi.org/10.1021/jm9602928"),
+        ("[9] Carbon-Mangels M, Hutter MC. Selecting relevant descriptors for classification by Bayesian estimates: a comparison with decision trees and support vector machines approaches for discrimination of CYP3A4 substrates. Molecular Informatics. 2011;30:885-895. ", "https://doi.org/10.1002/minf.201100069"),
+        ("[10] Thumuluri V et al. DeepLoc 2.0: multi-label subcellular localization prediction using protein language models. Nucleic Acids Research. 2022;50:W228-W234. ", "https://doi.org/10.1093/nar/gkac278"),
+        ("[11] Rao R et al. Evaluating protein transfer learning with TAPE. NeurIPS. 2019. ", "https://doi.org/10.48550/arXiv.1906.08230"),
+        ("[12] Dalla-Torre H et al. Nucleotide Transformer: building and evaluating robust foundation models for human genomics. Nature Methods. 2025;22:287-297. ", "https://doi.org/10.1038/s41592-024-02523-z"),
+        ("[13] Lin Z et al. Evolutionary-scale prediction of atomic-level protein structure with a language model. Science. 2023;379:1123-1130. ", "https://doi.org/10.1126/science.ade2574"),
+        ("[14] Elnaggar A et al. ProtTrans: toward understanding the language of life through self-supervised learning. IEEE TPAMI. 2022;44:7112-7127. ", "https://doi.org/10.1109/TPAMI.2021.3095381"),
+        ("[15] Nguyen E et al. HyenaDNA: long-range genomic sequence modeling at single nucleotide resolution. NeurIPS. 2023. ", "https://doi.org/10.48550/arXiv.2306.15794"),
+        ("[16] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
+        ("[17] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
     ]
     for text, url in references:
         paragraph = document.add_paragraph(
