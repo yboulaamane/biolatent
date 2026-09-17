@@ -1,0 +1,124 @@
+name: Convert representation submission to pull request
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  prepare-pull-request:
+    if: startsWith(github.event.issue.title, '[Representation submission]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Save the issue body without shell interpolation
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python -c 'import os, pathlib; pathlib.Path("${{ runner.temp }}/issue-body.md").write_text(os.environ.get("ISSUE_BODY", ""))'
+
+      - name: Validate and prepare the registry entry
+        id: prepare
+        shell: bash
+        run: |
+          set +e
+          python scripts/prepare_representation_submission.py \
+            --body-file "${{ runner.temp }}/issue-body.md" \
+            --registry-file src/app/data/embeddings.ts \
+            --github-output "${{ runner.temp }}/submission-output.txt" \
+            2> "${{ runner.temp }}/submission-error.txt"
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+            cat "${{ runner.temp }}/submission-output.txt" >> "$GITHUB_OUTPUT"
+          else
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Explain an invalid submission
+        if: steps.prepare.outputs.valid != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          {
+            echo "The automated registry check could not prepare a pull request."
+            echo
+            echo '```text'
+            sed -n '1,30p' "${{ runner.temp }}/submission-error.txt"
+            echo '```'
+            echo
+            echo "Please correct the form data and open a new submission."
+          } > "${{ runner.temp }}/invalid-comment.md"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "${{ runner.temp }}/invalid-comment.md"
+
+      - name: Set up Node.js
+        if: steps.prepare.outputs.valid == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Verify the generated registry
+        if: steps.prepare.outputs.valid == 'true'
+        run: |
+          python -m unittest scripts.test_prepare_representation_submission
+          npm ci
+          npm run build
+
+      - name: Commit the generated entry
+        if: steps.prepare.outputs.valid == 'true'
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SUBMISSION_ID: ${{ steps.prepare.outputs.submission_id }}
+          SUBMISSION_NAME: ${{ steps.prepare.outputs.submission_name }}
+        run: |
+          branch="registry-submission/issue-${ISSUE_NUMBER}-${SUBMISSION_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add src/app/data/embeddings.ts
+          git commit -m "Add ${SUBMISSION_NAME} to representation registry"
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_ENV"
+
+      - name: Open the pull request and close the intake issue
+        if: steps.prepare.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SUBMISSION_NAME: ${{ steps.prepare.outputs.submission_name }}
+        run: |
+          {
+            echo "Generated from #${ISSUE_NUMBER}."
+            echo
+            echo "Curator review is required before merge:"
+            echo "- verify representation identity, license and primary links"
+            echo "- replace the placeholder loading example with tested code"
+            echo "- add literature benchmark rows only after source-level provenance review"
+            echo
+            echo "Registry inclusion does not add this representation to the measured benchmark."
+          } > "${{ runner.temp }}/pull-request-body.md"
+          pr_url=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "Registry: add ${SUBMISSION_NAME}" \
+            --body-file "${{ runner.temp }}/pull-request-body.md")
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Automated pull request created: ${pr_url}"
+          gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed

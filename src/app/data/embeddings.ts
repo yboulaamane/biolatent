@@ -16,6 +16,7 @@ export interface BaseRepresentation {
   // Availability
   weightsUrl?: string;
   codeRepositoryUrl?: string;
+  paperUrl?: string;
   librarySupport?: string;
 
   // Usage constraints
