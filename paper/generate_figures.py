@@ -177,7 +177,7 @@ def make_scope_figure(results, paired):
     ax.text(0.02, 0.97, "BioLatent measured benchmark", fontsize=16,
             fontweight="bold", color=DARK, va="top")
     ax.text(0.02, 0.915,
-            "Real datasets · frozen representations · one standardised probe · paired inference",
+            "Real datasets · fixed representations · standardised prediction · paired statistics",
             fontsize=9.2, color=MID, va="top")
 
     x_positions = [0.02, 0.345, 0.67]
@@ -192,15 +192,15 @@ def make_scope_figure(results, paired):
                 f"{row['tasks']} tasks  ·  {row['representations']} representations",
                 fontsize=8.5, color=DARK)
         ax.text(x + 0.018, 0.735,
-                f"{row['measured_cells']} measured cells",
+                f"{row['measured_cells']} evaluations",
                 fontsize=9, fontweight="bold", color=DARK)
         ax.text(x + 0.018, 0.695, row["split_policy"], fontsize=7.7, color=MID)
 
     pipeline = [
-        ("1", "Embed once", "Pinned checkpoint\nand input hash"),
-        ("2", "Select comparator", "Validation data; same\nprobe and tuning grid"),
-        ("3", "Fixed-test score", "Saved predictions\nand ranked metric"),
-        ("4", "Paired inference", "Bootstrap, randomisation\nand study-wide Holm"),
+        ("1", "Calculate once", "Verified inputs;\nfixed model version"),
+        ("2", "Select baseline", "Validation data;\nsame procedure"),
+        ("3", "Score test set", "Predictions and\nendpoint measure"),
+        ("4", "Quantify uncertainty", "Bootstrap and\nadjusted tests"),
     ]
     px = [0.02, 0.27, 0.52, 0.77]
     for i, (num, title, subtitle) in enumerate(pipeline):
@@ -230,15 +230,15 @@ def make_scope_figure(results, paired):
     summary = [
         ("9", "real-data tasks"),
         ("18", "representations"),
-        (str(overall_cells), "model-task cells"),
-        (f"{overall_resolved}/{overall_comparisons}", "resolved comparisons"),
+        (str(overall_cells), "model–dataset\nevaluations"),
+        (f"{overall_resolved}/{overall_comparisons}", "statistically distinguishable\ncomparisons"),
     ]
     for i, (value, label) in enumerate(summary):
         x = 0.02 + i * 0.245
         ax.text(x, 0.19, value, fontsize=17, fontweight="bold", color=PURPLE)
-        ax.text(x, 0.145, label, fontsize=8.2, color=MID)
+        ax.text(x, 0.145, label, fontsize=7.6, color=MID, va="top", linespacing=1.2)
     ax.text(0.02, 0.07,
-            "Resolved = study-wide Holm-adjusted p < 0.05 against the validation-selected reference.",
+            "Distinguishable = study-wide adjusted p < 0.05 versus the preselected comparison method.",
             fontsize=7.8, color=MID)
     save_figure(fig, "figure1_study_design")
 
@@ -336,14 +336,14 @@ def score_legend(fig, y=0.01):
     handles = [
         Line2D([0], [0], marker="D", color="none", markerfacecolor=PURPLE,
                markeredgecolor=PURPLE, markersize=6,
-               label="Validation-selected reference"),
+               label="Preselected comparison"),
         Line2D([0], [0], marker="s", color="none", markerfacecolor=TEAL,
-               markeredgecolor=TEAL, markersize=6, label="Numerical test best"),
+               markeredgecolor=TEAL, markersize=6, label="Highest observed score"),
         Line2D([0], [0], marker="o", color="#718096", markerfacecolor=BLUE,
                markeredgecolor=BLUE, markersize=5, label="Estimate and 95% CI"),
         Line2D([0], [0], marker="o", color="none", markerfacecolor="white",
                markeredgecolor=RED, markersize=6,
-               label="* study-wide Holm p < 0.05 vs reference"),
+               label="* adjusted p < 0.05 vs comparison"),
     ]
     fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False,
                bbox_to_anchor=(0.5, y), columnspacing=1.5, handletextpad=0.6)
@@ -359,7 +359,7 @@ def make_score_figures(results, paired):
         plot_task_scores(ax, task, results, paired, MODEL_ORDER["molecule"])
         panel_label(ax, chr(65 + idx))
     score_legend(fig, y=0.002)
-    fig.suptitle("Molecular frozen-embedding performance", fontsize=14,
+    fig.suptitle("Molecular property-prediction performance", fontsize=14,
                  fontweight="bold", color=DARK, y=0.995)
     fig.tight_layout(rect=(0, 0.055, 1, 0.98), h_pad=2.1, w_pad=1.5)
     save_figure(fig, "figure2_molecular_performance")
@@ -377,7 +377,7 @@ def make_score_figures(results, paired):
                          MODEL_ORDER[results[task]["modality"]])
         panel_label(ax, chr(65 + idx))
     score_legend(fig, y=0.002)
-    fig.suptitle("Protein and genomic frozen-embedding performance", fontsize=14,
+    fig.suptitle("Protein and genomic extension", fontsize=14,
                  fontweight="bold", color=DARK, y=0.995)
     fig.tight_layout(rect=(0, 0.07, 1, 0.975), h_pad=2.0)
     save_figure(fig, "figure3_protein_genomic_performance")
@@ -445,13 +445,13 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
         ax.text(r + u + 0.15, yi, f"{r}/{r + u}", va="center",
                 fontsize=7.5, color=DARK)
     ax.set_yticks(y, tasks)
-    ax.set_xlabel("Reference comparisons")
-    ax.set_title("Study-wide statistically resolved comparisons")
+    ax.set_xlabel("Representations compared")
+    ax.set_title("Statistically distinguishable comparisons after study-wide correction")
     handles = [
-        Patch(facecolor=PURPLE, label="Molecules: resolved"),
-        Patch(facecolor=GREEN, label="Proteins: resolved"),
-        Patch(facecolor=GOLD, label="Genomics: resolved"),
-        Patch(facecolor=LIGHT, label="Unresolved"),
+        Patch(facecolor=PURPLE, label="Molecules: distinguishable"),
+        Patch(facecolor=GREEN, label="Proteins: distinguishable"),
+        Patch(facecolor=GOLD, label="Genomics: distinguishable"),
+        Patch(facecolor=LIGHT, label="Not distinguishable"),
     ]
     ax.legend(handles=handles, frameon=False, loc="upper center", ncol=4,
               bbox_to_anchor=(0.5, -0.18), fontsize=7.3,
@@ -476,11 +476,11 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     ax.set_xlim(0, 8.2)
     ax.set_yticks(y2, mol_tasks)
     ax.set_xticks(range(0, 6))
-    ax.set_xlabel("Scaffold seeds won (of 5)")
-    ax.set_title("Consistency of the numerical leader across scaffold splits")
+    ax.set_xlabel("Scaffold partitions led (of 5)")
+    ax.set_title("Consistency of the leading representation across scaffold partitions")
     handles = [
-        Line2D([0], [0], color=TEAL, lw=6, label="Matches fixed-test best"),
-        Line2D([0], [0], color=ORANGE, lw=6, label="Different from fixed-test best"),
+        Line2D([0], [0], color=TEAL, lw=6, label="Matches primary-partition leader"),
+        Line2D([0], [0], color=ORANGE, lw=6, label="Different from primary-partition leader"),
     ]
     ax.legend(handles=handles, frameon=False, loc="lower right")
     clean_axes(ax)
@@ -500,7 +500,7 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     ax.set_title("Largest observed split sensitivity within each task")
     clean_axes(ax)
     panel_label(ax, "C")
-    fig.suptitle("Inferential resolution and molecular split sensitivity",
+    fig.suptitle("Statistical comparisons and scaffold-partition sensitivity",
                  fontsize=14, fontweight="bold", color=DARK, y=0.995)
     fig.tight_layout(rect=(0, 0, 1, 0.975), h_pad=2.1)
     save_figure(fig, "figure4_inference_and_split_sensitivity")
@@ -551,13 +551,13 @@ def make_resolution_figure(results, resolution):
                     marker="o", markersize=4.5, linewidth=1.6, color=colour,
                     label=task)
         ax.set_xscale("log")
-        ax.set_xlabel("Median effective subset size (log scale)")
-        ax.set_ylabel("Median central 95% range width")
+        ax.set_xlabel("Median number of test observations (log scale)")
+        ax.set_ylabel("Median width of 95% range")
         ax.set_title(title)
         ax.legend(frameon=False, ncol=3 if idx == 0 else 2, loc="upper right")
         clean_axes(ax, grid="both")
         panel_label(ax, chr(65 + idx))
-    fig.suptitle("Fixed-test-set subsampling precision",
+    fig.suptitle("Precision across test-set sizes",
                  fontsize=14, fontweight="bold", color=DARK, y=0.995)
     fig.tight_layout(rect=(0, 0, 1, 0.975), h_pad=2.0)
     save_figure(fig, "figure5_subsampling_resolution")
@@ -613,7 +613,7 @@ def make_exposure_figure(exposure):
                for colour, label in zip(colours, labels)]
     fig.legend(handles=handles, frameon=False, ncol=3, loc="lower center",
                bbox_to_anchor=(0.5, 0.005))
-    fig.suptitle("Molecular pretraining input-exposure proxies",
+    fig.suptitle("Molecular overlap with sampled pretraining sources",
                  fontsize=14, fontweight="bold", color=DARK, y=0.995)
     fig.tight_layout(rect=(0, 0.07, 1, 0.975), h_pad=1.8)
     save_figure(fig, "figureS1_exposure_proxies")
@@ -624,27 +624,27 @@ def write_legends():
 
 ## Figure 1. Study design and validated benchmark scope
 
-BioLatent evaluates frozen molecular, protein and genomic representations on nine externally published tasks. Each representation is embedded once, evaluated with the same modality-appropriate linear-probe protocol, and compared with a reference selected using validation data before fixed-test evaluation. Difference intervals use paired bootstrap resampling; p-values use paired randomisation and the primary correction is Holm adjustment across all 59 reference comparisons. Counts describe compatible measured cells; unavailable cross-modality cells are not imputed.
+BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Confidence intervals use paired bootstrap resampling, and statistical evidence is adjusted across all 59 study comparisons. Counts include only representations applicable to each chemical or biological domain.
 
-## Figure 2. Molecular frozen-embedding performance
+## Figure 2. Molecular property-prediction performance
 
-Linear-probe scores and model-wise 95% bootstrap confidence intervals for the six molecular tasks. BBBP, BACE and CYP3A4 use ROC-AUC; ClinTox uses macro ROC-AUC across its two endpoints; ESOL and Lipophilicity use Spearman rho. Diamonds identify validation-selected references, squares identify numerical test bests, and a teal diamond with purple outline indicates both. Asterisks mark comparisons with the task reference that survived the study-wide Holm correction. The vertical dashed line is the task reference score. MolCLR–ClinTox is N/A because the official featurizer cannot represent every structure; no row was removed or rewritten.
+Performance and 95% bootstrap confidence intervals for the six molecular datasets. BBBP, BACE and CYP3A4 use ROC-AUC; ClinTox uses mean ROC-AUC across its two endpoints; ESOL and Lipophilicity use Spearman correlation. Diamonds identify the comparison method selected from validation data, squares identify the highest observed test score, and a teal diamond with a purple border indicates both. Asterisks mark representations that differed from the comparison method after adjustment across the complete study. The dashed line shows the score of the comparison method. MolCLR–ClinTox is unavailable because the published molecular featurisation cannot process every retained structure.
 
-## Figure 3. Protein and genomic frozen-embedding performance
+## Figure 3. Protein and genomic extension
 
-Linear-probe scores and model-wise 95% bootstrap confidence intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses macro ROC-AUC, Fluorescence uses Spearman rho and Promoters uses ROC-AUC. Symbols, dashed reference lines and asterisks follow Figure 2. Confidence intervals describe each model score; significance markers derive from the paired reference comparison after study-wide correction.
+Performance and 95% bootstrap confidence intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses mean ROC-AUC, Fluorescence uses Spearman correlation and Promoters uses ROC-AUC. Symbols, dashed comparison lines and asterisks follow Figure 2. These extension datasets illustrate the behaviour of the same evaluation procedure outside molecular property prediction; their absolute scores are not compared across biological domains.
 
-## Figure 4. Inferential resolution and molecular split sensitivity
+## Figure 4. Statistical comparisons and scaffold-partition sensitivity
 
-(A) Number of reference comparisons statistically resolved after the primary study-wide Holm correction; labels show resolved/total. Bar colours identify modality and grey segments are unresolved comparisons. (B) Frequency with which the most common numerical leader ranked first across five pre-specified balanced-scaffold seeds. Teal indicates agreement with the fixed-test numerical best and orange indicates disagreement. (C) Largest score range observed for any representation across the five seeds in each molecular task; parenthetical labels identify the representation with that range. Split sensitivity is diagnostic and does not replace the primary fixed partition.
+(A) Number of representations that were statistically distinguishable from the preselected comparison method after study-wide adjustment; labels show distinguishable/total. Colours identify molecular, protein and genomic datasets, and grey segments indicate differences that were not distinguishable. (B) Number of five balanced scaffold partitions led by the most frequent top-ranked molecular representation. Teal indicates agreement with the leader in the primary partition. (C) Largest score range observed for any representation across the five partitions in each molecular dataset; parenthetical labels identify the corresponding representation. The repeated partitions assess robustness and do not replace the primary analysis.
 
-## Figure 5. Fixed-test-set subsampling precision
+## Figure 5. Precision across test-set sizes
 
-Median central 95% range width across each task's validation-reference comparisons as saved fixed-test predictions are repeatedly subsampled without replacement. Molecular subsamples retain whole Murcko-scaffold groups, so effective n may differ from requested n. Lines summarize 400 repeated subsets per comparison and sample-size target. The curves are conditional on the observed test sets and do not estimate the causal effect of collecting additional data.
+Median width of the empirical 95% range when the observed test predictions are repeatedly evaluated on smaller subsets. Molecular subsets retain complete Bemis–Murcko scaffold groups, so the number of compounds can differ slightly from the target. Lines summarise 400 repeated subsets for each comparison and target size. The curves describe precision within the present test sets and do not predict the exact benefit of collecting additional observations.
 
-## Figure S1. Molecular pretraining input-exposure proxies
+## Figure S1. Molecular overlap with sampled pretraining sources
 
-Fractions of molecular test items with exact canonical identity, ECFP4 Tanimoto similarity of at least 0.9, or a shared Murcko scaffold in random 200,000-molecule ZINC and PubChem samples. These database samples are proxies rather than exact dated checkpoint training subsets. GROVER's additional declared ChEMBL exposure is unmeasured because no pinned local ChEMBL snapshot was available. Input familiarity does not establish downstream-label leakage.
+Fractions of molecular test compounds with an exact canonical structure match, an ECFP4 Tanimoto similarity of at least 0.9, or a shared Bemis–Murcko scaffold in random samples of 200,000 ZINC and PubChem structures. These samples provide structural-overlap context rather than exact reconstructions of model training collections. GROVER also reports ChEMBL pretraining, which was not measured because a dated local ChEMBL release was unavailable. Structural similarity does not establish that property labels were available during pretraining.
 """
     (ROOT / "paper" / "FIGURE_LEGENDS.md").write_text(legends)
 
