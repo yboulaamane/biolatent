@@ -14,7 +14,7 @@ In computer-aided drug discovery and computational biology, the landscape of fou
 
 **BioLatent** is a unified, provenance-aware index cataloging representations across five primary modalities: **Small Molecules**, **Proteins**, **Complexes**, **Chemical Reactions**, and **Nucleic Acids (DNA/RNA)**.
 
-The website keeps two evidence surfaces separate. The **Literature Registry** transcribes values from source publications and explicitly warns that their protocols differ. The **Measured Benchmark** recomputes frozen embeddings under one local protocol and reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. Values from the two surfaces must not be mixed.
+BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot support a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. Literature values and measured results remain separate throughout the website and must not be mixed.
 
 ### Measured release snapshot
 

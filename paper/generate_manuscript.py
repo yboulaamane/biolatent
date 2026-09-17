@@ -365,6 +365,15 @@ def build():
              "use the same compounds, scaffold partitions, hyperparameter searches or predictive "
              "models. Consequently, differences between reported scores may reflect the evaluation "
              "procedure as much as the representation itself.")
+    add_body(document, "BioLatent initially assembled a provenance-aware registry of molecular and "
+             "biological representations and the benchmark values reported for them. Examination "
+             "of those records showed that results assigned to the same endpoint often came from "
+             "different dataset versions, partitions, predictive models and tuning procedures. The "
+             "registry is therefore a descriptive catalogue, not a basis for ranking methods. This "
+             "limitation motivated a separate measured benchmark in which compatible "
+             "representations were recomputed and evaluated under one prespecified procedure. The "
+             "registry and measured benchmark are complementary, but their numerical values are "
+             "kept analytically separate.")
     add_body(document, "MoleculeNet and the Therapeutics Data Commons established valuable public "
              "datasets and recommended evaluation practices [1,2]. Scaffold-based partitioning is "
              "particularly important because a random split can place closely related chemical "
@@ -684,7 +693,9 @@ def build():
     add_body(document, "Raw benchmark datasets and representation matrices are regenerated from "
              "their documented public sources and are not redistributed in the repository. The "
              "release manifest records source checksums, model versions, structure or sequence "
-             "processing and software versions.")
+             "processing and software versions. The BioLatent website presents the reported "
+             "literature values in the Literature Registry and the results generated under the "
+             "common evaluation procedure in the Measured Benchmark.")
 
     add_heading(document, "Declarations", 1)
     add_heading(document, "Author contributions", 2)

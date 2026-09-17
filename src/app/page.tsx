@@ -400,7 +400,7 @@ export default function Home() {
           </svg>
           <div>
             <div className="logo-text">BioLatent</div>
-            <div className="logo-tagline">Biological & Chemical Vector Registry</div>
+            <div className="logo-tagline">Registry &amp; Measured Benchmark</div>
           </div>
         </button>
 
@@ -438,7 +438,7 @@ export default function Home() {
               className={`tab-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
               onClick={() => setActiveTab('benchmarks')}
             >
-              Literature Scores
+              Literature Registry
             </button>
           </div>
         </div>
@@ -793,9 +793,9 @@ export default function Home() {
       {/* ==================== TAB 3: BENCHMARKS ==================== */}
       {activeTab === 'benchmarks' && (
         <div className="glass-card">
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Reported Literature and Database Scores</h2>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>Literature Registry</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: '1rem' }}>
-            Benchmark values transcribed from the cited publication or official benchmark database, with a source link and row-level provenance note.
+            This registry records values reported in cited publications and official benchmark databases. Each entry includes its source and a provenance note.
           </p>
           <div style={{
             marginBottom: '1.5rem', padding: '0.9rem 1.15rem',
@@ -803,11 +803,11 @@ export default function Home() {
             border: '1px solid rgba(251, 191, 36, 0.22)', borderRadius: '12px',
             color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6,
           }}>
-            <strong style={{ color: '#fbbf24' }}>These numbers were not measured by us, and they are not comparable with each other.</strong>{' '}
-            Each was computed by a different group under a different split, readout and downstream head, so the ordering of a column here
-            reflects those choices as much as the representations. They carry no uncertainty and no significance test.
-            For locally generated values under one protocol, with confidence intervals, paired significance tests and a
-            pretraining input-exposure audit, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
+            <strong style={{ color: '#fbbf24' }}>Do not compare these values directly.</strong>{' '}
+            They were reported by different groups using different datasets, splits, readouts and predictive models.
+            The displayed order can therefore reflect the evaluation procedure as much as the representation.
+            These entries do not include a common uncertainty analysis or significance test. For results generated
+            under one protocol, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
           </div>
 
           {/* Scientific Methodology Card */}
@@ -1060,7 +1060,7 @@ export default function Home() {
                   const esolE = emb.benchmarks.find(b => b.dataset.startsWith('ESOL'));
                   const lipoE = emb.benchmarks.find(b => b.dataset.startsWith('Lipophilicity'));
                   const citLink = (e: typeof bbbpE) => e?.citation?.doi
-                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ' — ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
+                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ': ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
                     : null;
 
                   return (
@@ -1112,7 +1112,7 @@ export default function Home() {
                   if (!cb513E && !deeplocE) return null;
 
                   const citLink = (e: typeof cb513E) => e?.citation?.doi
-                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ' — ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
+                    ? <a href={e.citation.doi} target="_blank" rel="noopener noreferrer" onClick={ev => ev.stopPropagation()} title={`${e.citation.shortRef}${e.citation.note ? ': ' + e.citation.note : ''}`} style={{ marginLeft: '3px', color: 'var(--accent-indigo)', fontSize: '0.6rem', textDecoration: 'none', verticalAlign: 'super', lineHeight: 1 }}>↗</a>
                     : null;
 
                   return (
