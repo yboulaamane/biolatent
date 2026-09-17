@@ -14,12 +14,11 @@ from pathlib import Path
 
 import numpy as np
 from docx import Document
-from docx.enum.section import WD_SECTION
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
+from docx.shared import Inches, Pt
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = Path(os.environ.get(
@@ -41,6 +40,37 @@ MODEL_LABELS = {
     "protbert": "ProtBERT", "kmer5_dna": "5-mer frequency",
     "nucleotide_transformer": "Nucleotide Transformer 500M",
     "hyenadna": "HyenaDNA-tiny",
+}
+TASK_DETAILS = {
+    "BBBP": ("Blood–brain barrier penetration", "MoleculeNet scaffold", "ROC-AUC"),
+    "ClinTox": ("FDA approval and clinical toxicity", "MoleculeNet scaffold", "Mean ROC-AUC"),
+    "BACE": ("BACE-1 inhibition", "MoleculeNet scaffold", "ROC-AUC"),
+    "ESOL": ("Aqueous solubility", "MoleculeNet scaffold", "Spearman correlation"),
+    "Lipophilicity": ("Lipophilicity", "MoleculeNet scaffold", "Spearman correlation"),
+    "CYP3A4": ("CYP3A4 substrate status", "TDC scaffold", "ROC-AUC"),
+    "DeepLoc": ("Protein subcellular localisation", "Published homology split", "Mean ROC-AUC"),
+    "Fluorescence": ("Protein fluorescence", "Published extrapolation split", "Spearman correlation"),
+    "Promoters": ("Promoter recognition", "Published chromosome split", "ROC-AUC"),
+}
+REPRESENTATION_DETAILS = {
+    "ecfp4": ("Molecular graph", "Circular substructure fingerprint", "Conventional baseline"),
+    "rdkit2d": ("Molecular graph", "Physicochemical and topological descriptors", "Conventional baseline"),
+    "chemberta_77m": ("SMILES", "Pretrained chemical language model", "Learned representation"),
+    "chemberta_zinc": ("SMILES", "Pretrained chemical language model", "Learned representation"),
+    "molformer_xl": ("SMILES", "Pretrained chemical language model", "Learned representation"),
+    "unimol_v1": ("Three-dimensional molecular structure", "Pretrained 3D molecular model", "Learned representation"),
+    "molclr_gin": ("Molecular graph", "Contrastive graph neural network", "Learned representation"),
+    "grover_base": ("Molecular graph", "Pretrained graph transformer", "Learned representation"),
+    "grover_large": ("Molecular graph", "Pretrained graph transformer", "Learned representation"),
+    "kmer3_protein": ("Protein sequence", "Amino-acid triplet frequencies", "Conventional baseline"),
+    "esm2_8m": ("Protein sequence", "Pretrained protein language model", "Learned representation"),
+    "esm2_35m": ("Protein sequence", "Pretrained protein language model", "Learned representation"),
+    "esm2_150m": ("Protein sequence", "Pretrained protein language model", "Learned representation"),
+    "esm2_650m": ("Protein sequence", "Pretrained protein language model", "Learned representation"),
+    "protbert": ("Protein sequence", "Pretrained protein language model", "Learned representation"),
+    "kmer5_dna": ("DNA sequence", "Nucleotide 5-mer frequencies", "Conventional baseline"),
+    "nucleotide_transformer": ("DNA sequence", "Pretrained genomic sequence model", "Learned representation"),
+    "hyenadna": ("DNA sequence", "Pretrained long-range sequence model", "Learned representation"),
 }
 
 
@@ -219,11 +249,8 @@ def inference_summary(results, paired):
     return out
 
 
-def fmt(value):
-    return f"{float(value):.4f}"
-
-
-def result_rows(results, tasks):
+def readable_result_rows(results, paired, tasks):
+    """Format the main score tables with three decimals and visible leaders."""
     models = []
     for task in tasks:
         for model in results[task]["models"]:
@@ -234,18 +261,13 @@ def result_rows(results, tasks):
         values = [MODEL_LABELS.get(model, model)]
         for task in tasks:
             cell = results[task]["models"].get(model)
-            values.append(fmt(cell["linear"]["score"]) if cell else "N/A")
+            if cell is None:
+                values.append("—")
+                continue
+            marker = "†" if model == paired[task]["observed_test_best"] else ""
+            values.append(f"{float(cell['linear']['score']):.3f}{marker}")
         rows.append(values)
     return rows
-
-
-def exposure_text(entry):
-    if "measures" in entry:
-        measures = entry["measures"]
-        return (f"exact {100 * measures['exact_identity']['fraction']:.1f}%; "
-                f"near {100 * measures['near_duplicate']['fraction']:.1f}%; "
-                f"scaffold {100 * measures['shared_scaffold']['fraction']:.1f}%")
-    return f"homology {100 * entry['fraction']:.1f}%"
 
 
 def add_page_number(section):
@@ -266,7 +288,6 @@ def build():
     results = load_json("benchmark_results.json")
     paired = load_json("paired_comparisons.json")
     exposure = load_json("exposure_report.json")
-    manifest = load_json("run_manifest.json")
     sensitivity = load_json("split_seed_sensitivity.json")
     resolution = load_json("resolution_curves.json")
     figure_legends = load_figure_legends()
@@ -285,10 +306,10 @@ def build():
         "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
         "Protein, and Genomic Representations")
     document.core_properties.author = "Yassir Boulaamane"
-    document.core_properties.subject = "BioLatent frozen-embedding benchmark"
+    document.core_properties.subject = "BioLatent molecular-representation benchmark"
     document.core_properties.keywords = (
-        "frozen embeddings, molecular representation, protein language model, "
-        "genomics, paired randomisation, benchmark uncertainty")
+        "molecular representations, molecular property prediction, chemical fingerprints, "
+        "scaffold split, pretrained models, benchmark uncertainty")
 
     title = document.add_paragraph(style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -310,264 +331,260 @@ def build():
         "Abstract", style=available_style(document, "Abstract Title", "Heading 1")
     )
     abstract = (
-        f"Published representation leaderboards often combine scores produced under "
-        f"different splits, pooling rules and downstream heads. We evaluated {model_count} "
-        f"representations in {cell_count} model-task cells across nine molecular, protein "
-        f"and genomic tasks under one frozen-embedding protocol. ClinTox was evaluated as "
-        f"its two-endpoint task, CYP3A4 used the 667-molecule Carbon-Mangels substrate "
-        f"dataset, and DeepLoc 2.0 retained all ten localisation labels and its published "
-        f"homology partitions. Transformer embeddings were mean-pooled after excluding "
-        f"padding and special tokens; checkpoint revisions and matrix hashes were recorded. "
-        f"A standardised linear probe was ranked, while a one-hidden-layer MLP was retained "
-        f"only as a diagnostic. The comparison reference was selected on validation data. "
-        f"Difference intervals used paired bootstrap resampling, with Murcko scaffolds as "
-        f"the molecular resampling unit, and p-values used paired randomisation followed by "
-        f"a study-wide Holm correction. {inference['molecule']['significant']} of "
-        f"{inference['molecule']['total']} molecular reference comparisons and "
-        f"{inference['protein']['significant']} of {inference['protein']['total']} protein "
-        f"comparisons survived the primary correction; the genomic count was "
-        f"{inference['genomics']['significant']} of {inference['genomics']['total']}. "
-        f"Repeated scaffold splits and test-set "
-        f"subsampling showed that statistical resolution depends on sample size but also on "
-        f"task structure, dependence and effect size. An input-exposure audit reported exact, "
-        f"near-duplicate and scaffold proxies separately and did not interpret self-supervised "
-        f"input familiarity as label leakage. BioLatent therefore measures linear decodability "
-        f"under a specified pooling and truncation protocol, not intrinsic representation "
-        f"quality. Its value is a reproducible cross-modal estimate with uncertainty and "
-        f"provenance, rather than another single-number leaderboard.")
+        f"Comparisons of molecular representations are often confounded by differences in "
+        f"dataset preparation, scaffold partitioning and predictive models. BioLatent compares "
+        f"established fingerprints, physicochemical descriptors and pretrained representations "
+        f"under a common evaluation procedure. We studied six molecular-property datasets and "
+        f"three protein or genomic datasets, comprising {cell_count} evaluations of "
+        f"{model_count} representations. Each representation was kept fixed and assessed with "
+        f"the same regularised linear prediction model for a given endpoint. Comparison models "
+        f"were selected without using the test data, and uncertainty was estimated from paired "
+        f"resampling that respected molecular scaffolds. After correction for all comparisons, "
+        f"{inference['molecule']['significant']} of {inference['molecule']['total']} molecular "
+        f"differences were statistically distinguishable. The corresponding results were "
+        f"{inference['protein']['significant']} of {inference['protein']['total']} for proteins "
+        f"and {inference['genomics']['significant']} of {inference['genomics']['total']} for the "
+        f"genomic task. The highest-scoring molecular representation depended on the endpoint, "
+        f"and repeated scaffold partitions changed the leading method in several datasets. "
+        f"Conventional fingerprints and descriptors remained competitive with pretrained "
+        f"molecular models. These findings show that small numerical differences should not be "
+        f"interpreted as stable rankings without uncertainty estimates and split-sensitivity "
+        f"analysis. BioLatent provides a reproducible basis for comparing molecular "
+        f"representations while preserving the endpoint-specific nature of their performance.")
     document.add_paragraph(
         abstract, style=available_style(document, "Abstract")
     )
-    add_body(document, "Keywords: frozen embeddings; linear probing; molecular property "
-             "prediction; protein language models; genomic foundation models; paired "
-             "randomisation; benchmark uncertainty")
+    add_body(document, "Keywords: molecular representations; molecular property prediction; "
+             "chemical fingerprints; scaffold split; pretrained models; benchmark uncertainty")
 
     add_heading(document, "1. Introduction", 1)
-    add_body(document, "The same benchmark name can conceal different train-test boundaries, "
-             "readout architectures, pooling choices and tuning budgets. MoleculeNet and the "
-             "Therapeutics Data Commons standardized important datasets, while TAPE and the "
-             "Nucleotide Transformer task suite did the same for proteins and genomes [1-4]. "
-             "Those resources do not make scores copied from independent model papers mutually "
-             "comparable. A literature registry can preserve provenance, but it cannot remove "
-             "protocol heterogeneity after the fact.")
-    add_body(document, "Frozen-embedding evaluation reduces one source of variation by fixing "
-             "the supervised readout. It does not produce a context-free measure of model "
-             "quality. Pooling is itself a consequential modelling choice, as shown by recent "
-             "DNA foundation-model benchmarks, and truncation can remove biologically relevant "
-             "context [4,5]. The estimand in this study is therefore explicit: how much task "
-             "signal is linearly decodable from a particular frozen checkpoint under one mean-"
-             "pooling and truncation rule.")
-    add_body(document, "We make four methodological changes that are often absent from a ranked "
-             "table. First, dataset variants are specified precisely. Second, the comparator is "
-             "selected before the test set is examined. Third, uncertainty and paired tests use "
-             "dependence-aware resampling and family-wise multiplicity correction. Fourth, "
-             "pretraining input exposure is reported as a proxy and is not called label leakage. "
-             "The result is intended as an auditable measurement study and web resource, not a "
-             "claim that one representation is universally best.")
+    add_body(document, "Molecular-property models depend strongly on how chemical structure is "
+             "represented. Circular fingerprints and calculated descriptors remain widely used, "
+             "whereas recent methods learn representations from SMILES strings, molecular graphs "
+             "or three-dimensional structures [9,10,17-19]. Published comparisons do not always "
+             "use the same compounds, scaffold partitions, hyperparameter searches or predictive "
+             "models. Consequently, differences between reported scores may reflect the evaluation "
+             "procedure as much as the representation itself.")
+    add_body(document, "MoleculeNet and the Therapeutics Data Commons established valuable public "
+             "datasets and recommended evaluation practices [1,2]. Scaffold-based partitioning is "
+             "particularly important because a random split can place closely related chemical "
+             "series in both training and test sets [6]. Even with a scaffold split, however, a "
+             "single test score gives no indication of its uncertainty or its sensitivity to the "
+             "chosen partition. This is especially problematic when several representations differ "
+             "only in the second or third decimal place.")
+    add_body(document, "BioLatent was developed to compare representations under one controlled "
+             "procedure. The main analysis covers six molecular endpoints spanning permeability, "
+             "toxicity, enzyme inhibition, solubility, lipophilicity and metabolism. Protein and "
+             "genomic datasets provide an extension to other biological sequences, rather than a "
+             "claim that scores from different modalities are directly comparable. The study "
+             "reports uncertainty, repeated scaffold partitions and overlap with sampled "
+             "pretraining sources so that apparent performance differences can be interpreted in "
+             "their experimental context.")
     add_publication_figure(
         document, "figure1_study_design.png", figure_legends["Figure 1"], 6.55
     )
 
     add_heading(document, "2. Methods", 1)
-    add_heading(document, "2.1 Tasks and dataset variants", 2)
-    add_body(document, "Nine per-object prediction tasks were used. MoleculeNet source SMILES "
-             "were retained after RDKit validation; they were not canonicalized in a way that "
-             "would collapse salts or stereoisomers carrying different source labels. The five "
-             "MoleculeNet tasks used a balanced Murcko-scaffold split at seed 42 [1,6]. CYP3A4 "
-             "used TDC CYP3A4_Substrate_CarbonMangels and was canonicalized and deduplicated "
-             "before TDC scaffold splitting [2,7]. The larger CYP3A4_Veith inhibition dataset "
-             "was not substituted for this substrate task.")
-    add_body(document, "ClinTox retained FDA_APPROVED and CT_TOX and was ranked by their macro "
-             "ROC-AUC. DeepLoc used the DeepLoc 2.0 SwissProt multi-label data and all ten "
-             "compartments. Its published homology partitions were assigned in advance as fold "
-             "0 test, fold 1 validation and folds 2-4 train [8]. Fluorescence retained the TAPE "
-             "extrapolation split [3]. Promoters retained the Nucleotide Transformer chromosome "
-             "partition; exact repeats were removed only within a partition [4].")
+    add_heading(document, "2.1 Study design and datasets", 2)
+    add_body(document, "The primary analysis comprised six molecular datasets. BBBP, ClinTox, "
+             "BACE, ESOL and Lipophilicity were obtained from MoleculeNet [1]. CYP3A4 used the "
+             "667-compound Carbon–Mangels substrate dataset distributed through the Therapeutics "
+             "Data Commons [2,7]; it was not replaced by the larger CYP3A4 inhibition dataset. "
+             "ClinTox retained both its clinical-toxicity and FDA-approval endpoints.")
+    add_body(document, "MoleculeNet structures were checked with RDKit while preserving source "
+             "records that differed by salt form or stereochemistry. The five MoleculeNet datasets "
+             "were divided by a balanced Bemis–Murcko scaffold procedure [6]. CYP3A4 structures "
+             "were standardized and deduplicated before applying the scaffold procedure supplied "
+             "by the Therapeutics Data Commons. One partition was designated for model fitting, "
+             "one for model selection and one for final evaluation.")
+    add_body(document, "The extension analysis used DeepLoc 2.0 protein localisation, TAPE protein "
+             "fluorescence and Nucleotide Transformer promoter recognition [3,4,8]. Their published "
+             "homology, extrapolation or chromosome-based partitions were retained. These datasets "
+             "test whether the same comparison framework behaves similarly outside molecular "
+             "property prediction; their absolute scores are not compared with molecular scores.")
     task_rows = []
     for task in TASK_ORDER:
         entry = results[task]
+        endpoint, split_label, metric_label = TASK_DETAILS[task]
         task_rows.append([
-            entry.get("dataset_label", task), entry["modality"], entry["task_type"],
-            entry["n_total"], entry["n_train"], entry["n_test"],
-            entry["split_source"], entry["models"][next(iter(entry["models"]))]["linear"]["metric"],
+            task, endpoint, entry["n_total"], entry["n_test"], split_label, metric_label,
         ])
-    add_caption(document, "Table 1. Benchmark tasks after preprocessing. Counts and labels are read from benchmark_results.json.")
-    add_table(document, ["Task", "Modality", "Type", "Total", "Train", "Test", "Split", "Ranked metric"],
-              task_rows, widths=[1.15, 0.65, 0.7, 0.5, 0.5, 0.5, 1.3, 0.8], font_size=6.8)
+    add_caption(document, "Table 1. Datasets and evaluation measures. Dataset sizes are reported after preprocessing; the test set was not used for model selection.")
+    add_table(document, ["Dataset", "Endpoint", "Compounds or sequences", "Test set", "Partition", "Measure"],
+              task_rows, widths=[0.75, 1.65, 0.8, 0.6, 1.25, 1.05], font_size=7.2)
 
-    add_heading(document, "2.2 Frozen representations and provenance", 2)
-    add_body(document, "Every model was used only on its native modality. Classical baselines "
-             "were ECFP4 and RDKit2D for molecules, amino-acid 3-mer frequencies for proteins, "
-             "and DNA 5-mer frequencies for genomes. Neural checkpoints included ChemBERTa, "
-             "MoLFormer, Uni-Mol, MolCLR GIN, GROVER Base/Large, four ESM-2 scales, ProtBERT, "
-             "Nucleotide Transformer and HyenaDNA [4,9-13,17-19]. The MolCLR-ClinTox cell was "
-             "N/A because the checkpoint's native featuriser cannot represent every structure "
-             "in that task. Missing cells are not imputed.")
-    add_body(document, "All neural checkpoints were pinned to immutable source revisions and "
-             "weight hashes. Raw "
-             "protein and DNA input was capped at 510 characters before tokenization, and the "
-             "token budget was 512 including special tokens; molecular tokenization was capped "
-             "at 256. ProtBERT inputs followed its documented U/Z/O/B-to-X mapping. Transformer "
-             "outputs were averaged over attention-mask tokens after "
-             "tokenizer-designated special tokens were removed. Uni-Mol used mean atom pooling; "
-             "MolCLR used its 512-dimensional encoder feature before the contrastive projection "
-             "head; GROVER used the official concatenated atom- and bond-view mean fingerprint. "
-             "Each sidecar stores the input "
-             "hash, matrix hash, revision, dimensions, pooling text, truncation count and the "
-             "embedding subprocess software versions. The inference-precision policy and float32 "
-             "output-matrix dtype are recorded in the public run manifest, which aggregates these "
-             "records.")
-    model_rows = []
-    seen = set()
-    for task in TASK_ORDER:
-        for model, sidecar in manifest["tasks"][task]["embeddings"].items():
-            if model in seen:
-                continue
-            seen.add(model)
-            model_rows.append([
-                MODEL_LABELS.get(model, model), sidecar["kind"], sidecar["modality"],
-                sidecar.get("checkpoint") or "deterministic featurizer",
-                (sidecar.get("revision") or "not applicable")[:12], sidecar["dim"],
-            ])
-    add_caption(document, "Table 2. Representation implementations and pinned revisions.")
-    add_table(document, ["Representation", "Kind", "Modality", "Checkpoint", "Revision", "Dim"],
-              model_rows, widths=[1.15, 0.6, 0.65, 2.35, 0.85, 0.45], font_size=7)
+    add_heading(document, "2.2 Molecular and sequence representations", 2)
+    add_body(document, "The molecular comparison included ECFP4 circular fingerprints, RDKit2D "
+             "descriptors, three SMILES-based models, two pretrained graph families, a contrastive "
+             "graph model and a three-dimensional molecular model [9,10,17-19]. Fingerprints and "
+             "descriptors provide established cheminformatics baselines; the remaining methods "
+             "represent structures learned from large unlabelled molecular collections. Each "
+             "representation was calculated once and held fixed during property-model fitting.")
+    add_body(document, "The extension used amino-acid triplet frequencies, four ESM-2 sizes and "
+             "ProtBERT for proteins [11,12], together with nucleotide 5-mer frequencies, Nucleotide "
+             "Transformer and HyenaDNA for promoter sequences [4,13]. A representation was evaluated "
+             "only on its corresponding molecular or sequence domain. MolCLR could not process all "
+             "ClinTox structures with its published molecular featurisation and is therefore shown "
+             "as unavailable rather than estimated from a reduced dataset.")
+    model_rows = [
+        [MODEL_LABELS[model], *REPRESENTATION_DETAILS[model]]
+        for model in MODEL_LABELS
+    ]
+    add_caption(document, "Table 2. Representations included in BioLatent. Detailed model versions and software provenance are provided in the public run manifest.")
+    add_table(document, ["Representation", "Input", "Approach", "Comparison role"],
+              model_rows, widths=[1.35, 1.35, 2.2, 1.25], font_size=7.2)
 
-    add_heading(document, "2.3 Probe and metrics", 2)
-    add_body(document, "Features were standardized using training-set means and variances only. "
-             "The ranked probe was L2-regularized logistic regression for binary or multi-label "
-             "classification and ridge regression otherwise. C or alpha was selected by three-"
-             "fold training-only cross-validation from one fixed grid. The search used at most "
-             "6,000 training rows, selected deterministically, after which the chosen probe was "
-             "refit on the complete training split. Classification used ROC-AUC; multi-label "
-             "tasks used macro ROC-AUC; regression used Spearman rho both for cross-validation "
-             "selection and ranking. Accuracy, macro-F1, RMSE and R-squared were diagnostic.")
-    add_body(document, "A one-hidden-layer MLP with 256 ReLU units, alpha 10^-4, batch size 256, "
-             "learning rate 10^-3 and early stopping was fit as a non-linear diagnostic. It was "
-             "not ranked. Calling this architecture a two-hidden-layer network would be incorrect; "
-             "the output layer is not a second hidden layer.")
+    add_heading(document, "2.3 Standardised prediction models and performance measures", 2)
+    add_body(document, "For each dataset, representation values were standardised using the "
+             "training compounds or sequences only. Binary and multi-endpoint outcomes were modelled "
+             "with L2-regularised logistic regression; continuous outcomes were modelled with ridge "
+             "regression. The regularisation strength was selected by three-fold cross-validation "
+             "within the training data and the selected model was then refitted using all available "
+             "non-test observations.")
+    add_body(document, "Classification performance was measured by area under the receiver operating "
+             "characteristic curve (ROC-AUC). ClinTox and DeepLoc were summarised by the mean ROC-AUC "
+             "across their endpoints. ESOL, Lipophilicity and Fluorescence were evaluated by Spearman "
+             "correlation. The same measure was used for model selection and final evaluation. A "
+             "small nonlinear model was retained as a diagnostic but did not contribute to rankings "
+             "or statistical comparisons.")
 
-    add_heading(document, "2.4 Paired inference and multiplicity", 2)
-    add_body(document, "The reference representation for each task was chosen by its validation "
-             "score. Promoters has no published validation partition, so a deterministic stratified "
-             "10% holdout from training was used for reference selection. After reference "
-             "selection, every final probe was refit on all non-test labels (training plus "
-             "validation where available). The numerical test best was reported "
-             "descriptively and was not used to choose the comparator.")
-    add_body(document, "A paired bootstrap resampled the same units for both models and formed a "
-             "95% percentile interval for their metric difference. Molecular units were Murcko "
-             "scaffold clusters; acyclic compounds without a Murcko scaffold were treated as "
-             "separate identity units. Protein and genomic units were individual test items. "
-             "Two-sided Monte Carlo randomisation p-values were computed from 2,000 null draws by "
-             "swapping the two models' predictions within the same units [14]. The primary Holm "
-             "correction covered every validation-reference comparison in the nine-task study "
-             "[15]. Task-only and modality-only adjusted values were retained as sensitivity "
-             "analyses. Consecutive ESM-2 scale steps formed a separate pre-specified family.")
+    add_heading(document, "2.4 Statistical comparison of representations", 2)
+    add_body(document, "One comparison representation was selected for each dataset using validation "
+             "performance before the final test results were examined. Promoters lacked a published "
+             "validation set, so 10% of its training data was reserved for this purpose. The highest "
+             "test score is also reported descriptively, but it was not used to choose the comparison "
+             "representation.")
+    add_body(document, "Differences between representations were evaluated from paired predictions on "
+             "the same test observations. Confidence intervals were obtained by bootstrap resampling. "
+             "For molecular datasets, complete Bemis–Murcko scaffold groups were resampled together "
+             "to preserve dependence within a chemical series; individual acyclic compounds were kept "
+             "as separate groups. Statistical evidence was estimated by paired randomisation with "
+             "2,000 repetitions [14]. Holm adjustment controlled the family-wise error rate across all "
+             "59 comparisons in the study [15]. A difference was considered statistically "
+             "distinguishable when the adjusted p-value was below 0.05.")
 
-    add_heading(document, "2.5 Split sensitivity and empirical resolution", 2)
-    add_body(document, "Molecular split sensitivity was assessed by redrawing the balanced scaffold "
-             "split at five pre-specified seeds and refitting each linear probe. These diagnostic "
-             "resplits do not replace the primary fixed partition. Separately, saved test predictions "
-             "were repeatedly subsampled without replacement at increasing sample sizes. Molecular "
-             "subsamples selected whole scaffold groups. The central 95% range and sign consistency "
-             "describe stability conditional on the observed test set; they are not a causal "
-             "decomposition of differences between modalities.")
+    add_heading(document, "2.5 Robustness to scaffold partition and test-set size", 2)
+    add_body(document, "The six molecular analyses were repeated with five prespecified balanced "
+             "scaffold partitions. This analysis examined whether the leading representation and "
+             "the magnitude of its score depended on the particular allocation of chemical series. "
+             "The original partition remained the primary analysis.")
+    add_body(document, "To examine measurement precision, the saved test predictions were repeatedly "
+             "evaluated on smaller subsets. Molecular subsets retained complete scaffold groups. The "
+             "resulting ranges describe how precisely the present test sets distinguish the methods; "
+             "they do not predict the exact benefit of collecting additional compounds.")
 
-    add_heading(document, "2.6 Pretraining input-exposure audit", 2)
-    add_body(document, f"Molecular test items were compared with random "
-             f"{exposure['sample_size']:,}-molecule ZINC and PubChem database "
-             "samples. Exact canonical identity, ECFP4 Tanimoto similarity of at least 0.9, and "
-             "Murcko-scaffold identity were reported separately. Because these samples are not the "
-             "checkpoints' exact dated training subsets, the fractions are exposure proxies rather "
-             "than confirmed membership. Proteins were aligned to Swiss-Prot with MMseqs2 at 50% "
-             "identity and 50% coverage as a homology proxy for UniRef50/UniRef100. Promoters derive from the "
-             "human reference assembly used in genomic pretraining, so input exposure is structural. "
-             "GROVER also declares ChEMBL pretraining, for which no pinned local snapshot was "
-             "available; that source is marked unmeasured rather than represented by ZINC. "
-             "None of these analyses establishes that downstream labels were present in pretraining.")
+    add_heading(document, "2.6 Overlap with sampled pretraining sources", 2)
+    add_body(document, f"Molecular test compounds were compared with random samples of "
+             f"{exposure['sample_size']:,} structures from ZINC and PubChem. We recorded exact "
+             "canonical structure matches, close ECFP4 neighbours (Tanimoto similarity at least "
+             "0.9) and shared Bemis–Murcko scaffolds. These database samples approximate possible "
+             "structural familiarity; they are not the exact dated training collections of every "
+             "model and therefore cannot establish training-set membership or label leakage. "
+             "Protein sequences were compared with Swiss-Prot by sequence identity and coverage. "
+             "The promoter sequences derive from the human reference genome used by genomic "
+             "pretraining collections.")
 
-    add_heading(document, "2.7 Web implementation", 2)
-    add_body(document, "The public interface is implemented in Next.js 16.3.5 and TypeScript. The "
-             "Measured Benchmark imports the result JSON directly at build time. Literature values "
-             "remain in a separate registry because their protocols are heterogeneous. Headline "
-             "counts are computed from the result files rather than hard-coded.")
+    add_heading(document, "2.7 Computational reproducibility", 2)
+    add_body(document, "All pretrained model versions and source revisions were fixed before "
+             "evaluation. Molecular strings used a maximum model input length of 256; protein and "
+             "DNA sequences were limited to 510 biological characters before encoding. Sequence "
+             "representations were averaged across valid sequence positions, Uni-Mol across atoms, "
+             "and graph representations according to their published implementations. Input files, "
+             "representation matrices and software environments were recorded with cryptographic "
+             "checksums. The complete provenance record, predictions and analysis code are provided "
+             "with the public release.")
 
     add_heading(document, "3. Results", 1)
-    add_heading(document, "3.1 Frozen linear-probe performance", 2)
-    add_body(document, "Tables 3-5 report the complete ranked linear-probe results. These scores are "
-             "internally comparable within this protocol. They should not be substituted for values "
-             "from papers that used different splits, pooling, layers or downstream heads.")
-    add_caption(document, "Table 3. Molecular ranked metrics. ClinTox is macro ROC-AUC across two endpoints; ESOL and Lipophilicity use Spearman rho; other tasks use ROC-AUC.")
+    add_heading(document, "3.1 Molecular-property prediction", 2)
+    add_body(document, "The identity of the highest-scoring representation varied across the six "
+             "chemical endpoints. ChemBERTa-ZINC produced the highest observed scores for BBBP "
+             "(0.971) and ClinTox (0.985), ECFP4 for BACE (0.890), GROVER Large for ESOL "
+             "(0.915), GROVER Base for Lipophilicity (0.781), and ChemBERTa-77M for CYP3A4 "
+             "substrate classification (0.729). Thus, neither a single pretrained architecture nor "
+             "pretraining in general produced the highest score in every dataset.")
+    add_body(document, "The conventional baselines remained informative. ECFP4 led the BACE "
+             "evaluation, and RDKit2D approached the leading score for ESOL. Conversely, "
+             "some pretrained representations performed well on one endpoint and poorly on another. "
+             "These results favour endpoint-specific assessment over a global ranking of molecular "
+             "representations.")
+    add_caption(document, "Table 3. Molecular-property performance under the common evaluation procedure. BBBP, BACE and CYP3A4 are reported as ROC-AUC; ClinTox as mean ROC-AUC; and ESOL and Lipophilicity as Spearman correlation. † indicates the highest observed score in that dataset; it does not by itself imply a statistically supported difference.")
     add_table(document, ["Representation", "BBBP", "ClinTox", "BACE", "ESOL", "Lipo", "CYP3A4"],
-              result_rows(results, TASK_ORDER[:6]), widths=[1.45, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7])
-    add_caption(document, "Table 4. Protein ranked metrics. DeepLoc 2.0 uses macro ROC-AUC and Fluorescence uses Spearman rho.")
-    add_table(document, ["Representation", "DeepLoc 2.0", "Fluorescence"],
-              result_rows(results, ["DeepLoc", "Fluorescence"]), widths=[2.2, 1.2, 1.2])
-    add_caption(document, "Table 5. Genomic ranked metric. Promoters uses ROC-AUC.")
-    add_table(document, ["Representation", "Promoters"],
-              result_rows(results, ["Promoters"]), widths=[2.5, 1.2])
+              readable_result_rows(results, paired, TASK_ORDER[:6]),
+              widths=[1.55, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7], font_size=7.5)
     add_publication_figure(
         document, "figure2_molecular_performance.png", figure_legends["Figure 2"], 5.55
     )
+
+    add_heading(document, "3.2 Extension to protein and genomic datasets", 2)
+    add_body(document, "For DeepLoc, performance increased across the four ESM-2 sizes, reaching "
+             "a mean ROC-AUC of 0.892 with ESM-2 650M. The Fluorescence results did not follow the "
+             "same pattern: amino-acid triplet frequencies achieved the highest correlation "
+             "(0.674), followed by ProtBERT (0.662). For promoter recognition, the three methods "
+             "were closely grouped between 0.930 and 0.938 ROC-AUC.")
+    add_caption(document, "Table 4. Performance on the protein and genomic extension datasets. DeepLoc is reported as mean ROC-AUC, Fluorescence as Spearman correlation and Promoters as ROC-AUC. † indicates the highest observed score within a dataset; an em dash denotes a representation from another biological domain.")
+    add_table(document, ["Representation", "DeepLoc", "Fluorescence", "Promoters"],
+              readable_result_rows(results, paired, ["DeepLoc", "Fluorescence", "Promoters"]),
+              widths=[2.3, 1.1, 1.15, 1.1], font_size=7.5)
     add_publication_figure(
         document, "figure3_protein_genomic_performance.png",
         figure_legends["Figure 3"], 6.15
     )
 
-    add_heading(document, "3.2 Validation-selected paired comparisons", 2)
+    add_heading(document, "3.3 Statistical support for performance differences", 2)
     inference_rows = []
     for task in TASK_ORDER:
         entry = paired[task]
         significant = sum(bool(value.get("significant_global", value["significant"]))
                           for value in entry["comparisons"].values())
         inference_rows.append([
-            results[task].get("dataset_label", task),
+            task,
             MODEL_LABELS.get(entry["reference"], entry["reference"]),
-            fmt(entry["reference_test_score"]),
             MODEL_LABELS.get(entry["observed_test_best"], entry["observed_test_best"]),
-            fmt(entry["observed_test_best_score"]),
-            f"{significant}/{len(entry['comparisons'])}", entry["resampling_unit"],
+            f"{significant} of {len(entry['comparisons'])}",
         ])
-    add_caption(document, "Table 6. Reference selection and study-wide Holm results. The observed test best is descriptive.")
-    add_table(document, ["Task", "Validation reference", "Ref. test", "Numerical test best", "Best test", "Separated", "Unit"],
-              inference_rows, widths=[1.0, 1.25, 0.6, 1.25, 0.6, 0.6, 1.0], font_size=6.8)
-    add_body(document, f"Across molecular tasks, {inference['molecule']['significant']} of "
-             f"{inference['molecule']['total']} reference comparisons survived the primary "
-             f"study-wide correction. The protein count was {inference['protein']['significant']} "
-             f"of {inference['protein']['total']}, and the genomic count was "
-             f"{inference['genomics']['significant']} of {inference['genomics']['total']}. "
-             "These counts describe this model roster and these fixed task variants; they are "
-             "not evidence that one biological modality is intrinsically easier to benchmark.")
+    add_caption(document, "Table 5. Statistical comparison with the representation selected from validation data. The highest observed test score is descriptive. The final column reports how many alternatives differed after correction across all 59 study comparisons.")
+    add_table(document, ["Dataset", "Preselected comparison", "Highest observed representation", "Statistically distinguishable"],
+              inference_rows, widths=[1.0, 1.8, 1.8, 1.35], font_size=7.4)
+    add_body(document, f"Only {inference['molecule']['significant']} of "
+             f"{inference['molecule']['total']} molecular comparisons were statistically "
+             "distinguishable after correction across the study. Evidence varied markedly by "
+             "endpoint: seven of eight comparisons were distinguishable for Lipophilicity, four "
+             "of seven for ClinTox, two of eight for ESOL and one of eight for BBBP; none were "
+             "distinguishable for BACE or CYP3A4. Numerical ordering alone therefore overstated "
+             "the separation among molecular representations in several datasets.")
+    add_body(document, f"All {inference['protein']['significant']} protein comparisons were "
+             "distinguishable from their preselected comparison method, whereas neither genomic "
+             "comparison was distinguishable. The protein test sets were much larger than most "
+             "molecular test sets, but sample size is not the only explanation: endpoint noise, "
+             "effect size and dependence among observations also influence precision.")
     add_publication_figure(
         document, "figure4_inference_and_split_sensitivity.png",
         figure_legends["Figure 4"], 5.65
     )
 
-    add_heading(document, "3.3 Scale, split and sample-size sensitivity", 2)
-    ladder_rows = []
-    for task, entry in paired.items():
-        for ladder in entry.get("ladders", {}).values():
-            for step, value in ladder["steps"].items():
-                ladder_rows.append([task, step.replace("->", " to "), fmt(value["delta"]),
-                                    f"[{fmt(value['ci_low'])}, {fmt(value['ci_high'])}]",
-                                    f"{value['p_holm']:.4g}", value["direction"]])
-    if ladder_rows:
-        add_caption(document, "Table 7. Pre-specified ESM-2 scale steps, Holm-corrected within the ladder.")
-        add_table(document, ["Task", "Step", "Delta", "95% interval", "Holm p", "Direction"],
-                  ladder_rows, widths=[0.9, 1.5, 0.6, 1.3, 0.7, 1.25])
-
+    add_heading(document, "3.4 Sensitivity to scaffold partition and test-set size", 2)
     split_rows = []
     for task, entry in sensitivity["tasks"].items():
         ranges = {model: values["range"] for model, values in entry["models"].items()}
         winners = [run["order"][0] for run in entry["runs"]]
         common, frequency = Counter(winners).most_common(1)[0]
-        split_rows.append([task, fmt(max(ranges.values())),
-                           MODEL_LABELS.get(common, common), f"{frequency}/{len(winners)}",
-                           ", ".join(MODEL_LABELS.get(item, item)
-                                     for item in sorted(set(winners)))])
-    add_caption(document, "Table 8. Five-seed balanced-scaffold sensitivity. Maximum range is across models within a task.")
-    add_table(document, ["Task", "Maximum score range", "Most frequent numerical best", "Frequency", "Observed best models"],
-              split_rows, widths=[0.9, 1.0, 1.5, 0.7, 2.3], font_size=7)
+        max_model, max_range = max(ranges.items(), key=lambda item: item[1])
+        split_rows.append([
+            task, MODEL_LABELS.get(common, common), f"{frequency} of {len(winners)}",
+            f"{max_range:.3f} ({MODEL_LABELS.get(max_model, max_model)})",
+        ])
+    add_caption(document, "Table 6. Sensitivity of molecular results to five balanced scaffold partitions. Score spread is the largest range observed for any representation within the dataset.")
+    add_table(document, ["Dataset", "Most frequent leader", "Partitions led", "Largest score spread"],
+              split_rows, widths=[1.0, 1.8, 1.1, 2.15], font_size=7.5)
+    add_body(document, "No molecular dataset had the same leading representation in all five "
+             "scaffold partitions. The most frequent leader prevailed in two to four partitions, "
+             "and the largest within-method score spread ranged from 0.084 for BACE to 0.279 for "
+             "ESOL. This variation shows that conclusions based on a single scaffold allocation "
+             "can be unstable even when every method is evaluated consistently.")
+    add_body(document, "Within the ESM-2 series, larger models improved DeepLoc at each consecutive "
+             "step. Fluorescence was non-monotonic: ESM-2 35M exceeded 8M, 150M fell below 35M, "
+             "and 650M improved over 150M. Model size alone therefore did not determine performance "
+             "across protein endpoints.")
 
     widths_100, widths_1000 = [], []
     for task in resolution["tasks"].values():
@@ -578,98 +595,96 @@ def build():
                 if point["requested_n"] == 1000:
                     widths_1000.append(point["central_95_width"])
     if widths_100:
-        text = (f"Across available reference comparisons, the median empirical central-range "
-                f"width at n=100 was {np.median(widths_100):.4f}.")
+        text = (f"Across available comparisons, the median width of the empirical 95% range at "
+                f"a test-set size of 100 was {np.median(widths_100):.3f}.")
         if widths_1000:
-            text += (f" At n=1,000 it was {np.median(widths_1000):.4f}. The contraction "
-                     "supports test size as a contributor to precision, while the substantial "
-                     "between-task spread shows that it is not the sole determinant.")
+            text += (f" At a test-set size of 1,000 it was {np.median(widths_1000):.3f}. "
+                     "Larger test sets generally narrowed the range, although substantial "
+                     "differences remained among endpoints.")
         add_body(document, text)
     add_publication_figure(
         document, "figure5_subsampling_resolution.png", figure_legends["Figure 5"], 5.95
     )
 
-    add_heading(document, "3.4 Input-exposure proxies", 2)
-    exposure_rows = []
-    for task in TASK_ORDER:
-        entry = exposure["tasks"].get(task, {})
-        empirical = entry.get("empirical", {})
-        structural = entry.get("structural", {})
-        unmeasured = entry.get("unmeasured", {})
-        notes = [value["claim"] for value in structural.values()]
-        notes.extend(f"{corpus}: {value['reason']}" for corpus, value in unmeasured.items())
-        exposure_rows.append([
-            task,
-            exposure_text(empirical["zinc"]) if "zinc" in empirical else "N/A",
-            exposure_text(empirical["pubchem"]) if "pubchem" in empirical else "N/A",
-            exposure_text(empirical["swissprot"]) if "swissprot" in empirical else "N/A",
-            "; ".join(notes),
-        ])
-    add_caption(document, "Table 9. Pretraining input-exposure proxies. Molecular cells report exact, near-duplicate and shared-scaffold fractions separately.")
-    add_table(document, ["Task", "ZINC sample", "PubChem sample", "Swiss-Prot", "Structural note"],
-              exposure_rows, widths=[0.9, 1.4, 1.4, 1.0, 2.1], font_size=6.8)
-    add_body(document, "High exposure-proxy fractions change the interpretation of a frozen "
-             "representation score: they indicate that input familiarity may contribute. They "
-             "do not demonstrate memorized downstream labels, and a low random-sample fraction "
-             "does not prove absence from the checkpoint's exact training corpus.")
+    add_heading(document, "3.5 Structural overlap with sampled pretraining sources", 2)
+    add_body(document, "Exact molecular matches were rare in the sampled databases: none occurred "
+             "in the ZINC sample and one Lipophilicity compound occurred in the PubChem sample. "
+             "Close ECFP4 neighbours were also uncommon. Shared scaffolds were more frequent and "
+             "strongly endpoint-dependent, ranging from 1.3% for BACE in ZINC to 86.0% for ESOL "
+             "in PubChem. Structural familiarity may therefore differ substantially among benchmark "
+             "datasets even when exact compound overlap is minimal.")
+    add_body(document, "These comparisons use random database samples rather than the exact dated "
+             "pretraining collections. They should be interpreted as chemical-overlap context, not "
+             "as evidence that test compounds or property labels were memorised during pretraining.")
     add_publication_figure(
         document, "figureS1_exposure_proxies.png", figure_legends["Figure S1"], 5.95
     )
 
     add_heading(document, "4. Discussion", 1)
-    add_body(document, "The study has practical value because it turns a literature directory "
-             "into an executable measurement protocol with explicit dataset variants, immutable "
-             "checkpoint revisions, saved predictions and multiplicity-aware comparisons. It also "
-             "makes negative conclusions legible: failure to resolve a difference is not evidence "
-             "of equality, but it is stronger and more useful than silently converting numerical "
-             "noise into a rank.")
-    add_body(document, "The work should not be presented as the first frozen-embedding benchmark. "
-             "TAPE, Nucleotide Transformer and recent DNA foundation-model studies already use "
-             "frozen or zero-shot embeddings and controlled downstream evaluation [3-5]. The "
-             "distinct contribution here is the cross-modal combination of validation-selected "
-             "paired inference, dependence-aware molecular resampling, split sensitivity, public "
-             "matrix provenance and input-exposure context. This is a methods and resource "
-             "contribution rather than a new representation architecture.")
-    add_body(document, "The results also reinforce that pooling cannot be treated as neutral. "
-             "Mean pooling was fixed to avoid per-model tuning, but recent genomic benchmarking "
-             "shows that pooling choice can materially change conclusions [5]. Similarly, a 510-"
-             "character cap makes long-protein results conditional on truncated inputs. Frozen "
-             "probing measures accessible information after these decisions, not everything that "
-             "the pretrained model could express under task-specific adaptation.")
+    add_body(document, "The molecular results do not support a universal ordering of representation "
+             "families. A chemical language model led BBBP, ClinTox and CYP3A4, a circular "
+             "fingerprint led BACE, and pretrained graph models led the two continuous-property "
+             "datasets. This pattern is chemically plausible: endpoints differ in structural "
+             "complexity, assay noise, dataset size and the extent to which local substructures or "
+             "global physicochemical properties are informative. A representation that is useful "
+             "for one endpoint should not therefore be assumed to dominate another.")
+    add_body(document, "Classical cheminformatics representations remained strong comparators. "
+             "Their competitiveness is important because fingerprints and calculated descriptors "
+             "are inexpensive, interpretable and well characterised. The present results do not "
+             "argue against pretrained molecular models; rather, they show that their value must be "
+             "demonstrated against appropriately tuned conventional methods on chemically separated "
+             "test sets.")
+    add_body(document, "Scaffold sensitivity was at least as important as the nominal ranking. The "
+             "leading representation changed across repeated partitions in every molecular dataset, "
+             "and score variation was substantial for ESOL and CYP3A4. This behaviour is consistent "
+             "with the limited number and uneven distribution of chemical series in many public "
+             "benchmarks. Reporting one scaffold split without uncertainty can make a modest and "
+             "partition-dependent advantage appear general.")
+    add_body(document, "The protein and genomic experiments clarify the role of statistical precision "
+             "without making direct cross-domain performance claims. The large protein test sets "
+             "supported clear separation among the evaluated methods, whereas the molecular datasets "
+             "often did not. The promoter methods were numerically close and statistically "
+             "indistinguishable. Sample size contributed to these differences, but endpoint noise, "
+             "sequence relatedness and effect magnitude also matter.")
+    add_body(document, "BioLatent contributes a controlled comparison and reusable result resource, "
+             "rather than a new molecular representation. Its principal advantage is that the same "
+             "dataset definitions, predictive models and statistical criteria are applied throughout. "
+             "The public predictions and source data allow new representations to be added without "
+             "treating heterogeneous literature values as if they came from one experiment.")
 
     add_heading(document, "5. Limitations", 1)
     limitations = [
-        "The roster is deliberately small and cannot support universal claims about architecture families.",
-        "One checkpoint layer and one mean-pooling rule were used. Layer choice, alternative pooling and fine-tuning are outside the estimand.",
-        "Bootstrap intervals are conditional on the fixed test partition. Five molecular resplits provide sensitivity evidence but not a full hierarchical variance estimate.",
-        "DeepLoc 2.0 uses one pre-specified assignment of five published homology partitions, not the paper's complete five-fold cross-validation average.",
-        "The TAPE Fluorescence variants are related. Item-level resampling does not model every mutational dependency, so its intervals may remain optimistic.",
-        "The ZINC and PubChem audits use random database samples rather than exact dated checkpoint corpora. Swiss-Prot homology is a proxy for UniRef50/UniRef100 exposure.",
-        "Self-supervised input exposure is not label leakage. The study cannot determine whether familiarity helped an individual prediction.",
-        "The regularisation search is capped at 6,000 rows for computational parity. This is disclosed because it is part of the protocol.",
-        "No external holdout study establishes that conclusions transfer to another benchmark collection.",
+        "The selected datasets and representations do not cover all chemical endpoints or available pretrained molecular models.",
+        "Pretrained representations were assessed in one fixed form with a common linear prediction model. Alternative representation layers, aggregation methods and end-to-end model fitting were outside the study scope.",
+        "The confidence intervals describe the fixed primary test partitions. Five additional scaffold partitions provide a robustness check but do not capture every possible division of chemical space.",
+        "Some molecular test sets are small, particularly CYP3A4, and consequently provide limited power to distinguish similar methods.",
+        "DeepLoc uses one prespecified assignment of its published homology partitions rather than the complete cross-validation average reported by the original study.",
+        "Related variants in the Fluorescence dataset may not be fully independent, so its uncertainty could be underestimated.",
+        "The ZINC, PubChem and Swiss-Prot comparisons are sampled indicators of structural or sequence familiarity, not exact reconstructions of model pretraining collections.",
+        "No independent benchmark collection was used to establish that the observed rankings generalise to other chemical series or assay settings.",
     ]
     for item in limitations:
         document.add_paragraph(item, style="List Paragraph").style = document.styles["List Paragraph"]
 
     add_heading(document, "6. Conclusion", 1)
-    add_body(document, "BioLatent is most defensible as an uncertainty-aware benchmark and "
-             "provenance resource whose claims remain at the level supported by the design. It compares "
-             "linear decodability under one frozen protocol; it does not identify an intrinsically "
-             "best representation, prove contamination, or establish that sample size alone causes "
-             "cross-modal differences. Reporting the validation-selected comparator, paired "
-             "difference interval, multiplicity-adjusted p-value, split sensitivity and input-"
-             "exposure proxy is a more defensible unit than a single rank.")
+    add_body(document, "Under a common evaluation procedure, molecular-representation performance "
+             "was endpoint-dependent and sensitive to scaffold partitioning. Conventional "
+             "fingerprints and descriptors remained competitive, while pretrained methods provided "
+             "clear advantages in selected datasets rather than uniformly. Most numerical molecular "
+             "rankings were not supported as statistically distinguishable differences after "
+             "study-wide correction. BioLatent therefore supports representation selection based on "
+             "the chemical endpoint, uncertainty and scaffold robustness, rather than on a single "
+             "aggregate leaderboard.")
 
     add_heading(document, "Data and code availability", 1)
-    paragraph = add_body(document, "Source code, public result JSON, prediction artefacts and the "
-                         "manuscript generator are available in the BioLatent repository: ")
+    paragraph = add_body(document, "Source code, derived results, test-set predictions, figure source "
+                         "data and the manuscript generator are available in the BioLatent repository: ")
     add_hyperlink(paragraph, "https://github.com/yboulaamane/biolatent",
                   "https://github.com/yboulaamane/biolatent")
-    add_body(document, "Raw benchmark datasets and embedding matrices are regenerated from the "
-             "pinned sources and checkpoints and are not committed to the web repository. The "
-             "public run manifest records dataset hashes, checkpoint revisions, pooling, "
-             "truncation and software versions.")
+    add_body(document, "Raw benchmark datasets and representation matrices are regenerated from "
+             "their documented public sources and are not redistributed in the repository. The "
+             "release manifest records source checksums, model versions, structure or sequence "
+             "processing and software versions.")
 
     add_heading(document, "Declarations", 1)
     add_heading(document, "Author contributions", 2)
