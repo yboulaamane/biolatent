@@ -5,7 +5,7 @@ An open-access registry, compatibility filter, and interactive benchmark dashboa
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22813148.svg)](https://doi.org/10.5281/zenodo.22813148)
 
-![BioLatent Platform Showcase](showcase.png)
+<img width="1862" height="976" alt="biolatent" src="https://github.com/user-attachments/assets/3bf8c24e-dd89-487d-8247-f41ed61815d3" />
 
 ---
 
