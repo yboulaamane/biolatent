@@ -14,33 +14,6 @@ interface ChartPoint {
   y: number;
 }
 
-interface SubmissionDraft {
-  id: string;
-  name: string;
-  developer: string;
-  representationType: string;
-  modality: string;
-  inputRepresentation: string;
-  yearReleased: number;
-  computeProfile: 'cpu' | 'gpu';
-  benchmarks: never[];
-  tags: string[];
-  codeSnippet: string;
-  architectureType?: string;
-  pretrainingObjective?: string;
-  embeddingDimension?: number;
-  trainingData?: { name: string; size: string; license: string };
-  descriptorFamily?: string;
-  algorithmType?: 'hashed';
-  vectorType?: 'binary';
-  dimensionality?: number;
-  components?: {
-    learnedModel: string;
-    descriptorsUsed: string[];
-    fusionMethod: 'concatenation';
-  };
-}
-
 export default function Home() {
   // Navigation Tabs. The measured study is the landing tab: it is the only
   // content on this site where results were generated locally under one protocol.
@@ -66,17 +39,28 @@ export default function Home() {
     representationType: 'learned_embedding',
     modality: 'molecule',
     inputRepresentation: 'SMILES',
+    yearReleased: String(new Date().getFullYear()),
     dimension: '',
+    computeProfile: 'gpu',
+    architectureType: '',
     datasetName: '',
     datasetSize: '',
+    datasetLicense: '',
     objective: '',
     license: 'MIT',
-    huggingface: '',
     github: '',
+    weights: '',
     paper: '',
-    typicalTasks: '',
+    descriptorFamily: '',
+    algorithmType: 'hashed',
+    vectorType: 'binary',
+    learnedModel: '',
+    descriptorsUsed: '',
+    fusionMethod: 'concatenation',
   });
   const [generatedJson, setGeneratedJson] = useState<string | null>(null);
+  const [submissionIssueUrl, setSubmissionIssueUrl] = useState<string | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // Wizard States
   const [wizardStep, setWizardStep] = useState(1);
@@ -319,52 +303,115 @@ export default function Home() {
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSubmitForm(prev => ({ ...prev, [name]: value }));
+    setGeneratedJson(null);
+    setSubmissionIssueUrl(null);
+    setSubmissionError(null);
   };
 
-  // Generate community JSON pull request snippet
+  const submissionId = (name: string) => name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+
+  // Prepare a validated registry payload. GitHub Actions converts the issue
+  // created from this payload into a reviewable pull request.
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const isLearned = submitForm.representationType === 'learned_embedding';
-    const isFixed = submitForm.representationType === 'fixed_descriptor';
-    
-    const formatted: SubmissionDraft = {
-      id: submitForm.name.toLowerCase().replace(/\s+/g, '_'),
-      name: submitForm.name,
-      developer: submitForm.developer,
-      representationType: submitForm.representationType,
-      modality: submitForm.modality,
-      inputRepresentation: submitForm.inputRepresentation,
-      yearReleased: new Date().getFullYear(),
-      computeProfile: isFixed ? 'cpu' : 'gpu',
-      benchmarks: [],
-      tags: [submitForm.inputRepresentation, submitForm.modality],
-      codeSnippet: `# Python load code for ${submitForm.name}`,
-    };
-
-    if (isLearned) {
-      formatted.architectureType = 'Transformer';
-      formatted.pretrainingObjective = submitForm.objective;
-      formatted.embeddingDimension = parseInt(submitForm.dimension) || 512;
-      formatted.trainingData = {
-        name: submitForm.datasetName,
-        size: submitForm.datasetSize,
-        license: submitForm.license,
-      };
-    } else if (isFixed) {
-      formatted.descriptorFamily = submitForm.name;
-      formatted.algorithmType = 'hashed';
-      formatted.vectorType = 'binary';
-      formatted.dimensionality = parseInt(submitForm.dimension) || 2048;
-    } else {
-      formatted.components = {
-        learnedModel: 'Transformer',
-        descriptorsUsed: [submitForm.inputRepresentation],
-        fusionMethod: 'concatenation',
-      };
-      formatted.embeddingDimension = parseInt(submitForm.dimension) || 512;
+    const id = submissionId(submitForm.name);
+    if (!id) {
+      setSubmissionError('The representation name must contain at least one letter or number.');
+      return;
     }
 
-    setGeneratedJson(JSON.stringify(formatted, null, 2));
+    const isLearned = submitForm.representationType === 'learned_embedding';
+    const isFixed = submitForm.representationType === 'fixed_descriptor';
+    const dimension = Number.parseInt(submitForm.dimension, 10);
+    const yearReleased = Number.parseInt(submitForm.yearReleased, 10);
+    if (!Number.isInteger(dimension) || dimension < 1) {
+      setSubmissionError('Dimension must be a positive integer.');
+      return;
+    }
+    if (!Number.isInteger(yearReleased) || yearReleased < 1990 || yearReleased > new Date().getFullYear() + 1) {
+      setSubmissionError('Release year must be between 1990 and next year.');
+      return;
+    }
+
+    const base = {
+      id,
+      name: submitForm.name,
+      developer: submitForm.developer,
+      modality: submitForm.modality as RepresentationEntry['modality'],
+      inputRepresentation: submitForm.inputRepresentation as RepresentationEntry['inputRepresentation'],
+      license: submitForm.license,
+      yearReleased,
+      computeProfile: submitForm.computeProfile as RepresentationEntry['computeProfile'],
+      codeRepositoryUrl: submitForm.github,
+      ...(submitForm.weights ? { weightsUrl: submitForm.weights } : {}),
+      ...(submitForm.paper ? { paperUrl: submitForm.paper } : {}),
+      benchmarks: [] as RepresentationEntry['benchmarks'],
+      tags: [submitForm.inputRepresentation, submitForm.modality],
+      codeSnippet: '# Loading example pending curator review',
+    };
+
+    let formatted: RepresentationEntry;
+    if (isLearned) {
+      formatted = {
+        ...base,
+        representationType: 'learned_embedding',
+        architectureType: submitForm.architectureType,
+        pretrainingObjective: submitForm.objective,
+        embeddingDimension: dimension,
+        trainingData: {
+          name: submitForm.datasetName,
+          size: submitForm.datasetSize,
+          license: submitForm.datasetLicense,
+        },
+      };
+    } else if (isFixed) {
+      formatted = {
+        ...base,
+        representationType: 'fixed_descriptor',
+        descriptorFamily: submitForm.descriptorFamily,
+        algorithmType: submitForm.algorithmType as FixedDescriptor['algorithmType'],
+        vectorType: submitForm.vectorType as FixedDescriptor['vectorType'],
+        dimensionality: dimension,
+      };
+    } else {
+      formatted = {
+        ...base,
+        representationType: 'hybrid_representation',
+        embeddingDimension: dimension,
+        components: {
+          learnedModel: submitForm.learnedModel,
+          descriptorsUsed: submitForm.descriptorsUsed.split(',').map(value => value.trim()).filter(Boolean),
+          fusionMethod: submitForm.fusionMethod as HybridRepresentation['components']['fusionMethod'],
+        },
+      };
+    }
+
+    const json = JSON.stringify(formatted, null, 2);
+    const issueBody = [
+      '<!-- biolatent-representation-submission:v1 -->',
+      '## Representation metadata',
+      '',
+      '```json',
+      json,
+      '```',
+      '',
+      '## Contributor statement',
+      '',
+      'I confirm that the links and metadata above describe a real representation. I understand that registry inclusion does not add the representation to the measured benchmark.',
+    ].join('\n');
+    const params = new URLSearchParams({
+      title: `[Representation submission] ${formatted.name}`,
+      body: issueBody,
+    });
+    setGeneratedJson(json);
+    setSubmissionIssueUrl(`https://github.com/yboulaamane/biolatent/issues/new?${params.toString()}`);
+    setSubmissionError(null);
   };
 
   const resetWizard = () => {
@@ -408,8 +455,10 @@ export default function Home() {
           <button className="badge-btn active" onClick={() => {
             setShowSubmitModal(true);
             setGeneratedJson(null);
+            setSubmissionIssueUrl(null);
+            setSubmissionError(null);
           }}>
-            + Add Representation
+            + Submit Representation
           </button>
           
           <div className="tabs-nav">
@@ -1328,6 +1377,11 @@ export default function Home() {
                           Source Code
                         </a>
                       )}
+                      {selectedEmbedding.paperUrl && (
+                        <a href={selectedEmbedding.paperUrl} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none' }}>
+                          Primary Paper
+                        </a>
+                      )}
                       {selectedEmbedding.weightsUrl && (
                         <a href={selectedEmbedding.weightsUrl} target="_blank" rel="noopener noreferrer" className="btn-details" style={{ textDecoration: 'none', background: 'var(--gradient-latent)', borderColor: 'transparent' }}>
                           HF / Weight Hub
@@ -1366,12 +1420,13 @@ export default function Home() {
       {/* ==================== PR SUBMISSION DIALOG ==================== */}
       {showSubmitModal && (
         <div className="modal-overlay" onClick={() => setShowSubmitModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '760px' }}>
             <button className="modal-close" onClick={() => setShowSubmitModal(false)}>×</button>
             <div className="modal-body">
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>Submit a Representation</h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                Fill out the metadata schema below to generate a standardized registry payload suitable for a GitHub Pull Request.
+                Complete the registry metadata below. GitHub will ask you to confirm a prefilled issue,
+                then an automated check will open a pull request for curator review.
               </p>
 
               <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -1402,6 +1457,7 @@ export default function Home() {
                       <option value="protein">Protein</option>
                       <option value="complex">Complex</option>
                       <option value="reaction">Reaction</option>
+                      <option value="nucleic_acid">Nucleic Acid</option>
                     </select>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -1412,58 +1468,138 @@ export default function Home() {
                       <option value="3D">3D Coordinates</option>
                       <option value="graph">2D Graph</option>
                       <option value="engineered_features">Engineered Features</option>
+                      <option value="Pocket/3D">Pocket / 3D</option>
+                      <option value="reaction_smiles">Reaction SMILES</option>
                     </select>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Dimension / Length</label>
-                    <input type="number" name="dimension" required placeholder="e.g. 768" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.dimension} onChange={handleFormChange} />
+                    <input type="number" min="1" name="dimension" required placeholder="e.g. 768" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.dimension} onChange={handleFormChange} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>License</label>
-                    <select name="license" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.license} onChange={handleFormChange}>
-                      <option value="MIT">MIT</option>
-                      <option value="Apache-2.0">Apache-2.0</option>
-                      <option value="Academic/Restrictive">Academic/Restrictive</option>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Release Year</label>
+                    <input type="number" min="1990" max={new Date().getFullYear() + 1} name="yearReleased" required className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.yearReleased} onChange={handleFormChange} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Compute Profile</label>
+                    <select name="computeProfile" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.computeProfile} onChange={handleFormChange}>
+                      <option value="cpu">CPU</option>
+                      <option value="gpu">GPU</option>
+                      <option value="mixed">Mixed</option>
                     </select>
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Representation License</label>
+                  <select name="license" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.license} onChange={handleFormChange}>
+                    <option value="MIT">MIT</option>
+                    <option value="Apache-2.0">Apache-2.0</option>
+                    <option value="Academic/Restrictive">Academic/Restrictive</option>
+                  </select>
                 </div>
 
                 {submitForm.representationType === 'learned_embedding' && (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Architecture</label>
+                        <input type="text" name="architectureType" required placeholder="e.g. Graph transformer" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.architectureType} onChange={handleFormChange} />
+                      </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Dataset Name</label>
-                        <input type="text" name="datasetName" placeholder="e.g. PubChem10M" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetName} onChange={handleFormChange} />
+                        <input type="text" name="datasetName" required placeholder="e.g. PubChem10M" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetName} onChange={handleFormChange} />
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Dataset Size</label>
-                        <input type="text" name="datasetSize" placeholder="e.g. 10M molecules" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetSize} onChange={handleFormChange} />
+                        <input type="text" name="datasetSize" required placeholder="e.g. 10M molecules" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetSize} onChange={handleFormChange} />
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Objective</label>
-                      <input type="text" name="objective" placeholder="e.g. Masked atom reconstruction" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.objective} onChange={handleFormChange} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Objective</label>
+                        <input type="text" name="objective" required placeholder="e.g. Masked atom reconstruction" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.objective} onChange={handleFormChange} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Pretraining Data License</label>
+                        <input type="text" name="datasetLicense" required placeholder="e.g. CC0 / mixed" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.datasetLicense} onChange={handleFormChange} />
+                      </div>
                     </div>
                   </>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {submitForm.representationType === 'fixed_descriptor' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Descriptor Family</label>
+                      <input type="text" name="descriptorFamily" required placeholder="e.g. Circular fingerprint" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.descriptorFamily} onChange={handleFormChange} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Algorithm Type</label>
+                      <select name="algorithmType" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.algorithmType} onChange={handleFormChange}>
+                        <option value="hashed">Hashed</option>
+                        <option value="rule-based">Rule-based</option>
+                        <option value="physicochemical">Physicochemical</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Vector Type</label>
+                      <select name="vectorType" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.vectorType} onChange={handleFormChange}>
+                        <option value="binary">Binary</option>
+                        <option value="count">Count</option>
+                        <option value="continuous">Continuous</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {submitForm.representationType === 'hybrid_representation' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Learned Component</label>
+                      <input type="text" name="learnedModel" required placeholder="e.g. ChemBERTa" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.learnedModel} onChange={handleFormChange} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Descriptors, comma-separated</label>
+                      <input type="text" name="descriptorsUsed" required placeholder="e.g. RDKit2D, ECFP4" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.descriptorsUsed} onChange={handleFormChange} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Fusion Method</label>
+                      <select name="fusionMethod" className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.fusionMethod} onChange={handleFormChange}>
+                        <option value="concatenation">Concatenation</option>
+                        <option value="projection">Projection</option>
+                        <option value="attention">Attention</option>
+                        <option value="ensemble">Ensemble</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>GitHub Link</label>
-                    <input type="text" name="github" placeholder="https://github.com/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.github} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Code Repository</label>
+                    <input type="url" name="github" required placeholder="https://github.com/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.github} onChange={handleFormChange} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Paper Link</label>
-                    <input type="text" name="paper" placeholder="https://arxiv.org/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.paper} onChange={handleFormChange} />
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Weights Link, optional</label>
+                    <input type="url" name="weights" placeholder="https://huggingface.co/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.weights} onChange={handleFormChange} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Primary Paper, optional</label>
+                    <input type="url" name="paper" placeholder="https://doi.org/..." className="search-input" style={{ padding: '0.5rem 0.75rem' }} value={submitForm.paper} onChange={handleFormChange} />
                   </div>
                 </div>
 
+                {submissionError && (
+                  <div role="alert" style={{ color: '#fda4af', fontSize: '0.82rem' }}>{submissionError}</div>
+                )}
+
                 <button type="submit" className="btn-wizard-next" style={{ width: '100%', marginTop: '0.5rem' }}>
-                  Generate Entry JSON
+                  Prepare GitHub Submission
                 </button>
               </form>
 
@@ -1481,7 +1617,15 @@ export default function Home() {
                     </pre>
                   </div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
-                    Copy this payload and submit a Pull Request to our repository inside `/src/app/data/embeddings.ts`.
+                    The payload contains no benchmark claims. Those require separate source-level review.
+                  </p>
+                  {submissionIssueUrl && (
+                    <a href={submissionIssueUrl} target="_blank" rel="noopener noreferrer" className="btn-wizard-next" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginTop: '1rem' }}>
+                      Continue on GitHub
+                    </a>
+                  )}
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.65rem', textAlign: 'center' }}>
+                    After you confirm the GitHub issue, an automated check prepares a pull request. Nothing is merged without curator review.
                   </p>
                 </div>
               )}

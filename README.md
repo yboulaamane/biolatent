@@ -39,6 +39,7 @@ The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer
 5. **Programmatic JSON API**: Exposes query-parameter filters to fetch representation metadata dynamically (e.g. `/api/representations?modality=protein`).
 6. **Reproducible Measured Study**: Imports public JSON artefacts produced by the benchmark scripts, with checkpoint revisions, dataset hashes, pooling, truncation, and software versions recorded in `results/run_manifest.json`.
 7. **Audited Data Provenance**: Every measured task was compared with a fresh upstream copy, and every literature row carries source-level provenance. See [`DATA_PROVENANCE_AUDIT.md`](DATA_PROVENANCE_AUDIT.md).
+8. **Reviewable Community Submissions**: The website prepares a structured GitHub issue. A repository workflow validates the metadata, builds the site, and opens a pull request for curator review.
 
 ---
 
@@ -120,6 +121,16 @@ curl "https://biolatent.org/api/representations?search=ChemBERTa-2&modality=mole
    ```bash
    npm run build
    ```
+
+---
+
+## Community representation submissions
+
+The **Submit Representation** form creates a complete registry payload and opens a prefilled GitHub issue. After the contributor confirms the issue, `.github/workflows/representation-submission.yml` validates the payload with `scripts/prepare_representation_submission.py`, rebuilds the website, and opens a pull request. The workflow never merges submissions automatically.
+
+Community submissions add descriptive representation metadata only. They cannot add literature benchmark values or enter the measured benchmark. Benchmark claims require separate source-level provenance review, and measured inclusion requires a compatible adapter and a complete benchmark run.
+
+Repository maintainers must allow GitHub Actions to create pull requests using the repository `GITHUB_TOKEN`. If that permission is disabled, the issue remains available for manual review but the automated pull request step cannot complete.
 
 ---
 
