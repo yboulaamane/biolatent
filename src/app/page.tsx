@@ -1132,11 +1132,12 @@ export default function Home() {
       )}
 
       {/* FOOTER */}
-      <footer style={{ marginTop: '4rem', padding: '2rem 0 1rem', borderTop: '1px solid var(--border-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+      <footer style={{ marginTop: '4rem', padding: '2rem 0 1rem', borderTop: '1px solid var(--border-card)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
         <div>
-          © {new Date().getFullYear()} BioLatent • Open Source Registry.
+          © {new Date().getFullYear()} BioLatent • Registry and Measured Benchmark.
         </div>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <a href="https://doi.org/10.5281/zenodo.22813148" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>Data DOI</a>
           <a href="https://github.com/yboulaamane/biolatent" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
           <span>Curated by <a href="https://github.com/yboulaamane" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none', fontWeight: 600 }}>yboulaamane</a></span>
         </div>

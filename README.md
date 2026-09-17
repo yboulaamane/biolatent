@@ -3,6 +3,7 @@
 An open-access registry, compatibility filter, and interactive benchmark dashboard for chemical and biological vector representations.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22813148.svg)](https://doi.org/10.5281/zenodo.22813148)
 
 ![BioLatent Platform Showcase](showcase.png)
 
@@ -18,7 +19,7 @@ BioLatent began as a provenance-aware registry of representations and results re
 
 ### Measured release snapshot
 
-The validated 2026-09-14 release contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed.
+The benchmark snapshot was validated against its source data on 2026-09-14 and released as version 1.0.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The complete data release is archived on Zenodo at [https://doi.org/10.5281/zenodo.22813148](https://doi.org/10.5281/zenodo.22813148).
 
 | Modality | Tasks | Measured cells | Study-wide resolved comparisons |
 |---|---:|---:|---:|
@@ -190,6 +191,9 @@ If you use BioLatent in your research, please cite:
   title={BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations},
   author={Boulaamane, Yassir},
   year={2026},
-  url={https://github.com/yboulaamane/biolatent}
+  version={1.0.0},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.22813148},
+  url={https://doi.org/10.5281/zenodo.22813148}
 }
 ```
