@@ -25,7 +25,7 @@ TEMPLATE = Path(os.environ.get(
     "BIOLATENT_MANUSCRIPT_TEMPLATE", ROOT / "BioLatent_methods.docx"
 ))
 OUTPUT = ROOT / "paper" / "BioLatent_methods_revised.docx"
-SUPPLEMENTARY_OUTPUT = ROOT / "paper" / "BioLatent_supplementary_table_S1.docx"
+SUPPLEMENTARY_OUTPUT = ROOT / "paper" / "BioLatent_supplementary.docx"
 FIGURE_DIR = ROOT / "paper" / "figures"
 FIGURE_LEGENDS_PATH = ROOT / "paper" / "FIGURE_LEGENDS.md"
 TASK_ORDER = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
@@ -492,6 +492,8 @@ def build():
              "and metabolism. Protein and genomic tasks test the same comparison framework in other "
              "biological sequences without treating scores from different modalities as directly "
              "comparable.")
+    add_body(document, "The overall study design, evaluation sequence and validated benchmark "
+             "scope are summarised in Figure 1.")
     add_publication_figure(
         document, "figure1_study_design.png", figure_legends["Figure 1"], 6.55
     )
@@ -521,6 +523,8 @@ def build():
         task_rows.append([
             task, endpoint, entry["n_total"], entry["n_test"], split_label, metric_label,
         ])
+    add_body(document, "The datasets, retained partitions and endpoint-specific performance "
+             "measures are summarised in Table 1.")
     add_caption(document, "Table 1. Datasets and evaluation measures. Dataset sizes are reported after preprocessing; the test set was not used for model selection.")
     add_table(document, ["Dataset", "Endpoint", "Compounds or sequences", "Test set", "Partition", "Measure"],
               task_rows, widths=[0.75, 1.65, 0.8, 0.6, 1.25, 1.05], font_size=7.2)
@@ -556,6 +560,8 @@ def build():
         [MODEL_LABELS[model], *REPRESENTATION_DETAILS[model]]
         for model in MODEL_LABELS
     ]
+    add_body(document, "The molecular, protein and genomic representations included in the "
+             "benchmark are listed in Table 2.")
     add_caption(document, "Table 2. Representations included in BioLatent. Detailed model versions and software provenance are provided in the public run manifest.")
     add_table(document, ["Representation", "Input", "Approach", "Comparison role"],
               model_rows, widths=[1.35, 1.35, 2.2, 1.25], font_size=7.2)
@@ -649,10 +655,14 @@ def build():
              "groups, whereas each ClinTox endpoint contained only 11 observations in its minority "
              "class among 148 test compounds. The paired intervals and repeated scaffold partitions "
              "are consequently more informative than the point estimates alone.")
+    add_body(document, "The molecular performance estimates obtained under the common evaluation "
+             "procedure are reported in Table 3.")
     add_caption(document, "Table 3. Molecular-property performance under the common evaluation procedure. BBBP, BACE and CYP3A4 are reported as ROC-AUC; ClinTox as mean ROC-AUC; and ESOL and Lipophilicity as Spearman correlation. † indicates the highest observed score in that dataset; it does not by itself imply a statistically supported difference.")
     add_table(document, ["Representation", "BBBP", "ClinTox", "BACE", "ESOL", "Lipo", "CYP3A4"],
               readable_result_rows(results, paired, TASK_ORDER[:6]),
               widths=[1.55, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7], font_size=7.5)
+    add_body(document, "The corresponding molecular point estimates and confidence intervals are "
+             "shown in Figure 2.")
     add_publication_figure(
         document, "figure2_molecular_performance.png", figure_legends["Figure 2"], 5.55
     )
@@ -663,16 +673,22 @@ def build():
              "same pattern: amino-acid triplet frequencies achieved the highest correlation "
              "(0.674), followed by ProtBERT (0.662). For promoter recognition, the three methods "
              "were closely grouped between 0.930 and 0.938 ROC-AUC.")
+    add_body(document, "The numerical results for the protein and genomic extensions are reported "
+             "in Table 4.")
     add_caption(document, "Table 4. Performance on the protein and genomic extension datasets. DeepLoc is reported as mean ROC-AUC, Fluorescence as Spearman correlation and Promoters as ROC-AUC. † indicates the highest observed score within a dataset; an em dash denotes a representation from another biological domain.")
     add_table(document, ["Representation", "DeepLoc", "Fluorescence", "Promoters"],
               readable_result_rows(results, paired, ["DeepLoc", "Fluorescence", "Promoters"]),
               widths=[2.3, 1.1, 1.15, 1.1], font_size=7.5)
+    add_body(document, "The extension results and their uncertainty intervals are shown in Figure 3.")
     add_publication_figure(
         document, "figure3_protein_genomic_performance.png",
         figure_legends["Figure 3"], 6.15
     )
 
     add_heading(document, "3.3 Statistical support for performance differences", 2)
+    add_body(document, "Statistical support was evaluated relative to the comparison representation "
+             "selected using validation data. The dataset-specific results are summarised in Table 5 "
+             "and Figure 4A.")
     inference_rows = []
     for task in TASK_ORDER:
         entry = paired[task]
@@ -705,12 +721,10 @@ def build():
              "panel and were not included in the formal multiplicity family. Sample size is not the "
              "only determinant of precision: endpoint noise, effect size and dependence among "
              "observations also matter.")
-    add_publication_figure(
-        document, "figure4_inference_and_split_sensitivity.png",
-        figure_legends["Figure 4"], 5.65
-    )
-
     add_heading(document, "3.4 Sensitivity to scaffold partition and test-set size", 2)
+    add_body(document, "Scaffold-partition sensitivity was assessed from the frequency of each "
+             "leading representation and the largest score spread across 20 partitions. These "
+             "results are summarised in Table 6 and Figure 4B–C.")
     split_rows = []
     for task, entry in sensitivity["tasks"].items():
         ranges = {model: values["range"] for model, values in entry["models"].items()}
@@ -725,6 +739,10 @@ def build():
     add_caption(document, f"Table 6. Sensitivity of molecular results to {n_splits} balanced scaffold partitions. Score spread is the largest range observed for any representation within the dataset.")
     add_table(document, ["Dataset", "Most frequent leader", "Partitions led", "Largest score spread"],
               split_rows, widths=[1.0, 1.8, 1.1, 2.15], font_size=7.5)
+    add_publication_figure(
+        document, "figure4_inference_and_split_sensitivity.png",
+        figure_legends["Figure 4"], 5.65
+    )
     winner_frequencies = []
     score_spreads = []
     for task, entry in sensitivity["tasks"].items():
@@ -763,6 +781,8 @@ def build():
                      "Larger test sets generally narrowed the range, although substantial "
                      "differences remained among endpoints.")
         add_body(document, text)
+    add_body(document, "The effect of test-set size on the precision of the measured differences "
+             "is shown in Figure 5.")
     add_publication_figure(
         document, "figure5_subsampling_resolution.png", figure_legends["Figure 5"], 5.95
     )
@@ -777,9 +797,8 @@ def build():
     add_body(document, "These comparisons use random database samples rather than the exact dated "
              "pretraining collections. They should be interpreted as chemical-overlap context, not "
              "as evidence that test compounds or property labels were memorised during pretraining.")
-    add_publication_figure(
-        document, "figureS1_exposure_proxies.png", figure_legends["Figure S1"], 5.95
-    )
+    add_body(document, "The resulting structural-overlap fractions are shown in Supplementary "
+             "Figure S1.")
 
     add_heading(document, "4. Discussion", 1)
     add_body(document, "The molecular results do not support a universal ordering of representation "
@@ -957,6 +976,13 @@ def build():
         ["Dataset", "n", "Scaffolds", "Fit target", "Test target", "Overlap"],
         diagnostic_rows,
         widths=[0.7, 0.85, 0.9, 1.65, 1.65, 0.75],
+    )
+    supplement.add_page_break()
+    add_publication_figure(
+        supplement,
+        "figureS1_exposure_proxies.png",
+        figure_legends["Figure S1"],
+        5.95,
     )
     for section in supplement.sections:
         section.top_margin = Inches(0.75)
