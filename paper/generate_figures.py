@@ -723,13 +723,14 @@ def make_exposure_figure(exposure):
             offsets = task_y + (offset_idx - 1) * height
             ax.barh(offsets, values, height=height, color=colour, label=label,
                     edgecolor="white", linewidth=0.45)
-            for yi, value in zip(offsets, values):
+            for task, yi, value in zip(MOLECULE_TASKS, offsets, values):
                 if value > 0:
                     label_x = value + 0.008
-                    # Separate the two tiny Lipophilicity annotations rather
-                    # than letting their labels visually merge near zero.
-                    if value < 0.02:
-                        label_x += 0.028 * offset_idx
+                    # Separate the two tiny PubChem Lipophilicity labels at
+                    # fixed horizontal anchors so they remain legible at 100%.
+                    if (corpus == "pubchem" and task == "Lipophilicity"
+                            and value < 0.02):
+                        label_x = 0.012 if measure == "exact_identity" else 0.075
                     ax.text(label_x, yi, f"{100 * value:.1f}%",
                             fontsize=9.8, fontweight="bold",
                             va="center", color=DARK)

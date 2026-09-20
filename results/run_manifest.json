@@ -2244,7 +2244,8 @@
     "split_seed_sensitivity.json": "7df9a692c4aae648a3bdf4b4ee08cd1fdd886cd768c98aaf53da2191aea07b60",
     "resolution_curves.json": "0249bf70451f44f726127fdd52316f6aa14ae933787928a7c57d37ded10b20cd",
     "sequence_clusters.json": "20a1402b9f69710456a97c8fd6b0f71b94ce550ba54929717060a2fd08b3322d",
-    "split_diagnostics.json": "575afe5b1a749c0b7bff20f795a7285639c6803cd0a5bb62755c1f37afe1f2fc"
+    "split_diagnostics.json": "575afe5b1a749c0b7bff20f795a7285639c6803cd0a5bb62755c1f37afe1f2fc",
+    "literature_measured_comparison.json": "bd08501f3718690abc01f736c316fde608adedee7b6beba4b01316165c527ce0"
   },
   "prediction_artifacts": {
     "predictions/BBBP.npz": "a3c0c19cdc705adabd252b40ca36289481235f8bdb2579fbea2cd3b56b31c6d3",

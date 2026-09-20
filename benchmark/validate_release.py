@@ -234,7 +234,8 @@ def main(full_hash=False):
     for filename in ("benchmark_results.json", "paired_comparisons.json",
                      "exposure_report.json", "split_seed_sensitivity.json",
                      "resolution_curves.json", "sequence_clusters.json",
-                     "split_diagnostics.json"):
+                     "split_diagnostics.json",
+                     "literature_measured_comparison.json"):
         path = os.path.join(ROOT, "results", filename)
         assert manifest["public_artifacts"][filename] == file_hash(path)
     for task in ALL_DATASETS:
