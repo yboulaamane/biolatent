@@ -251,10 +251,13 @@ def inference_summary(results, paired):
     out = {}
     for modality in ("molecule", "protein", "genomics"):
         tasks = [task for task in TASK_ORDER if results[task]["modality"] == modality]
-        comparisons = [comparison for task in tasks
-                       for comparison in paired[task]["comparisons"].values()]
+        all_comparisons = [comparison for task in tasks
+                           for comparison in paired[task]["comparisons"].values()]
+        comparisons = [comparison for comparison in all_comparisons
+                       if comparison.get("inferential", True)]
         out[modality] = {
             "tasks": len(tasks), "total": len(comparisons),
+            "descriptive": len(all_comparisons) - len(comparisons),
             "significant": sum(bool(item.get("significant_global", item["significant"]))
                                for item in comparisons),
         }
@@ -282,6 +285,18 @@ def readable_result_rows(results, paired, tasks):
     return rows
 
 
+def compact_target_summary(summary):
+    """Readable class prevalence or regression moments for split diagnostics."""
+    if "mean" in summary:
+        return f"mean {summary['mean']:.2f}; SD {summary['standard_deviation']:.2f}"
+    if "positive_fraction" in summary:
+        return f"{100 * summary['positive_fraction']:.1f}% positive"
+    return "; ".join(
+        f"{label.replace('target_', '', 1)}: {100 * values['positive_fraction']:.1f}%"
+        for label, values in summary.items()
+    )
+
+
 def add_page_number(section):
     paragraph = section.footer.paragraphs[0]
     paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -302,6 +317,7 @@ def build():
     exposure = load_json("exposure_report.json")
     sensitivity = load_json("split_seed_sensitivity.json")
     resolution = load_json("resolution_curves.json")
+    split_diagnostics = load_json("split_diagnostics.json")
     figure_legends = load_figure_legends()
     missing = [task for task in TASK_ORDER if task not in results or task not in paired]
     if missing:
@@ -328,8 +344,8 @@ def build():
         except KeyError:
             continue
     document.core_properties.title = (
-        "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
-        "Protein, and Genomic Representations")
+        "BioLatent: A Standardised Benchmark of Frozen Molecular "
+        "Representations with Protein and Genomic Extensions")
     document.core_properties.author = "Yassir Boulaamane"
     document.core_properties.subject = "BioLatent molecular-representation benchmark"
     document.core_properties.keywords = (
@@ -338,8 +354,8 @@ def build():
 
     title = document.add_paragraph(style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title.add_run("BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, "
-                              "Protein, and Genomic Representations")
+    title_run = title.add_run("BioLatent: A Standardised Benchmark of Frozen Molecular "
+                              "Representations with Protein and Genomic Extensions")
     title_run.font.color.rgb = RGBColor(0, 0, 0)
     author = document.add_paragraph(
         "Yassir Boulaamane",
@@ -367,12 +383,15 @@ def build():
         f"{model_count} representations. Each representation was kept fixed and assessed with "
         f"the same regularised linear prediction model for a given endpoint. Comparison models "
         f"were selected without using the test data, and uncertainty was estimated from paired "
-        f"resampling that respected molecular scaffolds. After correction for all comparisons, "
+        f"resampling that respected molecular scaffolds and protein homology. After correction "
+        f"across the eligible comparisons, "
         f"{inference['molecule']['significant']} of {inference['molecule']['total']} molecular "
         f"differences were statistically distinguishable. The corresponding results were "
-        f"{inference['protein']['significant']} of {inference['protein']['total']} for proteins "
+        f"{inference['protein']['significant']} of {inference['protein']['total']} for DeepLoc "
         f"and {inference['genomics']['significant']} of {inference['genomics']['total']} for the "
-        f"genomic task. The highest-scoring molecular representation depended on the endpoint, "
+        f"genomic task. Fluorescence was retained as a descriptive fixed-panel analysis because "
+        f"its related variants did not provide independent homology clusters. The highest-scoring "
+        f"molecular representation depended on the endpoint, "
         f"and repeated scaffold partitions changed the leading method in several datasets. "
         f"Conventional fingerprints and descriptors remained competitive with pretrained "
         f"molecular models. These findings show that small numerical differences should not be "
@@ -479,6 +498,24 @@ def build():
     add_table(document, ["Dataset", "Endpoint", "Compounds or sequences", "Test set", "Partition", "Measure"],
               task_rows, widths=[0.75, 1.65, 0.8, 0.6, 1.25, 1.05], font_size=7.2)
 
+    diagnostic_rows = []
+    for task in TASK_ORDER[:6]:
+        diagnostic = split_diagnostics["tasks"][task]
+        fit = diagnostic["splits"]["non_test_fit"]
+        test = diagnostic["splits"]["test"]
+        overlap = diagnostic["fit_test_overlap"]
+        diagnostic_rows.append([
+            task,
+            f"{fit['n']:,} / {test['n']:,}",
+            f"{fit['n_scaffold_groups']:,} / {test['n_scaffold_groups']:,}",
+            compact_target_summary(fit["target"]),
+            compact_target_summary(test["target"]),
+            f"{overlap['exact_input_count']} / {overlap['scaffold_count']}",
+        ])
+    add_caption(document, "Table S1. Molecular split diagnostics. Counts and target summaries are shown as non-test fit/test. The final column reports exact-structure/scaffold overlap between the complete fit and test sets.")
+    add_table(document, ["Dataset", "n", "Scaffolds", "Fit target", "Test target", "Overlap"],
+              diagnostic_rows, widths=[0.7, 0.85, 0.9, 1.65, 1.65, 0.75], font_size=7.0)
+
     add_heading(document, "2.2 Molecular and sequence representations", 2)
     add_body(document, "The molecular comparison included ECFP4 circular fingerprints, RDKit2D "
              "descriptors, three SMILES-based models, two pretrained graph families, a contrastive "
@@ -524,18 +561,25 @@ def build():
              "the same test observations. Confidence intervals were obtained by bootstrap resampling. "
              "For molecular datasets, complete Bemis–Murcko scaffold groups were resampled together "
              "to preserve dependence within a chemical series; individual acyclic compounds were kept "
-             "as separate groups. Statistical evidence was estimated by paired randomisation with "
-             "2,000 repetitions [22]. Holm adjustment controlled the family-wise error rate across all "
-             "59 comparisons in the study [23]. A difference was considered statistically "
+             "as separate groups. DeepLoc test sequences were clustered with MMseqs2 at 30% identity "
+             "and 80% bidirectional coverage, and complete homology clusters were resampled [24]. "
+             "Promoter observations were resampled individually conditional on the fixed published "
+             "chromosome split. At 90% identity and 90% coverage, all Fluorescence test variants "
+             "formed one connected component; those differences were therefore reported descriptively "
+             "without p-values or population-level claims. Statistical evidence for eligible tests "
+             "was estimated by paired randomisation with 2,000 repetitions [22]. Holm adjustment "
+             "controlled the family-wise error rate across all 54 eligible comparisons [23]. A "
+             "difference was considered statistically "
              "distinguishable when the adjusted p-value was below 0.05.")
 
     add_heading(document, "2.5 Robustness to scaffold partition and test-set size", 2)
-    add_body(document, "The six molecular analyses were repeated with five prespecified balanced "
+    add_body(document, "The six molecular analyses were repeated with 20 prespecified balanced "
              "scaffold partitions. This analysis examined whether the leading representation and "
              "the magnitude of its score depended on the particular allocation of chemical series. "
              "The original partition remained the primary analysis.")
     add_body(document, "To examine measurement precision, the saved test predictions were repeatedly "
-             "evaluated on smaller subsets. Molecular subsets retained complete scaffold groups. The "
+             "evaluated on smaller subsets. Molecular subsets retained complete scaffold groups and "
+             "DeepLoc subsets retained complete MMseqs2 homology clusters. The "
              "resulting ranges describe how precisely the present test sets distinguish the methods; "
              "they do not predict the exact benefit of collecting additional compounds.")
 
@@ -573,6 +617,14 @@ def build():
              "some pretrained representations performed well on one endpoint and poorly on another. "
              "These results favour endpoint-specific assessment over a global ranking of molecular "
              "representations.")
+    add_body(document, "Split diagnostics found no exact-structure or Bemis–Murcko scaffold overlap "
+             "between the complete fit and test sets for any molecular endpoint (Table S1). The high "
+             "BBBP and ClinTox values therefore cannot be attributed to direct scaffold leakage in "
+             "this implementation. They should nevertheless be interpreted with their test-set "
+             "sizes and class balances: BBBP contained 205 test compounds across 133 scaffold "
+             "groups, whereas each ClinTox endpoint contained only 11 observations in its minority "
+             "class among 148 test compounds. The paired intervals and repeated scaffold partitions "
+             "are consequently more informative than the point estimates alone.")
     add_caption(document, "Table 3. Molecular-property performance under the common evaluation procedure. BBBP, BACE and CYP3A4 are reported as ROC-AUC; ClinTox as mean ROC-AUC; and ESOL and Lipophilicity as Spearman correlation. † indicates the highest observed score in that dataset; it does not by itself imply a statistically supported difference.")
     add_table(document, ["Representation", "BBBP", "ClinTox", "BACE", "ESOL", "Lipo", "CYP3A4"],
               readable_result_rows(results, paired, TASK_ORDER[:6]),
@@ -600,15 +652,19 @@ def build():
     inference_rows = []
     for task in TASK_ORDER:
         entry = paired[task]
+        eligible = [value for value in entry["comparisons"].values()
+                    if value.get("inferential", True)]
         significant = sum(bool(value.get("significant_global", value["significant"]))
-                          for value in entry["comparisons"].values())
+                          for value in eligible)
+        verdict = ("Descriptive only" if entry.get("inference_status") == "descriptive_only"
+                   else f"{significant} of {len(eligible)}")
         inference_rows.append([
             task,
             MODEL_LABELS.get(entry["reference"], entry["reference"]),
             MODEL_LABELS.get(entry["observed_test_best"], entry["observed_test_best"]),
-            f"{significant} of {len(entry['comparisons'])}",
+            verdict,
         ])
-    add_caption(document, "Table 5. Statistical comparison with the representation selected from validation data. The highest observed test score is descriptive. The final column reports how many alternatives differed after correction across all 59 study comparisons.")
+    add_caption(document, "Table 5. Statistical comparison with the representation selected from validation data. The highest observed test score is descriptive. The final column reports how many eligible alternatives differed after correction across all 54 formal study comparisons; Fluorescence is descriptive only.")
     add_table(document, ["Dataset", "Preselected comparison", "Highest observed representation", "Statistically distinguishable"],
               inference_rows, widths=[1.0, 1.8, 1.8, 1.35], font_size=7.4)
     add_body(document, f"Only {inference['molecule']['significant']} of "
@@ -618,11 +674,13 @@ def build():
              "of seven for ClinTox, two of eight for ESOL and one of eight for BBBP; none were "
              "distinguishable for BACE or CYP3A4. Numerical ordering alone therefore overstated "
              "the separation among molecular representations in several datasets.")
-    add_body(document, f"All {inference['protein']['significant']} protein comparisons were "
-             "distinguishable from their preselected comparison method, whereas neither genomic "
-             "comparison was distinguishable. The protein test sets were much larger than most "
-             "molecular test sets, but sample size is not the only explanation: endpoint noise, "
-             "effect size and dependence among observations also influence precision.")
+    add_body(document, f"All {inference['protein']['significant']} of "
+             f"{inference['protein']['total']} eligible DeepLoc comparisons remained distinguishable "
+             "when complete homology clusters were resampled, whereas neither genomic comparison "
+             "was distinguishable. The five Fluorescence differences describe the fixed variant "
+             "panel and were not included in the formal multiplicity family. Sample size is not the "
+             "only determinant of precision: endpoint noise, effect size and dependence among "
+             "observations also matter.")
     add_publication_figure(
         document, "figure4_inference_and_split_sensitivity.png",
         figure_legends["Figure 4"], 5.65
@@ -639,18 +697,31 @@ def build():
             task, MODEL_LABELS.get(common, common), f"{frequency} of {len(winners)}",
             f"{max_range:.3f} ({MODEL_LABELS.get(max_model, max_model)})",
         ])
-    add_caption(document, "Table 6. Sensitivity of molecular results to five balanced scaffold partitions. Score spread is the largest range observed for any representation within the dataset.")
+    n_splits = len(sensitivity["seeds"])
+    add_caption(document, f"Table 6. Sensitivity of molecular results to {n_splits} balanced scaffold partitions. Score spread is the largest range observed for any representation within the dataset.")
     add_table(document, ["Dataset", "Most frequent leader", "Partitions led", "Largest score spread"],
               split_rows, widths=[1.0, 1.8, 1.1, 2.15], font_size=7.5)
-    add_body(document, "No molecular dataset had the same leading representation in all five "
-             "scaffold partitions. The most frequent leader prevailed in two to four partitions, "
-             "and the largest within-method score spread ranged from 0.084 for BACE to 0.279 for "
-             "ESOL. This variation shows that conclusions based on a single scaffold allocation "
-             "can be unstable even when every method is evaluated consistently.")
+    winner_frequencies = []
+    score_spreads = []
+    for task, entry in sensitivity["tasks"].items():
+        winners = [run["order"][0] for run in entry["runs"]]
+        winner_frequencies.append(Counter(winners).most_common(1)[0][1])
+        score_spreads.append((max(values["range"] for values in entry["models"].values()), task))
+    min_spread, min_spread_task = min(score_spreads)
+    max_spread, max_spread_task = max(score_spreads)
+    completely_stable = sum(value == n_splits for value in winner_frequencies)
+    add_body(document, f"The same leading representation occurred in all {n_splits} partitions for "
+             f"{completely_stable} of six molecular datasets. Across tasks, the most frequent leader "
+             f"prevailed in {min(winner_frequencies)} to {max(winner_frequencies)} partitions, and "
+             f"the largest within-method score spread ranged from {min_spread:.3f} for "
+             f"{min_spread_task} to {max_spread:.3f} for {max_spread_task}. This variation shows "
+             "that conclusions based on a single scaffold allocation can be unstable even when "
+             "every method is evaluated consistently.")
     add_body(document, "Within the ESM-2 series, larger models improved DeepLoc at each consecutive "
-             "step. Fluorescence was non-monotonic: ESM-2 35M exceeded 8M, 150M fell below 35M, "
-             "and 650M improved over 150M. Model size alone therefore did not determine performance "
-             "across protein endpoints.")
+             "step under homology-cluster inference. The fixed Fluorescence panel was non-monotonic: "
+             "ESM-2 35M exceeded 8M, 150M fell below 35M, and 650M exceeded 150M. These Fluorescence "
+             "differences are descriptive, but together the two endpoints show that model size alone "
+             "does not determine observed performance.")
 
     widths_100, widths_1000 = [], []
     for task in resolution["tasks"].values():
@@ -706,12 +777,14 @@ def build():
              "with the limited number and uneven distribution of chemical series in many public "
              "benchmarks. Reporting one scaffold split without uncertainty can make a modest and "
              "partition-dependent advantage appear general.")
-    add_body(document, "The protein and genomic experiments clarify the role of statistical precision "
-             "without making direct cross-domain performance claims. The large protein test sets "
-             "supported clear separation among the evaluated methods, whereas the molecular datasets "
-             "often did not. The promoter methods were numerically close and statistically "
-             "indistinguishable. Sample size contributed to these differences, but endpoint noise, "
-             "sequence relatedness and effect magnitude also matter.")
+    add_body(document, "The protein and genomic experiments clarify the role of dependence and "
+             "statistical precision without making direct cross-domain performance claims. DeepLoc "
+             "supported clear separation among the evaluated methods after resampling homology "
+             "clusters. Fluorescence did not provide multiple independent homology components at the "
+             "prespecified threshold and was therefore limited to fixed-panel description. The "
+             "promoter methods were numerically close and statistically indistinguishable. Sample "
+             "size contributed to precision, but endpoint noise, sequence relatedness and effect "
+             "magnitude also matter.")
     add_body(document, "BioLatent contributes a controlled comparison and reusable result resource, "
              "rather than a new molecular representation. Its principal advantage is that the same "
              "dataset definitions, predictive models and statistical criteria are applied throughout. "
@@ -722,10 +795,10 @@ def build():
     limitations = [
         "The selected datasets and representations do not cover all chemical endpoints or available pretrained molecular models.",
         "Pretrained representations were assessed in one fixed form with a common linear prediction model. Alternative representation layers, aggregation methods and end-to-end model fitting were outside the study scope.",
-        "The confidence intervals describe the fixed primary test partitions. Five additional scaffold partitions provide a robustness check but do not capture every possible division of chemical space.",
+        "The confidence intervals describe the fixed primary test partitions. Twenty scaffold partitions provide a robustness check but do not capture every possible division of chemical space.",
         "Some molecular test sets are small, particularly CYP3A4, and consequently provide limited power to distinguish similar methods.",
         "DeepLoc uses one prespecified assignment of its published homology partitions rather than the complete cross-validation average reported by the original study.",
-        "Related variants in the Fluorescence dataset may not be fully independent, so its uncertainty could be underestimated.",
+        "The Fluorescence test variants formed one homology component at the prespecified threshold. Its scores and intervals are fixed-panel descriptions and do not support population-level significance claims.",
         "The ZINC, PubChem and Swiss-Prot comparisons are sampled indicators of structural or sequence familiarity, not exact reconstructions of model pretraining collections.",
         "No independent benchmark collection was used to establish that the observed rankings generalise to other chemical series or assay settings.",
     ]
@@ -748,7 +821,7 @@ def build():
 
     add_heading(document, "Data and code availability", 1)
     paragraph = add_body(document, "The benchmark results, test-set predictions and figure source "
-                         "data are archived in Zenodo version 1.0.0: ")
+                         "data are archived in Zenodo: ")
     add_hyperlink(paragraph, "https://doi.org/10.5281/zenodo.22813148",
                   "https://doi.org/10.5281/zenodo.22813148")
     paragraph = add_body(document, "Source code and the manuscript generator are available in the "
@@ -806,6 +879,7 @@ def build():
         ("[21] Nguyen E et al. HyenaDNA: long-range genomic sequence modeling at single nucleotide resolution. NeurIPS. 2023. ", "https://doi.org/10.48550/arXiv.2306.15794"),
         ("[22] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
         ("[23] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
+        ("[24] Steinegger M, Söding J. MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nature Biotechnology. 2017;35:1026-1028. ", "https://doi.org/10.1038/nbt.3988"),
     ]
     for text, url in references:
         paragraph = document.add_paragraph(

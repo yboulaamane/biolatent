@@ -41,6 +41,7 @@ const VERDICT_STYLE: Record<Verdict, { bg: string; fg: string; text: string }> =
   indistinguishable: { bg: 'rgba(148, 163, 184, 0.12)', fg: '#94a3b8', text: 'not resolved' },
   better: { bg: 'rgba(16, 185, 129, 0.14)', fg: '#34d399', text: 'better than reference' },
   worse: { bg: 'rgba(244, 63, 94, 0.14)', fg: '#fb7185', text: 'worse than reference' },
+  descriptive: { bg: 'rgba(245, 158, 11, 0.14)', fg: '#fbbf24', text: 'descriptive only' },
 };
 
 function exposureFraction(value: { fraction?: number; measures?: Record<string, { fraction: number }> }) {
@@ -118,9 +119,14 @@ function TaskCard({ task }: { task: string }) {
         )}
         {paired
           ? <>Reference selected on held-out data: <strong style={{ color: '#a5b4fc' }}>
-            {MODEL_LABELS[paired.reference] ?? paired.reference}</strong>. Difference intervals use
-            paired {paired.resampling_unit.toLowerCase()} bootstrap ({paired.n_boot.toLocaleString()} resamples);
-            p-values use {paired.n_permutations.toLocaleString()} paired randomisations with study-wide Holm correction.</>
+            {MODEL_LABELS[paired.reference] ?? paired.reference}</strong>.{' '}
+            {paired.inference_status === 'descriptive_only'
+              ? <>Differences and intervals are descriptive: {paired.inference_note}</>
+              : <>Difference intervals use paired {paired.resampling_unit.toLowerCase()} bootstrap
+                ({paired.n_boot.toLocaleString()} resamples); p-values use{' '}
+                {paired.n_permutations.toLocaleString()} paired randomisations with study-wide
+                Holm correction. {paired.inference_note}</>}
+          </>
           : <>No paired comparison available for this task.</>}
         {exposureBits.length > 0 && (
           <> Pretraining input-exposure proxy: <strong style={{ color: '#fbbf24' }}>
@@ -219,6 +225,8 @@ function LadderPanel() {
         Each consecutive ESM-2 checkpoint is tested against the one below it, as a
         pre-specified family corrected within itself. This separates an observed
         scale trend from a claim that larger checkpoints are universally better.
+        DeepLoc uses formal homology-cluster inference; Fluorescence is descriptive because
+        its test variants form one connected homology component at the prespecified threshold.
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="benchmark-table">
@@ -235,6 +243,7 @@ function LadderPanel() {
             {entries.flatMap((e) => e.steps.map(([key, step]) => {
               const [from, to] = key.split('->');
               const regress = step.direction === 'REGRESSES';
+              const descriptive = step.direction === 'descriptive only';
               return (
                 <tr key={`${e.task}-${key}`}>
                   <td style={{ color: '#fff' }}>{e.task}</td>
@@ -250,12 +259,13 @@ function LadderPanel() {
                     {step.ci_high > 0 ? '+' : ''}{step.ci_high.toFixed(4)}]
                   </td>
                   <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                    {step.p_holm.toFixed(3)}
+                    {step.p_holm === null ? '—' : step.p_holm.toFixed(3)}
                   </td>
                   <td>
                     <span style={{
-                      background: regress ? 'rgba(244,63,94,0.16)' : 'rgba(16,185,129,0.14)',
-                      color: regress ? '#fb7185' : '#34d399',
+                      background: descriptive ? 'rgba(245,158,11,0.14)'
+                        : regress ? 'rgba(244,63,94,0.16)' : 'rgba(16,185,129,0.14)',
+                      color: descriptive ? '#fbbf24' : regress ? '#fb7185' : '#34d399',
                       padding: '0.15rem 0.55rem', borderRadius: '999px',
                       fontSize: '0.7rem', fontWeight: 700,
                     }}>
@@ -437,7 +447,8 @@ function ResolutionPanel({ modality }: { modality: Modality }) {
         Across {RESOLUTION_REPEATS.toLocaleString()} repeated subsets, this shows the median
         consistency of each reference comparison&apos;s direction. It is conditional on the
         observed test set and is not a causal estimate of how adding data would change a task.
-        Molecular subsets retain whole scaffold groups, so their effective n can exceed the target.
+        Molecular subsets retain whole scaffold groups and DeepLoc subsets retain whole MMseqs2
+        homology clusters, so their effective n can exceed the target.
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="benchmark-table">
@@ -502,7 +513,10 @@ export default function StudyTab() {
           regularisation grid, folds and seed. The comparison method is selected using validation
           data before the test set is examined. Paired cluster bootstrap provides the difference
           interval, paired randomisation provides the p-value, and the primary Holm correction
-          covers every reference comparison in the study.
+          covers every eligible reference comparison in the study. Molecular tests resample
+          Bemis-Murcko scaffolds and DeepLoc resamples MMseqs2 homology clusters. Fluorescence is
+          reported descriptively because its related variants do not supply independent clusters
+          for population-level inference.
         </p>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
@@ -510,7 +524,7 @@ export default function StudyTab() {
                 label="molecular comparisons distinguishable after study-wide correction"
                 tone="#fb7185" />
           <Stat value={`${prot.reliable} of ${prot.total}`}
-                label="protein comparisons distinguishable after study-wide correction"
+                label="eligible protein comparisons distinguishable after study-wide correction"
                 tone="#34d399" />
           <Stat value={`${genomic.reliable} of ${genomic.total}`}
                 label="genomic comparisons distinguishable after study-wide correction"
@@ -532,10 +546,11 @@ export default function StudyTab() {
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6 }}>
             On the molecular tasks, {mol.reliable} of {mol.total} comparisons remain significant
             after study-wide correction. The corresponding result is {prot.reliable} of{' '}
-            {prot.total} for the protein tasks. Larger protein test sets may contribute to this
-            difference, although endpoint structure, label noise, dependence and effect size also
-            affect precision. The subsampling analysis examines test-set size without attributing
-            the result to modality alone.
+            {prot.total} among the eligible DeepLoc comparisons. Fluorescence scores and
+            intervals remain useful descriptions of this fixed variant panel, but are not counted
+            as independent formal tests. Larger test sets may contribute to precision, although
+            endpoint structure, label noise, dependence and effect size also matter. The
+            subsampling analysis examines test-set size without attributing the result to modality alone.
           </div>
         </div>
       </div>
@@ -568,6 +583,9 @@ export default function StudyTab() {
           <li><strong style={{ color: '#fff' }}>&ldquo;Not resolved&rdquo; does not mean equal.</strong> It
             means this test set could not separate the model from the validation-selected
             reference at the stated multiplicity correction.</li>
+          <li><strong style={{ color: '#fff' }}>&ldquo;Descriptive only&rdquo; means no formal population claim.</strong>{' '}
+            The score and interval describe the observed panel, but no p-value is reported when
+            suitable independent resampling units are unavailable.</li>
           <li><strong style={{ color: '#fff' }}>The numerical test best is descriptive.</strong>{' '}
             It is shown for orientation but is not selected and tested on the same outcomes.</li>
           <li><strong style={{ color: '#fff' }}>Intervals cover the test set only</strong>, not

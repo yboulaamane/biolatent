@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
+from benchmark.inference_policy import inference_policy
 from benchmark.paired_test import INFERENCE_PROTOCOL_VERSION, score as paired_score
 from benchmark.probe import PROBE_PROTOCOL_VERSION
 
@@ -53,8 +54,7 @@ def validate_prediction_bundle(path, task, data, result, comparison,
     target = np.asarray(data["targets"])[data["test_idx"]]
     valid = valid_target_rows(target)
     expected_y = target[valid]
-    expected_groups = np.asarray(
-        data["resampling_groups"][data["test_idx"]][valid], dtype=str)
+    expected_groups = np.asarray(inference_policy(task, data)["groups"])[valid].astype(str)
 
     with np.load(path) as predictions:
         assert set(predictions.files) == expected_keys, \
@@ -104,6 +104,8 @@ def main(full_hash=False):
     manifest = read_result("run_manifest.json")
     sensitivity = read_result("split_seed_sensitivity.json")
     resolution = read_result("resolution_curves.json")
+    sequence_clusters = read_result("sequence_clusters.json")
+    split_diagnostics = read_result("split_diagnostics.json")
     assert set(results) == set(ALL_DATASETS)
     assert set(paired) == set(ALL_DATASETS)
     assert set(exposure["tasks"]) == set(ALL_DATASETS)
@@ -111,11 +113,42 @@ def main(full_hash=False):
     assert set(resolution["tasks"]) == set(ALL_DATASETS)
     assert exposure["report_kind"] == "pretraining_input_exposure_proxy"
     assert sensitivity["schema_version"] == 2
+    assert len(sensitivity["seeds"]) == 20
     assert resolution["schema_version"] == 1
+    assert sequence_clusters["schema_version"] == 1
+    assert split_diagnostics["schema_version"] == 1
+    assert set(sequence_clusters["tasks"]) == {"DeepLoc", "Fluorescence"}
+    assert set(split_diagnostics["tasks"]) == set(ALL_DATASETS)
+    for task in ALL_DATASETS[:6]:
+        runs = sensitivity["tasks"][task]["runs"]
+        assert [run["seed"] for run in runs] == sensitivity["seeds"]
+        assert len(runs) == 20
 
     for task in ALL_DATASETS:
         data = load_benchmark_dataset(task)
         result = results[task]
+        diagnostic = split_diagnostics["tasks"][task]
+        assert diagnostic["dataset_input_sha256"] == data["input_sha256"]
+        for split, indices in (("train", data["train_idx"]),
+                               ("validation", data["val_idx"]),
+                               ("non_test_fit", data["final_train_idx"]),
+                               ("test", data["test_idx"])):
+            assert diagnostic["splits"][split]["n"] == len(indices)
+        assert diagnostic["fit_test_overlap"]["exact_input_count"] == 0
+        if data["modality"] == "molecule":
+            assert diagnostic["fit_test_overlap"]["scaffold_count"] == 0
+
+        if task in sequence_clusters["tasks"]:
+            clustered = sequence_clusters["tasks"][task]
+            assignments = clustered["assignments"]
+            assert clustered["dataset_input_sha256"] == data["input_sha256"]
+            assert clustered["n_test"] == len(data["test_idx"])
+            assert len(assignments) == clustered["n_test"]
+            assert len(set(assignments)) == clustered["n_clusters"]
+            if task == "DeepLoc":
+                assert clustered["n_clusters"] > 1
+            else:
+                assert clustered["n_clusters"] == 1
         assert result["dataset_sha256"] == data["dataset_sha256"]
         assert result["input_sha256"] == data["input_sha256"]
         assert result["protocol_version"] == PROBE_PROTOCOL_VERSION
@@ -160,11 +193,22 @@ def main(full_hash=False):
         assert comparison["protocol_version"] == INFERENCE_PROTOCOL_VERSION
         assert comparison["reference"] in expected_models
         assert len(comparison["comparisons"]) == len(expected_models) - 1
+        policy = inference_policy(task, data)
+        assert comparison["inference_status"] == \
+            ("primary" if policy["enabled"] else "descriptive_only")
+        assert comparison["n_resampling_groups"] == \
+            len(np.unique(policy["groups"]))
         for value in comparison["comparisons"].values():
             assert "p_holm_global" in value and "significant_global" in value
-            assert 0 <= value["p_raw"] <= 1
-            assert value["p_holm"] == value["p_holm_global"]
-            assert value["significant"] == value["significant_global"]
+            if policy["enabled"]:
+                assert value["inferential"] is True
+                assert 0 <= value["p_raw"] <= 1
+                assert value["p_holm"] == value["p_holm_global"]
+                assert value["significant"] == value["significant_global"]
+            else:
+                assert value["inferential"] is False
+                assert value["p_raw"] is None and value["p_holm"] is None
+                assert value["significant"] is False
         prediction_path = os.path.join(ROOT, "results", "predictions", f"{task}.npz")
         assert os.path.exists(prediction_path)
         validate_prediction_bundle(prediction_path, task, data, result,
@@ -189,7 +233,8 @@ def main(full_hash=False):
     assert manifest["benchmark_results_sha256"] == result_hash
     for filename in ("benchmark_results.json", "paired_comparisons.json",
                      "exposure_report.json", "split_seed_sensitivity.json",
-                     "resolution_curves.json"):
+                     "resolution_curves.json", "sequence_clusters.json",
+                     "split_diagnostics.json"):
         path = os.path.join(ROOT, "results", filename)
         assert manifest["public_artifacts"][filename] == file_hash(path)
     for task in ALL_DATASETS:

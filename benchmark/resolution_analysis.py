@@ -2,7 +2,8 @@
 
 For every validation-reference comparison, repeatedly subsample the fixed test
 set without replacement and recompute the paired metric difference. Molecular
-subsamples select whole Murcko-scaffold groups until the requested size is met.
+subsamples select whole Murcko-scaffold groups and DeepLoc subsets select whole
+MMseqs2 homology clusters until the requested size is met.
 The resulting central range and sign consistency show how estimate stability
 changes with sample size without asserting that sample size is the only source
 of cross-task differences.
@@ -13,7 +14,7 @@ import os
 import sys
 
 import numpy as np
-from scipy.stats import spearmanr
+from scipy.stats import rankdata, spearmanr
 from sklearn.metrics import accuracy_score, roc_auc_score
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -38,21 +39,30 @@ def metric(y, pred, prob, task_type):
         if any(len(np.unique(y[:, column])) < 2
                for column in range(y.shape[1])):
             return np.nan
-        return float(roc_auc_score(y, prob, average="macro"))
+        aucs = []
+        for column in range(y.shape[1]):
+            labels = y[:, column].astype(bool)
+            n_positive = int(labels.sum())
+            n_negative = len(labels) - n_positive
+            ranks = rankdata(prob[:, column], method="average")
+            numerator = (ranks[labels].sum()
+                         - n_positive * (n_positive + 1) / 2)
+            aucs.append(numerator / (n_positive * n_negative))
+        return float(np.mean(aucs))
     if len(np.unique(y)) < 2:
         return np.nan
     return float(roc_auc_score(y, prob[:, 1]))
 
 
-def sample_indices(rng, groups, target_n, clustered):
+def sample_indices(rng, n_items, members, target_n, clustered):
     if not clustered:
-        return rng.choice(len(groups), target_n, replace=False)
-    chosen = rng.permutation(np.unique(groups))
+        return rng.choice(n_items, target_n, replace=False)
+    chosen = rng.permutation(len(members))
     parts, count = [], 0
     for group in chosen:
-        members = np.where(groups == group)[0]
-        parts.append(members)
-        count += len(members)
+        group_members = members[group]
+        parts.append(group_members)
+        count += len(group_members)
         if count >= target_n:
             break
     return np.concatenate(parts)
@@ -61,22 +71,34 @@ def sample_indices(rng, groups, target_n, clustered):
 def main():
     with open(PAIRED_PATH) as handle:
         paired = json.load(handle)
+    requested = set(sys.argv[1:])
+    previous_tasks = {}
+    if requested and os.path.exists(OUTPUT):
+        with open(OUTPUT) as handle:
+            previous_tasks = json.load(handle).get("tasks", {})
     report = {
         "schema_version": 1, "repeats": REPEATS,
         "sampling": ("without replacement; whole Murcko-scaffold groups for "
-                     "molecules and individual items otherwise"),
+                     "molecules, whole MMseqs2 homology clusters for DeepLoc, "
+                     "and individual items otherwise"),
         "interpretation": ("Empirical subsampling stability conditional on the "
                            "fixed test set; not a causal decomposition of modality."),
-        "tasks": {},
+        "tasks": previous_tasks,
     }
     rng = np.random.RandomState(SEED)
     for task, paired_task in paired.items():
+        if requested and task not in requested:
+            continue
         path = os.path.join(PREDICTION_DIR, f"{task}.npz")
         if not os.path.exists(path):
             continue
         data = np.load(path)
         definition = load_benchmark_dataset(task)
         y, groups = data["y_true"], data["groups"].astype(str)
+        _, membership = np.unique(groups, return_inverse=True)
+        members = [np.flatnonzero(membership == group)
+                   for group in range(int(membership.max()) + 1)]
+        clustered = len(members) < len(groups)
         reference = paired_task["reference"]
         ref_pred = data[f"{reference}__pred"]
         ref_prob = data[f"{reference}__prob"] if f"{reference}__prob" in data else None
@@ -97,8 +119,10 @@ def main():
             for size in sizes:
                 values, effective = [], []
                 for _ in range(REPEATS):
-                    idx = sample_indices(rng, groups, size,
-                                         definition["modality"] == "molecule")
+                    idx = sample_indices(
+                        rng, len(groups), members, size,
+                        clustered,
+                    )
                     left = metric(y[idx], ref_pred[idx],
                                   ref_prob[idx] if ref_prob is not None else None,
                                   definition["task_type"])

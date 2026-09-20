@@ -62,12 +62,13 @@ export interface Comparison {
   delta: number;
   ci_low: number;
   ci_high: number;
-  p_raw: number;
-  p_holm: number;
+  p_raw: number | null;
+  p_holm: number | null;
   significant: boolean;
-  p_holm_task?: number;
-  p_holm_modality?: number;
-  p_holm_global?: number;
+  inferential?: boolean;
+  p_holm_task?: number | null;
+  p_holm_modality?: number | null;
+  p_holm_global?: number | null;
   significant_global?: boolean;
 }
 
@@ -75,9 +76,9 @@ export interface LadderStep {
   delta: number;
   ci_low: number;
   ci_high: number;
-  p_raw: number;
-  p_holm: number;
-  direction: 'improves' | 'REGRESSES' | 'no reliable difference';
+  p_raw: number | null;
+  p_holm: number | null;
+  direction: 'improves' | 'REGRESSES' | 'no reliable difference' | 'descriptive only';
   significant: boolean;
 }
 
@@ -93,6 +94,8 @@ export interface PairedTask {
   n_permutations: number;
   n_resampling_groups: number;
   resampling_unit: string;
+  inference_status: 'primary' | 'descriptive_only';
+  inference_note: string;
   primary_correction: string;
   comparisons: Record<string, Comparison>;
   ladders?: Record<string, { rungs: string[]; steps: Record<string, LadderStep> }>;
@@ -187,7 +190,7 @@ export const MODALITY_LABEL: Record<Modality, string> = {
   genomics: 'Genomics',
 };
 
-export type Verdict = 'reference' | 'indistinguishable' | 'better' | 'worse';
+export type Verdict = 'reference' | 'indistinguishable' | 'better' | 'worse' | 'descriptive';
 
 export interface Row {
   model: string;
@@ -220,6 +223,8 @@ export function taskRows(task: string): Row[] {
       const significant = comparison?.significant_global ?? comparison?.significant;
       const verdict: Verdict = isReference
         ? 'reference'
+        : paired?.inference_status === 'descriptive_only'
+          ? 'descriptive'
         : significant
           ? comparison.delta > 0 ? 'worse' : 'better'
           : 'indistinguishable';
@@ -234,7 +239,7 @@ export function taskRows(task: string): Row[] {
         gap: cell.linear_mlp_gap,
         verdict,
         delta: comparison?.delta,
-        pHolm: comparison?.p_holm,
+        pHolm: comparison?.p_holm ?? undefined,
         isBaseline: BASELINES.has(model),
       };
     })
@@ -254,7 +259,8 @@ export function separationSummary(modality: Modality) {
   for (const task of tasks) {
     const paired = PAIRED[task];
     if (!paired) continue;
-    const comparisons = Object.values(paired.comparisons);
+    const comparisons = Object.values(paired.comparisons)
+      .filter((comparison) => comparison.inferential !== false);
     total += comparisons.length;
     reliable += comparisons.filter((c) => c.significant).length;
     const bestComparison = paired.comparisons[paired.observed_test_best];
@@ -268,6 +274,7 @@ export function topGroupCounts(modality: Modality) {
   const tasks = tasksByModality(modality);
   const counts = new Map<string, { top: number; total: number }>();
   for (const task of tasks) {
+    if (PAIRED[task]?.inference_status === 'descriptive_only') continue;
     for (const row of taskRows(task)) {
       const entry = counts.get(row.model) ?? { top: 0, total: 0 };
       entry.total += 1;

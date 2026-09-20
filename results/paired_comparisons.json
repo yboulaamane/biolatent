@@ -1,6 +1,6 @@
 {
   "BBBP": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "chemberta_77m",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.9555,
@@ -12,7 +12,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "chemberta_zinc": {
         "delta": -0.0175,
@@ -29,7 +29,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": -0.0003,
@@ -46,7 +47,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_large": {
         "delta": 0.0198,
@@ -63,7 +65,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "rdkit2d": {
         "delta": 0.0311,
@@ -80,7 +83,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_base": {
         "delta": 0.0356,
@@ -97,7 +101,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "ecfp4": {
         "delta": 0.0397,
@@ -114,7 +119,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.0448,
@@ -131,7 +137,8 @@
         "p_holm_global": 0.407796,
         "significant_global": false,
         "p_holm": 0.407796,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molclr_gin": {
         "delta": 0.0699,
@@ -145,16 +152,19 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "ClinTox": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "chemberta_zinc",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.9749,
@@ -166,7 +176,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "chemberta_77m": {
         "delta": 0.01,
@@ -183,7 +193,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": 0.0133,
@@ -200,7 +211,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_large": {
         "delta": 0.0962,
@@ -217,7 +229,8 @@
         "p_holm_global": 0.15743,
         "significant_global": false,
         "p_holm": 0.15743,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_base": {
         "delta": 0.0972,
@@ -231,10 +244,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "rdkit2d": {
         "delta": 0.1322,
@@ -248,10 +262,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "ecfp4": {
         "delta": 0.1369,
@@ -265,10 +280,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.3096,
@@ -282,16 +298,19 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "BACE": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "chemberta_zinc",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.8644,
@@ -303,7 +322,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "ecfp4": {
         "delta": -0.0639,
@@ -320,7 +339,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_base": {
         "delta": -0.0585,
@@ -337,7 +357,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_large": {
         "delta": -0.0552,
@@ -354,7 +375,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "chemberta_77m": {
         "delta": -0.0126,
@@ -371,7 +393,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "rdkit2d": {
         "delta": -0.005,
@@ -388,7 +411,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molclr_gin": {
         "delta": 0.0062,
@@ -405,7 +429,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.0109,
@@ -422,7 +447,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": 0.0163,
@@ -439,13 +465,16 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "ESOL": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "grover_large",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.8615,
@@ -457,7 +486,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "grover_base": {
         "delta": 0.0025,
@@ -474,7 +503,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "rdkit2d": {
         "delta": 0.0104,
@@ -491,7 +521,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": 0.0225,
@@ -508,7 +539,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.0247,
@@ -525,7 +557,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "chemberta_77m": {
         "delta": 0.0684,
@@ -542,7 +575,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "chemberta_zinc": {
         "delta": 0.0726,
@@ -559,7 +593,8 @@
         "p_holm_global": 0.428802,
         "significant_global": false,
         "p_holm": 0.428802,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "ecfp4": {
         "delta": 0.2992,
@@ -573,10 +608,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "molclr_gin": {
         "delta": 0.3101,
@@ -590,16 +626,19 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "Lipophilicity": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "grover_large",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.7986,
@@ -611,7 +650,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "grover_base": {
         "delta": -0.0024,
@@ -628,7 +667,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "rdkit2d": {
         "delta": 0.1058,
@@ -645,7 +685,8 @@
         "p_holm_global": 0.038,
         "significant_global": true,
         "p_holm": 0.038,
-        "significant": true
+        "significant": true,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.1733,
@@ -662,7 +703,8 @@
         "p_holm_global": 0.038,
         "significant_global": true,
         "p_holm": 0.038,
-        "significant": true
+        "significant": true,
+        "inferential": true
       },
       "chemberta_77m": {
         "delta": 0.1758,
@@ -676,10 +718,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": 0.1799,
@@ -696,7 +739,8 @@
         "p_holm_global": 0.038,
         "significant_global": true,
         "p_holm": 0.038,
-        "significant": true
+        "significant": true,
+        "inferential": true
       },
       "ecfp4": {
         "delta": 0.192,
@@ -710,10 +754,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "molclr_gin": {
         "delta": 0.1924,
@@ -727,10 +772,11 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       },
       "chemberta_zinc": {
         "delta": 0.2304,
@@ -744,16 +790,19 @@
         "significant_task": true,
         "p_holm_modality": 0.0235,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm": 0.027,
+        "significant": true,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "CYP3A4": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "rdkit2d",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.65,
@@ -765,7 +814,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "Murcko scaffold cluster",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "chemberta_77m": {
         "delta": -0.0412,
@@ -782,7 +831,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "ecfp4": {
         "delta": 0.0035,
@@ -799,7 +849,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molclr_gin": {
         "delta": 0.0171,
@@ -816,7 +867,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_large": {
         "delta": 0.0294,
@@ -833,7 +885,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "chemberta_zinc": {
         "delta": 0.0294,
@@ -850,7 +903,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "molformer_xl": {
         "delta": 0.0355,
@@ -867,7 +921,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "grover_base": {
         "delta": 0.0732,
@@ -884,7 +939,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "unimol_v1": {
         "delta": 0.1101,
@@ -901,13 +957,16 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Molecular dependence is represented by complete Murcko scaffolds."
   },
   "DeepLoc": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "esm2_650m",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.8983,
@@ -915,95 +974,100 @@
     "observed_test_best": "esm2_650m",
     "observed_test_best_score": 0.8924,
     "n_test": 5963,
-    "n_resampling_groups": 5963,
+    "n_resampling_groups": 3577,
     "n_boot": 2000,
     "n_permutations": 2000,
-    "resampling_unit": "test item",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "resampling_unit": "MMseqs2 30%-identity homology cluster",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "esm2_150m": {
         "delta": 0.0125,
-        "ci_low": 0.0083,
-        "ci_high": 0.0168,
+        "ci_low": 0.0056,
+        "ci_high": 0.019,
         "p_raw": 0.0005,
         "n_boot_valid": 2000,
         "n_perm_valid": 2000,
+        "inferential": true,
         "score": 0.8799,
         "p_holm_task": 0.0025,
         "significant_task": true,
-        "p_holm_modality": 0.005,
+        "p_holm_modality": 0.0025,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
+        "p_holm": 0.027,
         "significant": true
       },
       "esm2_35m": {
         "delta": 0.0259,
-        "ci_low": 0.0209,
-        "ci_high": 0.0313,
+        "ci_low": 0.019,
+        "ci_high": 0.033,
         "p_raw": 0.0005,
         "n_boot_valid": 2000,
         "n_perm_valid": 2000,
+        "inferential": true,
         "score": 0.8666,
         "p_holm_task": 0.0025,
         "significant_task": true,
-        "p_holm_modality": 0.005,
+        "p_holm_modality": 0.0025,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
+        "p_holm": 0.027,
         "significant": true
       },
       "protbert": {
         "delta": 0.031,
-        "ci_low": 0.0248,
-        "ci_high": 0.0372,
+        "ci_low": 0.0222,
+        "ci_high": 0.0383,
         "p_raw": 0.0005,
         "n_boot_valid": 2000,
         "n_perm_valid": 2000,
+        "inferential": true,
         "score": 0.8614,
         "p_holm_task": 0.0025,
         "significant_task": true,
-        "p_holm_modality": 0.005,
+        "p_holm_modality": 0.0025,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
+        "p_holm": 0.027,
         "significant": true
       },
       "esm2_8m": {
         "delta": 0.046,
-        "ci_low": 0.0392,
-        "ci_high": 0.0529,
+        "ci_low": 0.0362,
+        "ci_high": 0.0552,
         "p_raw": 0.0005,
         "n_boot_valid": 2000,
         "n_perm_valid": 2000,
+        "inferential": true,
         "score": 0.8464,
         "p_holm_task": 0.0025,
         "significant_task": true,
-        "p_holm_modality": 0.005,
+        "p_holm_modality": 0.0025,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
+        "p_holm": 0.027,
         "significant": true
       },
       "kmer3_protein": {
         "delta": 0.1755,
-        "ci_low": 0.1658,
-        "ci_high": 0.185,
+        "ci_low": 0.162,
+        "ci_high": 0.1879,
         "p_raw": 0.0005,
         "n_boot_valid": 2000,
         "n_perm_valid": 2000,
+        "inferential": true,
         "score": 0.7169,
         "p_holm_task": 0.0025,
         "significant_task": true,
-        "p_holm_modality": 0.005,
+        "p_holm_modality": 0.0025,
         "significant_modality": true,
-        "p_holm_global": 0.0295,
+        "p_holm_global": 0.027,
         "significant_global": true,
-        "p_holm": 0.0295,
+        "p_holm": 0.027,
         "significant": true
       }
     },
@@ -1018,33 +1082,36 @@
         "steps": {
           "esm2_8m->esm2_35m": {
             "delta": 0.0201,
-            "ci_low": 0.0151,
-            "ci_high": 0.0253,
+            "ci_low": 0.0121,
+            "ci_high": 0.0286,
             "p_raw": 0.0005,
             "n_boot_valid": 2000,
             "n_perm_valid": 2000,
+            "inferential": true,
             "p_holm": 0.0015,
             "significant": true,
             "direction": "improves"
           },
           "esm2_35m->esm2_150m": {
             "delta": 0.0134,
-            "ci_low": 0.0089,
-            "ci_high": 0.0177,
+            "ci_low": 0.0075,
+            "ci_high": 0.0193,
             "p_raw": 0.0005,
             "n_boot_valid": 2000,
             "n_perm_valid": 2000,
+            "inferential": true,
             "p_holm": 0.0015,
             "significant": true,
             "direction": "improves"
           },
           "esm2_150m->esm2_650m": {
             "delta": 0.0125,
-            "ci_low": 0.0084,
-            "ci_high": 0.0167,
+            "ci_low": 0.0059,
+            "ci_high": 0.0193,
             "p_raw": 0.0005,
             "n_boot_valid": 2000,
             "n_perm_valid": 2000,
+            "inferential": true,
             "p_holm": 0.0015,
             "significant": true,
             "direction": "improves"
@@ -1052,10 +1119,12 @@
         },
         "correction": "Holm within pre-specified ladder"
       }
-    }
+    },
+    "inference_status": "primary",
+    "inference_note": "5963 test proteins form 3577 MMseqs2 clusters at 30% identity and 80% bidirectional coverage."
   },
   "Fluorescence": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "kmer3_protein",
     "reference_selection": "published validation split",
     "reference_selection_score": 0.8126,
@@ -1066,93 +1135,98 @@
     "n_resampling_groups": 27217,
     "n_boot": 2000,
     "n_permutations": 2000,
-    "resampling_unit": "test item",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "resampling_unit": "test variant (descriptive only)",
+    "primary_correction": "Not included in inferential multiplicity family",
     "comparisons": {
       "protbert": {
         "delta": 0.0117,
         "ci_low": 0.0089,
         "ci_high": 0.0145,
-        "p_raw": 0.0005,
+        "p_raw": null,
         "n_boot_valid": 2000,
-        "n_perm_valid": 2000,
+        "n_perm_valid": 0,
         "score": 0.6622,
-        "p_holm_task": 0.0025,
-        "significant_task": true,
-        "p_holm_modality": 0.005,
-        "significant_modality": true,
-        "p_holm_global": 0.0295,
-        "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm_task": null,
+        "significant_task": false,
+        "p_holm_modality": null,
+        "significant_modality": false,
+        "p_holm_global": null,
+        "significant_global": false,
+        "p_holm": null,
+        "significant": false,
+        "inferential": false
       },
       "esm2_650m": {
         "delta": 0.0606,
         "ci_low": 0.0555,
         "ci_high": 0.0658,
-        "p_raw": 0.0005,
+        "p_raw": null,
         "n_boot_valid": 2000,
-        "n_perm_valid": 2000,
+        "n_perm_valid": 0,
         "score": 0.6133,
-        "p_holm_task": 0.0025,
-        "significant_task": true,
-        "p_holm_modality": 0.005,
-        "significant_modality": true,
-        "p_holm_global": 0.0295,
-        "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm_task": null,
+        "significant_task": false,
+        "p_holm_modality": null,
+        "significant_modality": false,
+        "p_holm_global": null,
+        "significant_global": false,
+        "p_holm": null,
+        "significant": false,
+        "inferential": false
       },
       "esm2_35m": {
         "delta": 0.0803,
         "ci_low": 0.0745,
         "ci_high": 0.086,
-        "p_raw": 0.0005,
+        "p_raw": null,
         "n_boot_valid": 2000,
-        "n_perm_valid": 2000,
+        "n_perm_valid": 0,
         "score": 0.5936,
-        "p_holm_task": 0.0025,
-        "significant_task": true,
-        "p_holm_modality": 0.005,
-        "significant_modality": true,
-        "p_holm_global": 0.0295,
-        "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm_task": null,
+        "significant_task": false,
+        "p_holm_modality": null,
+        "significant_modality": false,
+        "p_holm_global": null,
+        "significant_global": false,
+        "p_holm": null,
+        "significant": false,
+        "inferential": false
       },
       "esm2_150m": {
         "delta": 0.0897,
         "ci_low": 0.0837,
         "ci_high": 0.0955,
-        "p_raw": 0.0005,
+        "p_raw": null,
         "n_boot_valid": 2000,
-        "n_perm_valid": 2000,
+        "n_perm_valid": 0,
         "score": 0.5843,
-        "p_holm_task": 0.0025,
-        "significant_task": true,
-        "p_holm_modality": 0.005,
-        "significant_modality": true,
-        "p_holm_global": 0.0295,
-        "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm_task": null,
+        "significant_task": false,
+        "p_holm_modality": null,
+        "significant_modality": false,
+        "p_holm_global": null,
+        "significant_global": false,
+        "p_holm": null,
+        "significant": false,
+        "inferential": false
       },
       "esm2_8m": {
         "delta": 0.1006,
         "ci_low": 0.0948,
         "ci_high": 0.1066,
-        "p_raw": 0.0005,
+        "p_raw": null,
         "n_boot_valid": 2000,
-        "n_perm_valid": 2000,
+        "n_perm_valid": 0,
         "score": 0.5733,
-        "p_holm_task": 0.0025,
-        "significant_task": true,
-        "p_holm_modality": 0.005,
-        "significant_modality": true,
-        "p_holm_global": 0.0295,
-        "significant_global": true,
-        "p_holm": 0.0295,
-        "significant": true
+        "p_holm_task": null,
+        "significant_task": false,
+        "p_holm_modality": null,
+        "significant_modality": false,
+        "p_holm_global": null,
+        "significant_global": false,
+        "p_holm": null,
+        "significant": false,
+        "inferential": false
       }
     },
     "ladders": {
@@ -1168,42 +1242,47 @@
             "delta": 0.0203,
             "ci_low": 0.0141,
             "ci_high": 0.0265,
-            "p_raw": 0.0005,
+            "p_raw": null,
             "n_boot_valid": 2000,
-            "n_perm_valid": 2000,
-            "p_holm": 0.0015,
-            "significant": true,
-            "direction": "improves"
+            "n_perm_valid": 0,
+            "p_holm": null,
+            "significant": false,
+            "direction": "descriptive only",
+            "inferential": false
           },
           "esm2_35m->esm2_150m": {
             "delta": -0.0093,
             "ci_low": -0.0154,
             "ci_high": -0.0032,
-            "p_raw": 0.002499,
+            "p_raw": null,
             "n_boot_valid": 2000,
-            "n_perm_valid": 2000,
-            "p_holm": 0.002499,
-            "significant": true,
-            "direction": "REGRESSES"
+            "n_perm_valid": 0,
+            "p_holm": null,
+            "significant": false,
+            "direction": "descriptive only",
+            "inferential": false
           },
           "esm2_150m->esm2_650m": {
             "delta": 0.0291,
             "ci_low": 0.023,
             "ci_high": 0.0355,
-            "p_raw": 0.0005,
+            "p_raw": null,
             "n_boot_valid": 2000,
-            "n_perm_valid": 2000,
-            "p_holm": 0.0015,
-            "significant": true,
-            "direction": "improves"
+            "n_perm_valid": 0,
+            "p_holm": null,
+            "significant": false,
+            "direction": "descriptive only",
+            "inferential": false
           }
         },
-        "correction": "Holm within pre-specified ladder"
+        "correction": "Descriptive differences; no formal test"
       }
-    }
+    },
+    "inference_status": "descriptive_only",
+    "inference_note": "Formal inference is withheld because all 27217 GFP test variants form one MMseqs2 component at 90% identity and 90% bidirectional coverage. Intervals describe only the fixed test variants."
   },
   "Promoters": {
-    "protocol_version": 4,
+    "protocol_version": 5,
     "reference": "nucleotide_transformer",
     "reference_selection": "deterministic 10% holdout from training split",
     "reference_selection_score": 0.929,
@@ -1215,7 +1294,7 @@
     "n_boot": 2000,
     "n_permutations": 2000,
     "resampling_unit": "test item",
-    "primary_correction": "Holm-Bonferroni across all reference comparisons",
+    "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
     "comparisons": {
       "hyenadna": {
         "delta": -0.0019,
@@ -1232,7 +1311,8 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       },
       "kmer5_dna": {
         "delta": 0.0059,
@@ -1249,9 +1329,12 @@
         "p_holm_global": 1.0,
         "significant_global": false,
         "p_holm": 1.0,
-        "significant": false
+        "significant": false,
+        "inferential": true
       }
     },
-    "ladders": {}
+    "ladders": {},
+    "inference_status": "primary",
+    "inference_note": "Inference is conditional on the fixed published test partition."
   }
 }

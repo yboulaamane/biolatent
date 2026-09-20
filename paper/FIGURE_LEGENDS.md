@@ -2,7 +2,7 @@
 
 ## Figure 1. Study design and validated benchmark scope
 
-BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Confidence intervals use paired bootstrap resampling, and statistical evidence is adjusted across all 59 study comparisons. Counts include only representations applicable to each chemical or biological domain.
+BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Molecular confidence intervals resample Bemis–Murcko scaffolds and DeepLoc intervals resample MMseqs2 homology clusters. Statistical evidence is adjusted across 54 eligible study comparisons; the five Fluorescence comparisons are descriptive because its test variants form one connected homology component at the prespecified threshold. Counts include only representations applicable to each chemical or biological domain.
 
 ## Figure 2. Molecular property-prediction performance
 
@@ -10,15 +10,15 @@ Performance and 95% bootstrap confidence intervals for the six molecular dataset
 
 ## Figure 3. Protein and genomic extension
 
-Performance and 95% bootstrap confidence intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses mean ROC-AUC, Fluorescence uses Spearman correlation and Promoters uses ROC-AUC. Symbols, dashed comparison lines and asterisks follow Figure 2. These extension datasets illustrate the behaviour of the same evaluation procedure outside molecular property prediction; their absolute scores are not compared across biological domains.
+Performance and 95% intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses mean ROC-AUC with homology-cluster inference, Fluorescence uses Spearman correlation with descriptive item-resampling intervals, and Promoters uses ROC-AUC. Symbols and dashed comparison lines follow Figure 2; asterisks appear only for eligible formal comparisons. These extension datasets illustrate the behaviour of the same evaluation procedure outside molecular property prediction; their absolute scores are not compared across biological domains.
 
 ## Figure 4. Statistical comparisons and scaffold-partition sensitivity
 
-(A) Number of representations that were statistically distinguishable from the preselected comparison method after study-wide adjustment; labels show distinguishable/total. Colours identify molecular, protein and genomic datasets, and grey segments indicate differences that were not distinguishable. (B) Number of five balanced scaffold partitions led by the most frequent top-ranked molecular representation. Teal indicates agreement with the leader in the primary partition. (C) Largest score range observed for any representation across the five partitions in each molecular dataset; parenthetical labels identify the corresponding representation. The repeated partitions assess robustness and do not replace the primary analysis.
+(A) Number of eligible representations that were statistically distinguishable from the preselected comparison method after study-wide adjustment; labels show distinguishable/eligible total, while Fluorescence is marked descriptive. Colours identify molecular, protein and genomic datasets, and grey segments indicate eligible differences that were not distinguishable. (B) Number of 20 balanced scaffold partitions led by the most frequent top-ranked molecular representation. Teal indicates agreement with the leader in the primary partition. (C) Largest score range observed for any representation across the 20 partitions in each molecular dataset; parenthetical labels identify the corresponding representation. The repeated partitions assess robustness and do not replace the primary analysis.
 
 ## Figure 5. Precision across test-set sizes
 
-Median width of the empirical 95% range when the observed test predictions are repeatedly evaluated on smaller subsets. Molecular subsets retain complete Bemis–Murcko scaffold groups, so the number of compounds can differ slightly from the target. Lines summarise 400 repeated subsets for each comparison and target size. The curves describe precision within the present test sets and do not predict the exact benefit of collecting additional observations.
+Median width of the empirical 95% range when the observed test predictions are repeatedly evaluated on smaller subsets. Molecular subsets retain complete Bemis–Murcko scaffold groups and DeepLoc subsets retain complete MMseqs2 homology clusters, so the number of observations can differ slightly from the target. Lines summarise 400 repeated subsets for each comparison and target size. Fluorescence curves are descriptive for its fixed variant panel. The curves describe precision within the present test sets and do not predict the exact benefit of collecting additional observations.
 
 ## Figure S1. Molecular overlap with sampled pretraining sources
 

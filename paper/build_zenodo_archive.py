@@ -9,11 +9,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "2026.09.16"
-RELEASE_DATE = "2026-09-16"
+VERSION = "2026.09.20"
+RELEASE_DATE = "2026-09-20"
 ARCHIVE_ROOT = f"biolatent-benchmark-{VERSION}"
 OUTPUT = ROOT / "dist" / f"biolatent-benchmark-{RELEASE_DATE}.zip"
-FIXED_TIME = (2026, 9, 16, 0, 0, 0)
+FIXED_TIME = (2026, 9, 20, 0, 0, 0)
 
 
 def sha256(data: bytes) -> str:
@@ -48,6 +48,7 @@ def release_summary() -> tuple[int, int, int, dict[str, tuple[int, int]]]:
             value
             for name in task_names
             for value in paired[name]["comparisons"].values()
+            if value.get("inferential", True)
         ]
         resolved = sum(
             bool(value.get("significant_global", value["significant"]))
@@ -61,13 +62,13 @@ def zenodo_readme() -> bytes:
     tasks, models, cells, counts = release_summary()
     text = f"""# BioLatent benchmark data release {VERSION}
 
-Data accompanying **BioLatent: An Uncertainty-Aware Benchmark of Frozen
-Molecular, Protein, and Genomic Representations**.
+Data accompanying **BioLatent: A Standardised Benchmark of Frozen Molecular
+Representations with Protein and Genomic Extensions**.
 
 ## Release scope
 
 - {tasks} real-data tasks, {models} frozen representations and {cells} measured model-task cells.
-- Study-wide Holm-resolved comparisons: {counts['molecule'][0]}/{counts['molecule'][1]} molecular, {counts['protein'][0]}/{counts['protein'][1]} protein and {counts['genomics'][0]}/{counts['genomics'][1]} genomic.
+- Study-wide Holm-resolved eligible comparisons: {counts['molecule'][0]}/{counts['molecule'][1]} molecular, {counts['protein'][0]}/{counts['protein'][1]} protein and {counts['genomics'][0]}/{counts['genomics'][1]} genomic. Five Fluorescence comparisons are descriptive because suitable independent homology clusters are unavailable.
 - Aggregate result JSON, per-example compressed prediction arrays and figure source CSVs.
 
 ## Directory guide

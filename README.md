@@ -19,15 +19,15 @@ BioLatent began as a provenance-aware registry of representations and results re
 
 ### Measured release snapshot
 
-The benchmark snapshot was validated against its source data on 2026-09-14 and released as version 1.0.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The complete data release is archived on Zenodo at [https://doi.org/10.5281/zenodo.22813148](https://doi.org/10.5281/zenodo.22813148).
+The benchmark snapshot was validated against its source data on 2026-09-20 and released as version 1.1.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The complete data release is archived on Zenodo at [https://doi.org/10.5281/zenodo.22813148](https://doi.org/10.5281/zenodo.22813148).
 
-| Modality | Tasks | Measured cells | Study-wide resolved comparisons |
+| Modality | Tasks | Measured cells | Study-wide resolved/eligible comparisons |
 |---|---:|---:|---:|
 | Molecules | 6 | 53 | 14 of 47 |
-| Proteins | 2 | 12 | 10 of 10 |
+| Proteins | 2 | 12 | 5 of 5; 5 Fluorescence comparisons descriptive |
 | Genomics | 1 | 3 | 0 of 2 |
 
-“Resolved” means that a paired comparison with the validation-selected reference survived Holm correction across all 59 primary comparisons. It does not mean that unresolved representations are equivalent, and the scores are not comparable across tasks that use different metrics. See [`STUDY.md`](STUDY.md) for the complete results and interpretation.
+“Resolved” means that an eligible paired comparison with the validation-selected reference survived Holm correction across all 54 formal comparisons. Molecules are resampled by Bemis–Murcko scaffold and DeepLoc by MMseqs2 homology cluster. The five Fluorescence comparisons are descriptive because the related test variants form one connected component at the prespecified homology threshold. Unresolved does not mean equivalent, and scores from different metrics are not comparable. See [`STUDY.md`](STUDY.md) for the complete results and interpretation.
 
 The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer-XL, Uni-Mol v1, MolCLR GIN, and GROVER Base/Large. MolCLR is intentionally N/A on ClinTox because its official featurizer cannot represent every structure; no molecule was removed or rewritten to force that cell. Supervised task-trained systems such as standard Chemprop and ChemXTree are outside the frozen-representation estimand, while Graphormer is deferred until its legacy official stack can be reproduced without approximation.
 
@@ -199,10 +199,10 @@ If you use BioLatent in your research, please cite:
 
 ```bibtex
 @misc{boulaamane2026biolatent,
-  title={BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations},
+  title={BioLatent: A Standardised Benchmark of Frozen Molecular Representations with Protein and Genomic Extensions},
   author={Boulaamane, Yassir},
   year={2026},
-  version={1.0.0},
+  version={1.1.0},
   publisher={Zenodo},
   doi={10.5281/zenodo.22813148},
   url={https://doi.org/10.5281/zenodo.22813148}
