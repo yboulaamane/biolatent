@@ -12,17 +12,17 @@
     "diagnostic_probe": "one-hidden-layer MLP (256 ReLU units)"
   },
   "software": {
-    "python": "3.11.15",
-    "numpy": "1.26.4",
-    "pandas": "2.3.3",
+    "python": "3.13.13",
+    "numpy": "2.4.6",
+    "pandas": "3.0.2",
     "scipy": "1.17.1",
     "scikit_learn": "1.8.0",
-    "rdkit": "2023.9.6",
-    "torch": "2.8.0+cu128",
-    "torch_build": "2.8.0+cu128",
-    "torch_cuda": "12.8",
-    "transformers": "4.50.3",
-    "datasets": "2.19.2"
+    "rdkit": "2026.3.1",
+    "torch": "2.11.0+cpu",
+    "torch_build": "2.11.0+cpu",
+    "torch_cuda": null,
+    "transformers": "unknown",
+    "datasets": "unknown"
   },
   "tasks": {
     "BBBP": {
@@ -2238,22 +2238,24 @@
     }
   },
   "public_artifacts": {
-    "benchmark_results.json": "b97ba68cc3abe16e2ca3cfee312e73c066707ed142e3ec4009e01b70473fa0b0",
-    "paired_comparisons.json": "945a32f763b8c753f9e027cd77cb200863181f2b875f2ffdd0ec0adcf38cc299",
+    "benchmark_results.json": "16ba476ca6ad1d2601a9c2443e53b919749a94eea661d6471bf888b5b05f4e3d",
+    "paired_comparisons.json": "d5c95c9d9d6079e318be5de61efb1c6f4fbe50cf69e1159900c3a4103275363f",
     "exposure_report.json": "2c3ecfc7a5e03c2b9987b351649e7ac19db11ac28e20e3bd2ea9631410e19c3b",
-    "split_seed_sensitivity.json": "91312b6008395becb9df2a94a29d9bd7423d94db394adbccc4885f27f63a6e21",
-    "resolution_curves.json": "7678a18a56dcc2459e6c1626b0e98c8b7de8ab8a6d81e282c4b0961037feccdd"
+    "split_seed_sensitivity.json": "7df9a692c4aae648a3bdf4b4ee08cd1fdd886cd768c98aaf53da2191aea07b60",
+    "resolution_curves.json": "0249bf70451f44f726127fdd52316f6aa14ae933787928a7c57d37ded10b20cd",
+    "sequence_clusters.json": "20a1402b9f69710456a97c8fd6b0f71b94ce550ba54929717060a2fd08b3322d",
+    "split_diagnostics.json": "575afe5b1a749c0b7bff20f795a7285639c6803cd0a5bb62755c1f37afe1f2fc"
   },
   "prediction_artifacts": {
     "predictions/BBBP.npz": "a3c0c19cdc705adabd252b40ca36289481235f8bdb2579fbea2cd3b56b31c6d3",
-    "predictions/ClinTox.npz": "4506798f7b7f8d7931ae335f6e51a42f1d238a3569bee7e719f869963b0f5c31",
+    "predictions/ClinTox.npz": "bd742b3784d245d565bed80ac54ffdd227985b700e2f1e4e501770aa75ed0dcc",
     "predictions/BACE.npz": "43d4d18c5b5a1a78f7c3c7800f3499baa3106c2531b26944f86d268135182e24",
     "predictions/ESOL.npz": "6145254a760d204375d753874bfb4afe5bf81524f772782c837b087a39300be5",
     "predictions/Lipophilicity.npz": "39a3dbb368babf5ce5fc80f5953732bdecb9d86558aa2f439984287d2070e4d3",
     "predictions/CYP3A4.npz": "c29079c50190ce081031a166578cf747199cc732661b2de7e5d42565e38a76d1",
-    "predictions/DeepLoc.npz": "553fb43fa0565c4a9d66c10a3f9404c5214592f89959af131e775e544b9f2da8",
-    "predictions/Fluorescence.npz": "cb129255deaaed83c10c529d1a878eaa3ccb682fa3c25af4d61e6202aa002876",
-    "predictions/Promoters.npz": "648bc2ef4c4920f112c787c970ff9484b3c6ee470fdcb11c361d5479ac90295f"
+    "predictions/DeepLoc.npz": "eb268d3d21b8cdc74fcee624cfe3c8fc62608eb399589d8c00eb129bd0f59f2d",
+    "predictions/Fluorescence.npz": "26d82ebe22dab156996c1d04959eaab9a4469b2c25a6f760d773129143c73590",
+    "predictions/Promoters.npz": "9498374f7c633afb3b0bd5ba83c3badedd31babe4e00606fcce7564f7bfb3fd4"
   },
-  "benchmark_results_sha256": "b97ba68cc3abe16e2ca3cfee312e73c066707ed142e3ec4009e01b70473fa0b0"
+  "benchmark_results_sha256": "16ba476ca6ad1d2601a9c2443e53b919749a94eea661d6471bf888b5b05f4e3d"
 }

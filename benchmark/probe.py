@@ -158,15 +158,23 @@ def bootstrap_ci(y_true, y_pred, y_prob, task_type, n_classes,
     rng = np.random.RandomState(seed)
     n = len(y_true)
     group_values = None if groups is None else np.asarray(groups)
-    unique_groups = None if group_values is None else np.unique(group_values)
+    unique_groups = None
+    membership = None
+    if group_values is not None:
+        unique_groups, membership = np.unique(group_values, return_inverse=True)
     scores = np.empty(n_boot)
     for b in range(n_boot):
         if unique_groups is None:
             idx = rng.randint(0, n, n)
         else:
-            sampled = rng.choice(unique_groups, len(unique_groups), replace=True)
-            idx = np.concatenate([np.where(group_values == group)[0]
-                                  for group in sampled])
+            # A cluster bootstrap samples clusters with replacement. Metrics
+            # are invariant to row order, so expand each item by the number of
+            # times its cluster was sampled. This is exactly the former
+            # concatenate-of-where implementation without millions of Python
+            # scans over the group vector.
+            sampled = rng.randint(0, len(unique_groups), len(unique_groups))
+            counts = np.bincount(sampled, minlength=len(unique_groups))
+            idx = np.repeat(np.arange(n), counts[membership])
         scores[b] = _score_only(
             y_true[idx], y_pred[idx],
             y_prob[idx] if y_prob is not None else None,

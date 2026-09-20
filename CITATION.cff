@@ -1,9 +1,9 @@
 cff-version: 1.2.0
 message: "If you use the BioLatent benchmark, please cite this data release."
-title: "BioLatent: An Uncertainty-Aware Benchmark of Frozen Molecular, Protein, and Genomic Representations"
+title: "BioLatent: A Standardised Benchmark of Frozen Molecular Representations with Protein and Genomic Extensions"
 type: dataset
-version: 1.0.0
-date-released: 2026-09-17
+version: 1.1.0
+date-released: 2026-09-20
 doi: "10.5281/zenodo.22813148"
 authors:
   - family-names: Boulaamane

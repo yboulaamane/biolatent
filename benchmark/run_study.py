@@ -45,7 +45,8 @@ MANIFEST_PATH = os.path.join(RESULTS_DIR, "run_manifest.json")
 PUBLIC_RESULT_FILES = [
     "benchmark_results.json", "paired_comparisons.json",
     "exposure_report.json", "split_seed_sensitivity.json",
-    "resolution_curves.json",
+    "resolution_curves.json", "sequence_clusters.json",
+    "split_diagnostics.json",
 ]
 
 

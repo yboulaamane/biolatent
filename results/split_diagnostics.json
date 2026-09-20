@@ -1,0 +1,674 @@
+{
+  "schema_version": 1,
+  "interpretation": "Split sizes, target balance and identity/scaffold disjointness. Zero overlap is checked between the complete non-test fit set and test set.",
+  "tasks": {
+    "BBBP": {
+      "modality": "molecule",
+      "task_type": "classification",
+      "split_source": "balanced Murcko scaffold split (seed 42)",
+      "dataset_input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
+      "splits": {
+        "train": {
+          "n": 1631,
+          "target": {
+            "positive": 1254,
+            "negative": 377,
+            "positive_fraction": 0.768853
+          },
+          "n_scaffold_groups": 863,
+          "n_singleton_scaffold_groups": 659
+        },
+        "validation": {
+          "n": 203,
+          "target": {
+            "positive": 165,
+            "negative": 38,
+            "positive_fraction": 0.812808
+          },
+          "n_scaffold_groups": 127,
+          "n_singleton_scaffold_groups": 101
+        },
+        "non_test_fit": {
+          "n": 1834,
+          "target": {
+            "positive": 1419,
+            "negative": 415,
+            "positive_fraction": 0.773719
+          },
+          "n_scaffold_groups": 990,
+          "n_singleton_scaffold_groups": 760
+        },
+        "test": {
+          "n": 205,
+          "target": {
+            "positive": 141,
+            "negative": 64,
+            "positive_fraction": 0.687805
+          },
+          "n_scaffold_groups": 133,
+          "n_singleton_scaffold_groups": 102
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "ClinTox": {
+      "modality": "molecule",
+      "task_type": "multilabel",
+      "split_source": "balanced Murcko scaffold split (seed 42)",
+      "dataset_input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
+      "splits": {
+        "train": {
+          "n": 1184,
+          "target": {
+            "target_FDA_APPROVED": {
+              "positive": 1108,
+              "negative": 76,
+              "positive_fraction": 0.935811
+            },
+            "target_CT_TOX": {
+              "positive": 91,
+              "negative": 1093,
+              "positive_fraction": 0.076858
+            }
+          },
+          "n_scaffold_groups": 718,
+          "n_singleton_scaffold_groups": 581
+        },
+        "validation": {
+          "n": 148,
+          "target": {
+            "target_FDA_APPROVED": {
+              "positive": 141,
+              "negative": 7,
+              "positive_fraction": 0.952703
+            },
+            "target_CT_TOX": {
+              "positive": 10,
+              "negative": 138,
+              "positive_fraction": 0.067568
+            }
+          },
+          "n_scaffold_groups": 98,
+          "n_singleton_scaffold_groups": 79
+        },
+        "non_test_fit": {
+          "n": 1332,
+          "target": {
+            "target_FDA_APPROVED": {
+              "positive": 1249,
+              "negative": 83,
+              "positive_fraction": 0.937688
+            },
+            "target_CT_TOX": {
+              "positive": 101,
+              "negative": 1231,
+              "positive_fraction": 0.075826
+            }
+          },
+          "n_scaffold_groups": 816,
+          "n_singleton_scaffold_groups": 660
+        },
+        "test": {
+          "n": 148,
+          "target": {
+            "target_FDA_APPROVED": {
+              "positive": 137,
+              "negative": 11,
+              "positive_fraction": 0.925676
+            },
+            "target_CT_TOX": {
+              "positive": 11,
+              "negative": 137,
+              "positive_fraction": 0.074324
+            }
+          },
+          "n_scaffold_groups": 96,
+          "n_singleton_scaffold_groups": 69
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "BACE": {
+      "modality": "molecule",
+      "task_type": "classification",
+      "split_source": "balanced Murcko scaffold split (seed 42)",
+      "dataset_input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
+      "splits": {
+        "train": {
+          "n": 1210,
+          "target": {
+            "positive": 536,
+            "negative": 674,
+            "positive_fraction": 0.442975
+          },
+          "n_scaffold_groups": 555,
+          "n_singleton_scaffold_groups": 397
+        },
+        "validation": {
+          "n": 151,
+          "target": {
+            "positive": 80,
+            "negative": 71,
+            "positive_fraction": 0.529801
+          },
+          "n_scaffold_groups": 50,
+          "n_singleton_scaffold_groups": 36
+        },
+        "non_test_fit": {
+          "n": 1361,
+          "target": {
+            "positive": 616,
+            "negative": 745,
+            "positive_fraction": 0.452608
+          },
+          "n_scaffold_groups": 605,
+          "n_singleton_scaffold_groups": 433
+        },
+        "test": {
+          "n": 152,
+          "target": {
+            "positive": 75,
+            "negative": 77,
+            "positive_fraction": 0.493421
+          },
+          "n_scaffold_groups": 70,
+          "n_singleton_scaffold_groups": 48
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "ESOL": {
+      "modality": "molecule",
+      "task_type": "regression",
+      "split_source": "balanced Murcko scaffold split (seed 42)",
+      "dataset_input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
+      "splits": {
+        "train": {
+          "n": 902,
+          "target": {
+            "mean": -2.888713,
+            "standard_deviation": 2.092756,
+            "minimum": -11.6,
+            "maximum": 1.58
+          },
+          "n_scaffold_groups": 471,
+          "n_singleton_scaffold_groups": 434
+        },
+        "validation": {
+          "n": 112,
+          "target": {
+            "mean": -3.754188,
+            "standard_deviation": 1.738859,
+            "minimum": -8.057,
+            "maximum": 0.522
+          },
+          "n_scaffold_groups": 56,
+          "n_singleton_scaffold_groups": 38
+        },
+        "non_test_fit": {
+          "n": 1014,
+          "target": {
+            "mean": -2.984308,
+            "standard_deviation": 2.074476,
+            "minimum": -11.6,
+            "maximum": 1.58
+          },
+          "n_scaffold_groups": 527,
+          "n_singleton_scaffold_groups": 472
+        },
+        "test": {
+          "n": 114,
+          "target": {
+            "mean": -3.635324,
+            "standard_deviation": 2.188706,
+            "minimum": -9.332,
+            "maximum": 1.1
+          },
+          "n_scaffold_groups": 58,
+          "n_singleton_scaffold_groups": 39
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "Lipophilicity": {
+      "modality": "molecule",
+      "task_type": "regression",
+      "split_source": "balanced Murcko scaffold split (seed 42)",
+      "dataset_input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
+      "splits": {
+        "train": {
+          "n": 3360,
+          "target": {
+            "mean": 2.192833,
+            "standard_deviation": 1.199074,
+            "minimum": -1.5,
+            "maximum": 4.5
+          },
+          "n_scaffold_groups": 1955,
+          "n_singleton_scaffold_groups": 1508
+        },
+        "validation": {
+          "n": 420,
+          "target": {
+            "mean": 2.04731,
+            "standard_deviation": 1.227484,
+            "minimum": -1.42,
+            "maximum": 4.3
+          },
+          "n_scaffold_groups": 211,
+          "n_singleton_scaffold_groups": 151
+        },
+        "non_test_fit": {
+          "n": 3780,
+          "target": {
+            "mean": 2.176664,
+            "standard_deviation": 1.203134,
+            "minimum": -1.5,
+            "maximum": 4.5
+          },
+          "n_scaffold_groups": 2166,
+          "n_singleton_scaffold_groups": 1659
+        },
+        "test": {
+          "n": 420,
+          "target": {
+            "mean": 2.273381,
+            "standard_deviation": 1.196888,
+            "minimum": -1.27,
+            "maximum": 4.5
+          },
+          "n_scaffold_groups": 246,
+          "n_singleton_scaffold_groups": 203
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "CYP3A4": {
+      "modality": "molecule",
+      "task_type": "classification",
+      "split_source": "TDC scaffold split (seed 42)",
+      "dataset_input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
+      "splits": {
+        "train": {
+          "n": 533,
+          "target": {
+            "positive": 276,
+            "negative": 257,
+            "positive_fraction": 0.517824
+          },
+          "n_scaffold_groups": 375,
+          "n_singleton_scaffold_groups": 313
+        },
+        "validation": {
+          "n": 66,
+          "target": {
+            "positive": 40,
+            "negative": 26,
+            "positive_fraction": 0.606061
+          },
+          "n_scaffold_groups": 53,
+          "n_singleton_scaffold_groups": 46
+        },
+        "non_test_fit": {
+          "n": 599,
+          "target": {
+            "positive": 316,
+            "negative": 283,
+            "positive_fraction": 0.527546
+          },
+          "n_scaffold_groups": 428,
+          "n_singleton_scaffold_groups": 359
+        },
+        "test": {
+          "n": 68,
+          "target": {
+            "positive": 38,
+            "negative": 30,
+            "positive_fraction": 0.558824
+          },
+          "n_scaffold_groups": 45,
+          "n_singleton_scaffold_groups": 35
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": 0
+      }
+    },
+    "DeepLoc": {
+      "modality": "protein",
+      "task_type": "multilabel",
+      "split_source": "published homology partitions (fixed fold assignment)",
+      "dataset_input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+      "splits": {
+        "train": {
+          "n": 16889,
+          "target": {
+            "target_Cytoplasm": {
+              "positive": 5755,
+              "negative": 11134,
+              "positive_fraction": 0.340754
+            },
+            "target_Nucleus": {
+              "positive": 5934,
+              "negative": 10955,
+              "positive_fraction": 0.351353
+            },
+            "target_Extracellular": {
+              "positive": 2062,
+              "negative": 14827,
+              "positive_fraction": 0.122091
+            },
+            "target_Cell_membrane": {
+              "positive": 2318,
+              "negative": 14571,
+              "positive_fraction": 0.137249
+            },
+            "target_Mitochondrion": {
+              "positive": 1534,
+              "negative": 15355,
+              "positive_fraction": 0.090828
+            },
+            "target_Plastid": {
+              "positive": 650,
+              "negative": 16239,
+              "positive_fraction": 0.038487
+            },
+            "target_Endoplasmic_reticulum": {
+              "positive": 1275,
+              "negative": 15614,
+              "positive_fraction": 0.075493
+            },
+            "target_Lysosome_Vacuole": {
+              "positive": 774,
+              "negative": 16115,
+              "positive_fraction": 0.045829
+            },
+            "target_Golgi_apparatus": {
+              "positive": 716,
+              "negative": 16173,
+              "positive_fraction": 0.042394
+            },
+            "target_Peroxisome": {
+              "positive": 165,
+              "negative": 16724,
+              "positive_fraction": 0.00977
+            }
+          }
+        },
+        "validation": {
+          "n": 5451,
+          "target": {
+            "target_Cytoplasm": {
+              "positive": 1996,
+              "negative": 3455,
+              "positive_fraction": 0.366171
+            },
+            "target_Nucleus": {
+              "positive": 1915,
+              "negative": 3536,
+              "positive_fraction": 0.351312
+            },
+            "target_Extracellular": {
+              "positive": 546,
+              "negative": 4905,
+              "positive_fraction": 0.100165
+            },
+            "target_Cell_membrane": {
+              "positive": 814,
+              "negative": 4637,
+              "positive_fraction": 0.14933
+            },
+            "target_Mitochondrion": {
+              "positive": 491,
+              "negative": 4960,
+              "positive_fraction": 0.090075
+            },
+            "target_Plastid": {
+              "positive": 174,
+              "negative": 5277,
+              "positive_fraction": 0.031921
+            },
+            "target_Endoplasmic_reticulum": {
+              "positive": 431,
+              "negative": 5020,
+              "positive_fraction": 0.079068
+            },
+            "target_Lysosome_Vacuole": {
+              "positive": 278,
+              "negative": 5173,
+              "positive_fraction": 0.051
+            },
+            "target_Golgi_apparatus": {
+              "positive": 244,
+              "negative": 5207,
+              "positive_fraction": 0.044762
+            },
+            "target_Peroxisome": {
+              "positive": 58,
+              "negative": 5393,
+              "positive_fraction": 0.01064
+            }
+          }
+        },
+        "non_test_fit": {
+          "n": 22340,
+          "target": {
+            "target_Cytoplasm": {
+              "positive": 7751,
+              "negative": 14589,
+              "positive_fraction": 0.346956
+            },
+            "target_Nucleus": {
+              "positive": 7849,
+              "negative": 14491,
+              "positive_fraction": 0.351343
+            },
+            "target_Extracellular": {
+              "positive": 2608,
+              "negative": 19732,
+              "positive_fraction": 0.116741
+            },
+            "target_Cell_membrane": {
+              "positive": 3132,
+              "negative": 19208,
+              "positive_fraction": 0.140197
+            },
+            "target_Mitochondrion": {
+              "positive": 2025,
+              "negative": 20315,
+              "positive_fraction": 0.090645
+            },
+            "target_Plastid": {
+              "positive": 824,
+              "negative": 21516,
+              "positive_fraction": 0.036885
+            },
+            "target_Endoplasmic_reticulum": {
+              "positive": 1706,
+              "negative": 20634,
+              "positive_fraction": 0.076365
+            },
+            "target_Lysosome_Vacuole": {
+              "positive": 1052,
+              "negative": 21288,
+              "positive_fraction": 0.04709
+            },
+            "target_Golgi_apparatus": {
+              "positive": 960,
+              "negative": 21380,
+              "positive_fraction": 0.042972
+            },
+            "target_Peroxisome": {
+              "positive": 223,
+              "negative": 22117,
+              "positive_fraction": 0.009982
+            }
+          }
+        },
+        "test": {
+          "n": 5963,
+          "target": {
+            "target_Cytoplasm": {
+              "positive": 2119,
+              "negative": 3844,
+              "positive_fraction": 0.355358
+            },
+            "target_Nucleus": {
+              "positive": 1871,
+              "negative": 4092,
+              "positive_fraction": 0.313768
+            },
+            "target_Extracellular": {
+              "positive": 693,
+              "negative": 5270,
+              "positive_fraction": 0.116217
+            },
+            "target_Cell_membrane": {
+              "positive": 1055,
+              "negative": 4908,
+              "positive_fraction": 0.176924
+            },
+            "target_Mitochondrion": {
+              "positive": 565,
+              "negative": 5398,
+              "positive_fraction": 0.094751
+            },
+            "target_Plastid": {
+              "positive": 223,
+              "negative": 5740,
+              "positive_fraction": 0.037397
+            },
+            "target_Endoplasmic_reticulum": {
+              "positive": 474,
+              "negative": 5489,
+              "positive_fraction": 0.07949
+            },
+            "target_Lysosome_Vacuole": {
+              "positive": 444,
+              "negative": 5519,
+              "positive_fraction": 0.074459
+            },
+            "target_Golgi_apparatus": {
+              "positive": 319,
+              "negative": 5644,
+              "positive_fraction": 0.053497
+            },
+            "target_Peroxisome": {
+              "positive": 81,
+              "negative": 5882,
+              "positive_fraction": 0.013584
+            }
+          }
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": null
+      }
+    },
+    "Fluorescence": {
+      "modality": "protein",
+      "task_type": "regression",
+      "split_source": "published extrapolation partition",
+      "dataset_input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+      "splits": {
+        "train": {
+          "n": 21446,
+          "target": {
+            "mean": 3.180587,
+            "standard_deviation": 0.833991,
+            "minimum": 1.283419,
+            "maximum": 4.123109
+          }
+        },
+        "validation": {
+          "n": 5362,
+          "target": {
+            "mean": 3.173018,
+            "standard_deviation": 0.835723,
+            "minimum": 1.285993,
+            "maximum": 4.107867
+          }
+        },
+        "non_test_fit": {
+          "n": 26808,
+          "target": {
+            "mean": 3.179073,
+            "standard_deviation": 0.834343,
+            "minimum": 1.283419,
+            "maximum": 4.123109
+          }
+        },
+        "test": {
+          "n": 27217,
+          "target": {
+            "mean": 2.082536,
+            "standard_deviation": 0.974197,
+            "minimum": 1.286571,
+            "maximum": 4.106778
+          }
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": null
+      }
+    },
+    "Promoters": {
+      "modality": "genomics",
+      "task_type": "classification",
+      "split_source": "published chromosome partition (within-split deduplicated)",
+      "dataset_input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+      "splits": {
+        "train": {
+          "n": 29872,
+          "target": {
+            "positive": 15048,
+            "negative": 14824,
+            "positive_fraction": 0.503749
+          }
+        },
+        "validation": {
+          "n": 0,
+          "target": null
+        },
+        "non_test_fit": {
+          "n": 29872,
+          "target": {
+            "positive": 15048,
+            "negative": 14824,
+            "positive_fraction": 0.503749
+          }
+        },
+        "test": {
+          "n": 1571,
+          "target": {
+            "positive": 792,
+            "negative": 779,
+            "positive_fraction": 0.504137
+          }
+        }
+      },
+      "fit_test_overlap": {
+        "exact_input_count": 0,
+        "scaffold_count": null
+      }
+    }
+  }
+}

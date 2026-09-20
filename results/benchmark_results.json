@@ -1845,10 +1845,10 @@
           "hyperparameter": {
             "C": 0.001
           },
-          "ci_low": 0.7082,
-          "ci_high": 0.7256,
-          "ci_width": 0.0174,
-          "n_boot": 1000,
+          "ci_low": 0.7039,
+          "ci_high": 0.7299,
+          "ci_width": 0.026,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,
@@ -1878,10 +1878,10 @@
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8386,
-          "ci_high": 0.8542,
-          "ci_width": 0.0156,
-          "n_boot": 1000,
+          "ci_low": 0.834,
+          "ci_high": 0.8585,
+          "ci_width": 0.0245,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,
@@ -1911,10 +1911,10 @@
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.859,
-          "ci_high": 0.8738,
-          "ci_width": 0.0148,
-          "n_boot": 1000,
+          "ci_low": 0.8557,
+          "ci_high": 0.8765,
+          "ci_width": 0.0208,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,
@@ -1944,10 +1944,10 @@
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8732,
-          "ci_high": 0.8859,
-          "ci_width": 0.0127,
-          "n_boot": 1000,
+          "ci_low": 0.87,
+          "ci_high": 0.8897,
+          "ci_width": 0.0197,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,
@@ -1977,10 +1977,10 @@
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.886,
-          "ci_high": 0.8989,
-          "ci_width": 0.013,
-          "n_boot": 1000,
+          "ci_low": 0.8832,
+          "ci_high": 0.9005,
+          "ci_width": 0.0174,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,
@@ -2010,10 +2010,10 @@
           "hyperparameter": {
             "C": 0.01
           },
-          "ci_low": 0.8542,
-          "ci_high": 0.868,
-          "ci_width": 0.0138,
-          "n_boot": 1000,
+          "ci_low": 0.8503,
+          "ci_high": 0.8718,
+          "ci_width": 0.0216,
+          "n_boot": 2000,
           "probe": "linear",
           "protocol_version": 4,
           "regularisation_search_rows": 6000,

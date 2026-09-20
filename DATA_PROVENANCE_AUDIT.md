@@ -1,6 +1,6 @@
 # BioLatent data and score provenance audit
 
-**Audit date:** 2026-09-14
+**Audit date:** 2026-09-20
 **Scope:** the nine-task measured benchmark and all literature-score rows in
 `src/app/data/embeddings.ts`.
 
@@ -59,7 +59,7 @@ The final release command is:
 python benchmark/validate_release.py --full-hash
 ```
 
-It passed on 2026-09-14 with `Validated 9 tasks and 68 cells.` The validator
+It passed on 2026-09-20 with `Validated 9 tasks and 68 cells.` The validator
 also recomputed the ranked metric from every saved prediction bundle and
 confirmed agreement with both the paired-inference report and the measured
 benchmark table.

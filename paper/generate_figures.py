@@ -169,7 +169,8 @@ def make_scope_figure(results, paired):
         models = {model for task in task_ids for model in results[task]["models"]}
         cells = sum(len(results[task]["models"]) for task in task_ids)
         comparisons = [comparison for task in task_ids
-                       for comparison in paired[task]["comparisons"].values()]
+                       for comparison in paired[task]["comparisons"].values()
+                       if comparison.get("inferential", True)]
         resolved = sum(bool(item.get("significant_global", item["significant"]))
                        for item in comparisons)
         rows.append({
@@ -224,7 +225,8 @@ def make_scope_figure(results, paired):
                 "Draw.io Figure 1 is out of sync with the benchmark results; "
                 f"missing labels: {', '.join(missing_values)}"
             )
-        return
+        # Regenerate the publication exports below from the same data. The
+        # Draw.io source remains editable and is checked for matching totals.
 
     fig, ax = plt.subplots(figsize=(7.2, 5.4))
     ax.set_xlim(0, 1)
@@ -254,7 +256,7 @@ def make_scope_figure(results, paired):
 
     pipeline = [
         ("1", "Calculate once", "Verified inputs;\nfixed model version"),
-        ("2", "Select baseline", "Validation data;\nsame procedure"),
+        ("2", "Select comparison", "Validation data;\nsame procedure"),
         ("3", "Score test set", "Predictions and\nendpoint measure"),
         ("4", "Quantify uncertainty", "Bootstrap and\nadjusted tests"),
     ]
@@ -282,7 +284,7 @@ def make_scope_figure(results, paired):
             fontweight="bold", color=DARK)
     summary = [
         ("9", "real-data tasks"),
-        ("18", "representations"),
+        (str(overall_representations), "representations"),
         (str(overall_cells), "model–dataset\nevaluations"),
         (f"{overall_resolved}/{overall_comparisons}", "statistically distinguishable\ncomparisons"),
     ]
@@ -291,7 +293,7 @@ def make_scope_figure(results, paired):
         ax.text(x, 0.19, value, fontsize=17, fontweight="bold", color=PURPLE)
         ax.text(x, 0.145, label, fontsize=7.6, color=MID, va="top", linespacing=1.2)
     ax.text(0.02, 0.07,
-            "Distinguishable = study-wide adjusted p < 0.05 versus the preselected comparison method.",
+            "Distinguishable = study-wide adjusted p < 0.05 for eligible formal comparisons; Fluorescence is descriptive.",
             fontsize=7.8, color=MID)
     save_figure(fig, "figure1_study_design")
 
@@ -316,11 +318,13 @@ def score_rows(results, paired, tasks, model_order):
                 "n_test": task_result["n_test"],
                 "validation_reference": model == comparison["reference"],
                 "numerical_test_best": model == comparison["observed_test_best"],
+                "inference_status": comparison.get("inference_status", "primary"),
                 "significant_global": bool(
-                    inference and inference.get("significant_global", inference["significant"])
+                    inference and inference.get("inferential", True)
+                    and inference.get("significant_global", inference["significant"])
                 ),
-                "p_holm_global": (inference.get("p_holm_global", inference["p_holm"])
-                                  if inference else ""),
+                "p_holm_global": ((inference.get("p_holm_global", inference["p_holm"])
+                                   if inference else "") or ""),
             })
     return rows
 
@@ -359,7 +363,8 @@ def plot_task_scores(ax, task, results, paired, order):
         is_ref = model == pair["reference"]
         is_best = model == pair["observed_test_best"]
         comp = pair["comparisons"].get(model)
-        sig = bool(comp and comp.get("significant_global", comp["significant"]))
+        sig = bool(comp and comp.get("inferential", True)
+                   and comp.get("significant_global", comp["significant"]))
         if is_ref and is_best:
             marker, face, edge = "D", TEAL, PURPLE
         elif is_ref:
@@ -380,8 +385,10 @@ def plot_task_scores(ax, task, results, paired, order):
     ax.set_yticks(y, [MODEL_LABELS[model] for model in order])
     ax.invert_yaxis()
     metric = next(iter(task_result["models"].values()))["linear"]["metric"]
+    inference_label = (" · descriptive only"
+                       if pair.get("inference_status") == "descriptive_only" else "")
     ax.set_title(
-        f"{task}\n{metric}\nTest set: n = {task_result['n_test']:,}",
+        f"{task}{inference_label}\n{metric}\nTest set: n = {task_result['n_test']:,}",
         pad=5, linespacing=1.05,
     )
     ax.set_xlabel(metric)
@@ -447,7 +454,8 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     summary_rows = []
     for task in TASK_ORDER:
         entry = paired[task]
-        comparisons = list(entry["comparisons"].values())
+        comparisons = [item for item in entry["comparisons"].values()
+                       if item.get("inferential", True)]
         resolved = sum(bool(item.get("significant_global", item["significant"]))
                        for item in comparisons)
         split_entry = sensitivity["tasks"].get(task)
@@ -466,6 +474,7 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
             "resolved": resolved,
             "unresolved": len(comparisons) - resolved,
             "total": len(comparisons),
+            "inference_status": entry.get("inference_status", "primary"),
             "validation_reference": MODEL_LABELS[entry["reference"]],
             "numerical_test_best": MODEL_LABELS[entry["observed_test_best"]],
             "reference_differs_from_test_best": entry["reference"] != entry["observed_test_best"],
@@ -505,11 +514,13 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     ax.barh(y, unresolved, left=resolved, color=LIGHT, edgecolor="white",
             linewidth=0.55, height=0.68, label="Unresolved")
     for yi, task, r, u in zip(y, tasks, resolved, unresolved):
-        ax.text(r + u + 0.15, yi, f"{r}/{r + u}", va="center",
+        label = ("descriptive" if row_by_task[task]["inference_status"] == "descriptive_only"
+                 else f"{r}/{r + u}")
+        ax.text(r + u + 0.15, yi, label, va="center",
                 fontsize=10.2, fontweight="bold", color=DARK)
     ax.set_yticks(y, tasks)
-    ax.set_xlabel("Representations compared")
-    ax.set_title("Statistically distinguishable comparisons after study-wide correction")
+    ax.set_xlabel("Eligible formal comparisons")
+    ax.set_title("Statistically distinguishable eligible comparisons")
     handles = [
         Patch(facecolor=PURPLE, label="Molecules: distinguishable"),
         Patch(facecolor=GREEN, label="Proteins: distinguishable"),
@@ -525,6 +536,7 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     panel_label(ax, "A")
 
     ax = axes[1]
+    n_splits = len(sensitivity["seeds"])
     mol_tasks = MOLECULE_TASKS[::-1]
     y2 = np.arange(len(mol_tasks))
     freq = [row_by_task[t]["split_winner_frequency"] for t in mol_tasks]
@@ -535,12 +547,12 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
     for yi, task, count in zip(y2, mol_tasks, freq):
         row = row_by_task[task]
         ax.text(count + 0.08, yi,
-                f"{row['most_frequent_split_winner']}  ({count}/5)",
+                f"{row['most_frequent_split_winner']}  ({count}/{n_splits})",
                 va="center", fontsize=10.0, fontweight="bold", color=DARK)
-    ax.set_xlim(0, 7.0)
+    ax.set_xlim(0, n_splits * 1.38)
     ax.set_yticks(y2, mol_tasks)
-    ax.set_xticks(range(0, 6))
-    ax.set_xlabel("Scaffold partitions led (of 5)")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins=6))
+    ax.set_xlabel(f"Scaffold partitions led (of {n_splits})")
     ax.set_title("Consistency of the leading representation across scaffold partitions")
     handles = [
         Line2D([0], [0], color=TEAL, lw=6, label="Matches primary-partition leader"),
@@ -564,7 +576,7 @@ def make_inference_sensitivity_figure(results, paired, sensitivity):
                 va="center", fontsize=10.0, fontweight="bold", color=DARK)
     ax.set_xlim(0, max(ranges) * 1.75)
     ax.set_yticks(y2, mol_tasks)
-    ax.set_xlabel("Maximum score range across five seeds")
+    ax.set_xlabel(f"Maximum score range across {n_splits} seeds")
     ax.set_title("Largest observed split sensitivity within each task")
     clean_axes(ax)
     panel_label(ax, "C")
@@ -705,7 +717,7 @@ def write_legends():
 
 ## Figure 1. Study design and validated benchmark scope
 
-BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Confidence intervals use paired bootstrap resampling, and statistical evidence is adjusted across all 59 study comparisons. Counts include only representations applicable to each chemical or biological domain.
+BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Molecular confidence intervals resample Bemis–Murcko scaffolds and DeepLoc intervals resample MMseqs2 homology clusters. Statistical evidence is adjusted across 54 eligible study comparisons; the five Fluorescence comparisons are descriptive because its test variants form one connected homology component at the prespecified threshold. Counts include only representations applicable to each chemical or biological domain.
 
 ## Figure 2. Molecular property-prediction performance
 
@@ -713,15 +725,15 @@ Performance and 95% bootstrap confidence intervals for the six molecular dataset
 
 ## Figure 3. Protein and genomic extension
 
-Performance and 95% bootstrap confidence intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses mean ROC-AUC, Fluorescence uses Spearman correlation and Promoters uses ROC-AUC. Symbols, dashed comparison lines and asterisks follow Figure 2. These extension datasets illustrate the behaviour of the same evaluation procedure outside molecular property prediction; their absolute scores are not compared across biological domains.
+Performance and 95% intervals for DeepLoc 2.0, Fluorescence and Promoters. DeepLoc uses mean ROC-AUC with homology-cluster inference, Fluorescence uses Spearman correlation with descriptive item-resampling intervals, and Promoters uses ROC-AUC. Symbols and dashed comparison lines follow Figure 2; asterisks appear only for eligible formal comparisons. These extension datasets illustrate the behaviour of the same evaluation procedure outside molecular property prediction; their absolute scores are not compared across biological domains.
 
 ## Figure 4. Statistical comparisons and scaffold-partition sensitivity
 
-(A) Number of representations that were statistically distinguishable from the preselected comparison method after study-wide adjustment; labels show distinguishable/total. Colours identify molecular, protein and genomic datasets, and grey segments indicate differences that were not distinguishable. (B) Number of five balanced scaffold partitions led by the most frequent top-ranked molecular representation. Teal indicates agreement with the leader in the primary partition. (C) Largest score range observed for any representation across the five partitions in each molecular dataset; parenthetical labels identify the corresponding representation. The repeated partitions assess robustness and do not replace the primary analysis.
+(A) Number of eligible representations that were statistically distinguishable from the preselected comparison method after study-wide adjustment; labels show distinguishable/eligible total, while Fluorescence is marked descriptive. Colours identify molecular, protein and genomic datasets, and grey segments indicate eligible differences that were not distinguishable. (B) Number of 20 balanced scaffold partitions led by the most frequent top-ranked molecular representation. Teal indicates agreement with the leader in the primary partition. (C) Largest score range observed for any representation across the 20 partitions in each molecular dataset; parenthetical labels identify the corresponding representation. The repeated partitions assess robustness and do not replace the primary analysis.
 
 ## Figure 5. Precision across test-set sizes
 
-Median width of the empirical 95% range when the observed test predictions are repeatedly evaluated on smaller subsets. Molecular subsets retain complete Bemis–Murcko scaffold groups, so the number of compounds can differ slightly from the target. Lines summarise 400 repeated subsets for each comparison and target size. The curves describe precision within the present test sets and do not predict the exact benefit of collecting additional observations.
+Median width of the empirical 95% range when the observed test predictions are repeatedly evaluated on smaller subsets. Molecular subsets retain complete Bemis–Murcko scaffold groups and DeepLoc subsets retain complete MMseqs2 homology clusters, so the number of observations can differ slightly from the target. Lines summarise 400 repeated subsets for each comparison and target size. Fluorescence curves are descriptive for its fixed variant panel. The curves describe precision within the present test sets and do not predict the exact benefit of collecting additional observations.
 
 ## Figure S1. Molecular overlap with sampled pretraining sources
 

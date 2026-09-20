@@ -2,14 +2,16 @@
 
 The representation used as comparator is selected on validation data, never on
 the test scores it is compared against. Test-set uncertainty is estimated by a
-paired cluster bootstrap (Murcko scaffold clusters for molecules; individual
-items otherwise). P-values come from a paired randomisation test that swaps the
+paired cluster bootstrap (Murcko scaffolds for molecules and MMseqs2 homology
+clusters for DeepLoc; task items otherwise). P-values come from a paired
+randomisation test that swaps the
 two models' predictions within the same resampling units under the null.
 
-Primary significance uses a Holm correction across every reference comparison
-in the study. Within-task and within-modality adjusted values are retained as
-sensitivity analyses. ESM-2 scale steps are pre-specified and corrected as a
-separate family.
+Primary significance uses a Holm correction across every eligible reference
+comparison in the study. Fluorescence is descriptive because its test variants
+form one homology component at the prespecified threshold. Within-task and
+within-modality adjusted values are retained as sensitivity analyses. ESM-2
+scale steps are pre-specified and corrected as a separate family.
 """
 
 import gc
@@ -20,7 +22,8 @@ import subprocess
 import sys
 
 import numpy as np
-from scipy.stats import spearmanr
+from joblib import Parallel, delayed
+from scipy.stats import rankdata, spearmanr
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -32,13 +35,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
+from benchmark.inference_policy import inference_policy
 from benchmark.probe import (ALPHA_GRID, C_GRID, PROBE_PROTOCOL_VERSION,
                              SEED, _multilabel_auc_scorer, _search_subset,
                              _valid_rows)
 
 N_BOOT = 2000
 N_PERM = 2000
-INFERENCE_PROTOCOL_VERSION = 4
+INFERENCE_PROTOCOL_VERSION = 5
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
                            "paired_comparisons.json")
 REPORT_LOCK_PATH = os.path.join(os.path.dirname(__file__), "..", "results",
@@ -137,7 +141,20 @@ def score(bundle, idx=None):
         if any(len(np.unique(y_true[:, column])) < 2
                for column in range(y_true.shape[1])):
             return np.nan
-        return float(roc_auc_score(y_true, y_prob, average="macro"))
+        # Binary AUC is the normalised Mann-Whitney rank statistic. Computing
+        # it directly avoids repeated estimator/validation overhead inside the
+        # thousands of resampling iterations while matching scikit-learn,
+        # including average ranks for tied probabilities.
+        aucs = []
+        for column in range(y_true.shape[1]):
+            labels = y_true[:, column].astype(bool)
+            n_positive = int(labels.sum())
+            n_negative = len(labels) - n_positive
+            ranks = rankdata(y_prob[:, column], method="average")
+            numerator = (ranks[labels].sum()
+                         - n_positive * (n_positive + 1) / 2)
+            aucs.append(numerator / (n_positive * n_negative))
+        return float(np.mean(aucs))
     if n_classes == 2:
         if len(np.unique(y_true)) < 2:
             return np.nan
@@ -160,15 +177,15 @@ def holm(pvalues):
 
 def _sample_indices(rng, groups):
     unique, membership = np.unique(groups, return_inverse=True)
-    sampled = rng.choice(len(unique), len(unique), replace=True)
+    sampled = rng.randint(0, len(unique), len(unique))
     if len(unique) == len(groups):
         # Item-level resampling is the common protein/genomics case. Preserve
         # the original sorted-group RNG mapping without constructing tens of
         # thousands of one-element arrays for every bootstrap replicate.
         sorted_to_original = np.argsort(membership)
         return sorted_to_original[sampled]
-    return np.concatenate([np.where(membership == group)[0]
-                           for group in sampled])
+    counts = np.bincount(sampled, minlength=len(unique))
+    return np.repeat(np.arange(len(groups)), counts[membership])
 
 
 def _swapped_bundle(left, right, swap_items):
@@ -221,6 +238,27 @@ def paired_inference(left, right, groups, seed=SEED):
             "n_boot_valid": int(len(boot)), "n_perm_valid": int(valid)}
 
 
+def paired_descriptive(left, right, groups, seed=SEED):
+    """Difference and empirical interval without a population-level test."""
+    observed = score(left) - score(right)
+    rng = np.random.RandomState(seed)
+    boot = np.empty(N_BOOT)
+    for index in range(N_BOOT):
+        sampled = _sample_indices(rng, groups)
+        boot[index] = score(left, sampled) - score(right, sampled)
+    boot = boot[np.isfinite(boot)]
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+    return {
+        "delta": round(float(observed), 4),
+        "ci_low": round(float(lo), 4),
+        "ci_high": round(float(hi), 4),
+        "p_raw": None,
+        "n_boot_valid": int(len(boot)),
+        "n_perm_valid": 0,
+        "inferential": False,
+    }
+
+
 def _selection_indices(data):
     if len(data["val_idx"]):
         return data["train_idx"], data["val_idx"], "published validation split"
@@ -233,14 +271,13 @@ def _selection_indices(data):
         "deterministic 10% holdout from training split"
 
 
-def _save_predictions(task, data, predictions):
+def _save_predictions(task, predictions, groups):
     os.makedirs(PREDICTION_DIR, exist_ok=True)
     first = next(iter(predictions.values()))
     valid = first["valid"]
     payload = {
         "y_true": first["y_true"],
-        "groups": np.asarray(data["resampling_groups"]
-                             [data["test_idx"]][valid], dtype=str),
+        "groups": np.asarray(groups, dtype=str),
     }
     for model_id, bundle in predictions.items():
         payload[f"{model_id}__pred"] = bundle["y_pred"]
@@ -292,14 +329,14 @@ def run_task(task):
                    for model, bundle in test_predictions.items()}
     observed_best = max(names, key=lambda model: test_scores[model])
     valid = test_predictions[reference]["valid"]
-    groups = np.asarray(data["resampling_groups"]
-                        [data["test_idx"]][valid], dtype=str)
+    policy = inference_policy(task, data)
+    groups = np.asarray(policy["groups"])[valid].astype(str)
 
     # Persist the fitted test predictions before the expensive resampling
     # analyses. A pre-emption can then be diagnosed from a complete prediction
     # bundle instead of discarding hours of successful model fitting. The
     # release gate still refuses the task until its paired report is complete.
-    _save_predictions(task, data, test_predictions)
+    _save_predictions(task, test_predictions, groups)
 
     comparisons = {}
     challengers = [model for model in sorted(names,
@@ -308,19 +345,27 @@ def run_task(task):
     print(f"\n{task}: validation reference={reference}; "
           f"test best={observed_best}", flush=True)
     for offset, model in enumerate(challengers):
-        result = paired_inference(test_predictions[reference],
-                                  test_predictions[model], groups,
-                                  seed=SEED + offset)
+        method = paired_inference if policy["enabled"] else paired_descriptive
+        result = method(test_predictions[reference], test_predictions[model],
+                        groups, seed=SEED + offset)
+        result.setdefault("inferential", bool(policy["enabled"]))
         result["score"] = round(float(test_scores[model]), 4)
         comparisons[model] = result
+        p_label = (f"{result['p_raw']:.4g}"
+                   if result["p_raw"] is not None else "descriptive")
         print(f"  vs {model:24s} d={result['delta']:+.4f} "
               f"CI [{result['ci_low']:+.4f}, {result['ci_high']:+.4f}] "
-              f"p={result['p_raw']:.4g}", flush=True)
+              f"p={p_label}", flush=True)
 
-    adjusted = holm([comparisons[model]["p_raw"] for model in challengers])
-    for model, p_value in zip(challengers, adjusted):
-        comparisons[model]["p_holm_task"] = round(float(p_value), 6)
-        comparisons[model]["significant_task"] = bool(p_value < 0.05)
+    if policy["enabled"]:
+        adjusted = holm([comparisons[model]["p_raw"] for model in challengers])
+        for model, p_value in zip(challengers, adjusted):
+            comparisons[model]["p_holm_task"] = round(float(p_value), 6)
+            comparisons[model]["significant_task"] = bool(p_value < 0.05)
+    else:
+        for model in challengers:
+            comparisons[model]["p_holm_task"] = None
+            comparisons[model]["significant_task"] = False
 
     entry = {
         "protocol_version": INFERENCE_PROTOCOL_VERSION,
@@ -332,32 +377,49 @@ def run_task(task):
         "observed_test_best_score": round(float(test_scores[observed_best]), 4),
         "n_test": int(len(groups)), "n_resampling_groups": int(len(np.unique(groups))),
         "n_boot": N_BOOT, "n_permutations": N_PERM,
-        "resampling_unit": "Murcko scaffold cluster" if modality == "molecule"
-                           else "test item",
-        "primary_correction": "Holm-Bonferroni across all reference comparisons",
+        "resampling_unit": policy["resampling_unit"],
+        "inference_status": "primary" if policy["enabled"] else "descriptive_only",
+        "inference_note": policy["note"],
+        "primary_correction": "Holm-Bonferroni across all eligible reference comparisons",
         "comparisons": comparisons,
     }
-    entry["ladders"] = _ladder_steps(names, test_predictions, test_scores, groups)
+    entry["ladders"] = _ladder_steps(
+        names, test_predictions, test_scores, groups, bool(policy["enabled"])
+    )
     return entry
 
 
-def _ladder_steps(names, predictions, test_scores, groups):
+def _ladder_steps(names, predictions, test_scores, groups, inference_enabled=True):
     out = {}
     for ladder_name, rungs in LADDERS.items():
         present = [model for model in rungs if model in names]
         if len(present) < 2:
             continue
+        pairs = list(zip(present, present[1:]))
+        method = paired_inference if inference_enabled else paired_descriptive
+
+        def evaluate(offset, lower, upper):
+            return lower, upper, method(
+                predictions[upper], predictions[lower], groups,
+                seed=SEED + 100 + offset)
+
+        evaluated = Parallel(n_jobs=min(4, len(pairs)))(
+            delayed(evaluate)(offset, lower, upper)
+            for offset, (lower, upper) in enumerate(pairs)
+        )
         steps, raw = {}, []
-        for offset, (lower, upper) in enumerate(zip(present, present[1:])):
-            result = paired_inference(predictions[upper], predictions[lower],
-                                      groups, seed=SEED + 100 + offset)
+        for lower, upper, result in evaluated:
+            result.setdefault("inferential", inference_enabled)
             steps[f"{lower}->{upper}"] = result
             raw.append(result["p_raw"])
-        for key, p_value in zip(steps, holm(raw)):
+        adjusted = holm(raw) if inference_enabled else [None] * len(raw)
+        for key, p_value in zip(steps, adjusted):
             result = steps[key]
-            result["p_holm"] = round(float(p_value), 6)
-            result["significant"] = bool(p_value < 0.05)
-            if p_value >= 0.05:
+            result["p_holm"] = round(float(p_value), 6) if p_value is not None else None
+            result["significant"] = bool(p_value is not None and p_value < 0.05)
+            if p_value is None:
+                result["direction"] = "descriptive only"
+            elif p_value >= 0.05:
                 result["direction"] = "no reliable difference"
             elif result["delta"] > 0:
                 result["direction"] = "improves"
@@ -403,7 +465,15 @@ def apply_familywise_corrections():
     for task, entry in report.items():
         modality = load_benchmark_dataset(task)["modality"]
         for model, comparison in entry["comparisons"].items():
-            records.append((task, modality, model, comparison))
+            if comparison.get("inferential", True):
+                records.append((task, modality, model, comparison))
+            else:
+                comparison["p_holm_modality"] = None
+                comparison["significant_modality"] = False
+                comparison["p_holm_global"] = None
+                comparison["significant_global"] = False
+                comparison["p_holm"] = None
+                comparison["significant"] = False
 
     for modality in sorted({record[1] for record in records}):
         family = [record for record in records if record[1] == modality]
