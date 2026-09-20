@@ -125,7 +125,10 @@ def add_hyperlink(paragraph, text, url):
     size.set(qn("w:val"), "24")
     complex_script_size = OxmlElement("w:szCs")
     complex_script_size.set(qn("w:val"), "24")
-    properties.extend([color, underline, size, complex_script_size])
+    fonts = OxmlElement("w:rFonts")
+    for attribute in ("ascii", "hAnsi", "eastAsia", "cs"):
+        fonts.set(qn(f"w:{attribute}"), "Times New Roman")
+    properties.extend([fonts, color, underline, size, complex_script_size])
     run.append(properties)
     text_element = OxmlElement("w:t")
     text_element.text = text
@@ -138,6 +141,8 @@ def add_heading(document, text, level):
     paragraph = document.add_heading(text, level=level)
     paragraph.paragraph_format.keep_with_next = True
     for run in paragraph.runs:
+        run.font.name = "Times New Roman"
+        run.font.bold = True
         run.font.color.rgb = RGBColor(0, 0, 0)
     return paragraph
 
@@ -146,8 +151,9 @@ def add_body(document, text, style=None):
     paragraph = document.add_paragraph(text, style=style)
     paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     paragraph.paragraph_format.space_after = Pt(6)
-    paragraph.paragraph_format.line_spacing = 1.08
+    paragraph.paragraph_format.line_spacing = 1.5
     for run in paragraph.runs:
+        run.font.name = "Times New Roman"
         run.font.size = Pt(12)
     return paragraph
 
@@ -167,8 +173,10 @@ def add_caption(document, text):
     )
     paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     paragraph.paragraph_format.keep_with_next = True
+    paragraph.paragraph_format.line_spacing = 1.0
     for run in paragraph.runs:
-        run.font.size = Pt(12)
+        run.font.name = "Times New Roman"
+        run.font.size = Pt(9)
     return paragraph
 
 
@@ -200,7 +208,10 @@ def add_publication_figure(document, filename, legend, width):
     add_caption(document, legend)
 
 
-def add_table(document, headers, rows, widths=None, font_size=7.5):
+def add_table(document, headers, rows, widths=None, font_size=10):
+    # Journal-facing tables use a consistent readable size, irrespective of
+    # the legacy per-table size hints retained at call sites.
+    font_size = 10
     table = document.add_table(rows=1, cols=len(headers))
     # The retained manuscript template was exported without Word's built-in
     # ``Table Grid`` style. Prefer it when present, but fall back to the
@@ -220,6 +231,7 @@ def add_table(document, headers, rows, widths=None, font_size=7.5):
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         for run in cell.paragraphs[0].runs:
             run.bold = True
+            run.font.name = "Times New Roman"
             run.font.size = Pt(font_size)
     for values in rows:
         row = table.add_row()
@@ -231,6 +243,7 @@ def add_table(document, headers, rows, widths=None, font_size=7.5):
             for paragraph in cell.paragraphs:
                 paragraph.paragraph_format.space_after = Pt(0)
                 for run in paragraph.runs:
+                    run.font.name = "Times New Roman"
                     run.font.size = Pt(font_size)
     if widths:
         for row in table.rows:
@@ -330,19 +343,26 @@ def build():
     # complete manuscript with python-docx's standard document styles.
     document = Document(TEMPLATE) if TEMPLATE.exists() else Document()
     clear_body(document)
-    for style_name in ("Normal", "Abstract", "Bibliography", "List Paragraph", "Caption"):
+    for style_name in (
+        "Normal", "Abstract", "Bibliography", "List Paragraph", "Caption",
+        "Author", "Subtitle",
+    ):
         try:
             style = document.styles[style_name]
         except KeyError:
             continue
-        style.font.name = "Arial"
-        style.font.size = Pt(12)
-        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(9 if style_name == "Caption" else 12)
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     for style_name in ("Title", "Heading 1", "Heading 2", "Heading 3", "Abstract Title"):
         try:
-            document.styles[style_name].font.color.rgb = RGBColor(0, 0, 0)
+            style = document.styles[style_name]
         except KeyError:
             continue
+        style.font.name = "Times New Roman"
+        style.font.bold = True
+        style.font.color.rgb = RGBColor(0, 0, 0)
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     document.core_properties.title = (
         "BioLatent: A Standardised Benchmark of Frozen Molecular "
         "Representations with Protein and Genomic Extensions")
@@ -356,6 +376,8 @@ def build():
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     title_run = title.add_run("BioLatent: A Standardised Benchmark of Frozen Molecular "
                               "Representations with Protein and Genomic Extensions")
+    title_run.font.name = "Times New Roman"
+    title_run.font.bold = True
     title_run.font.color.rgb = RGBColor(0, 0, 0)
     author = document.add_paragraph(
         "Yassir Boulaamane",
@@ -373,6 +395,8 @@ def build():
         "Abstract", style=available_style(document, "Abstract Title", "Heading 1")
     )
     for run in abstract_heading.runs:
+        run.font.name = "Times New Roman"
+        run.font.bold = True
         run.font.color.rgb = RGBColor(0, 0, 0)
     abstract = (
         f"Comparisons of molecular representations are often confounded by differences in "
@@ -402,7 +426,9 @@ def build():
         abstract, style=available_style(document, "Abstract")
     )
     abstract_paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    abstract_paragraph.paragraph_format.line_spacing = 1.5
     for run in abstract_paragraph.runs:
+        run.font.name = "Times New Roman"
         run.font.size = Pt(12)
     add_body(document, "Keywords: molecular representations; molecular property prediction; "
              "chemical fingerprints; scaffold split; pretrained models; benchmark uncertainty")
@@ -806,7 +832,9 @@ def build():
         paragraph = document.add_paragraph(item, style="List Paragraph")
         paragraph.style = document.styles["List Paragraph"]
         paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        paragraph.paragraph_format.line_spacing = 1.5
         for run in paragraph.runs:
+            run.font.name = "Times New Roman"
             run.font.size = Pt(12)
 
     add_heading(document, "6. Conclusion", 1)
@@ -886,7 +914,10 @@ def build():
             style=available_style(document, "Bibliography")
         )
         paragraph.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-        paragraph.add_run(text).font.size = Pt(12)
+        paragraph.paragraph_format.line_spacing = 1.5
+        reference_run = paragraph.add_run(text)
+        reference_run.font.name = "Times New Roman"
+        reference_run.font.size = Pt(12)
         add_hyperlink(paragraph, url.replace("https://doi.org/", "doi:"), url)
 
     for section in document.sections:
@@ -896,9 +927,9 @@ def build():
         section.right_margin = Inches(0.75)
         add_page_number(section)
     normal = document.styles["Normal"]
-    normal.font.name = "Arial"
+    normal.font.name = "Times New Roman"
     normal.font.size = Pt(12)
-    normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Arial")
+    normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     document.save(OUTPUT)
     print(f"Wrote {OUTPUT}")
 
