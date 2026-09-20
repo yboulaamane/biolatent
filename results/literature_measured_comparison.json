@@ -1,0 +1,191 @@
+{
+  "analysis_type": "descriptive registry-to-measured alignment",
+  "matching_rule": "Same representation, endpoint and performance measure; values were not pooled and no causal attribution or cross-study significance test was performed.",
+  "registry_summary": {
+    "benchmark_records": 61,
+    "molecular_records": 41,
+    "documented_partition_counts": {
+      "other or unstated": 24,
+      "scaffold": 37
+    },
+    "molecular_documented_partition_counts": {
+      "other or unstated": 4,
+      "scaffold": 37
+    }
+  },
+  "matched_summary": {
+    "pairs": 11,
+    "measured_higher": 7,
+    "literature_higher": 4,
+    "equal": 0,
+    "documented_scaffold_pairs": 11
+  },
+  "rank_concordance": {
+    "BBBP": {
+      "n": 7,
+      "spearman_rho": 0.25,
+      "interpretation": "descriptive only; no inferential test was performed"
+    },
+    "CYP3A4": {
+      "n": 4,
+      "spearman_rho": -0.6,
+      "interpretation": "descriptive only; no inferential test was performed"
+    }
+  },
+  "matches": [
+    {
+      "representation": "ChemBERTa-77M",
+      "registry_id": "chemberta_77m",
+      "measured_id": "chemberta_77m",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.698,
+      "measured_score": 0.9538,
+      "difference_measured_minus_literature": 0.2558,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Ahmad et al., 2022",
+      "literature_source_url": "https://doi.org/10.48550/arXiv.2209.01712",
+      "literature_note": "Table 1, MLM-77M, DeepChem scaffold split 80/10/10"
+    },
+    {
+      "representation": "ECFP4",
+      "registry_id": "ecfp4_fingerprint",
+      "measured_id": "ecfp4",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.714,
+      "measured_score": 0.9141,
+      "difference_measured_minus_literature": 0.2001,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Wu et al., 2018",
+      "literature_source_url": "https://doi.org/10.1039/C7SC02664A",
+      "literature_note": "Table 6, scaffold split; RF on ECFP4 features (ECFP-featurized models span 0.688-0.729)"
+    },
+    {
+      "representation": "GROVER Base",
+      "registry_id": "grover_base",
+      "measured_id": "grover_base",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.936,
+      "measured_score": 0.9182,
+      "difference_measured_minus_literature": -0.0178,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Rong et al., 2020",
+      "literature_source_url": "https://doi.org/10.48550/arXiv.2007.02835",
+      "literature_note": "Table 1, scaffold split (8:1:1), mean of 3 seeds"
+    },
+    {
+      "representation": "GROVER Large",
+      "registry_id": "grover_large",
+      "measured_id": "grover_large",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.94,
+      "measured_score": 0.934,
+      "difference_measured_minus_literature": -0.006,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Rong et al., 2020",
+      "literature_source_url": "https://doi.org/10.48550/arXiv.2007.02835",
+      "literature_note": "Table 1, scaffold split (8:1:1), mean of 3 seeds"
+    },
+    {
+      "representation": "MoLFormer-XL",
+      "registry_id": "molformer_xl",
+      "measured_id": "molformer_xl",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.937,
+      "measured_score": 0.9541,
+      "difference_measured_minus_literature": 0.0171,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Ross et al., 2022",
+      "literature_source_url": "https://doi.org/10.1038/s42256-022-00580-7",
+      "literature_note": "Table 1, MolFormer-XL = 93.7, MoleculeNet scaffold split"
+    },
+    {
+      "representation": "MolCLR GIN",
+      "registry_id": "molclr",
+      "measured_id": "molclr_gin",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.736,
+      "measured_score": 0.8839,
+      "difference_measured_minus_literature": 0.1479,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Wang et al., 2022",
+      "literature_source_url": "https://doi.org/10.1038/s42256-022-00447-x",
+      "literature_note": "Table 1, MolCLR GIN, scaffold split 80/10/10"
+    },
+    {
+      "representation": "Uni-Mol v1",
+      "registry_id": "uni_mol",
+      "measured_id": "unimol_v1",
+      "dataset": "BBBP",
+      "metric": "ROC-AUC",
+      "literature_score": 0.729,
+      "measured_score": 0.909,
+      "difference_measured_minus_literature": 0.18,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Zhou et al., 2023",
+      "literature_source_url": "https://openreview.net/forum?id=6K2RM6wVqKu",
+      "literature_note": "Table 1, Uni-Mol row, ROC-AUC %, scaffold split, mean of 3 seeds (72.9 +/- 0.6)"
+    },
+    {
+      "representation": "ECFP4",
+      "registry_id": "ecfp4_fingerprint",
+      "measured_id": "ecfp4",
+      "dataset": "CYP3A4",
+      "metric": "ROC-AUC",
+      "literature_score": 0.633,
+      "measured_score": 0.6838,
+      "difference_measured_minus_literature": 0.0508,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "TDC ADMET leaderboard (accessed 2026-07-18)",
+      "literature_source_url": "https://tdcommons.ai/benchmark/admet_group/15cyp3a4s/",
+      "literature_note": "Morgan + MLP (DeepPurpose) entry, AUROC, scaffold split; no plain-ECFP entry exists"
+    },
+    {
+      "representation": "MoLFormer-XL",
+      "registry_id": "molformer_xl",
+      "measured_id": "molformer_xl",
+      "dataset": "CYP3A4",
+      "metric": "ROC-AUC",
+      "literature_score": 0.699,
+      "measured_score": 0.6518,
+      "difference_measured_minus_literature": -0.0472,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Pinto, 2025",
+      "literature_source_url": "https://doi.org/10.48550/arXiv.2506.06443",
+      "literature_note": "Table 1, MolFormer Layer 9 representation, scaffold split (default CLS/final-layer is 0.662)"
+    },
+    {
+      "representation": "RDKit2D",
+      "registry_id": "rdkit_descriptors",
+      "measured_id": "rdkit2d",
+      "dataset": "CYP3A4",
+      "metric": "ROC-AUC",
+      "literature_score": 0.639,
+      "measured_score": 0.6873,
+      "difference_measured_minus_literature": 0.0483,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "TDC ADMET leaderboard (accessed 2026-07-18)",
+      "literature_source_url": "https://tdcommons.ai/benchmark/admet_group/15cyp3a4s/",
+      "literature_note": "RDKit2D + MLP (DeepPurpose) entry, AUROC, scaffold split"
+    },
+    {
+      "representation": "Uni-Mol v1",
+      "registry_id": "uni_mol",
+      "measured_id": "unimol_v1",
+      "dataset": "CYP3A4",
+      "metric": "ROC-AUC",
+      "literature_score": 0.688,
+      "measured_score": 0.5772,
+      "difference_measured_minus_literature": -0.1108,
+      "documented_literature_partition": "scaffold",
+      "literature_source": "Pinto, 2025",
+      "literature_source_url": "https://doi.org/10.48550/arXiv.2506.06443",
+      "literature_note": "Table 1, Uni-Mol Layer 13 representation, scaffold split (default CLS/final-layer is 0.662)"
+    }
+  ]
+}

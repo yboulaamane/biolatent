@@ -74,6 +74,17 @@ REPRESENTATION_DETAILS = {
     "hyenadna": ("DNA sequence", "Pretrained long-range sequence model", "Learned representation"),
 }
 
+LITERATURE_REFERENCE_NUMBERS = {
+    "https://doi.org/10.48550/arXiv.2209.01712": 25,
+    "https://doi.org/10.1039/C7SC02664A": 9,
+    "https://doi.org/10.48550/arXiv.2007.02835": 6,
+    "https://doi.org/10.1038/s42256-022-00580-7": 3,
+    "https://doi.org/10.1038/s42256-022-00447-x": 5,
+    "https://openreview.net/forum?id=6K2RM6wVqKu": 4,
+    "https://tdcommons.ai/benchmark/admet_group/15cyp3a4s/": 10,
+    "https://doi.org/10.48550/arXiv.2506.06443": 26,
+}
+
 
 def load_json(name):
     path = ROOT / "results" / name
@@ -332,6 +343,7 @@ def build():
     sensitivity = load_json("split_seed_sensitivity.json")
     resolution = load_json("resolution_curves.json")
     split_diagnostics = load_json("split_diagnostics.json")
+    literature_comparison = load_json("literature_measured_comparison.json")
     figure_legends = load_figure_legends()
     missing = [task for task in TASK_ORDER if task not in results or task not in paired]
     if missing:
@@ -418,6 +430,8 @@ def build():
         f"its related variants did not provide independent homology clusters. The highest-scoring "
         f"molecular representation depended on the endpoint, "
         f"and repeated scaffold partitions changed the leading method in several datasets. "
+        f"Eleven registry records could be matched by representation, endpoint and metric; all "
+        f"were documented as scaffold-split, and score differences were bidirectional. "
         f"Conventional fingerprints and descriptors remained competitive with pretrained "
         f"molecular models. These findings show that small numerical differences should not be "
         f"interpreted as stable rankings without uncertainty estimates and split-sensitivity "
@@ -454,14 +468,13 @@ def build():
              "sources of variation make numerical rankings assembled across publications difficult to "
              "interpret.")
     add_body(document, "BioLatent initially assembled a provenance-aware registry of molecular and "
-             "biological representations and the benchmark values reported for them. Examination "
-             "of those records showed that results assigned to the same endpoint often came from "
-             "different dataset versions, partitions, predictive models and tuning procedures. The "
-             "registry is therefore a descriptive catalogue, not a basis for ranking methods. This "
-             "limitation motivated a separate measured benchmark in which compatible "
-             "representations were recomputed and evaluated under one prespecified procedure. The "
-             "registry and measured benchmark are complementary, but their numerical values are "
-             "kept analytically separate.")
+             "biological representations and the benchmark values reported for them. Those values "
+             "often arose from different dataset versions, partitions, predictive models and tuning "
+             "procedures, so they cannot be pooled into a controlled ranking. This limitation "
+             "motivated a measured benchmark in which compatible representations were recomputed "
+             "under one prespecified procedure. The two layers were connected through a descriptive "
+             "matching analysis restricted to the same representation, endpoint and performance "
+             "measure, while preserving the protocol provenance of each literature value.")
     add_body(document, "MoleculeNet and the Therapeutics Data Commons established public datasets and "
              "evaluation practices for molecular machine learning [9,10]. The choice of partition is "
              "nevertheless consequential. Random allocation can place close analogues in both the "
@@ -484,10 +497,11 @@ def build():
              "regularised linear prediction procedure. This design asks whether task-relevant "
              "information is accessible from the fixed vector without representation-specific "
              "fine-tuning; it does not estimate the maximum performance attainable by an end-to-end "
-             "model. We asked three questions: whether pretrained representations consistently "
-             "separate from established fingerprints and descriptors, whether apparent rankings are "
-             "robust to scaffold allocation, and how often numerical differences remain statistically "
-             "distinguishable after study-wide correction. The primary analysis covers six molecular "
+             "model. We asked whether published magnitudes and rankings carried into this common "
+             "protocol, whether pretrained representations consistently separated from established "
+             "fingerprints and descriptors, whether apparent rankings were robust to scaffold "
+             "allocation, and how often differences remained statistically distinguishable after "
+             "study-wide correction. The primary analysis covers six molecular "
              "endpoints spanning permeability, toxicity, enzyme inhibition, solubility, lipophilicity "
              "and metabolism. Protein and genomic tasks test the same comparison framework in other "
              "biological sequences without treating scores from different modalities as directly "
@@ -623,7 +637,18 @@ def build():
              "The promoter sequences derive from the human reference genome used by genomic "
              "pretraining collections.")
 
-    add_heading(document, "2.7 Computational reproducibility", 2)
+    add_heading(document, "2.7 Descriptive alignment with literature-reported results", 2)
+    add_body(document, "Registry records were matched to the measured benchmark only when the "
+             "representation, endpoint and performance measure were the same. Literature and "
+             "measured values were not pooled because dataset processing, the exact scaffold "
+             "allocation, model fitting and tuning could still differ. For each eligible pair, we "
+             "recorded the direction of the score difference and calculated the Spearman rank "
+             "correlation within endpoints containing at least two matches. These correlations are "
+             "descriptive; no cross-study significance test or causal attribution to partition "
+             "strategy was made. The matching script and its complete output are included in the "
+             "public release.")
+
+    add_heading(document, "2.8 Computational reproducibility", 2)
     add_body(document, "All pretrained model versions and source revisions were fixed before "
              "evaluation. Molecular strings used a maximum model input length of 256; protein and "
              "DNA sequences were limited to 510 biological characters before encoding. Sequence "
@@ -634,7 +659,31 @@ def build():
              "with the public release.")
 
     add_heading(document, "3. Results", 1)
-    add_heading(document, "3.1 Molecular-property prediction", 2)
+    registry_summary = literature_comparison["registry_summary"]
+    matched_summary = literature_comparison["matched_summary"]
+    rank_concordance = literature_comparison["rank_concordance"]
+    add_heading(document, "3.1 Alignment of literature and measured results", 2)
+    add_body(document, f"The registry contained {registry_summary['benchmark_records']} reported "
+             f"performance records, including {registry_summary['molecular_records']} molecular "
+             f"records. Of the molecular records, "
+             f"{registry_summary['molecular_documented_partition_counts']['scaffold']} were "
+             "documented as scaffold-split and four used another or unstated partition; none was "
+             "documented in the registry as random-split. Matching by representation, endpoint and "
+             f"metric yielded {matched_summary['pairs']} pairs: seven for BBBP and four for CYP3A4. "
+             f"All {matched_summary['documented_scaffold_pairs']} matched literature values were "
+             "scaffold-split.")
+    add_body(document, f"The direction of the difference was mixed: the measured value was higher "
+             f"in {matched_summary['measured_higher']} pairs and the literature value was higher in "
+             f"{matched_summary['literature_higher']}. Rank concordance was weak for BBBP "
+             f"(Spearman rho = {rank_concordance['BBBP']['spearman_rho']:.2f}, n = "
+             f"{rank_concordance['BBBP']['n']}) and negative for CYP3A4 (rho = "
+             f"{rank_concordance['CYP3A4']['spearman_rho']:.2f}, n = "
+             f"{rank_concordance['CYP3A4']['n']}). These small, descriptive matched sets do not "
+             "show random-split inflation. They show that published magnitudes and rankings were not "
+             "transportable to the common frozen-representation protocol. The individual matches "
+             "and their source-level partition notes are reported in Supplementary Table S2.")
+
+    add_heading(document, "3.2 Molecular-property prediction", 2)
     add_body(document, "The identity of the highest-scoring representation varied across the six "
              "chemical endpoints. ChemBERTa-ZINC produced the highest observed scores for BBBP "
              "(0.971) and ClinTox (0.985), ECFP4 for BACE (0.890), GROVER Large for ESOL "
@@ -667,7 +716,7 @@ def build():
         document, "figure2_molecular_performance.png", figure_legends["Figure 2"], 5.55
     )
 
-    add_heading(document, "3.2 Extension to protein and genomic datasets", 2)
+    add_heading(document, "3.3 Extension to protein and genomic datasets", 2)
     add_body(document, "For DeepLoc, performance increased across the four ESM-2 sizes, reaching "
              "a mean ROC-AUC of 0.892 with ESM-2 650M. The Fluorescence results did not follow the "
              "same pattern: amino-acid triplet frequencies achieved the highest correlation "
@@ -685,7 +734,7 @@ def build():
         figure_legends["Figure 3"], 6.15
     )
 
-    add_heading(document, "3.3 Statistical support for performance differences", 2)
+    add_heading(document, "3.4 Statistical support for performance differences", 2)
     add_body(document, "Statistical support was evaluated relative to the comparison representation "
              "selected using validation data. The dataset-specific results are summarised in Table 5 "
              "and Figure 4A.")
@@ -721,7 +770,7 @@ def build():
              "panel and were not included in the formal multiplicity family. Sample size is not the "
              "only determinant of precision: endpoint noise, effect size and dependence among "
              "observations also matter.")
-    add_heading(document, "3.4 Sensitivity to scaffold partition and test-set size", 2)
+    add_heading(document, "3.5 Sensitivity to scaffold partition and test-set size", 2)
     add_body(document, "Scaffold-partition sensitivity was assessed from the frequency of each "
              "leading representation and the largest score spread across 20 partitions. These "
              "results are summarised in Table 6 and Figure 4B–C.")
@@ -787,7 +836,7 @@ def build():
         document, "figure5_subsampling_resolution.png", figure_legends["Figure 5"], 5.95
     )
 
-    add_heading(document, "3.5 Structural overlap with sampled pretraining sources", 2)
+    add_heading(document, "3.6 Structural overlap with sampled pretraining sources", 2)
     add_body(document, "Exact molecular matches were rare in the sampled databases: none occurred "
              "in the ZINC sample and one Lipophilicity compound occurred in the PubChem sample. "
              "Close ECFP4 neighbours were also uncommon. Shared scaffolds were more frequent and "
@@ -828,11 +877,13 @@ def build():
              "promoter methods were numerically close and statistically indistinguishable. Sample "
              "size contributed to precision, but endpoint noise, sequence relatedness and effect "
              "magnitude also matter.")
-    add_body(document, "BioLatent contributes a controlled comparison and reusable result resource, "
-             "rather than a new molecular representation. Its principal advantage is that the same "
-             "dataset definitions, predictive models and statistical criteria are applied throughout. "
-             "The public predictions and source data allow new representations to be added without "
-             "treating heterogeneous literature values as if they came from one experiment.")
+    add_body(document, "The registry alignment reinforces the need for a common evaluation procedure. "
+             "Although every matched literature value used a scaffold split, score differences were "
+             "bidirectional and rankings changed. The discrepancy therefore cannot be attributed to "
+             "random rather than scaffold partitioning. It can reflect the exact scaffold allocation, "
+             "dataset processing, endpoint definition, representation extraction, predictor and "
+             "tuning procedure. Literature values remain useful provenance-rich context, but the "
+             "measured benchmark is the appropriate layer for controlled comparison.")
 
     add_heading(document, "5. Limitations", 1)
     limitations = [
@@ -844,6 +895,7 @@ def build():
         "The Fluorescence test variants formed one homology component at the prespecified threshold. Its scores and intervals are fixed-panel descriptions and do not support population-level significance claims.",
         "The ZINC, PubChem and Swiss-Prot comparisons are sampled indicators of structural or sequence familiarity, not exact reconstructions of model pretraining collections.",
         "No independent benchmark collection was used to establish that the observed rankings generalise to other chemical series or assay settings.",
+        "The literature-to-measured alignment is descriptive. Its small matched sets and remaining protocol differences do not support causal attribution of score changes to any single design choice.",
     ]
     for item in limitations:
         paragraph = document.add_paragraph(item, style="List Paragraph")
@@ -860,7 +912,9 @@ def build():
              "fingerprints and descriptors remained competitive, while pretrained methods provided "
              "clear advantages in selected datasets rather than uniformly. Most numerical molecular "
              "rankings were not supported as statistically distinguishable differences after "
-             "study-wide correction. BioLatent therefore supports representation selection based on "
+             "study-wide correction. Matched literature values were all scaffold-split, yet their "
+             "magnitudes and rankings did not transfer consistently to the common frozen-representation "
+             "protocol. BioLatent therefore supports representation selection based on "
              "the chemical endpoint, uncertainty and scaffold robustness, rather than on a single "
              "aggregate leaderboard.")
 
@@ -925,6 +979,8 @@ def build():
         ("[22] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
         ("[23] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
         ("[24] Steinegger M, Söding J. MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nature Biotechnology. 2017;35:1026-1028. ", "https://doi.org/10.1038/nbt.3988"),
+        ("[25] Ahmad W, Simon E, Chithrananda S, Grand G, Ramsundar B. ChemBERTa-2: towards chemical foundation models. 2022. ", "https://doi.org/10.48550/arXiv.2209.01712"),
+        ("[26] Pinto L. Superior molecular representations from intermediate encoder layers. 2025. ", "https://doi.org/10.48550/arXiv.2506.06443"),
     ]
     for text, url in references:
         paragraph = document.add_paragraph(
@@ -976,6 +1032,33 @@ def build():
         ["Dataset", "n", "Scaffolds", "Fit target", "Test target", "Overlap"],
         diagnostic_rows,
         widths=[0.7, 0.85, 0.9, 1.65, 1.65, 0.75],
+    )
+    literature_rows = [
+        [
+            row["representation"],
+            row["dataset"],
+            row["metric"],
+            f"{row['literature_score']:.3f}",
+            f"{row['measured_score']:.3f}",
+            f"{row['difference_measured_minus_literature']:+.3f}",
+            f"{row['literature_source']} "
+            f"[{LITERATURE_REFERENCE_NUMBERS[row['literature_source_url']]}]",
+        ]
+        for row in literature_comparison["matches"]
+    ]
+    add_caption(
+        supplement,
+        "Table S2. Descriptive alignment of literature-reported and measured results. "
+        "Rows share the same representation, endpoint and measure; all literature records "
+        "were documented as scaffold-split. Delta is measured minus literature. Values are "
+        "not estimates from the same experiment and were not subjected to cross-study "
+        "significance testing.",
+    )
+    add_table(
+        supplement,
+        ["Representation", "Endpoint", "Measure", "Literature", "Measured", "Delta", "Source"],
+        literature_rows,
+        widths=[1.2, 0.75, 0.75, 0.7, 0.7, 0.6, 1.35],
     )
     supplement.add_page_break()
     add_publication_figure(

@@ -889,11 +889,11 @@ export default function Home() {
             border: '1px solid rgba(251, 191, 36, 0.22)', borderRadius: '12px',
             color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6,
           }}>
-            <strong style={{ color: '#fbbf24' }}>Do not compare these values directly.</strong>{' '}
-            They were reported by different groups using different datasets, splits, readouts and predictive models.
-            The displayed order can therefore reflect the evaluation procedure as much as the representation.
-            These entries do not include a common uncertainty analysis or significance test. For results generated
-            under one protocol, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
+            <strong style={{ color: '#fbbf24' }}>Do not rank unmatched literature values.</strong>{' '}
+            Different datasets, partitions, readouts and predictive models can affect the displayed scores.
+            BioLatent therefore keeps their provenance visible and only compares literature with measured results
+            descriptively when the representation, endpoint and metric match. For controlled comparisons and
+            uncertainty estimates, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
           </div>
 
           {/* Scientific Methodology Card */}
@@ -969,7 +969,7 @@ export default function Home() {
                       <span>• <strong>MoleculeNet QSAR Suite</strong>: <a href="https://doi.org/10.1039/C7SC02664A" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Wu et al. (2018)</a></span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <span>• <strong>FLIP (Functional Landscapes)</strong>: <a href="https://doi.org/10.1101/2021.11.09.467895" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Dallago et al. (2021)</a></span>
+                      <span>• <strong>FLIP (Functional Landscapes)</strong>: <a href="https://doi.org/10.1101/2021.11.09.467890" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Dallago et al. (2021)</a></span>
                       <span>• <strong>DeepLoc Architecture</strong>: <a href="https://doi.org/10.1093/bioinformatics/btx431" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none' }}>Almagro Armenteros et al. (2017)</a></span>
                     </div>
                   </div>

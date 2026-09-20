@@ -167,7 +167,6 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
       size: "1.7M molecules",
       license: "CC BY-SA 3.0"
     },
-    codeRepositoryUrl: "https://github.com/honda-research-institute/smiles-transformer",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.704", citation: { shortRef: "Honda et al., 2019", doi: "https://doi.org/10.48550/arXiv.1911.04738", note: "Table 3, ST row, scaffold split (paper labels split per dataset)" } }],
@@ -368,7 +367,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
       size: "120,000+ binding affinities",
       license: "Academic Use"
     },
-    codeRepositoryUrl: "https://github.com/lifesciencetrust/deep-dti",
+    codeRepositoryUrl: "https://github.com/hkmztrk/DeepDTA",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "Davis (Affinity)", metric: "CI (Concordance Index)", score: "0.878", citation: { shortRef: "Öztürk et al., 2018", doi: "https://doi.org/10.1093/bioinformatics/bty593", note: "Table 3, DeepDTA CNN-CNN = 0.878 (0.004) on Davis; MSE 0.261" } }
@@ -572,7 +571,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
       size: "2.1 Billion sequences",
       license: "Academic Use"
     },
-    codeRepositoryUrl: "https://github.com/agemf/prot_t5_xl_uniref50",
+    codeRepositoryUrl: "https://github.com/agemagician/ProtTrans",
     weightsUrl: "https://huggingface.co/Rostlab/prot_bert_bfd",
     computeProfile: "gpu",
     benchmarks: [
@@ -608,7 +607,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
       size: "2.1 Billion sequences",
       license: "Academic/Commercial"
     },
-    codeRepositoryUrl: "https://github.com/agemf/prot_t5_xl_uniref50",
+    codeRepositoryUrl: "https://github.com/agemagician/ProtTrans",
     weightsUrl: "https://huggingface.co/Rostlab/prot_t5_xl_uniref50",
     computeProfile: "gpu",
     benchmarks: [
@@ -672,8 +671,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()`
       size: "200M sequences",
       license: "Apache-2.0"
     },
-    codeRepositoryUrl: "https://github.com/Rostlab/Ankh",
-    weightsUrl: "https://huggingface.co/Elana/ankh-base",
+    codeRepositoryUrl: "https://github.com/agemagician/Ankh",
+    weightsUrl: "https://huggingface.co/ElnaggarLab/ankh-base",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "Secondary Structure (CB513)", metric: "Q3 Accuracy", score: "0.869", citation: { shortRef: "Elnaggar et al., 2023", doi: "https://doi.org/10.48550/arXiv.2301.06568", note: "Q3 on CB513, Ankh Base = 86.94 (official benchmark table)" } }],
@@ -702,7 +701,6 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
       license: "MIT"
     },
     codeRepositoryUrl: "https://github.com/facebookresearch/esm",
-    weightsUrl: "https://huggingface.co/facebook/esm-msa",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "Unsupervised Contact Prediction (CASP13-FM)", metric: "Top-L Long-Range Precision", score: "0.448", citation: { shortRef: "Rao et al., 2021", doi: "https://doi.org/10.1101/2021.02.12.430858", note: "Unsupervised contact table: CASP13-FM top-L = 44.8, top-L/5 = 72.5; CAMEO top-L = 43.5, top-L/5 = 66.8. Paper reports LONG-range only" } }
@@ -871,7 +869,7 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
       license: "CC0 / Mixed"
     },
     codeRepositoryUrl: "https://github.com/IBM/molformer",
-    weightsUrl: "https://huggingface.co/ibm/MoLFormer-XL-Cperceiver-10pct",
+    weightsUrl: "https://huggingface.co/ibm-research/MoLFormer-XL-both-10pct",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "BBBP (Blood-Brain Barrier)", metric: "ROC-AUC", score: "0.937", citation: { shortRef: "Ross et al., 2022", doi: "https://doi.org/10.1038/s42256-022-00580-7", note: "Table 1, MolFormer-XL = 93.7, MoleculeNet scaffold split" } },
@@ -880,8 +878,8 @@ model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
     ],
     tags: ["IBM", "Mila", "SMILES", "Linear-Attention"],
     codeSnippet: `from transformers import AutoModel, AutoTokenizer
-tokenizer = AutoTokenizer.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)
-model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_remote_code=True)`
+tokenizer = AutoTokenizer.from_pretrained("ibm-research/MoLFormer-XL-both-10pct", trust_remote_code=True)
+model = AutoModel.from_pretrained("ibm-research/MoLFormer-XL-both-10pct", trust_remote_code=True)`
   },
   {
     id: "prost_t5",
@@ -899,7 +897,7 @@ model = AutoModel.from_pretrained("ibm/MoLFormer-XL-Cperceiver-10pct", trust_rem
       size: "19M protein structures",
       license: "Academic/Commercial"
     },
-    codeRepositoryUrl: "https://github.com/agemf/ProstT5",
+    codeRepositoryUrl: "https://github.com/mheinzinger/ProstT5",
     weightsUrl: "https://huggingface.co/Rostlab/ProstT5",
     computeProfile: "gpu",
     benchmarks: [],
@@ -950,8 +948,8 @@ model = T5EncoderModel.from_pretrained("Rostlab/ProstT5")`
       size: "350M antibody sequences",
       license: "Creative Commons Attribution 4.0"
     },
-    codeRepositoryUrl: "https://github.com/jerryji1993/antiBERTy",
-    weightsUrl: "https://huggingface.co/jerryji1993/antiBERTy",
+    codeRepositoryUrl: "https://github.com/jeffreyruffolo/AntiBERTy",
+    weightsUrl: "https://huggingface.co/jeffruffolo/AntiBERTy",
     computeProfile: "gpu",
     benchmarks: [],
     tags: ["Antibody", "Immunoglobulin", "Therapeutic", "BERT"],
@@ -974,7 +972,6 @@ runner = AntiBERTyRunner()`
       size: "10M molecules",
       license: "MIT"
     },
-    codeRepositoryUrl: "https://github.com/valencelabs/ChemGPT",
     weightsUrl: "https://huggingface.co/ncfrey/ChemGPT-1.2B",
     computeProfile: "gpu",
     benchmarks: [],
@@ -1054,8 +1051,8 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
       size: "300 Billion tokens",
       license: "Apache-2.0"
     },
-    codeRepositoryUrl: "https://github.com/a16z-infra/evo",
-    weightsUrl: "https://huggingface.co/arc-institute/evo-1-7b-base",
+    codeRepositoryUrl: "https://github.com/evo-design/evo",
+    weightsUrl: "https://huggingface.co/togethercomputer/evo-1-131k-base",
     computeProfile: "gpu",
     benchmarks: [],
     tags: ["Evo", "DNA", "RNA", "Genomics", "Arc-Institute", "Hyena"],
@@ -1064,7 +1061,7 @@ import torch
 
 # Load the 7B foundation model
 device = "cuda" if torch.cuda.is_available() else "cpu"
-evo_model = Evo("evo-1-7b-base")
+evo_model = Evo("evo-1-131k-base")
 model = evo_model.model.to(device)
 model.eval()
 
@@ -1092,8 +1089,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
       size: "32 Billion base pairs",
       license: "Academic/Commercial"
     },
-    codeRepositoryUrl: "https://github.com/jerryji1993/DNABERT2",
-    weightsUrl: "https://huggingface.co/zhihan1996/DNABERT2-117M",
+    codeRepositoryUrl: "https://github.com/MAGICS-LAB/DNABERT_2",
+    weightsUrl: "https://huggingface.co/zhihan1996/DNABERT-2-117M",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "GUE (Genome Understanding Eval)", metric: "Average Score (F1 / MCC)", score: "0.668", citation: { shortRef: "Zhou et al., 2024", doi: "https://doi.org/10.48550/arXiv.2306.15006", note: "Table 3, DNABERT-2 = 66.80. Paper uses F1 for some tasks and MCC for others, averaged" } }
@@ -1102,8 +1099,8 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()`
     codeSnippet: `from transformers import AutoTokenizer, AutoModel
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT2-117M", trust_remote_code=True)
-model = AutoModel.from_pretrained("zhihan1996/DNABERT2-117M", trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
+model = AutoModel.from_pretrained("zhihan1996/DNABERT-2-117M", trust_remote_code=True)
 
 inputs = tokenizer("ACGTTGCA", return_tensors="pt")
 with torch.no_grad():
@@ -1137,31 +1134,6 @@ embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
     codeSnippet: `# HyenaDNA custom loader utilizing safari-conv modules
 # from hyena_dna.model import HyenaDNAModel
 # model = HyenaDNAModel.from_pretrained("hyenadna-medium-160k")`
-  },
-  {
-    id: "rxnformer",
-    name: "Rxnformer",
-    representationType: "learned_embedding",
-    modality: "reaction",
-    inputRepresentation: "reaction_smiles",
-    license: "MIT",
-    developer: "Bayer / IBM Research",
-    architectureType: "Transformer (BART-like)",
-    pretrainingObjective: "Sequence-to-sequence reaction prediction and yield classification",
-    embeddingDimension: 768,
-    yearReleased: 2022,
-    trainingData: {
-      name: "USPTO reaction database",
-      size: "2.5 Million reactions",
-      license: "CC0 / Public Domain"
-    },
-    codeRepositoryUrl: "https://github.com/Bayer-Group/rxnformer",
-    computeProfile: "gpu",
-    benchmarks: [],
-    tags: ["Reaction", "Synthesis", "BART", "USPTO"],
-    codeSnippet: `# Rxnformer runs yield prediction on chemical reactions
-# from rxnformer import RxnformerModel
-# model = RxnformerModel.from_pretrained("rxnformer-yield")`
   },
   {
     id: "rxnmapper",
