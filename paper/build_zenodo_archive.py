@@ -74,7 +74,8 @@ Representations with Protein and Genomic Extensions**.
 ## Directory guide
 
 - `results/`: benchmark scores, paired comparisons, sensitivity analyses,
-  exposure proxies, run manifest and per-example predictions.
+  exposure proxies, the descriptive literature alignment, run manifest and
+  per-example predictions.
 - `paper/figure_data/`: exact source tables plotted in every figure.
 - `SHA256SUMS.txt`: file integrity hashes.
 

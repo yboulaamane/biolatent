@@ -15,7 +15,7 @@ In computer-aided drug discovery and computational biology, the landscape of fou
 
 **BioLatent** is a unified, provenance-aware index cataloging representations across five primary modalities: **Small Molecules**, **Proteins**, **Complexes**, **Chemical Reactions**, and **Nucleic Acids (DNA/RNA)**.
 
-BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot support a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. Literature values and measured results remain separate throughout the website and must not be mixed.
+BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot be pooled into a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. The two layers are connected through a descriptive analysis restricted to records with the same representation, endpoint, and metric; remaining protocol differences are retained explicitly and prevent causal attribution to any single design choice.
 
 ### Measured release snapshot
 
@@ -167,6 +167,7 @@ python benchmark/resolution_analysis.py
 python benchmark/split_sensitivity.py
 python benchmark/run_study.py --refresh-metadata
 python benchmark/validate_release.py --full-hash
+python scripts/build_literature_comparison.py
 python paper/generate_figures.py
 python paper/generate_manuscript.py
 python paper/build_zenodo_archive.py
@@ -188,7 +189,7 @@ Registry metadata are descriptive catalog fields, not empirical quality or clini
 
 * **Artifact availability** records whether code and/or weights are linked; it is not a reproducibility score.
 * **Compute profile** is the declared CPU, GPU, or mixed execution category, not a runtime guarantee.
-* **Reported benchmarks** retain a source link and row-level provenance note. Values from heterogeneous papers are not treated as directly comparable.
+* **Reported benchmarks** retain a source link and row-level provenance note. Heterogeneous values are not pooled; the committed descriptive analysis matches only records with the same representation, endpoint, and metric.
 * **Compatibility Finder** filters by modality, available input, and compute profile. It identifies catalogued or explicitly derivable input compatibility, lists matches alphabetically, and does not claim an optimal model.
 
 ---

@@ -2,7 +2,7 @@
 
 ## Figure 1. Study design and validated benchmark scope
 
-BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Molecular confidence intervals resample Bemis–Murcko scaffolds and DeepLoc intervals resample MMseqs2 homology clusters. Statistical evidence is adjusted across 54 eligible study comparisons; the five Fluorescence comparisons are descriptive because its test variants form one connected homology component at the prespecified threshold. The validated release contains 18 domain-specific representations and 68 model–dataset evaluations, of which 19 of 54 eligible formal comparisons were statistically distinguishable after correction.
+BioLatent compares 18 fixed representations across nine public molecular, protein and genomic datasets (68 representation–dataset evaluations) using a common regularised linear protocol. Comparison methods are selected using validation data, and resampling respects molecular scaffolds or DeepLoc homology clusters. After correction across 54 eligible comparisons, 19 were statistically distinguishable. Fluorescence is descriptive because its test variants form a single homology component.
 
 ## Figure 2. Molecular property-prediction performance
 

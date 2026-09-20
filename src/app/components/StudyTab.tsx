@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import literatureComparison from '../../../results/literature_measured_comparison.json';
 import {
   EXPOSURE,
   EXPOSURE_SAMPLE,
@@ -27,7 +28,8 @@ import {
 /**
  * The measured study. Every score on this tab was generated locally under the
  * benchmark protocol, unlike the Literature Registry tab which transcribes
- * published values. The two are deliberately never mixed.
+ * published values. Matched registry records are compared descriptively, but
+ * values from different protocols are never pooled into a common ranking.
  */
 
 const CORPUS_LABELS: Record<string, string> = {
@@ -502,8 +504,9 @@ export default function StudyTab() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
           BioLatent began as a registry of results reported in the literature. Because those
           studies used different datasets and evaluation procedures, their values cannot be
-          ranked fairly. This separate study evaluates compatible representations under one
-          prespecified procedure.
+          pooled into a controlled ranking. The measured study evaluates compatible representations
+          under one prespecified procedure, while a restricted matching analysis connects records
+          that share the same representation, endpoint and metric.
         </p>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginTop: '0.7rem' }}>
           We generated the results shown here rather than transcribing them from papers. Across the
@@ -518,6 +521,20 @@ export default function StudyTab() {
           reported descriptively because its related variants do not supply independent clusters
           for population-level inference.
         </p>
+
+        <div style={{
+          marginTop: '1rem', padding: '0.9rem 1.15rem',
+          background: 'rgba(99, 102, 241, 0.08)',
+          border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: '12px',
+          color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6,
+        }}>
+          <strong style={{ color: '#a5b4fc' }}>Literature alignment.</strong>{' '}
+          {literatureComparison.matched_summary.pairs} registry records matched the measured study
+          by representation, endpoint and metric. All were documented as scaffold-split; the measured
+          value was higher in {literatureComparison.matched_summary.measured_higher} pairs and the
+          literature value in {literatureComparison.matched_summary.literature_higher}. This is a
+          descriptive comparison of protocol transportability, not evidence for random-split inflation.
+        </div>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
           <Stat value={`${mol.reliable} of ${mol.total}`}
