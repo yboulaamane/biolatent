@@ -25,6 +25,7 @@ TEMPLATE = Path(os.environ.get(
     "BIOLATENT_MANUSCRIPT_TEMPLATE", ROOT / "BioLatent_methods.docx"
 ))
 OUTPUT = ROOT / "paper" / "BioLatent_methods_revised.docx"
+SUPPLEMENTARY_OUTPUT = ROOT / "paper" / "BioLatent_supplementary_table_S1.docx"
 FIGURE_DIR = ROOT / "paper" / "figures"
 FIGURE_LEGENDS_PATH = ROOT / "paper" / "FIGURE_LEGENDS.md"
 TASK_ORDER = ["BBBP", "ClinTox", "BACE", "ESOL", "Lipophilicity", "CYP3A4",
@@ -538,10 +539,6 @@ def build():
             compact_target_summary(test["target"]),
             f"{overlap['exact_input_count']} / {overlap['scaffold_count']}",
         ])
-    add_caption(document, "Table S1. Molecular split diagnostics. Counts and target summaries are shown as non-test fit/test. The final column reports exact-structure/scaffold overlap between the complete fit and test sets.")
-    add_table(document, ["Dataset", "n", "Scaffolds", "Fit target", "Test target", "Overlap"],
-              diagnostic_rows, widths=[0.7, 0.85, 0.9, 1.65, 1.65, 0.75], font_size=7.0)
-
     add_heading(document, "2.2 Molecular and sequence representations", 2)
     add_body(document, "The molecular comparison included ECFP4 circular fingerprints, RDKit2D "
              "descriptors, three SMILES-based models, two pretrained graph families, a contrastive "
@@ -644,7 +641,8 @@ def build():
              "These results favour endpoint-specific assessment over a global ranking of molecular "
              "representations.")
     add_body(document, "Split diagnostics found no exact-structure or Bemis–Murcko scaffold overlap "
-             "between the complete fit and test sets for any molecular endpoint (Table S1). The high "
+             "between the complete fit and test sets for any molecular endpoint (Supplementary "
+             "Table S1). The high "
              "BBBP and ClinTox values therefore cannot be attributed to direct scaffold leakage in "
              "this implementation. They should nevertheless be interpreted with their test-set "
              "sizes and class balances: BBBP contained 205 test compounds across 133 scaffold "
@@ -931,7 +929,43 @@ def build():
     normal.font.size = Pt(12)
     normal._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     document.save(OUTPUT)
+
+    supplement = Document()
+    clear_body(supplement)
+    for style_name in ("Normal", "Caption"):
+        style = supplement.styles[style_name]
+        style.font.name = "Times New Roman"
+        style.font.size = Pt(9 if style_name == "Caption" else 12)
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
+    supplement_title = supplement.add_paragraph()
+    supplement_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    supplement_title_run = supplement_title.add_run(
+        "BioLatent Supplementary Information"
+    )
+    supplement_title_run.font.name = "Times New Roman"
+    supplement_title_run.font.size = Pt(14)
+    supplement_title_run.bold = True
+    supplement_title_run.font.color.rgb = RGBColor(0, 0, 0)
+    add_caption(
+        supplement,
+        "Table S1. Molecular split diagnostics. Counts and target summaries are "
+        "shown as non-test fit/test. The final column reports exact-structure/scaffold "
+        "overlap between the complete fit and test sets.",
+    )
+    add_table(
+        supplement,
+        ["Dataset", "n", "Scaffolds", "Fit target", "Test target", "Overlap"],
+        diagnostic_rows,
+        widths=[0.7, 0.85, 0.9, 1.65, 1.65, 0.75],
+    )
+    for section in supplement.sections:
+        section.top_margin = Inches(0.75)
+        section.bottom_margin = Inches(0.75)
+        section.left_margin = Inches(0.75)
+        section.right_margin = Inches(0.75)
+    supplement.save(SUPPLEMENTARY_OUTPUT)
     print(f"Wrote {OUTPUT}")
+    print(f"Wrote {SUPPLEMENTARY_OUTPUT}")
 
 
 if __name__ == "__main__":
