@@ -1,6 +1,6 @@
 {
   "analysis_type": "descriptive registry-to-measured alignment",
-  "matching_rule": "Same representation, endpoint and performance measure; values were not pooled and no causal attribution or cross-study significance test was performed.",
+  "matching_rule": "Same named representation family, endpoint and performance measure; values were not pooled and no causal attribution or cross-study significance test was performed.",
   "registry_summary": {
     "benchmark_records": 61,
     "molecular_records": 41,

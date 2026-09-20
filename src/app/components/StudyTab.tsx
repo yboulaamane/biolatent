@@ -506,7 +506,7 @@ export default function StudyTab() {
           studies used different datasets and evaluation procedures, their values cannot be
           pooled into a controlled ranking. The measured study evaluates compatible representations
           under one prespecified procedure, while a restricted matching analysis connects records
-          that share the same representation, endpoint and metric.
+          that share the same named representation family, endpoint and metric.
         </p>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginTop: '0.7rem' }}>
           We generated the results shown here rather than transcribing them from papers. Across the
@@ -530,7 +530,7 @@ export default function StudyTab() {
         }}>
           <strong style={{ color: '#a5b4fc' }}>Literature alignment.</strong>{' '}
           {literatureComparison.matched_summary.pairs} registry records matched the measured study
-          by representation, endpoint and metric. All were documented as scaffold-split; the measured
+          by named representation family, endpoint and metric. All were documented as scaffold-split; the measured
           value was higher in {literatureComparison.matched_summary.measured_higher} pairs and the
           literature value in {literatureComparison.matched_summary.literature_higher}. This is a
           descriptive comparison of protocol transportability, not evidence for random-split inflation.

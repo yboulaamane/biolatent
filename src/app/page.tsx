@@ -892,7 +892,7 @@ export default function Home() {
             <strong style={{ color: '#fbbf24' }}>Do not rank unmatched literature values.</strong>{' '}
             Different datasets, partitions, readouts and predictive models can affect the displayed scores.
             BioLatent therefore keeps their provenance visible and only compares literature with measured results
-            descriptively when the representation, endpoint and metric match. For controlled comparisons and
+            descriptively when the named representation family, endpoint and metric match. For controlled comparisons and
             uncertainty estimates, see the <strong style={{ color: '#fff' }}>Measured Benchmark</strong> tab.
           </div>
 
@@ -1223,7 +1223,7 @@ export default function Home() {
           © {new Date().getFullYear()} BioLatent • Representation Registry and Measured Benchmark.
         </div>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <a href="https://doi.org/10.5281/zenodo.22813148" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>Data DOI</a>
+          <span style={{ color: 'var(--text-muted)' }}>Data DOI pending</span>
           <a href="https://github.com/yboulaamane/biolatent" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
           <span>Curated by <a href="https://github.com/yboulaamane" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-indigo)', textDecoration: 'none', fontWeight: 600 }}>yboulaamane</a></span>
         </div>

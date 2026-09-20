@@ -380,6 +380,7 @@ def build():
         "BioLatent: A Standardised Benchmark of Frozen Molecular "
         "Representations with Protein and Genomic Extensions")
     document.core_properties.author = "Yassir Boulaamane"
+    document.core_properties.last_modified_by = "Yassir Boulaamane"
     document.core_properties.subject = "BioLatent molecular-representation benchmark"
     document.core_properties.keywords = (
         "molecular representations, molecular property prediction, chemical fingerprints, "
@@ -430,7 +431,8 @@ def build():
         f"its related variants did not provide independent homology clusters. The highest-scoring "
         f"molecular representation depended on the endpoint, "
         f"and repeated scaffold partitions changed the leading method in several datasets. "
-        f"Eleven registry records could be matched by representation, endpoint and metric; all "
+        f"Eleven registry records could be matched by named representation family, endpoint and "
+        f"metric; all "
         f"were documented as scaffold-split, and score differences were bidirectional. "
         f"Conventional fingerprints and descriptors remained competitive with pretrained "
         f"molecular models. These findings show that small numerical differences should not be "
@@ -473,7 +475,8 @@ def build():
              "procedures, so they cannot be pooled into a controlled ranking. This limitation "
              "motivated a measured benchmark in which compatible representations were recomputed "
              "under one prespecified procedure. The two layers were connected through a descriptive "
-             "matching analysis restricted to the same representation, endpoint and performance "
+             "matching analysis restricted to the same named representation family, endpoint and "
+             "performance "
              "measure, while preserving the protocol provenance of each literature value.")
     add_body(document, "MoleculeNet and the Therapeutics Data Commons established public datasets and "
              "evaluation practices for molecular machine learning [9,10]. The choice of partition is "
@@ -605,13 +608,13 @@ def build():
              "For molecular datasets, complete Bemis–Murcko scaffold groups were resampled together "
              "to preserve dependence within a chemical series; individual acyclic compounds were kept "
              "as separate groups. DeepLoc test sequences were clustered with MMseqs2 at 30% identity "
-             "and 80% bidirectional coverage, and complete homology clusters were resampled [24]. "
+             "and 80% bidirectional coverage, and complete homology clusters were resampled [22]. "
              "Promoter observations were resampled individually conditional on the fixed published "
              "chromosome split. At 90% identity and 90% coverage, all Fluorescence test variants "
              "formed one connected component; those differences were therefore reported descriptively "
              "without p-values or population-level claims. Statistical evidence for eligible tests "
-             "was estimated by paired randomisation with 2,000 repetitions [22]. Holm adjustment "
-             "controlled the family-wise error rate across all 54 eligible comparisons [23]. A "
+             "was estimated by paired randomisation with 2,000 repetitions [23]. Holm adjustment "
+             "controlled the family-wise error rate across all 54 eligible comparisons [24]. A "
              "difference was considered statistically "
              "distinguishable when the adjusted p-value was below 0.05.")
 
@@ -638,8 +641,8 @@ def build():
              "pretraining collections.")
 
     add_heading(document, "2.7 Descriptive alignment with literature-reported results", 2)
-    add_body(document, "Registry records were matched to the measured benchmark only when the "
-             "representation, endpoint and performance measure were the same. Literature and "
+    add_body(document, "Registry records were matched to the measured benchmark only when the named "
+             "representation family, endpoint and performance measure were the same. Literature and "
              "measured values were not pooled because dataset processing, the exact scaffold "
              "allocation, model fitting and tuning could still differ. For each eligible pair, we "
              "recorded the direction of the score difference and calculated the Spearman rank "
@@ -668,7 +671,8 @@ def build():
              f"records. Of the molecular records, "
              f"{registry_summary['molecular_documented_partition_counts']['scaffold']} were "
              "documented as scaffold-split and four used another or unstated partition; none was "
-             "documented in the registry as random-split. Matching by representation, endpoint and "
+             "documented in the registry as random-split. Matching by named representation family, "
+             "endpoint and "
              f"metric yielded {matched_summary['pairs']} pairs: seven for BBBP and four for CYP3A4. "
              f"All {matched_summary['documented_scaffold_pairs']} matched literature values were "
              "scaffold-split.")
@@ -919,10 +923,8 @@ def build():
              "aggregate leaderboard.")
 
     add_heading(document, "Data and code availability", 1)
-    paragraph = add_body(document, "The benchmark results, test-set predictions and figure source "
-                         "data are archived in Zenodo: ")
-    add_hyperlink(paragraph, "https://doi.org/10.5281/zenodo.22813148",
-                  "https://doi.org/10.5281/zenodo.22813148")
+    add_body(document, "The benchmark results, test-set predictions and figure source data will "
+             "be archived in Zenodo. Zenodo DOI: [TO BE ADDED BEFORE SUBMISSION].")
     paragraph = add_body(document, "Source code and the manuscript generator are available in the "
                          "BioLatent repository: ")
     add_hyperlink(paragraph, "https://github.com/yboulaamane/biolatent",
@@ -976,9 +978,9 @@ def build():
         ("[19] Lin Z et al. Evolutionary-scale prediction of atomic-level protein structure with a language model. Science. 2023;379:1123-1130. ", "https://doi.org/10.1126/science.ade2574"),
         ("[20] Elnaggar A et al. ProtTrans: toward understanding the language of life through self-supervised learning. IEEE TPAMI. 2022;44:7112-7127. ", "https://doi.org/10.1109/TPAMI.2021.3095381"),
         ("[21] Nguyen E et al. HyenaDNA: long-range genomic sequence modeling at single nucleotide resolution. NeurIPS. 2023. ", "https://doi.org/10.48550/arXiv.2306.15794"),
-        ("[22] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
-        ("[23] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
-        ("[24] Steinegger M, Söding J. MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nature Biotechnology. 2017;35:1026-1028. ", "https://doi.org/10.1038/nbt.3988"),
+        ("[22] Steinegger M, Söding J. MMseqs2 enables sensitive protein sequence searching for the analysis of massive data sets. Nature Biotechnology. 2017;35:1026-1028. ", "https://doi.org/10.1038/nbt.3988"),
+        ("[23] Phipson B, Smyth GK. Permutation p-values should never be zero. Statistical Applications in Genetics and Molecular Biology. 2010;9:Article 39. ", "https://doi.org/10.2202/1544-6115.1585"),
+        ("[24] Holm S. A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics. 1979;6:65-70. ", "https://www.jstor.org/stable/4615733"),
         ("[25] Ahmad W, Simon E, Chithrananda S, Grand G, Ramsundar B. ChemBERTa-2: towards chemical foundation models. 2022. ", "https://doi.org/10.48550/arXiv.2209.01712"),
         ("[26] Pinto L. Superior molecular representations from intermediate encoder layers. 2025. ", "https://doi.org/10.48550/arXiv.2506.06443"),
     ]
@@ -1007,10 +1009,21 @@ def build():
 
     supplement = Document()
     clear_body(supplement)
+    supplement.core_properties.title = "BioLatent: Supplementary Information"
+    supplement.core_properties.author = "Yassir Boulaamane"
+    supplement.core_properties.last_modified_by = "Yassir Boulaamane"
+    supplement.core_properties.subject = "Supplementary information for the BioLatent benchmark"
+    supplement.core_properties.keywords = (
+        "molecular representations, benchmark, supplementary information"
+    )
+    supplement.core_properties.comments = ""
     for style_name in ("Normal", "Caption"):
         style = supplement.styles[style_name]
         style.font.name = "Times New Roman"
         style.font.size = Pt(9 if style_name == "Caption" else 12)
+        style.font.color.rgb = RGBColor(0, 0, 0)
+        if style_name == "Caption":
+            style.font.bold = False
         style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     supplement_title = supplement.add_paragraph()
     supplement_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1021,6 +1034,11 @@ def build():
     supplement_title_run.font.size = Pt(14)
     supplement_title_run.bold = True
     supplement_title_run.font.color.rgb = RGBColor(0, 0, 0)
+    add_body(
+        supplement,
+        "The supplementary tables and figure are cited from the main manuscript. "
+        "Reference numbers correspond to the reference list in the main manuscript.",
+    )
     add_caption(
         supplement,
         "Table S1. Molecular split diagnostics. Counts and target summaries are "
@@ -1049,7 +1067,8 @@ def build():
     add_caption(
         supplement,
         "Table S2. Descriptive alignment of literature-reported and measured results. "
-        "Rows share the same representation, endpoint and measure; all literature records "
+        "Rows share the same named representation family, endpoint and measure; all literature "
+        "records "
         "were documented as scaffold-split. Delta is measured minus literature. Values are "
         "not estimates from the same experiment and were not subjected to cross-study "
         "significance testing.",

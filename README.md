@@ -3,7 +3,7 @@
 An open-access registry, compatibility filter, and interactive benchmark dashboard for chemical and biological vector representations.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22813148.svg)](https://doi.org/10.5281/zenodo.22813148)
+**Zenodo DOI:** to be added with the final versioned data deposit.
 
 <img width="1862" height="976" alt="biolatent" src="https://github.com/user-attachments/assets/3bf8c24e-dd89-487d-8247-f41ed61815d3" />
 
@@ -15,11 +15,11 @@ In computer-aided drug discovery and computational biology, the landscape of fou
 
 **BioLatent** is a unified, provenance-aware index cataloging representations across five primary modalities: **Small Molecules**, **Proteins**, **Complexes**, **Chemical Reactions**, and **Nucleic Acids (DNA/RNA)**.
 
-BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot be pooled into a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. The two layers are connected through a descriptive analysis restricted to records with the same representation, endpoint, and metric; remaining protocol differences are retained explicitly and prevent causal attribution to any single design choice.
+BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot be pooled into a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. The two layers are connected through a descriptive analysis restricted to records with the same named representation family, endpoint, and metric; remaining protocol differences are retained explicitly and prevent causal attribution to any single design choice.
 
 ### Measured release snapshot
 
-The benchmark snapshot was validated against its source data on 2026-09-20 and released as version 1.1.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The complete data release is archived on Zenodo at [https://doi.org/10.5281/zenodo.22813148](https://doi.org/10.5281/zenodo.22813148).
+The benchmark snapshot was validated against its source data on 2026-09-20 and prepared as version 1.1.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The final Zenodo DOI will be added after the versioned data deposit is published.
 
 | Modality | Tasks | Measured cells | Study-wide resolved/eligible comparisons |
 |---|---:|---:|---:|
@@ -189,7 +189,7 @@ Registry metadata are descriptive catalog fields, not empirical quality or clini
 
 * **Artifact availability** records whether code and/or weights are linked; it is not a reproducibility score.
 * **Compute profile** is the declared CPU, GPU, or mixed execution category, not a runtime guarantee.
-* **Reported benchmarks** retain a source link and row-level provenance note. Heterogeneous values are not pooled; the committed descriptive analysis matches only records with the same representation, endpoint, and metric.
+* **Reported benchmarks** retain a source link and row-level provenance note. Heterogeneous values are not pooled; the committed descriptive analysis matches only records with the same named representation family, endpoint, and metric.
 * **Compatibility Finder** filters by modality, available input, and compute profile. It identifies catalogued or explicitly derivable input compatibility, lists matches alphabetically, and does not claim an optimal model.
 
 ---
@@ -205,7 +205,7 @@ If you use BioLatent in your research, please cite:
   year={2026},
   version={1.1.0},
   publisher={Zenodo},
-  doi={10.5281/zenodo.22813148},
-  url={https://doi.org/10.5281/zenodo.22813148}
+  note={Zenodo DOI to be added with the final versioned data deposit},
+  url={https://github.com/yboulaamane/biolatent}
 }
 ```

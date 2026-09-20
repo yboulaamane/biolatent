@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "2026.09.20"
+VERSION = "1.1.0"
 RELEASE_DATE = "2026-09-20"
 ARCHIVE_ROOT = f"biolatent-benchmark-{VERSION}"
 OUTPUT = ROOT / "dist" / f"biolatent-benchmark-{RELEASE_DATE}.zip"

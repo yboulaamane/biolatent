@@ -2,11 +2,13 @@
 """Build the descriptive literature-to-measured comparison artefact.
 
 The literature registry is intentionally broader than the measured benchmark.
-Only records with the same representation, endpoint and performance measure are
-matched. The resulting values remain descriptive because dataset preparation,
-the exact partition and the fitted predictor can differ between publications.
+Only records with the same named representation family, endpoint and
+performance measure are matched. The resulting values remain descriptive
+because dataset preparation, the exact partition and the fitted predictor can
+differ between publications.
 """
 
+import hashlib
 import json
 import math
 import re
@@ -18,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "src" / "app" / "data" / "embeddings.ts"
 MEASURED = ROOT / "results" / "benchmark_results.json"
 OUTPUT = ROOT / "results" / "literature_measured_comparison.json"
+MANIFEST = ROOT / "results" / "run_manifest.json"
 
 REPRESENTATION_MAP = {
     "chemberta_77m": "chemberta_77m",
@@ -182,7 +185,8 @@ def main():
     output = {
         "analysis_type": "descriptive registry-to-measured alignment",
         "matching_rule": (
-            "Same representation, endpoint and performance measure; values were not pooled "
+            "Same named representation family, endpoint and performance measure; "
+            "values were not pooled "
             "and no causal attribution or cross-study significance test was performed."
         ),
         "registry_summary": {
@@ -204,7 +208,13 @@ def main():
         "matches": matches,
     }
     OUTPUT.write_text(json.dumps(output, indent=2) + "\n")
+    manifest = json.loads(MANIFEST.read_text())
+    manifest["public_artifacts"][OUTPUT.name] = hashlib.sha256(
+        OUTPUT.read_bytes()
+    ).hexdigest()
+    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"Wrote {OUTPUT}")
+    print(f"Updated {MANIFEST}")
 
 
 if __name__ == "__main__":
