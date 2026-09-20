@@ -17,7 +17,14 @@ from xml.etree import ElementTree
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Patch
+from matplotlib.patches import (
+    Circle,
+    FancyArrowPatch,
+    FancyBboxPatch,
+    Patch,
+    Rectangle,
+    RegularPolygon,
+)
 from matplotlib.ticker import MaxNLocator, PercentFormatter
 
 
@@ -113,6 +120,7 @@ def apply_style():
         "axes.facecolor": "white",
         "savefig.facecolor": "white",
         "svg.fonttype": "none",
+        "svg.hashsalt": "biolatent",
     })
 
 
@@ -139,7 +147,8 @@ def save_figure(fig, stem):
     svg_path = FIGURE_DIR / f"{stem}.svg"
     fig.savefig(png_path, dpi=300, bbox_inches="tight",
                 pad_inches=0.08)
-    fig.savefig(svg_path, bbox_inches="tight", pad_inches=0.08)
+    fig.savefig(svg_path, bbox_inches="tight", pad_inches=0.08,
+                metadata={"Date": None})
     # Matplotlib writes inconsequential spaces at the ends of SVG path lines.
     # Normalising them keeps generated assets clean under ``git diff --check``.
     svg_path.write_text("\n".join(
@@ -184,15 +193,10 @@ def make_scope_figure(results, paired):
         })
     write_csv("figure1_benchmark_scope.csv", rows, list(rows[0]))
 
-    overall_tasks = sum(row["tasks"] for row in rows)
-    overall_representations = sum(row["representations"] for row in rows)
-    overall_cells = sum(row["measured_cells"] for row in rows)
-    overall_resolved = sum(row["resolved_comparisons"] for row in rows)
-    overall_comparisons = sum(row["total_comparisons"] for row in rows)
-
     # Figure 1 is maintained as native, editable Draw.io artwork.  Keep the
-    # data table generated above, verify that the artwork contains the current
-    # release totals, and preserve its publication exports on regeneration.
+    # generated scope data in sync with the artwork. The internal title and
+    # explanatory footer are intentionally omitted because both belong in the
+    # manuscript caption.
     drawio_path = FIGURE_DIR / "figure1_study_design.drawio"
     if drawio_path.exists():
         exports = [
@@ -214,10 +218,10 @@ def make_scope_figure(results, paired):
             *(f"{row['tasks']} {'task' if row['tasks'] == 1 else 'tasks'} · "
               f"{row['representations']} representations" for row in rows),
             *(f"{row['measured_cells']} evaluations" for row in rows),
-            str(overall_tasks),
-            str(overall_representations),
-            str(overall_cells),
-            f"{overall_resolved}/{overall_comparisons}",
+            "Calculate once",
+            "Select baseline",
+            "Score test set",
+            "Quantify uncertainty",
         }
         missing_values = sorted(expected_values - cell_values)
         if missing_values:
@@ -228,73 +232,110 @@ def make_scope_figure(results, paired):
         # Regenerate the publication exports below from the same data. The
         # Draw.io source remains editable and is checked for matching totals.
 
-    fig, ax = plt.subplots(figsize=(7.2, 5.4))
+    fig, ax = plt.subplots(figsize=(7.2, 3.25))
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
-    ax.text(0.02, 0.97, "BioLatent measured benchmark", fontsize=16,
-            fontweight="bold", color=DARK, va="top")
-    ax.text(0.02, 0.915,
-            "Real datasets · fixed representations · standardised prediction · paired statistics",
-            fontsize=9.2, color=MID, va="top")
 
     x_positions = [0.02, 0.345, 0.67]
-    for x, row, (_, _, _, _, fill, colour) in zip(x_positions, rows, modalities):
-        box = FancyBboxPatch((x, 0.66), 0.305, 0.20,
+    for card_index, (x, row, (_, _, _, _, fill, colour)) in enumerate(
+            zip(x_positions, rows, modalities)):
+        box = FancyBboxPatch((x, 0.60), 0.305, 0.34,
                              boxstyle="round,pad=0.012,rounding_size=0.018",
                              linewidth=1.2, edgecolor=colour, facecolor=fill)
         ax.add_patch(box)
-        ax.text(x + 0.018, 0.825, row["modality"], fontsize=11,
+        icon_x, icon_y = x + 0.050, 0.865
+        if card_index == 0:
+            ax.add_patch(RegularPolygon((icon_x, icon_y), 6, radius=0.026,
+                                        orientation=np.pi / 6, fill=False,
+                                        edgecolor=colour, linewidth=1.7))
+            ax.add_patch(Circle((icon_x, icon_y), 0.005,
+                                facecolor=colour, edgecolor=colour))
+        elif card_index == 1:
+            points = [(icon_x - 0.025, icon_y - 0.010),
+                      (icon_x - 0.012, icon_y + 0.020),
+                      (icon_x + 0.002, icon_y - 0.010),
+                      (icon_x + 0.016, icon_y + 0.018),
+                      (icon_x + 0.030, icon_y - 0.008)]
+            ax.plot([point[0] for point in points], [point[1] for point in points],
+                    color=colour, linewidth=1.7)
+            for point in points:
+                ax.add_patch(Circle(point, 0.0055, facecolor=colour,
+                                    edgecolor=colour))
+        else:
+            left = [(icon_x - 0.020, icon_y + offset)
+                    for offset in (-0.025, -0.008, 0.009, 0.026)]
+            right = [(icon_x + 0.020, icon_y - offset)
+                     for offset in (-0.025, -0.008, 0.009, 0.026)]
+            ax.plot([point[0] for point in left], [point[1] for point in left],
+                    color=colour, linewidth=1.5)
+            ax.plot([point[0] for point in right], [point[1] for point in right],
+                    color=colour, linewidth=1.5)
+            for a, b in zip(left, reversed(right)):
+                ax.plot([a[0], b[0]], [a[1], b[1]], color=colour, linewidth=0.9)
+        ax.text(x + 0.090, 0.875, row["modality"], fontsize=11,
                 fontweight="bold", color=colour)
-        ax.text(x + 0.018, 0.775,
-                f"{row['tasks']} tasks  ·  {row['representations']} representations",
-                fontsize=8.5, color=DARK)
-        ax.text(x + 0.018, 0.735,
+        ax.text(x + 0.018, 0.79,
+                f"{row['tasks']} {'task' if row['tasks'] == 1 else 'tasks'}  ·  "
+                f"{row['representations']} representations",
+                fontsize=8.0, color=DARK)
+        ax.text(x + 0.018, 0.70,
                 f"{row['measured_cells']} evaluations",
                 fontsize=9, fontweight="bold", color=DARK)
-        ax.text(x + 0.018, 0.695, row["split_policy"], fontsize=7.7, color=MID)
+        ax.text(x + 0.018, 0.625, row["split_policy"], fontsize=7.7, color=MID)
 
     pipeline = [
         ("1", "Calculate once", "Verified inputs;\nfixed model version"),
-        ("2", "Select comparison", "Validation data;\nsame procedure"),
+        ("2", "Select baseline", "Validation data;\nsame procedure"),
         ("3", "Score test set", "Predictions and\nendpoint measure"),
-        ("4", "Quantify uncertainty", "Bootstrap and\nadjusted tests"),
+        ("4", "Quantify\nuncertainty", "Bootstrap and\nadjusted tests"),
     ]
     px = [0.02, 0.27, 0.52, 0.77]
     for i, (num, title, subtitle) in enumerate(pipeline):
-        box = FancyBboxPatch((px[i], 0.34), 0.205, 0.20,
+        box = FancyBboxPatch((px[i], 0.10), 0.205, 0.34,
                              boxstyle="round,pad=0.012,rounding_size=0.015",
                              linewidth=1.0, edgecolor="#AAB3C3", facecolor="white")
         ax.add_patch(box)
-        ax.text(px[i] + 0.018, 0.495, num, fontsize=9, color="white",
+        ax.text(px[i] + 0.018, 0.36, num, fontsize=9, color="white",
                 fontweight="bold", ha="center", va="center",
                 bbox=dict(boxstyle="circle,pad=0.25", facecolor=PURPLE,
                           edgecolor=PURPLE))
-        ax.text(px[i] + 0.052, 0.49, title, fontsize=7.2,
-                fontweight="bold", color=DARK, va="center")
-        ax.text(px[i] + 0.018, 0.425, subtitle, fontsize=7.7,
+        ax.text(px[i] + 0.052, 0.36, title, fontsize=7.2,
+                fontweight="bold", color=DARK, va="center", linespacing=1.0)
+        ax.text(px[i] + 0.018, 0.22, subtitle, fontsize=7.7,
                 color=MID, va="center", linespacing=1.35)
+        icon_x, icon_y = px[i] + 0.176, 0.155
+        if i == 0:
+            ax.add_patch(RegularPolygon((icon_x, icon_y), 6, radius=0.018,
+                                        orientation=np.pi / 6,
+                                        facecolor="#F1EDFF", edgecolor=PURPLE,
+                                        linewidth=1.3))
+        elif i == 1:
+            ax.add_patch(Circle((icon_x, icon_y), 0.018, fill=False,
+                                edgecolor=PURPLE, linewidth=1.3))
+            ax.add_patch(Circle((icon_x, icon_y), 0.006,
+                                facecolor=PURPLE, edgecolor=PURPLE))
+        elif i == 2:
+            for offset, height in zip((-0.016, 0, 0.016), (0.024, 0.037, 0.052)):
+                ax.add_patch(Rectangle((icon_x + offset - 0.004, icon_y - 0.025),
+                                       0.008, height, facecolor=PURPLE,
+                                       edgecolor=PURPLE))
+        else:
+            ax.plot([icon_x - 0.022, icon_x + 0.022], [icon_y, icon_y],
+                    color=PURPLE, linewidth=1.4)
+            ax.plot([icon_x - 0.022, icon_x - 0.022],
+                    [icon_y - 0.012, icon_y + 0.012],
+                    color=PURPLE, linewidth=1.1)
+            ax.plot([icon_x + 0.022, icon_x + 0.022],
+                    [icon_y - 0.012, icon_y + 0.012],
+                    color=PURPLE, linewidth=1.1)
+            ax.add_patch(Circle((icon_x, icon_y), 0.006,
+                                facecolor=PURPLE, edgecolor=PURPLE))
         if i < len(pipeline) - 1:
-            ax.add_patch(FancyArrowPatch((px[i] + 0.21, 0.44),
-                                         (px[i + 1] - 0.01, 0.44),
+            ax.add_patch(FancyArrowPatch((px[i] + 0.21, 0.27),
+                                         (px[i + 1] - 0.01, 0.27),
                                          arrowstyle="-|>", mutation_scale=10,
                                          linewidth=1.0, color="#8C96A8"))
-
-    ax.text(0.02, 0.265, "Validated release", fontsize=9.5,
-            fontweight="bold", color=DARK)
-    summary = [
-        ("9", "real-data tasks"),
-        (str(overall_representations), "representations"),
-        (str(overall_cells), "model–dataset\nevaluations"),
-        (f"{overall_resolved}/{overall_comparisons}", "statistically distinguishable\ncomparisons"),
-    ]
-    for i, (value, label) in enumerate(summary):
-        x = 0.02 + i * 0.245
-        ax.text(x, 0.19, value, fontsize=17, fontweight="bold", color=PURPLE)
-        ax.text(x, 0.145, label, fontsize=7.6, color=MID, va="top", linespacing=1.2)
-    ax.text(0.02, 0.07,
-            "Distinguishable = study-wide adjusted p < 0.05 for eligible formal comparisons; Fluorescence is descriptive.",
-            fontsize=7.8, color=MID)
     save_figure(fig, "figure1_study_design")
 
 
@@ -717,7 +758,7 @@ def write_legends():
 
 ## Figure 1. Study design and validated benchmark scope
 
-BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Molecular confidence intervals resample Bemis–Murcko scaffolds and DeepLoc intervals resample MMseqs2 homology clusters. Statistical evidence is adjusted across 54 eligible study comparisons; the five Fluorescence comparisons are descriptive because its test variants form one connected homology component at the prespecified threshold. Counts include only representations applicable to each chemical or biological domain.
+BioLatent evaluates fixed molecular, protein and genomic representations on nine public datasets. For a given endpoint, every representation is assessed with the same regularised linear prediction procedure. One comparison method is selected using validation data before the test set is examined. Molecular confidence intervals resample Bemis–Murcko scaffolds and DeepLoc intervals resample MMseqs2 homology clusters. Statistical evidence is adjusted across 54 eligible study comparisons; the five Fluorescence comparisons are descriptive because its test variants form one connected homology component at the prespecified threshold. The validated release contains 18 domain-specific representations and 68 model–dataset evaluations, of which 19 of 54 eligible formal comparisons were statistically distinguishable after correction.
 
 ## Figure 2. Molecular property-prediction performance
 
