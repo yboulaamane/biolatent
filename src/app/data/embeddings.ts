@@ -357,7 +357,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     representationType: "learned_embedding",
     modality: "complex",
     inputRepresentation: "sequence",
-    license: "Academic/Restrictive",
+    license: "MIT",
     architectureType: "Convolutional Neural Network (1D, character-level)",
     pretrainingObjective: "Supervised drug-target interaction affinity regression",
     embeddingDimension: 128,
@@ -835,12 +835,12 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     embeddingDimension: 1536,
     yearReleased: 2024,
     trainingData: {
-      name: "ESM-Atlas (UniRef + structures)",
-      size: "2.7 Billion sequences / structures",
-      license: "Non-commercial Research License"
+      name: "Natural proteins with sequence, structure and function tracks",
+      size: "3.15B sequences; 236M structures; 539M function annotations",
+      license: "Mixed / source-dependent"
     },
-    codeRepositoryUrl: "https://github.com/evolutionaryscale/esm",
-    weightsUrl: "https://huggingface.co/EvolutionaryScale/esm3-open-1.4b",
+    codeRepositoryUrl: "https://github.com/Biohub/esm",
+    weightsUrl: "https://huggingface.co/biohub/esm3-sm-open-v1",
     computeProfile: "gpu",
     benchmarks: [
       { dataset: "De Novo Protein Generation (unconditional)", metric: "Mean pTM", score: "0.52", citation: { shortRef: "Hayes et al., 2025", doi: "https://doi.org/10.1126/science.ads0018", note: "Unconditional generation: mean pLDDT 0.84, mean pTM 0.52; mean pairwise seq identity 0.155, mean pairwise TM 0.48" } }

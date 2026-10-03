@@ -222,6 +222,13 @@ def make_scope_figure(results, paired):
             "Select baseline",
             "Score test set",
             "Quantify uncertainty",
+            "Validated release",
+            str(sum(row["tasks"] for row in rows)),
+            str(len({model for task in TASK_ORDER
+                     for model in results[task]["models"]})),
+            str(sum(row["measured_cells"] for row in rows)),
+            (f"{sum(row['resolved_comparisons'] for row in rows)}/"
+             f"{sum(row['total_comparisons'] for row in rows)}"),
         }
         missing_values = sorted(expected_values - cell_values)
         if missing_values:
@@ -229,8 +236,10 @@ def make_scope_figure(results, paired):
                 "Draw.io Figure 1 is out of sync with the benchmark results; "
                 f"missing labels: {', '.join(missing_values)}"
             )
-        # Regenerate the publication exports below from the same data. The
-        # Draw.io source remains editable and is checked for matching totals.
+        # Figure 1 is user-maintained artwork. Do not replace its approved
+        # layout with the Matplotlib fallback below. The existing PNG and SVG
+        # are publication exports from this checked Draw.io source.
+        return
 
     fig, ax = plt.subplots(figsize=(7.2, 3.25))
     ax.set_xlim(0, 1)
