@@ -57,7 +57,7 @@ Fetch all curated representations or filter them programmatically using query pa
 
 #### Example Request
 ```bash
-curl "https://biolatent.org/api/representations?search=ChemBERTa-2&modality=molecule&representationType=learned_embedding"
+curl "http://localhost:3000/api/representations?search=ChemBERTa-2&modality=molecule&representationType=learned_embedding"
 ```
 
 #### Example Response
