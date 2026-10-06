@@ -357,7 +357,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     representationType: "learned_embedding",
     modality: "complex",
     inputRepresentation: "sequence",
-    license: "MIT",
+    license: "Academic/Restrictive",
     architectureType: "Convolutional Neural Network (1D, character-level)",
     pretrainingObjective: "Supervised drug-target interaction affinity regression",
     embeddingDimension: 128,
@@ -829,7 +829,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
     representationType: "learned_embedding",
     modality: "protein",
     inputRepresentation: "3D",
-    license: "Academic/Restrictive",
+    license: "MIT",
     architectureType: "Transformer",
     pretrainingObjective: "Generative masked language modeling on sequence, structure, and function coordinates",
     embeddingDimension: 1536,
@@ -850,7 +850,7 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
 from esm.sdk.api import ESM3InferenceClient, GenerationConfig
 import torch
 
-model: ESM3InferenceClient = ESM3.from_pretrained("esm3-open-1.4b")`
+model: ESM3InferenceClient = ESM3.from_pretrained("esm3-sm-open-v1")`
   },
   {
     id: "molformer_xl",
