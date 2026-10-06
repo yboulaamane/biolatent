@@ -80,7 +80,24 @@ function Stat({ value, label, tone }: { value: string; label: string; tone?: str
   );
 }
 
+function Finding({ title, text, tone }: { title: string; text: string; tone: string }) {
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-card)',
+      borderRadius: '12px', padding: '1rem 1.15rem', flex: '1 1 240px',
+    }}>
+      <div style={{ color: tone, fontSize: '0.95rem', fontWeight: 800, marginBottom: '0.35rem' }}>
+        {title}
+      </div>
+      <div style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', lineHeight: 1.55 }}>
+        {text}
+      </div>
+    </div>
+  );
+}
+
 function TaskCard({ task }: { task: string }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const meta = RESULTS[task];
   const paired = PAIRED[task];
   const rows = taskRows(task);
@@ -101,51 +118,80 @@ function TaskCard({ task }: { task: string }) {
   }
 
   return (
-    <div className="glass-card" style={{ marginBottom: '1.25rem' }}>
+    <details className="glass-card" style={{ marginBottom: '0.85rem' }}>
+      <summary style={{ cursor: 'pointer', listStylePosition: 'outside' }}>
+        <span style={{
+          display: 'inline-flex', justifyContent: 'space-between', alignItems: 'baseline',
+          flexWrap: 'wrap', gap: '0.5rem', width: 'calc(100% - 1.25rem)', marginLeft: '0.35rem',
+        }}>
+          <strong style={{ fontSize: '1.05rem', color: '#fff' }}>
+            {meta.dataset_label ?? task}
+          </strong>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+            {rows.length} representations · {metric} · test n = {meta.n_test.toLocaleString()}
+          </span>
+        </span>
+      </summary>
+
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem',
+        alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginTop: '1rem',
       }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff' }}>
-          {meta.dataset_label ?? task}
-        </h3>
         <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-          {metric} · test n = {meta.n_test.toLocaleString()} · {meta.split_source}
+          {meta.split_source}
           {meta.dataset_source ? ` · ${meta.dataset_source}` : ''}
         </div>
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((value) => !value)}
+          style={{
+            border: '1px solid rgba(99,102,241,0.45)', background: 'rgba(99,102,241,0.08)',
+            color: '#c7d2fe', borderRadius: '8px', padding: '0.4rem 0.7rem',
+            fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+          }}
+        >
+          {showAdvanced ? 'Hide advanced columns' : 'Show advanced columns'}
+        </button>
       </div>
 
-      <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.4rem' }}>
-        {meta.dataset_variant && (
-          <>Variant: <strong style={{ color: '#fff' }}>{meta.dataset_variant}</strong>. </>
-        )}
-        {paired
-          ? <>Reference selected on held-out data: <strong style={{ color: '#a5b4fc' }}>
-            {MODEL_LABELS[paired.reference] ?? paired.reference}</strong>.{' '}
-            {paired.inference_status === 'descriptive_only'
-              ? <>Differences and intervals are descriptive: {paired.inference_note}</>
-              : <>Difference intervals use paired {paired.resampling_unit.toLowerCase()} bootstrap
-                ({paired.n_boot.toLocaleString()} resamples); p-values use{' '}
-                {paired.n_permutations.toLocaleString()} paired randomisations with study-wide
-                Holm correction. {paired.inference_note}</>}
-          </>
-          : <>No paired comparison available for this task.</>}
-        {exposureBits.length > 0 && (
-          <> Pretraining input-exposure proxy: <strong style={{ color: '#fbbf24' }}>
-            {exposureBits.join(', ')}</strong>.</>
-        )}
-      </div>
+      <details style={{ marginTop: '0.7rem' }}>
+        <summary style={{
+          color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700,
+        }}>
+          Dataset and statistical details
+        </summary>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.45rem', lineHeight: 1.55 }}>
+          {meta.dataset_variant && (
+            <>Variant: <strong style={{ color: '#fff' }}>{meta.dataset_variant}</strong>. </>
+          )}
+          {paired
+            ? <>Reference selected on held-out data: <strong style={{ color: '#a5b4fc' }}>
+              {MODEL_LABELS[paired.reference] ?? paired.reference}</strong>.{' '}
+              {paired.inference_status === 'descriptive_only'
+                ? <>Differences and intervals are descriptive: {paired.inference_note}</>
+                : <>Difference intervals use paired {paired.resampling_unit.toLowerCase()} bootstrap
+                  ({paired.n_boot.toLocaleString()} resamples); p-values use{' '}
+                  {paired.n_permutations.toLocaleString()} paired randomisations with study-wide
+                  Holm correction. {paired.inference_note}</>}
+            </>
+            : <>No paired comparison available for this task.</>}
+          {exposureBits.length > 0 && (
+            <> Pretraining input-exposure proxy: <strong style={{ color: '#fbbf24' }}>
+              {exposureBits.join(', ')}</strong>.</>
+          )}
+        </div>
+      </details>
 
       <div style={{ overflowX: 'auto' }}>
         <table className="benchmark-table">
           <thead>
             <tr>
               <th>Representation</th>
-              <th style={{ textAlign: 'right' }}>Dim</th>
-              <th style={{ textAlign: 'right' }}>Linear probe</th>
+              {showAdvanced && <th style={{ textAlign: 'right' }}>Dim</th>}
+              <th style={{ textAlign: 'right' }}>Score</th>
               <th>95% interval</th>
-              <th>vs validation reference</th>
-              <th style={{ textAlign: 'right' }}>MLP gap</th>
+              {showAdvanced && <th>vs validation reference</th>}
+              {showAdvanced && <th style={{ textAlign: 'right' }}>MLP gap</th>}
             </tr>
           </thead>
           <tbody>
@@ -161,9 +207,11 @@ function TaskCard({ task }: { task: string }) {
                     }}>no pretraining</span>
                   )}
                 </td>
-                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                  {r.dim.toLocaleString()}
-                </td>
+                {showAdvanced && (
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                    {r.dim.toLocaleString()}
+                  </td>
+                )}
                 <td style={{
                   textAlign: 'right', color: '#fff', fontWeight: 700,
                   fontVariantNumeric: 'tabular-nums',
@@ -175,29 +223,33 @@ function TaskCard({ task }: { task: string }) {
                     ? `[${formatScore(r.ciLow)}, ${formatScore(r.ciHigh)}]`
                     : '—'}
                 </td>
-                <td>
-                  <VerdictBadge verdict={r.verdict} />
-                  {(r.verdict === 'worse' || r.verdict === 'better') && r.pHolm !== undefined && (
-                    <span style={{
-                      marginLeft: '0.5rem', color: 'var(--text-muted)',
-                      fontSize: '0.72rem', fontVariantNumeric: 'tabular-nums',
-                    }}>
-                      Δ {r.delta?.toFixed(4)} · p {r.pHolm.toFixed(3)}
-                    </span>
-                  )}
-                </td>
-                <td style={{
-                  textAlign: 'right', fontVariantNumeric: 'tabular-nums',
-                  color: (r.gap ?? 0) < 0 ? '#94a3b8' : '#34d399',
-                }}>
-                  {r.gap !== undefined ? (r.gap > 0 ? '+' : '') + r.gap.toFixed(4) : '—'}
-                </td>
+                {showAdvanced && (
+                  <td>
+                    <VerdictBadge verdict={r.verdict} />
+                    {(r.verdict === 'worse' || r.verdict === 'better') && r.pHolm !== undefined && (
+                      <span style={{
+                        marginLeft: '0.5rem', color: 'var(--text-muted)',
+                        fontSize: '0.72rem', fontVariantNumeric: 'tabular-nums',
+                      }}>
+                        Δ {r.delta?.toFixed(4)} · p {r.pHolm.toFixed(3)}
+                      </span>
+                    )}
+                  </td>
+                )}
+                {showAdvanced && (
+                  <td style={{
+                    textAlign: 'right', fontVariantNumeric: 'tabular-nums',
+                    color: (r.gap ?? 0) < 0 ? '#94a3b8' : '#34d399',
+                  }}>
+                    {r.gap !== undefined ? (r.gap > 0 ? '+' : '') + r.gap.toFixed(4) : '—'}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -494,82 +546,85 @@ export default function StudyTab() {
   const prot = separationSummary('protein');
   const genomic = separationSummary('genomics');
   const tasks = tasksByModality(modality);
+  const resolved = mol.reliable + prot.reliable + genomic.reliable;
+  const eligible = mol.total + prot.total + genomic.total;
 
   return (
     <div>
       <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', marginBottom: '0.4rem' }}>
-          Measured benchmark under a common protocol
+          Compare representations on equal terms
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          BioLatent began as a registry of results reported in the literature. Because those
-          studies used different datasets and evaluation procedures, their values cannot be
-          pooled into a controlled ranking. The measured study evaluates compatible representations
-          under one prespecified procedure, while a restricted matching analysis connects records
-          that share the same named representation family, endpoint and metric.
-        </p>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginTop: '0.7rem' }}>
-          We generated the results shown here rather than transcribing them from papers. Across the
-          study, {totalModels()} representations were assessed over {Object.keys(RESULTS).length}{' '}
-          tasks, giving {totalCells()} compatible model-task cells. Each compatible representation
-          was computed once per dataset and assessed with the same standardised linear model,
-          regularisation grid, folds and seed. The comparison method is selected using validation
-          data before the test set is examined. Paired cluster bootstrap provides the difference
-          interval, paired randomisation provides the p-value, and the primary Holm correction
-          covers every eligible reference comparison in the study. Molecular tests resample
-          Bemis-Murcko scaffolds and DeepLoc resamples MMseqs2 homology clusters. Fluorescence is
-          reported descriptively because its related variants do not supply independent clusters
-          for population-level inference.
+          BioLatent combines a registry of published results with a controlled benchmark of{' '}
+          {totalModels()} representations across {Object.keys(RESULTS).length} public datasets.
         </p>
 
-        <div style={{
-          marginTop: '1rem', padding: '0.9rem 1.15rem',
-          background: 'rgba(99, 102, 241, 0.08)',
-          border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: '12px',
-          color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.6,
-        }}>
-          <strong style={{ color: '#a5b4fc' }}>Literature alignment.</strong>{' '}
-          {literatureComparison.matched_summary.pairs} registry records matched the measured study
-          by named representation family, endpoint and metric. All were documented as scaffold-split; the measured
-          value was higher in {literatureComparison.matched_summary.measured_higher} pairs and the
-          literature value in {literatureComparison.matched_summary.literature_higher}. This is a
-          descriptive comparison of protocol transportability, not evidence for random-split inflation.
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.1rem' }}>
+          <Finding
+            title="No universal winner"
+            text="The leading representation changes with the biological or chemical endpoint."
+            tone="#a78bfa"
+          />
+          <Finding
+            title="Classical methods remain competitive"
+            text="Fingerprints and calculated descriptors remain strong baselines for molecular prediction."
+            tone="#34d399"
+          />
+          <Finding
+            title="Many rankings remain uncertain"
+            text={`${resolved} of ${eligible} eligible comparisons were distinguishable after correction.`}
+            tone="#fbbf24"
+          />
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
-          <Stat value={`${mol.reliable} of ${mol.total}`}
-                label="molecular comparisons distinguishable after study-wide correction"
-                tone="#fb7185" />
-          <Stat value={`${prot.reliable} of ${prot.total}`}
-                label="eligible protein comparisons distinguishable after study-wide correction"
-                tone="#34d399" />
-          <Stat value={`${genomic.reliable} of ${genomic.total}`}
-                label="genomic comparisons distinguishable after study-wide correction"
-                tone="#fbbf24" />
-          <Stat value={`${mol.referencesDifferFromTestBest} of ${mol.tasks}`}
-                label="molecular tasks where the test-set leader differed significantly from the preselected comparison"
-                tone="#fb7185" />
-          <Stat value={`${totalCells()}`} label="measured model-task cells" />
-        </div>
-
-        <div style={{
-          marginTop: '1.25rem', padding: '1rem 1.25rem',
-          background: 'rgba(244, 63, 94, 0.07)',
-          border: '1px solid rgba(244, 63, 94, 0.2)', borderRadius: '12px',
+        <details style={{
+          marginTop: '1rem', padding: '0.8rem 1rem',
+          background: 'rgba(99, 102, 241, 0.06)',
+          border: '1px solid rgba(99, 102, 241, 0.22)', borderRadius: '10px',
         }}>
-          <div style={{ color: '#fb7185', fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.35rem' }}>
-            What the statistical comparisons show
+          <summary style={{ color: '#c7d2fe', cursor: 'pointer', fontWeight: 800, fontSize: '0.86rem' }}>
+            How the benchmark works
+          </summary>
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', lineHeight: 1.6, marginTop: '0.7rem' }}>
+            <p>
+              The measured results were generated under one prespecified procedure rather than
+              transcribed from papers. Each compatible representation was calculated once and
+              evaluated with the same standardised linear model, regularisation search, folds and seed.
+              The comparison method was chosen using validation data before the test set was examined.
+            </p>
+            <p style={{ marginTop: '0.6rem' }}>
+              Difference intervals use paired cluster bootstrap, p-values use paired randomisation,
+              and eligible comparisons are adjusted together using Holm correction. Molecular tests
+              resample Bemis–Murcko scaffolds and DeepLoc resamples MMseqs2 homology clusters.
+              Fluorescence is descriptive because its test variants do not form independent clusters
+              at the prespecified threshold.
+            </p>
+            <p style={{ marginTop: '0.6rem' }}>
+              <strong style={{ color: '#fff' }}>Literature comparison.</strong>{' '}
+              {literatureComparison.matched_summary.pairs} registry records matched by representation
+              family, endpoint and metric. All used documented scaffold splits. The measured value was
+              higher in {literatureComparison.matched_summary.measured_higher} pairs and the literature
+              value in {literatureComparison.matched_summary.literature_higher}. This describes how
+              results transfer across protocols; it does not test random-split inflation.
+            </p>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '0.85rem' }}>
+              <Stat value={`${mol.reliable}/${mol.total}`} label="molecular comparisons resolved" tone="#fb7185" />
+              <Stat value={`${prot.reliable}/${prot.total}`} label="eligible protein comparisons resolved" tone="#34d399" />
+              <Stat value={`${genomic.reliable}/${genomic.total}`} label="genomic comparisons resolved" tone="#fbbf24" />
+              <Stat value={`${totalCells()}`} label="measured model–dataset evaluations" />
+            </div>
           </div>
-          <div style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6 }}>
-            On the molecular tasks, {mol.reliable} of {mol.total} comparisons remain significant
-            after study-wide correction. The corresponding result is {prot.reliable} of{' '}
-            {prot.total} among the eligible DeepLoc comparisons. Fluorescence scores and
-            intervals remain useful descriptions of this fixed variant panel, but are not counted
-            as independent formal tests. Larger test sets may contribute to precision, although
-            endpoint structure, label noise, dependence and effect size also matter. The
-            subsampling analysis examines test-set size without attributing the result to modality alone.
-          </div>
-        </div>
+        </details>
+      </div>
+
+      <div style={{ marginBottom: '0.9rem' }}>
+        <h2 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+          Results by dataset
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+          Choose a domain, then open a dataset to inspect its scores.
+        </p>
       </div>
 
       <div className="tabs-nav" style={{ marginBottom: '1.25rem' }}>
@@ -584,37 +639,42 @@ export default function StudyTab() {
 
       {tasks.map((t) => <TaskCard key={t} task={t} />)}
 
-      <TopGroupPanel modality={modality} />
-      <ResolutionPanel modality={modality} />
-      {modality === 'protein' && <LadderPanel />}
-      <ExposurePanel />
+      <details className="glass-card" style={{ marginTop: '1.25rem' }}>
+        <summary style={{ color: '#fff', cursor: 'pointer', fontWeight: 800, fontSize: '1rem' }}>
+          Additional analyses and interpretation
+        </summary>
+        <div style={{ marginTop: '1rem' }}>
+          <TopGroupPanel modality={modality} />
+          <ResolutionPanel modality={modality} />
+          {modality === 'protein' && <LadderPanel />}
+          <ExposurePanel />
 
-      <div className="glass-card">
-        <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
-          How to read these numbers
-        </h3>
-        <ul style={{
-          color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.7,
-          paddingLeft: '1.25rem', marginTop: '0.6rem',
-        }}>
-          <li><strong style={{ color: '#fff' }}>&ldquo;Not resolved&rdquo; does not mean equal.</strong> It
-            means this test set could not separate the model from the validation-selected
-            reference at the stated multiplicity correction.</li>
-          <li><strong style={{ color: '#fff' }}>&ldquo;Descriptive only&rdquo; means no formal population claim.</strong>{' '}
-            The score and interval describe the observed panel, but no p-value is reported when
-            suitable independent resampling units are unavailable.</li>
-          <li><strong style={{ color: '#fff' }}>The numerical test best is descriptive.</strong>{' '}
-            It is shown for orientation but is not selected and tested on the same outcomes.</li>
-          <li><strong style={{ color: '#fff' }}>Intervals cover the test set only</strong>, not
-            variance from the split itself.</li>
-          <li><strong style={{ color: '#fff' }}>The MLP column is a diagnostic, never ranked.</strong> Ranking
-            it would measure the MLP&apos;s capacity rather than the representation; the
-            informative part is its gap to the linear probe.</li>
-          <li><strong style={{ color: '#fff' }}>Values are internally comparable, not externally.</strong> Every
-            dataset variant and split is stated beside its result. These values must
-            not be mixed with literature values produced under different protocols.</li>
-        </ul>
-      </div>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff' }}>
+            How to read these numbers
+          </h3>
+          <ul style={{
+            color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.7,
+            paddingLeft: '1.25rem', marginTop: '0.6rem',
+          }}>
+            <li><strong style={{ color: '#fff' }}>&ldquo;Not resolved&rdquo; does not mean equal.</strong> It
+              means this test set could not separate the model from the validation-selected
+              reference at the stated multiplicity correction.</li>
+            <li><strong style={{ color: '#fff' }}>&ldquo;Descriptive only&rdquo; means no formal population claim.</strong>{' '}
+              The score and interval describe the observed panel, but no p-value is reported when
+              suitable independent resampling units are unavailable.</li>
+            <li><strong style={{ color: '#fff' }}>The numerical test best is descriptive.</strong>{' '}
+              It is shown for orientation but is not selected and tested on the same outcomes.</li>
+            <li><strong style={{ color: '#fff' }}>Intervals cover the test set only</strong>, not
+              variance from the split itself.</li>
+            <li><strong style={{ color: '#fff' }}>The MLP column is a diagnostic, never ranked.</strong> Ranking
+              it would measure the MLP&apos;s capacity rather than the representation; the
+              informative part is its gap to the linear model.</li>
+            <li><strong style={{ color: '#fff' }}>Values are internally comparable, not externally.</strong> Every
+              dataset variant and split is stated beside its result. These values must
+              not be mixed with literature values produced under different protocols.</li>
+          </ul>
+        </div>
+      </details>
     </div>
   );
 }

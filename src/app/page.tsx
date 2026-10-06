@@ -471,13 +471,13 @@ export default function Home() {
               className={`tab-btn ${activeTab === 'study' ? 'active' : ''}`}
               onClick={() => setActiveTab('study')}
             >
-              Measured Benchmark
+              Benchmark Results
             </button>
             <button
               className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
               onClick={() => setActiveTab('directory')}
             >
-              Registry
+              Representations
             </button>
             <button
               className={`tab-btn ${activeTab === 'wizard' ? 'active' : ''}`}
@@ -486,13 +486,13 @@ export default function Home() {
                 resetWizard();
               }}
             >
-              Compatibility Finder
+              Find a Representation
             </button>
             <button
               className={`tab-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
               onClick={() => setActiveTab('benchmarks')}
             >
-              Literature Registry
+              Published Results
             </button>
           </div>
         </div>
