@@ -3,7 +3,6 @@
 An open-access registry, compatibility filter, and interactive benchmark dashboard for chemical and biological vector representations.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-**Zenodo DOI:** to be added with the final versioned data deposit.
 
 <img width="1862" height="976" alt="biolatent" src="https://github.com/user-attachments/assets/3bf8c24e-dd89-487d-8247-f41ed61815d3" />
 
