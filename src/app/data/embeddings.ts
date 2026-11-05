@@ -713,6 +713,230 @@ embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().detach().numpy()`
 # data = [("msa1", ["M-KTV", "MK-TV", "MKT-V"])]
 # labels, strs, tokens = batch_converter(data)`
   },
+  {
+    id: "unirep_1900",
+    name: "UniRep (1900-unit)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "GPL-3.0 code / CC BY-NC 4.0 weights",
+    architectureType: "Multiplicative LSTM",
+    pretrainingObjective: "Autoregressive next-amino-acid prediction",
+    parameterCount: "18M",
+    embeddingDimension: 1900,
+    yearReleased: 2019,
+    trainingData: {
+      name: "UniRef50",
+      size: "Approximately 24M protein sequences",
+      license: "UniProt terms"
+    },
+    codeRepositoryUrl: "https://github.com/churchlab/UniRep",
+    paperUrl: "https://doi.org/10.1038/s41592-019-0598-1",
+    computeProfile: "mixed",
+    benchmarks: [],
+    tags: ["UniRep", "mLSTM", "Protein-Engineering", "Sequence"],
+    codeSnippet: `from unirep import babbler1900
+
+# Download the official 1900-unit weights as documented in the repository.
+model = babbler1900(batch_size=1, model_path="1900_weights")
+final_hidden, *placeholders = model.get_rep_ops()`
+  },
+  {
+    id: "esm1v_650m",
+    name: "ESM-1v (650M parameter)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Transformer",
+    pretrainingObjective: "Masked language modeling optimized for zero-shot variant-effect scoring",
+    parameterCount: "650M",
+    embeddingDimension: 1280,
+    yearReleased: 2021,
+    trainingData: {
+      name: "UniRef90",
+      size: "98M protein sequences",
+      license: "UniProt terms"
+    },
+    codeRepositoryUrl: "https://github.com/facebookresearch/esm",
+    weightsUrl: "https://huggingface.co/facebook/esm1v_t33_650M_UR90S_1",
+    paperUrl: "https://proceedings.neurips.cc/paper/2021/hash/f51338d736f95dd42427296047067694-Abstract.html",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["ESM-1v", "Variant-Effect", "Protein-LM", "Transformer"],
+    codeSnippet: `from transformers import AutoModel, AutoTokenizer
+import torch
+
+checkpoint = "facebook/esm1v_t33_650M_UR90S_1"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModel.from_pretrained(checkpoint).eval()
+inputs = tokenizer("MSKGEELFTGVVPILVELDGDVNGHKFSV", return_tensors="pt")
+with torch.no_grad():
+    embedding = model(**inputs).last_hidden_state.mean(dim=1)`
+  },
+  {
+    id: "proteinbert",
+    name: "ProteinBERT",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Convolutional and global-attention encoder",
+    pretrainingObjective: "Masked sequence reconstruction and Gene Ontology annotation recovery",
+    parameterCount: "16M",
+    embeddingDimension: 512,
+    yearReleased: 2022,
+    trainingData: {
+      name: "UniRef90 with Gene Ontology annotations",
+      size: "Approximately 106M protein sequences",
+      license: "UniProt and Gene Ontology terms"
+    },
+    codeRepositoryUrl: "https://github.com/nadavbra/protein_bert",
+    weightsUrl: "https://huggingface.co/GrimSqueaker/proteinBERT",
+    paperUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9386727/",
+    computeProfile: "mixed",
+    benchmarks: [],
+    tags: ["ProteinBERT", "Global-Attention", "Gene-Ontology", "Long-Sequences"],
+    codeSnippet: `from proteinbert import load_pretrained_model
+from proteinbert.conv_and_global_attention_model import get_model_with_hidden_layers_as_outputs
+
+generator, input_encoder = load_pretrained_model()
+model = get_model_with_hidden_layers_as_outputs(generator.create_model(seq_len=512))
+encoded = input_encoder.encode_X(["MSKGEELFTGVVPILVELDGDVNGHKFSV"], 512)
+local_repr, global_repr = model.predict(encoded)`
+  },
+  {
+    id: "carp_640m",
+    name: "CARP (640M parameter)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "ByteNet dilated convolutional network",
+    pretrainingObjective: "Masked language modeling",
+    parameterCount: "640M",
+    embeddingDimension: 1280,
+    yearReleased: 2024,
+    trainingData: {
+      name: "UniRef50 (March 2020 release)",
+      size: "Approximately 41.5M training sequences",
+      license: "UniProt terms"
+    },
+    codeRepositoryUrl: "https://github.com/microsoft/protein-sequence-models",
+    weightsUrl: "https://zenodo.org/records/6564798",
+    paperUrl: "https://doi.org/10.1016/j.cels.2024.01.008",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["CARP", "CNN", "ByteNet", "Long-Sequences"],
+    codeSnippet: `from sequence_models.pretrained import load_model_and_alphabet
+import torch
+
+model, collater = load_model_and_alphabet("carp_640M")
+tokens = collater([["MSKGEELFT"]])[0]
+with torch.no_grad():
+    per_residue = model(tokens)
+embedding = per_residue.mean(dim=1)`
+  },
+  {
+    id: "esmc_300m",
+    name: "ESM-C (300M parameter)",
+    aliases: ["ESM Cambrian 300M", "ESMC-300M"],
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "EvolutionaryScale Cambrian Open License",
+    architectureType: "Transformer encoder with rotary position embeddings and SwiGLU",
+    pretrainingObjective: "Masked language modeling",
+    parameterCount: "300M",
+    embeddingDimension: 960,
+    yearReleased: 2024,
+    trainingData: {
+      name: "UniRef, MGnify, and JGI metagenomic proteins",
+      size: "Approximately 2.8B protein sequences",
+      license: "Mixed / source-dependent"
+    },
+    codeRepositoryUrl: "https://github.com/Biohub/esm",
+    weightsUrl: "https://huggingface.co/biohub/ESMC-300M-hf",
+    paperUrl: "https://www.biorxiv.org/content/10.64898/2026.06.03.729735v1.full",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["ESM-C", "EvolutionaryScale", "Protein-LM", "Metagenomics"],
+    codeSnippet: `from transformers import AutoModel, AutoTokenizer
+import torch
+
+checkpoint = "biohub/ESMC-300M-hf"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModel.from_pretrained(checkpoint).eval()
+inputs = tokenizer("MSKGEELFTGVVPILVELDGDVNGHKFSV", return_tensors="pt")
+with torch.no_grad():
+    embedding = model(**inputs).last_hidden_state.mean(dim=1)`
+  },
+  {
+    id: "saprot_650m_af2",
+    name: "SaProt (650M, AF2 structure tokens)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "3D",
+    license: "MIT",
+    architectureType: "Structure-aware ESM Transformer",
+    pretrainingObjective: "Masked language modeling over amino-acid and Foldseek 3Di tokens",
+    parameterCount: "650M",
+    embeddingDimension: 1280,
+    yearReleased: 2024,
+    trainingData: {
+      name: "AlphaFold2 structures encoded as amino-acid + 3Di tokens",
+      size: "Approximately 40M protein structures",
+      license: "Mixed / source-dependent"
+    },
+    codeRepositoryUrl: "https://github.com/westlake-repl/Saprot",
+    weightsUrl: "https://huggingface.co/westlake-repl/SaProt_650M_AF2",
+    paperUrl: "https://openreview.net/forum?id=6MRm3G4NiU",
+    inferenceRequirements: "Requires a protein structure converted to Foldseek 3Di tokens for valid frozen-embedding use.",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["SaProt", "Structure-Aware", "Foldseek", "3Di"],
+    codeSnippet: `from transformers import AutoModel, AutoTokenizer
+import torch
+
+checkpoint = "westlake-repl/SaProt_650M_AF2"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModel.from_pretrained(checkpoint).eval()
+# The input must pair each amino acid with its Foldseek 3Di token.
+structure_aware_sequence = "M#EvVpQpL#VyQdYaKv"
+inputs = tokenizer(structure_aware_sequence, return_tensors="pt")
+with torch.no_grad():
+    embedding = model(**inputs).last_hidden_state.mean(dim=1)`
+  },
+  {
+    id: "protrek_650m",
+    name: "ProTrek (650M sequence encoder)",
+    representationType: "learned_embedding",
+    modality: "protein",
+    inputRepresentation: "sequence",
+    license: "MIT",
+    architectureType: "Trimodal sequence, structure, and biomedical-text encoders",
+    pretrainingObjective: "Contrastive alignment of protein sequence, structure, and functional text",
+    parameterCount: "650M sequence + 150M structure + 130M text encoders",
+    embeddingDimension: 1024,
+    yearReleased: 2025,
+    trainingData: {
+      name: "Swiss-Prot and clustered TrEMBL50 sequence-structure-text records",
+      size: "Official release does not report one aggregate record count",
+      license: "Mixed / source-dependent"
+    },
+    codeRepositoryUrl: "https://github.com/westlake-repl/ProTrek",
+    weightsUrl: "https://huggingface.co/westlake-repl/ProTrek_650M",
+    paperUrl: "https://doi.org/10.1038/s41587-025-02836-0",
+    inferenceRequirements: "Sequence embeddings are available directly; cross-modal retrieval additionally uses structure or text encoders.",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["ProTrek", "Multimodal", "Contrastive", "Protein-Retrieval"],
+    codeSnippet: `# Clone the official ProTrek repository and download westlake-repl/ProTrek_650M.
+from model.ProTrek.protrek_trimodal_model import ProTrekTrimodalModel
+
+# After loading the official checkpoint as documented by the authors:
+# sequence_embedding = model.get_protein_repr(["MSKGEELFTGVVPILVELDGDVNGHKFSV"])`
+  },
 
   // ==================== 3. STRUCTURE / 3D MODELS ====================
   {
@@ -1035,6 +1259,31 @@ model = GPT2Model.from_pretrained("ncfrey/ChemGPT-1.2B")`
 # conformers = sampler.sample_conformers(smiles="C1CCCCC1...", num_samples=100)`
   },
   {
+    id: "kmer5_dna",
+    name: "DNA 5-mer Frequencies",
+    aliases: ["5-mer frequency"],
+    representationType: "fixed_descriptor",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Open method",
+    descriptorFamily: "Nucleotide k-mer composition",
+    algorithmType: "rule-based",
+    vectorType: "continuous",
+    dimensionality: 1024,
+    computeProfile: "cpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "K-mer", "Composition", "Classical-Baseline"],
+    codeSnippet: `from collections import Counter
+from itertools import product
+import numpy as np
+
+sequence = "ACGTACGTACGT".upper()
+vocabulary = ["".join(kmer) for kmer in product("ACGT", repeat=5)]
+counts = Counter(sequence[i:i + 5] for i in range(len(sequence) - 4))
+vector = np.array([counts[kmer] for kmer in vocabulary], dtype=float)
+vector /= max(vector.sum(), 1.0)`
+  },
+  {
     id: "evo_foundation",
     name: "Evo (7B Genomics Model)",
     representationType: "learned_embedding",
@@ -1106,6 +1355,179 @@ inputs = tokenizer("ACGTTGCA", return_tensors="pt")
 with torch.no_grad():
     outputs = model(**inputs)
 embeddings = outputs[0].mean(dim=1).squeeze().numpy()`
+  },
+  {
+    id: "nucleotide_transformer_500m_human_ref",
+    name: "Nucleotide Transformer 500M (Human Reference)",
+    aliases: ["NT 500M Human Ref"],
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "CC BY-NC-SA 4.0",
+    developer: "InstaDeep, NVIDIA, and Technical University of Munich",
+    architectureType: "Transformer encoder (ESM-style)",
+    pretrainingObjective: "Masked language modeling of 6-mer DNA tokens",
+    parameterCount: "500M",
+    embeddingDimension: 1280,
+    yearReleased: 2023,
+    trainingData: {
+      name: "Human reference genome",
+      size: "Approximately 3 billion base pairs",
+      license: "Source genome terms apply"
+    },
+    codeRepositoryUrl: "https://github.com/instadeepai/nucleotide-transformer",
+    weightsUrl: "https://huggingface.co/InstaDeepAI/nucleotide-transformer-500m-human-ref",
+    paperUrl: "https://doi.org/10.1038/s41592-024-02523-z",
+    librarySupport: "Hugging Face Transformers",
+    inferenceRequirements: "GPU recommended; sequences are represented as 6-mer tokens",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "Transformer", "Masked-Language-Model", "Human-Genome"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModelForMaskedLM
+import torch
+
+checkpoint = "InstaDeepAI/nucleotide-transformer-500m-human-ref"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModelForMaskedLM.from_pretrained(checkpoint).eval()
+inputs = tokenizer("ACGTACGTACGT", return_tensors="pt")
+with torch.no_grad():
+    embeddings = model(**inputs, output_hidden_states=True).hidden_states[-1].mean(dim=1)`
+  },
+  {
+    id: "caduceus_131k",
+    name: "Caduceus-PS (131K Context)",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    developer: "Kuleshov Group, Cornell University",
+    architectureType: "Bidirectional MambaDNA with reverse-complement equivariance",
+    pretrainingObjective: "Masked language modeling at single-nucleotide resolution",
+    embeddingDimension: 256,
+    yearReleased: 2024,
+    trainingData: {
+      name: "Human reference genome",
+      size: "131,072-nucleotide training sequences",
+      license: "Source genome terms apply"
+    },
+    codeRepositoryUrl: "https://github.com/kuleshov-group/caduceus",
+    weightsUrl: "https://huggingface.co/kuleshov-group/caduceus-ps_seqlen-131k_d_model-256_n_layer-16",
+    paperUrl: "https://doi.org/10.48550/arXiv.2403.03234",
+    librarySupport: "Hugging Face Transformers (custom model code)",
+    inferenceRequirements: "GPU recommended; trust_remote_code may be required",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "Mamba", "Long-Context", "Reverse-Complement-Equivariant"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModel
+import torch
+
+checkpoint = "kuleshov-group/caduceus-ps_seqlen-131k_d_model-256_n_layer-16"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint, trust_remote_code=True)
+model = AutoModel.from_pretrained(checkpoint, trust_remote_code=True).eval()
+inputs = tokenizer("ACGTACGTACGT", return_tensors="pt")
+with torch.no_grad():
+    embeddings = model(**inputs).last_hidden_state.mean(dim=1)`
+  },
+  {
+    id: "gena_lm_bert_large",
+    name: "GENA-LM BERT Large",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "MIT (code; weights terms not stated)",
+    developer: "Artificial Intelligence Research Institute (AIRI)",
+    architectureType: "BERT-large Transformer",
+    pretrainingObjective: "Masked language modeling of byte-pair-encoded DNA",
+    embeddingDimension: 1024,
+    yearReleased: 2023,
+    trainingData: {
+      name: "Telomere-to-Telomere human genome assembly",
+      size: "Approximately 3.1 billion base pairs",
+      license: "Source genome terms apply"
+    },
+    codeRepositoryUrl: "https://github.com/AIRI-Institute/GENA_LM",
+    weightsUrl: "https://huggingface.co/AIRI-Institute/gena-lm-bert-large-t2t",
+    paperUrl: "https://doi.org/10.1093/nar/gkae1310",
+    librarySupport: "Hugging Face Transformers (custom model code)",
+    inferenceRequirements: "GPU recommended; trust_remote_code is required",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "BERT", "BPE", "Long-Sequence"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModel
+import torch
+
+checkpoint = "AIRI-Institute/gena-lm-bert-large-t2t"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint, trust_remote_code=True)
+model = AutoModel.from_pretrained(checkpoint, trust_remote_code=True).eval()
+inputs = tokenizer("ACGTACGTACGT", return_tensors="pt")
+with torch.no_grad():
+    outputs = model(**inputs, output_hidden_states=True)
+    embeddings = outputs.hidden_states[-1].mean(dim=1)`
+  },
+  {
+    id: "grover_dna",
+    name: "GROVER",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Not stated by model provider",
+    developer: "Biotechnology Center, TU Dresden",
+    architectureType: "BERT Transformer",
+    pretrainingObjective: "Masked language modeling of byte-pair-encoded DNA",
+    embeddingDimension: 768,
+    yearReleased: 2024,
+    trainingData: {
+      name: "Human reference genome (GRCh37/hg19)",
+      size: "Approximately 3 billion base pairs",
+      license: "Source genome terms apply"
+    },
+    weightsUrl: "https://huggingface.co/PoetschLab/GROVER",
+    paperUrl: "https://doi.org/10.1038/s42256-024-00872-0",
+    librarySupport: "Hugging Face Transformers",
+    inferenceRequirements: "GPU recommended; add flanking sequence to stabilize BPE tokenization near sequence edges",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "BERT", "BPE", "Human-Genome"],
+    codeSnippet: `from transformers import AutoTokenizer, AutoModelForMaskedLM
+import torch
+
+checkpoint = "PoetschLab/GROVER"
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModelForMaskedLM.from_pretrained(checkpoint).eval()
+inputs = tokenizer("ACGTACGTACGT", return_tensors="pt")
+with torch.no_grad():
+    embeddings = model.base_model(**inputs).last_hidden_state.mean(dim=1)`
+  },
+  {
+    id: "evo2_7b",
+    name: "Evo 2 7B",
+    representationType: "learned_embedding",
+    modality: "nucleic_acid",
+    inputRepresentation: "sequence",
+    license: "Apache-2.0",
+    developer: "Arc Institute and collaborators",
+    architectureType: "StripedHyena 2",
+    pretrainingObjective: "Autoregressive single-nucleotide genome modeling",
+    parameterCount: "7B",
+    embeddingDimension: 4096,
+    yearReleased: 2026,
+    trainingData: {
+      name: "OpenGenome2 across all domains of life",
+      size: "9.3 trillion DNA tokens",
+      license: "Mixed / source-dependent"
+    },
+    codeRepositoryUrl: "https://github.com/ArcInstitute/evo2",
+    weightsUrl: "https://huggingface.co/arcinstitute/evo2_7b",
+    paperUrl: "https://doi.org/10.1038/s41586-026-10176-5",
+    librarySupport: "Official Evo 2 package",
+    inferenceRequirements: "High-memory NVIDIA GPU recommended; official package uses optimized StripedHyena kernels",
+    computeProfile: "gpu",
+    benchmarks: [],
+    tags: ["DNA", "Genomics", "Evo-2", "Autoregressive", "Long-Context", "All-Domains-of-Life"],
+    codeSnippet: `from evo2 import Evo2
+
+model = Evo2("evo2_7b")
+# Use the official Evo 2 scoring or embedding interface for nucleotide sequences.`
   },
   {
     id: "hyenadna",

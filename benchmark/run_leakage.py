@@ -77,6 +77,15 @@ STRUCTURAL = {
 UNMEASURED = {
     "chembl": ("No pinned local ChEMBL snapshot is available; the ZINC proxy "
                "covers only the other declared GROVER pretraining source."),
+    "opengenome_prokaryotic": (
+        "Evo 1 was trained on prokaryotic and viral genomes rather than the "
+        "human reference assembly; no pinned local OpenGenome snapshot is "
+        "available for an empirical sequence search."),
+}
+
+UNMEASURED_MODALITY = {
+    "chembl": "molecule",
+    "opengenome_prokaryotic": "genomics",
 }
 
 # Declared-corpus name -> the corpus actually sampled in the empirical audit.
@@ -185,8 +194,6 @@ def _structural_for(modality, empirical):
 
 
 def _unmeasured_for(modality):
-    if modality != "molecule":
-        return {}
     return {
         corpus: {
             "affected_models": [model for model, corpora in DECLARED_CORPORA.items()
@@ -194,6 +201,7 @@ def _unmeasured_for(modality):
             "reason": reason,
         }
         for corpus, reason in UNMEASURED.items()
+        if UNMEASURED_MODALITY[corpus] == modality
         if any(corpus in corpora for corpora in DECLARED_CORPORA.values())
     }
 

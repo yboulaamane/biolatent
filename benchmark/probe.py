@@ -53,6 +53,7 @@ ALPHA_GRID = [0.1, 1.0, 10.0, 100.0, 1000.0]
 # search set keeps the procedure identical for every model while leaving the
 # reported model fit on all available training data.
 SEARCH_CAP = 6000
+LOGISTIC_MAX_ITER = 5000
 
 MLP_KWARGS = dict(hidden_layer_sizes=(256,), activation="relu", alpha=1e-4,
                   batch_size=256, learning_rate_init=1e-3, max_iter=200,
@@ -223,7 +224,8 @@ def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4,
             estimator = Pipeline([
                 ("scale", StandardScaler()),
                 ("model", OneVsRestClassifier(
-                    LogisticRegression(max_iter=1000, random_state=SEED))),
+                    LogisticRegression(max_iter=LOGISTIC_MAX_ITER,
+                                       random_state=SEED))),
             ])
             parameters = {"model__estimator__C": C_GRID}
             scoring = _multilabel_auc_scorer
@@ -231,7 +233,7 @@ def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4,
         else:
             estimator = Pipeline([
                 ("scale", StandardScaler()),
-                ("model", LogisticRegression(max_iter=1000,
+                ("model", LogisticRegression(max_iter=LOGISTIC_MAX_ITER,
                                                random_state=SEED)),
             ])
             parameters = {"model__C": C_GRID}
@@ -243,14 +245,16 @@ def linear_probe(X_train, y_train, X_test, y_test, task_type, n_jobs=4,
         best_c = search.best_params_[parameter_name]
         if task_type == "multilabel":
             model = OneVsRestClassifier(LogisticRegression(
-                C=best_c, max_iter=1000, random_state=SEED)).fit(X_tr, y_tr)
+                C=best_c, max_iter=LOGISTIC_MAX_ITER,
+                random_state=SEED)).fit(X_tr, y_tr)
         else:
-            model = LogisticRegression(C=best_c, max_iter=1000,
+            model = LogisticRegression(C=best_c, max_iter=LOGISTIC_MAX_ITER,
                                        random_state=SEED).fit(X_tr, y_tr)
         y_pred, y_prob = model.predict(X_te), model.predict_proba(X_te)
         out = _classification_metrics(y_te, y_pred, y_prob, n_classes,
                                       task_type)
         out["hyperparameter"] = {"C": best_c}
+        out["optimizer_max_iter"] = LOGISTIC_MAX_ITER
         if n_boot:
             ci = bootstrap_ci(y_te, y_pred, y_prob, task_type, n_classes,
                               groups=test_groups, n_boot=n_boot)

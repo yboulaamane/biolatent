@@ -36,8 +36,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
 from benchmark.inference_policy import inference_policy
-from benchmark.probe import (ALPHA_GRID, C_GRID, PROBE_PROTOCOL_VERSION,
-                             SEED, _multilabel_auc_scorer, _search_subset,
+from benchmark.probe import (ALPHA_GRID, C_GRID, LOGISTIC_MAX_ITER,
+                             PROBE_PROTOCOL_VERSION, SEED,
+                             _multilabel_auc_scorer, _search_subset,
                              _valid_rows)
 
 N_BOOT = 2000
@@ -77,13 +78,14 @@ def fit_model(X, y, train_idx, task_type, n_jobs):
         search = GridSearchCV(
             Pipeline([
                 ("scale", StandardScaler()),
-                ("model", LogisticRegression(max_iter=1000,
+                ("model", LogisticRegression(max_iter=LOGISTIC_MAX_ITER,
                                                random_state=SEED)),
             ]),
             {"model__C": C_GRID}, cv=3, n_jobs=n_jobs,
             scoring=scoring).fit(Xs, ys)
-        model = LogisticRegression(C=search.best_params_["model__C"], max_iter=1000,
-                                   random_state=SEED).fit(X_train, y_train)
+        model = LogisticRegression(
+            C=search.best_params_["model__C"], max_iter=LOGISTIC_MAX_ITER,
+            random_state=SEED).fit(X_train, y_train)
     elif task_type == "multilabel":
         y_train = y_train.astype(int)
         n_classes = y_train.shape[1]
@@ -92,12 +94,14 @@ def fit_model(X, y, train_idx, task_type, n_jobs):
             Pipeline([
                 ("scale", StandardScaler()),
                 ("model", OneVsRestClassifier(
-                    LogisticRegression(max_iter=1000, random_state=SEED))),
+                    LogisticRegression(max_iter=LOGISTIC_MAX_ITER,
+                                       random_state=SEED))),
             ]),
             {"model__estimator__C": C_GRID}, cv=3, n_jobs=n_jobs,
             scoring=_multilabel_auc_scorer).fit(Xs, ys)
         model = OneVsRestClassifier(LogisticRegression(
-            C=search.best_params_["model__estimator__C"], max_iter=1000,
+            C=search.best_params_["model__estimator__C"],
+            max_iter=LOGISTIC_MAX_ITER,
             random_state=SEED)).fit(X_train, y_train)
     else:
         n_classes = None

@@ -21,6 +21,7 @@ Usage:
     python benchmark/run_study.py BBBP ClinTox   # named tasks only
 """
 
+import argparse
 import json
 import hashlib
 import importlib.metadata
@@ -34,8 +35,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from benchmark import embed
 from benchmark.datasets import ALL_DATASETS, load_benchmark_dataset
-from benchmark.probe import (PROBE_PROTOCOL_VERSION, SEARCH_CAP, SEED,
-                             linear_probe, mlp_probe)
+from benchmark.probe import (LOGISTIC_MAX_ITER, PROBE_PROTOCOL_VERSION,
+                             SEARCH_CAP, SEED, linear_probe, mlp_probe)
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "results")
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -46,7 +47,7 @@ PUBLIC_RESULT_FILES = [
     "benchmark_results.json", "paired_comparisons.json",
     "exposure_report.json", "split_seed_sensitivity.json",
     "resolution_curves.json", "sequence_clusters.json",
-    "split_diagnostics.json",
+    "split_diagnostics.json", "literature_measured_comparison.json",
 ]
 
 
@@ -136,6 +137,7 @@ def write_manifest(results):
             "probe_protocol_version": PROBE_PROTOCOL_VERSION,
             "seed": SEED,
             "regularisation_search_cap": SEARCH_CAP,
+            "logistic_regression_max_iter": LOGISTIC_MAX_ITER,
             "ranked_probe": "standardised L2 linear probe",
             "cross_validation_preprocessing": (
                 "feature scaling fitted independently inside each CV fold"),
@@ -226,12 +228,25 @@ def refresh_metadata(task_names=None):
     write_manifest(results)
 
 
-def precompute_embeddings(task_names=None):
+def _selected_models(task, modality, model_ids=None):
+    """Return applicable models, optionally restricted to an explicit set."""
+    requested = None if model_ids is None else set(model_ids)
+    unknown = set() if requested is None else requested - set(embed.MODEL_REGISTRY)
+    if unknown:
+        raise ValueError(f"Unknown model ids: {sorted(unknown)}")
+    return [
+        model for model in embed.MODEL_REGISTRY
+        if embed.is_applicable(model, task, modality)
+        and (requested is None or model in requested)
+    ]
+
+
+def precompute_embeddings(task_names=None, model_ids=None):
     """Populate valid embedding caches without fitting downstream probes."""
     for task in (task_names or ALL_DATASETS):
         data = load_benchmark_dataset(task)
-        applicable = [model for model in embed.MODEL_REGISTRY
-                      if embed.is_applicable(model, task, data["modality"])]
+        applicable = _selected_models(
+            task, data["modality"], model_ids=model_ids)
         print(f"\n{task}: precomputing {len(applicable)} representations", flush=True)
         for model_id in applicable:
             print(f"  -> {model_id}", flush=True)
@@ -239,15 +254,14 @@ def precompute_embeddings(task_names=None):
     print("\nEmbedding caches are complete.", flush=True)
 
 
-def run(task_names=None, run_mlp=True):
+def run(task_names=None, run_mlp=True, model_ids=None, force_probe=False):
     tasks = task_names or ALL_DATASETS
     results = load_results()
 
     for task in tasks:
         data = load_benchmark_dataset(task)
         modality = data["modality"]
-        applicable = [model for model in embed.MODEL_REGISTRY
-                      if embed.is_applicable(model, task, modality)]
+        applicable = _selected_models(task, modality, model_ids=model_ids)
 
         print(f"\n{'=' * 72}\n{task}  ({modality}, {data['task_type']}, "
               f"{data['split_source']} split, n={len(data['inputs'])})\n{'=' * 72}",
@@ -296,7 +310,8 @@ def run(task_names=None, run_mlp=True):
                 with open(sidecar_path) as handle:
                     embedding_sha256 = json.load(handle)["sha256"]
                 existing = results[task]["models"].get(model_id, {})
-                if (existing.get("linear", {}).get("protocol_version") ==
+                if (not force_probe
+                        and existing.get("linear", {}).get("protocol_version") ==
                         PROBE_PROTOCOL_VERSION
                         and existing.get("embedding_sha256") ==
                         embedding_sha256):
@@ -319,6 +334,12 @@ def run(task_names=None, run_mlp=True):
                 if run_mlp:
                     entry["mlp"] = mlp_probe(X[tr], y[tr], X[te], y[te],
                                              data["task_type"])
+                    entry["linear_mlp_gap"] = round(
+                        entry["mlp"]["score"] - lin["score"], 4)
+                elif "mlp" in existing:
+                    # A probe-only convergence rerun should not discard a
+                    # valid diagnostic MLP that depends on the same embedding.
+                    entry["mlp"] = existing["mlp"]
                     entry["linear_mlp_gap"] = round(
                         entry["mlp"]["score"] - lin["score"], 4)
 
@@ -346,19 +367,28 @@ def run(task_names=None, run_mlp=True):
 
 
 if __name__ == "__main__":
-    arguments = sys.argv[1:]
-    if "--embeddings-only" in arguments:
-        requested = [argument for argument in arguments
-                     if argument != "--embeddings-only"]
-        precompute_embeddings(requested or None)
-    elif "--refresh-metadata" in arguments:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("tasks", nargs="*", choices=ALL_DATASETS)
+    parser.add_argument("--models", nargs="+", choices=embed.MODEL_REGISTRY)
+    parser.add_argument("--embeddings-only", action="store_true")
+    parser.add_argument("--refresh-metadata", action="store_true")
+    parser.add_argument("--no-mlp", action="store_true")
+    parser.add_argument("--force-probe", action="store_true")
+    arguments = parser.parse_args()
+    if arguments.embeddings_only:
+        precompute_embeddings(
+            arguments.tasks or None, model_ids=arguments.models)
+    elif arguments.refresh_metadata:
         # Run this last in a release. write_manifest hashes every public
         # artefact, so running it before paired_test.py, run_leakage.py,
         # resolution_analysis.py and split_sensitivity.py have written their
         # outputs records hashes of files that no longer exist in that form.
-        requested = [argument for argument in arguments
-                     if argument != "--refresh-metadata"]
-        refresh_metadata(requested or None)
+        refresh_metadata(arguments.tasks or None)
         print(f"Refreshed {RESULTS_PATH} and {MANIFEST_PATH}", flush=True)
     else:
-        run(arguments or None)
+        run(
+            arguments.tasks or None,
+            run_mlp=not arguments.no_mlp,
+            model_ids=arguments.models,
+            force_probe=arguments.force_probe,
+        )

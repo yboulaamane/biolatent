@@ -6,23 +6,24 @@
     "probe_protocol_version": 4,
     "seed": 42,
     "regularisation_search_cap": 6000,
+    "logistic_regression_max_iter": 5000,
     "ranked_probe": "standardised L2 linear probe",
     "cross_validation_preprocessing": "feature scaling fitted independently inside each CV fold",
     "final_fit": "all non-test labels after validation selection",
     "diagnostic_probe": "one-hidden-layer MLP (256 ReLU units)"
   },
   "software": {
-    "python": "3.13.13",
-    "numpy": "2.4.6",
-    "pandas": "3.0.2",
+    "python": "3.11.18",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
     "scipy": "1.17.1",
     "scikit_learn": "1.8.0",
-    "rdkit": "2026.3.1",
-    "torch": "2.11.0+cpu",
-    "torch_build": "2.11.0+cpu",
-    "torch_cuda": null,
-    "transformers": "unknown",
-    "datasets": "unknown"
+    "rdkit": "2023.9.6",
+    "torch": "2.8.0+cu128",
+    "torch_build": "2.8.0+cu128",
+    "torch_cuda": "12.8",
+    "transformers": "4.50.3",
+    "datasets": "2.19.2"
   },
   "tasks": {
     "BBBP": {
@@ -80,7 +81,7 @@
           "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "45f538982843d8ff2d10a8c938e9b71420974a0026e8d9c8e2ef2647cec074b0",
+          "sha256": "e0e87d781d1a57323d6a8701ec6bb933e791abc7d54d8f7380e3226cbeaaf3e6",
           "embedding_runtime": null
         },
         "chemberta_77m": {
@@ -103,10 +104,10 @@
           "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "f1498194ea5deeb93f783beff37764e0b8b9c492000fd944bd383c42e4ff5528",
+          "sha256": "861973d1ba569644bae4a1d1180e0cae1d8204178ba0816511149f3bfa113211",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -134,10 +135,10 @@
           "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "87ef5e40c5d5e3d5f4b974969efc74695da431b6899a14418d2542bbaff20c60",
+          "sha256": "f8f2f3950c53eda59b2521559750219c4a0f5d469538e1b22813a00513c803b3",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -165,10 +166,10 @@
           "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
           "inference_seed": 42,
           "rare_amino_acid_mapping": null,
-          "sha256": "a18dbba6a9e08bcbcdc14d174bc4dce1b6a2490ea9eb4dc0ccdc884d5b4c7dad",
+          "sha256": "37c243abcc664c2c7f1f175e5f057488ae3b07572cd2f293c49d79163dfee09e",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
           "inference_device_type": "cuda",
@@ -198,7 +199,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "23484cbc640ed51c0b91abf99ba5498f4db48c1b0075251f48b7ca07aad1310f",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -233,9 +234,9 @@
           "input_sha256": "fe1ab58a666482dbe4a1185066a118ca5678ff8afcad40ca19352e0c00aa459a",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "e7b791555ba3a3e6f6cd3c61f9e1b7952643ac235ba7dda6e7f45a0eaf3719cc",
+          "sha256": "85f32aa030df46b3b11707ca3c85da3bcedf8b5fdf27c89b960b5ad99f04257e",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -271,7 +272,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "7332f1e8d0f1eefeb5b86fd43df0876731d0b6200bf2f41d829b9a43c964938d",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -307,7 +308,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "6544a675f6955c200cf931d81fee5b60dbe065f8790f4641eb36b4c46ba95609",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -378,7 +379,7 @@
           "input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "40c9e1960d458df85a11dc64dd3756a40facf052b9093f0f520f4dbd0b87bc1a",
+          "sha256": "26534a97a56d4c1fd9483bd4b81c5abe1a3ce063bdafa6b7e12d2ed8ad5e2f51",
           "embedding_runtime": null
         },
         "chemberta_77m": {
@@ -401,10 +402,10 @@
           "input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "ece69d2aa5ff5873388e9bb67f86c2f70aff1c7f4f95f36ac83eeb854f299bb4",
+          "sha256": "17bad35fc66b7bbf5ead5029346838aa23401b5f728abe9e332f2f54dc87815b",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -432,10 +433,10 @@
           "input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "32baa0731cce813001dcc50b23888e0ede8a55c2042c2a035386bec53b51a2f2",
+          "sha256": "5a6ef1830a4d57070d554671bafd00fa3e52b067248a626784866f434afd40cb",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -463,10 +464,10 @@
           "input_sha256": "14556cd4ac99ae1031bade8fd4c4ca33740e088c2f088992348fa29858d23df7",
           "inference_seed": 42,
           "rare_amino_acid_mapping": null,
-          "sha256": "51e5748b258a8e1cc70bd671647336501403f8eb8f269bdf57d950e97f7a1a57",
+          "sha256": "4fbdcf61098da827d44fc2e01b6acbf25a377ec80563ede263b58dad3fcfed4f",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
           "inference_device_type": "cuda",
@@ -496,7 +497,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "1a740780a4df3adfa72cfb39a1e2335f3235ad15288c4484bd559ccaf7945a14",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -533,7 +534,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "3d1389e1bb63335263969c6ed27dcf93105ff968f9dc94c822fe624b0305d3bf",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -569,7 +570,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "de9ea8786030334ad8978718272486a73a4b08c686b68e6aa5347f248fa2198b",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -640,7 +641,7 @@
           "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "6789268a22adffd4f817287aa067aa126eae2b3a79ab2710ea7d2bf093449a95",
+          "sha256": "ad50be2e8642b04173b2626147d0916c7c1dabe74c3ba8e5b0d6563c90b954e5",
           "embedding_runtime": null
         },
         "chemberta_77m": {
@@ -663,10 +664,10 @@
           "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "da9a024f679badee732c88280cc79bc41ba15b159ec5ce9598d22228fd265451",
+          "sha256": "883380db9b4d5e9bbedd83a5ffc5db88aaf4b626bd0f450ac1fb0bdb78928a21",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -694,10 +695,10 @@
           "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "92e4066f29b7bf536ebb733eb24f1188000b8e01873ac21e0ac2d2f11ec801c0",
+          "sha256": "f4d68d4386e657b025a8acc4ecd50dc1d8b0b1f10816a575a7797016db211480",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -725,10 +726,10 @@
           "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
           "inference_seed": 42,
           "rare_amino_acid_mapping": null,
-          "sha256": "825ae70ef83cfd19f637697c6d82a846631e2243ea95c0140b61fc261469aa54",
+          "sha256": "354d78391ac3ad90978a0a9be8849c4e60b017cfab0c7141488c77ca27577745",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
           "inference_device_type": "cuda",
@@ -758,7 +759,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "09811e04887c27c573c1fa7d79023abb8cec88d64a4771463ff4a7bc43da4270",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -793,9 +794,9 @@
           "input_sha256": "556115fdca6ed43aff5a8aeb07f0d8806fe27362c296f640b250e2e6b90a7cd0",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "c0bf6849314b6db2198fe991e15e3e921e582410587cd1d5284f8e2227292ee9",
+          "sha256": "1b7cdce5439836826112b95deff758e8e117c1c2e73c9714091262a024c0b2c8",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -831,7 +832,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "8a14025df140c479bdc83b6ee9b16454c0703ca18d2c44d72a040e259d10f403",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -867,7 +868,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "28d8672b8b935e94974e01b14e85bc656542151e58ff5c2ba727f946657ed480",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -961,10 +962,10 @@
           "input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "f56819009559ece3d5996ec17018215370981c550313bb3b13fe7de74f4c84d2",
+          "sha256": "e4da2155e97dac5a1f19b5280d64edf11f5b64166505b642d8d75e135ed390e0",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -992,10 +993,10 @@
           "input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "266244b8320ccc65117aed98fb8067f52c090369a16d2d5c029f48d846625ca9",
+          "sha256": "1f9d2ffaf2f84a588b0c70e4a1e9184520526f93fd402bfd255c5591ef2477b7",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -1023,10 +1024,10 @@
           "input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
           "inference_seed": 42,
           "rare_amino_acid_mapping": null,
-          "sha256": "41964cf04e41c5734e51990638868f525c94ac0300b678071f7560898a283099",
+          "sha256": "bcf9eb643469207596ab0f3b2438f24b75928f55452b17486c700f809e026622",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
           "inference_device_type": "cuda",
@@ -1056,7 +1057,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "8bf0082564baf280a928c7cc0a059e8952b201a0df3f4c223f12688692ae088c",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -1091,9 +1092,9 @@
           "input_sha256": "6829cdb428723bf1cd231ec8b7347f71548ced1d4268ccde2c3c39f6567a71ab",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "82a6d87e43464a286c2f25134762aeded99abdb61d08af979ad3c5b1745bb810",
+          "sha256": "37a24a6abdca7c864224320b9dfc8cf90efdbb8ff8a2aef0d5903206b151440e",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1129,7 +1130,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "ebc96423256e19a281ee1d0f5ba80576a73f16066e8526ff14f440ff162edc6b",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1165,7 +1166,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "f82cbcad0666da8f06e4c52b49fefdabec35e06fcff6f9a7820b7cbe04b64521",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1236,7 +1237,7 @@
           "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "b7a0d128c3d0184cc547777e08e00cbb49f18c6b0bf74126a532a5bb9e4de561",
+          "sha256": "cc0e20c7dbfb18f08aff5ba013c4aa6daeeefda9d8ae6d39bb2f4f85bef3c056",
           "embedding_runtime": null
         },
         "chemberta_77m": {
@@ -1259,10 +1260,10 @@
           "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "19ba7f7094d43d170057ba7bbeba7adef27e5b3120612068ec6c713a7853ff7a",
+          "sha256": "3bc3f2c54ca654a4b24f9d1df05dd22ead2cd3050a1369091c2494484a801a77",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -1290,10 +1291,10 @@
           "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "6d3e5ad2bf475a07a5e79cc7349edd5ec63420ffb577c927ece2908780899048",
+          "sha256": "1fd5c43d19c81f7a9feb9915cb6f12594d28233eb6558b4a93fa8f61d92356e7",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
@@ -1321,10 +1322,10 @@
           "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
           "inference_seed": 42,
           "rare_amino_acid_mapping": null,
-          "sha256": "8922e61fbf41cdeb7938a7971c7d5f0bb68d9a2c84d2437c27c46287f1bfdf4c",
+          "sha256": "c38f55db6266b91c9af2cc0409e1e259e33c39d3777db9e07c018f3b9d4450a4",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
           "inference_device_type": "cuda",
@@ -1354,7 +1355,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "14dec82d1b1c13fc4b5a0599a40a6a708bf6a19986880829b632ac3a65c973f2",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -1389,9 +1390,9 @@
           "input_sha256": "2afb4c8196d7ce6119408402c4d510946919f666938c0a83027b84b02cd89eaa",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "8d57d34bade15a48e51d871daae0c98b65051b1d3b3c88a5e976c638b08c1705",
+          "sha256": "32d314d586596607581fcfe72393f81e668bd0bbe685b454e1994703c1b31674",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1427,7 +1428,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "778e0821181f656a2865908642c3b2d77bccd77b683bf5666e0f103f09fd16c3",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1463,7 +1464,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "274de1ad8a3131d8ad779e320619f81964229ca455f751e2b6608c52c64ecc76",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1502,16 +1503,17 @@
           "modality": "molecule",
           "n": 667,
           "dim": 1024,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": null,
+          "rare_amino_acid_mapping": null,
           "sha256": "6a503146ea873e1a712039ea1ebe3202ea8cb9b3fc85b6603ea0b8d6a49240b6",
-          "embedding_runtime": null,
-          "inference_precision_policy": "not applicable",
-          "matrix_dtype": "float32"
+          "embedding_runtime": null
         },
         "rdkit2d": {
           "model_id": "rdkit2d",
@@ -1524,16 +1526,17 @@
           "modality": "molecule",
           "n": 667,
           "dim": 210,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": null,
+          "rare_amino_acid_mapping": null,
           "sha256": "881130a7fc46a1e1ffe7035ac3b698871f0550726eae4d79f4c1bb73b081840b",
-          "embedding_runtime": null,
-          "inference_precision_policy": "not applicable",
-          "matrix_dtype": "float32"
+          "embedding_runtime": null
         },
         "chemberta_77m": {
           "model_id": "chemberta_77m",
@@ -1546,22 +1549,25 @@
           "modality": "molecule",
           "n": 667,
           "dim": 384,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 256,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": null,
-          "sha256": "e2f5be7d49f0c3271c9c6e0da262ce1bc935f754ec1b97991ad70a7b5c8461df",
+          "rare_amino_acid_mapping": null,
+          "sha256": "4269e5b39cf91138e8e8a027e5707ac906b12a5602c5ef5230839f10857f3c19",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 175,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 175
         },
         "chemberta_zinc": {
           "model_id": "chemberta_zinc",
@@ -1574,22 +1580,25 @@
           "modality": "molecule",
           "n": 667,
           "dim": 768,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 256,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": null,
-          "sha256": "fc0b66e3900f8ee151b87e491859411da74807120584f724f92683f97241d81b",
+          "rare_amino_acid_mapping": null,
+          "sha256": "3410d319584e94e67c4b6bd00a7ec8a72aea833572c66fa4e57b20bd6db01b7b",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 186,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 186
         },
         "molformer_xl": {
           "model_id": "molformer_xl",
@@ -1602,22 +1611,25 @@
           "modality": "molecule",
           "n": 667,
           "dim": 768,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 on all devices",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 256,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": 42,
-          "sha256": "f1496de91c9ae5145c06d908cd234dfdb88e9ff9e6c64dec4677852cff1955ce",
+          "rare_amino_acid_mapping": null,
+          "sha256": "89651e230ad68584f4e4cfff9fed40a90f30c4ebc29eeaff3bff7aa7cb956c5d",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "5.14.1"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float32",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 175,
-          "inference_precision_policy": "float32 on all devices",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 175
         },
         "unimol_v1": {
           "model_id": "unimol_v1",
@@ -1641,7 +1653,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "19b98b7a83adf5d651c90bf9feea9b93623e6392014ad81b55854e8946851880",
           "embedding_runtime": {
-            "python": "3.10.20",
+            "python": "3.10.12",
             "torch": "2.4.0+cu121",
             "unimol_tools": "0.1.6",
             "rdkit": "2026.03.4"
@@ -1676,9 +1688,9 @@
           "input_sha256": "f8d1ebbb49eb58a5683f26be9c59d4fbbbf9e5076d053ae1d5e41deca5242184",
           "inference_seed": null,
           "rare_amino_acid_mapping": null,
-          "sha256": "ba2e2c0627a1cd9a6814f6301db90c34a70b078699953a94c3f614915876ee32",
+          "sha256": "8f8c4cdeb11489614f462a51e6f0985c9972c74d3a261522be28ac0e20e3dc32",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1714,7 +1726,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "8e783190d01191c331fa7737c4ad67d121bf5bd4a6242059be08f7a5a0030b29",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1750,7 +1762,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "1296069159e0e8009780615560564a6857334d4e15ceb2dd5829afd23603d835",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "torch_geometric": "2.6.1",
             "rdkit": "2023.09.6"
@@ -1789,16 +1801,17 @@
           "modality": "protein",
           "n": 28303,
           "dim": 8000,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "not applicable",
           "pooling": "n/a",
           "max_token_length_including_special_tokens": null,
           "raw_character_limit_before_tokenisation": null,
           "n_raw_inputs_truncated": null,
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
+          "rare_amino_acid_mapping": null,
           "sha256": "0b9d559d871e418f61fb42d7c552be78150eb6034d0208c1260d2c454647f80b",
-          "embedding_runtime": null,
-          "inference_precision_policy": "not applicable",
-          "matrix_dtype": "float32"
+          "embedding_runtime": null
         },
         "esm2_8m": {
           "model_id": "esm2_8m",
@@ -1811,22 +1824,25 @@
           "modality": "protein",
           "n": 28303,
           "dim": 320,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 512,
           "raw_character_limit_before_tokenisation": 510,
           "n_raw_inputs_truncated": 11325,
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
-          "sha256": "c2bd1107efbb3cb6928abd55982761753f39b640aa9df5e73769291105e59be8",
+          "rare_amino_acid_mapping": null,
+          "sha256": "e3c14a8866dc833eec0899b3f2770812a49910cfdac4434c15b38ef53d17dbca",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 512,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 512
         },
         "esm2_35m": {
           "model_id": "esm2_35m",
@@ -1839,22 +1855,25 @@
           "modality": "protein",
           "n": 28303,
           "dim": 480,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 512,
           "raw_character_limit_before_tokenisation": 510,
           "n_raw_inputs_truncated": 11325,
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
-          "sha256": "ed1251c8e12fc91b146b4cfc3f250da9734819d3816c5628b089aa86fb0ff387",
+          "rare_amino_acid_mapping": null,
+          "sha256": "44110f2797a940d1d89c85d0fe83fb4d90c29827ca4bd62d9157420d3acfe665",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 512,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 512
         },
         "esm2_150m": {
           "model_id": "esm2_150m",
@@ -1867,22 +1886,25 @@
           "modality": "protein",
           "n": 28303,
           "dim": 640,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 512,
           "raw_character_limit_before_tokenisation": 510,
           "n_raw_inputs_truncated": 11325,
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
-          "sha256": "49f803851aa87cf3417ee4bff78c397e0bfb3581558aee66fab110be54e8c26c",
+          "rare_amino_acid_mapping": null,
+          "sha256": "0b4a510f1f5e9c34049e783d23824f3d9c46558cc0a5bd16e31e4aa9efd93b2f",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 512,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 512
         },
         "esm2_650m": {
           "model_id": "esm2_650m",
@@ -1895,22 +1917,25 @@
           "modality": "protein",
           "n": 28303,
           "dim": 1280,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
           "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
           "max_token_length_including_special_tokens": 512,
           "raw_character_limit_before_tokenisation": 510,
           "n_raw_inputs_truncated": 11325,
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
-          "sha256": "3baac8746a404c7688d1b923e1821019af6f2230ed76819c1d964f9ab3f22caf",
+          "rare_amino_acid_mapping": null,
+          "sha256": "6e4f73e71c51c5ad56b8ed2b73470b3816a3a0ce7aee3000dd7e8bef269d5d66",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
-          "maximum_untruncated_token_length": 512,
-          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
-          "matrix_dtype": "float32"
+          "maximum_untruncated_token_length": 512
         },
         "protbert": {
           "model_id": "protbert",
@@ -1932,16 +1957,209 @@
           "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
           "inference_seed": null,
           "rare_amino_acid_mapping": "UZOB->X",
-          "sha256": "f53122df69c0870f259fbd20d985b80aa80daeca3c7176d5f63811c57f0776f0",
+          "sha256": "ca726123cd679e847056bf9473d3716b823422141799a20a34094913fdd6f8d2",
           "embedding_runtime": {
-            "python": "3.11.15",
-            "torch": "2.13.0+cu130",
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
           "inference_device_type": "cuda",
           "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 512
+        },
+        "esm1v_650m": {
+          "model_id": "esm1v_650m",
+          "label": "ESM-1v 650M",
+          "dataset": "DeepLoc",
+          "kind": "hf",
+          "checkpoint": "facebook/esm1v_t33_650M_UR90S_1",
+          "revision": "8bfdb1892536cc77bd0760b9c25ddced2cd0b4c8",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1280,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "62be49f11fa4c999953f945c9f5c9913cda5bc7d72897bfe95ebff1bac88a649",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 512
+        },
+        "esmc_300m": {
+          "model_id": "esmc_300m",
+          "label": "ESM-C 300M",
+          "dataset": "DeepLoc",
+          "kind": "esmc",
+          "checkpoint": "biohub/esmc-300m-2024-12",
+          "revision": "7f10b20ae75017b2dbc884070e03434515709a8d",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 960,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "official bfloat16 CUDA inference; float32 output matrix",
+          "pooling": "mean over final residue representations with special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "e08670414f427aa1715e65be007ede4c54a5c4fb4c9956fb401a1085a04003ae",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "esm": "3.2.1.post1"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.bfloat16",
+          "embedding_layer": "ESM-C final residue representations",
+          "n_tokenized_inputs_truncated": 11325,
+          "maximum_untruncated_token_length": 34350
+        },
+        "unirep_1900": {
+          "model_id": "unirep_1900",
+          "label": "UniRep 1900-unit",
+          "dataset": "DeepLoc",
+          "kind": "unirep",
+          "checkpoint": "jax-unirep bundled UniRef50 weights",
+          "revision": "jax-unirep-3.0.0",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1900,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 model inference and output matrix",
+          "pooling": "published average hidden state over the protein sequence (h_avg)",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "e92bfd4d7c6ecde365f1bb1b176e83a7a17980cbd880d8270e26385946dce240",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "jax": "0.4.38",
+            "jax_unirep": "3.0.0"
+          },
+          "inference_device_type": "JAX default device",
+          "inference_parameter_dtype": "float32",
+          "embedding_layer": "published UniRep average hidden state (h_avg)",
+          "n_tokenized_inputs_truncated": 11325,
+          "maximum_untruncated_token_length": 34350
+        },
+        "proteinbert": {
+          "model_id": "proteinbert",
+          "label": "ProteinBERT",
+          "dataset": "DeepLoc",
+          "kind": "hf",
+          "checkpoint": "multimolecule/proteinbert",
+          "revision": "d462d5c059e083678c182f161096c64987b8b863",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 128,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "65e924f6b9ba50e2f681e3e703165602a904073f1e448a2990d553b426c3e893",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "5.9.0",
+            "multimolecule": "0.2.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 512
+        },
+        "carp_640m": {
+          "model_id": "carp_640m",
+          "label": "CARP 640M",
+          "dataset": "DeepLoc",
+          "kind": "hf",
+          "checkpoint": "multimolecule/carp-640m",
+          "revision": "672cb98418fb703abb3ad704b457d97deea761f4",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1280,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 on all devices",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "a1da0a501131124bfa8b276cb973b58717d34336bcf7cdfe546f1c08ec339c2c",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "5.9.0",
+            "multimolecule": "0.2.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float32",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 510
+        },
+        "protrek_650m": {
+          "model_id": "protrek_650m",
+          "label": "ProTrek 650M sequence encoder",
+          "dataset": "DeepLoc",
+          "kind": "protrek",
+          "checkpoint": "westlake-repl/ProTrek_650M",
+          "revision": "f2a9d59f333f191fd9268c0f8faf41a1100937c3",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 28303,
+          "dim": 1024,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 CUDA inference; float32 output matrix",
+          "pooling": "official projected CLS representation with L2 normalization",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 11325,
+          "input_sha256": "8e593e3ed3fe458eb25de0d9ee11a3be3d5f4654edd59fa37fdce6644cb4deb3",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "07ed16ea50245dc17c6d084eb63287df0d0c8304815a8c717af6a7f4cf1defba",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "embedding_layer": "official ProTrek CLS projection, L2 normalized",
+          "implementation_revision": "48715468b8daa08236d05ff3310cd61db1896e94",
+          "n_tokenized_inputs_truncated": 11325,
+          "maximum_untruncated_token_length": 34350
         }
       }
     },
@@ -2002,7 +2220,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "cd668da05074cc462c7cac0092b29ce2917f3407e89ef9cf663a14181e35813c",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2033,7 +2251,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "84fe44c8e35e746467030f093b6ea996b9ede5199832ed2524229e16bc31129d",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2064,7 +2282,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "b15fbaee549017ac05d7d8e8db42905523c08948039d278e524dd773ece11a37",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2095,7 +2313,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "c293c5c17bd88af8a123e4be2f9878cd4dc17b66b22bb614b0c3d75e405b2570",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2126,7 +2344,7 @@
           "rare_amino_acid_mapping": "UZOB->X",
           "sha256": "ef6665c58b70a3f1af03c875a96bd71b433e134e0296f875e967b8c23aaad9a5",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2134,6 +2352,199 @@
           "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 239
+        },
+        "esm1v_650m": {
+          "model_id": "esm1v_650m",
+          "label": "ESM-1v 650M",
+          "dataset": "Fluorescence",
+          "kind": "hf",
+          "checkpoint": "facebook/esm1v_t33_650M_UR90S_1",
+          "revision": "8bfdb1892536cc77bd0760b9c25ddced2cd0b4c8",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 1280,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "4dd554d27dbcda8e5d3dc5eb6ba056150a28930931e670b4a96b445209cce873",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
+        },
+        "esmc_300m": {
+          "model_id": "esmc_300m",
+          "label": "ESM-C 300M",
+          "dataset": "Fluorescence",
+          "kind": "esmc",
+          "checkpoint": "biohub/esmc-300m-2024-12",
+          "revision": "7f10b20ae75017b2dbc884070e03434515709a8d",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 960,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "official bfloat16 CUDA inference; float32 output matrix",
+          "pooling": "mean over final residue representations with special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "6156916f195218f13e36a465597328ffff8aa7d1ea48316451d2e0efa707dade",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "esm": "3.2.1.post1"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.bfloat16",
+          "embedding_layer": "ESM-C final residue representations",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 237
+        },
+        "unirep_1900": {
+          "model_id": "unirep_1900",
+          "label": "UniRep 1900-unit",
+          "dataset": "Fluorescence",
+          "kind": "unirep",
+          "checkpoint": "jax-unirep bundled UniRef50 weights",
+          "revision": "jax-unirep-3.0.0",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 1900,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 model inference and output matrix",
+          "pooling": "published average hidden state over the protein sequence (h_avg)",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "3e37f7d1f5b2c7c6ddec5cf28cae2a2c46ec41dcb9fdc2e9ab3809a7bce57878",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "jax": "0.4.38",
+            "jax_unirep": "3.0.0"
+          },
+          "inference_device_type": "JAX default device",
+          "inference_parameter_dtype": "float32",
+          "embedding_layer": "published UniRep average hidden state (h_avg)",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 237
+        },
+        "proteinbert": {
+          "model_id": "proteinbert",
+          "label": "ProteinBERT",
+          "dataset": "Fluorescence",
+          "kind": "hf",
+          "checkpoint": "multimolecule/proteinbert",
+          "revision": "d462d5c059e083678c182f161096c64987b8b863",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 128,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "e5f48b86c71ce4582cfae158ccfee291595870e1fa9fdb43fb0c2b6cea30ebd7",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "5.9.0",
+            "multimolecule": "0.2.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 239
+        },
+        "carp_640m": {
+          "model_id": "carp_640m",
+          "label": "CARP 640M",
+          "dataset": "Fluorescence",
+          "kind": "hf",
+          "checkpoint": "multimolecule/carp-640m",
+          "revision": "672cb98418fb703abb3ad704b457d97deea761f4",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 1280,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 on all devices",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "24b902a77b8a0103c7362e17398b5977efda5b8ce9fbcca301d15458c8ed7904",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "5.9.0",
+            "multimolecule": "0.2.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float32",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 237
+        },
+        "protrek_650m": {
+          "model_id": "protrek_650m",
+          "label": "ProTrek 650M sequence encoder",
+          "dataset": "Fluorescence",
+          "kind": "protrek",
+          "checkpoint": "westlake-repl/ProTrek_650M",
+          "revision": "f2a9d59f333f191fd9268c0f8faf41a1100937c3",
+          "protocol_version": 2,
+          "modality": "protein",
+          "n": 54025,
+          "dim": 1024,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 CUDA inference; float32 output matrix",
+          "pooling": "official projected CLS representation with L2 normalization",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "71afb7639fc2c9d248e7739bb8182845ec903ffd9a455103552eab5a75900af4",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "1cfa1342d286b79b4185a3a692b8e47f3a36cde2276c317d25b21d28f3d9723f",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "embedding_layer": "official ProTrek CLS projection, L2 normalized",
+          "implementation_revision": "48715468b8daa08236d05ff3310cd61db1896e94",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 237
         }
       }
     },
@@ -2194,7 +2605,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "229f40f91055a2200da3b50bcabbfc3b3b49d8db77cfb956a117186dc07709ee",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2225,7 +2636,7 @@
           "rare_amino_acid_mapping": null,
           "sha256": "ebd148eafc35fa048f903a7a4bd0c609a7f37447d66411bdab45b525de2f1566",
           "embedding_runtime": {
-            "python": "3.11.15",
+            "python": "3.11.18",
             "torch": "2.8.0+cu128",
             "transformers": "4.50.3"
           },
@@ -2233,30 +2644,218 @@
           "inference_parameter_dtype": "torch.float16",
           "n_tokenized_inputs_truncated": 0,
           "maximum_untruncated_token_length": 301
+        },
+        "caduceus": {
+          "model_id": "caduceus",
+          "label": "Caduceus-PS 131K",
+          "dataset": "Promoters",
+          "kind": "hf",
+          "checkpoint": "kuleshov-group/caduceus-ps_seqlen-131k_d_model-256_n_layer-16",
+          "revision": "d89eeb853136ea64da7feb3d0c8e909771b17ae6",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 512,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "e47ca89efe2297aed0bdc1a325cbe1fcc833ceb7248f9549f76b1d32a19359b2",
+          "embedding_runtime": {
+            "python": "3.10.22",
+            "torch": "2.2.0",
+            "transformers": "4.38.1"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 301
+        },
+        "gena_lm": {
+          "model_id": "gena_lm",
+          "label": "GENA-LM BERT Large",
+          "dataset": "Promoters",
+          "kind": "hf",
+          "checkpoint": "AIRI-Institute/gena-lm-bert-large-t2t",
+          "revision": "f997a8a7c1ba5feb6d11de46354a41c51ffe9660",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 1024,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "1987d90f4ae432770a8e329ffaa7fae66d0ffc80a9a8bac3a9c1712e1945ec22",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 69
+        },
+        "grover_dna": {
+          "model_id": "grover_dna",
+          "label": "GROVER DNA",
+          "dataset": "Promoters",
+          "kind": "hf",
+          "checkpoint": "PoetschLab/GROVER",
+          "revision": "6b223110f0d6963e849f55bc2a2f3cff0e38c7a4",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 768,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float16 on CUDA; float32 when CUDA is unavailable",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "a927be0b3014e20e21ee6965e79b2cfb597c0e473fad7e554424d9f197785547",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.8.0+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float16",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 109
+        },
+        "evo2_7b": {
+          "model_id": "evo2_7b",
+          "label": "Evo 2 7B",
+          "dataset": "Promoters",
+          "kind": "evo2",
+          "checkpoint": "arcinstitute/evo2_7b",
+          "revision": "bda0089f92582d5baabf0f22d9fc85f3588f6b58",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 4096,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "official bfloat16 inference runtime; float32 output matrix",
+          "pooling": "mean over final normalized contextual states",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "f844b2ed5ed2b88b46ea952f793bd3dfe1cec112d14a4a01b9c34df4f2f95f1d",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.7.1+cu128",
+            "evo2": "0.6.0"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "official Evo 2 bfloat16 policy",
+          "embedding_layer": "final norm output before vocabulary projection",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 300
+        },
+        "dnabert2": {
+          "model_id": "dnabert2",
+          "label": "DNABERT-2 117M",
+          "dataset": "Promoters",
+          "kind": "hf",
+          "checkpoint": "zhihan1996/DNABERT-2-117M",
+          "revision": "7bce263b15377fc15361f52cfab88f8b586abda0",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 768,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "float32 on all devices",
+          "pooling": "mean over attention-mask tokens with tokenizer special tokens excluded",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "4a603973ecbbbc3e14c52ed7a549e8202f6752e2730c5cc7b2d49ebfbf713c05",
+          "embedding_runtime": {
+            "python": "3.10.22",
+            "torch": "1.13.1+cu117",
+            "transformers": "4.29.2"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.float32",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 81
+        },
+        "evo1_7b": {
+          "model_id": "evo1_7b",
+          "label": "Evo 1 7B",
+          "dataset": "Promoters",
+          "kind": "evo1",
+          "checkpoint": "togethercomputer/evo-1-131k-base",
+          "revision": "78c715ab81852e02ec3b1c7e795dc7250d8c7625",
+          "protocol_version": 2,
+          "modality": "genomics",
+          "n": 31443,
+          "dim": 4096,
+          "matrix_dtype": "float32",
+          "inference_precision_policy": "official bfloat16 inference runtime; float32 output matrix",
+          "pooling": "mean over final normalized contextual states",
+          "max_token_length_including_special_tokens": 512,
+          "raw_character_limit_before_tokenisation": 510,
+          "n_raw_inputs_truncated": 0,
+          "input_sha256": "5b829ce6daf66c3631cf1d7e14e853d19308fb735c9d97677397c78f98b0ee3f",
+          "inference_seed": null,
+          "rare_amino_acid_mapping": null,
+          "sha256": "3b63cec38b5d51a06bc38dc542d89af54fa3b787af67cae4364c402d4ddf359b",
+          "embedding_runtime": {
+            "python": "3.11.18",
+            "torch": "2.7.1+cu128",
+            "transformers": "4.50.3"
+          },
+          "inference_device_type": "cuda",
+          "inference_parameter_dtype": "torch.bfloat16",
+          "embedding_layer": "backbone.norm output before vocabulary projection",
+          "n_tokenized_inputs_truncated": 0,
+          "maximum_untruncated_token_length": 300
         }
       }
     }
   },
   "public_artifacts": {
-    "benchmark_results.json": "16ba476ca6ad1d2601a9c2443e53b919749a94eea661d6471bf888b5b05f4e3d",
-    "paired_comparisons.json": "d5c95c9d9d6079e318be5de61efb1c6f4fbe50cf69e1159900c3a4103275363f",
+    "benchmark_results.json": "2301c73fc800a887f8f3559c8b3b66bf166fe747e6065182b5ef277b63d21445",
+    "paired_comparisons.json": "b111478e7f03ec8642630d224ae8b984118a7e6826c6059234fec0b462464d59",
     "exposure_report.json": "2c3ecfc7a5e03c2b9987b351649e7ac19db11ac28e20e3bd2ea9631410e19c3b",
     "split_seed_sensitivity.json": "7df9a692c4aae648a3bdf4b4ee08cd1fdd886cd768c98aaf53da2191aea07b60",
-    "resolution_curves.json": "0249bf70451f44f726127fdd52316f6aa14ae933787928a7c57d37ded10b20cd",
+    "resolution_curves.json": "5f04c356342b03838b7554a2a1fc6cdbf55b0b73ba70821809dab3a8b72492ef",
     "sequence_clusters.json": "20a1402b9f69710456a97c8fd6b0f71b94ce550ba54929717060a2fd08b3322d",
     "split_diagnostics.json": "575afe5b1a749c0b7bff20f795a7285639c6803cd0a5bb62755c1f37afe1f2fc",
     "literature_measured_comparison.json": "bd08501f3718690abc01f736c316fde608adedee7b6beba4b01316165c527ce0"
   },
   "prediction_artifacts": {
-    "predictions/BBBP.npz": "a3c0c19cdc705adabd252b40ca36289481235f8bdb2579fbea2cd3b56b31c6d3",
-    "predictions/ClinTox.npz": "bd742b3784d245d565bed80ac54ffdd227985b700e2f1e4e501770aa75ed0dcc",
-    "predictions/BACE.npz": "43d4d18c5b5a1a78f7c3c7800f3499baa3106c2531b26944f86d268135182e24",
-    "predictions/ESOL.npz": "6145254a760d204375d753874bfb4afe5bf81524f772782c837b087a39300be5",
-    "predictions/Lipophilicity.npz": "39a3dbb368babf5ce5fc80f5953732bdecb9d86558aa2f439984287d2070e4d3",
-    "predictions/CYP3A4.npz": "c29079c50190ce081031a166578cf747199cc732661b2de7e5d42565e38a76d1",
-    "predictions/DeepLoc.npz": "eb268d3d21b8cdc74fcee624cfe3c8fc62608eb399589d8c00eb129bd0f59f2d",
-    "predictions/Fluorescence.npz": "26d82ebe22dab156996c1d04959eaab9a4469b2c25a6f760d773129143c73590",
-    "predictions/Promoters.npz": "9498374f7c633afb3b0bd5ba83c3badedd31babe4e00606fcce7564f7bfb3fd4"
+    "predictions/BBBP.npz": "247ee2a97a23b0b9f904f1cbe8ecf7960de744d8b218cbcad5a5d447e45e8ebf",
+    "predictions/ClinTox.npz": "9fdf013307d9580430211f7348db7d95289c814544972ce0c1343760b7ef61ec",
+    "predictions/BACE.npz": "a55be5de016c8dc0c60759605efe88f47f43d4e4a864b2084a6e5eb488704c43",
+    "predictions/ESOL.npz": "d774a6ea0ebbe7f2a539a9588af64bc4691afdf6d14c13caaee499aab4eeffd8",
+    "predictions/Lipophilicity.npz": "73d9cdd10d9cd50874934395b2de71faa201056236e708e84531b3b42704c946",
+    "predictions/CYP3A4.npz": "3864f74c652f56fc7d2800639514cd288faecd405c827f4175566d1a7b46d572",
+    "predictions/DeepLoc.npz": "76737a51076ba767f534773f4e3ce2d6e3b7b9e692c17bfa141f09f1d6c17e83",
+    "predictions/Fluorescence.npz": "19f06048c21ee2559cca2700d6dad2fc60fe76f1f2beca5f547ceea45a57000f",
+    "predictions/Promoters.npz": "8d5296df9a935dc0ba481cb1652ebad426589e593cc17d596601ce1c4bd7f0b7"
   },
-  "benchmark_results_sha256": "16ba476ca6ad1d2601a9c2443e53b919749a94eea661d6471bf888b5b05f4e3d"
+  "benchmark_results_sha256": "2301c73fc800a887f8f3559c8b3b66bf166fe747e6065182b5ef277b63d21445"
 }

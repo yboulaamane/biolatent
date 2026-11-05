@@ -171,9 +171,21 @@ export const MODEL_LABELS: Record<string, string> = {
   esm2_150m: 'ESM-2 150M',
   esm2_650m: 'ESM-2 650M',
   protbert: 'ProtBERT',
+  esm1v_650m: 'ESM-1v 650M',
+  esmc_300m: 'ESM-C 300M',
+  unirep_1900: 'UniRep 1900-unit',
+  proteinbert: 'ProteinBERT',
+  carp_640m: 'CARP 640M',
+  protrek_650m: 'ProTrek 650M',
   kmer5_dna: '5-mer frequency',
   nucleotide_transformer: 'Nucleotide Transformer 500M',
   hyenadna: 'HyenaDNA-tiny',
+  caduceus: 'Caduceus-PS 131K',
+  gena_lm: 'GENA-LM BERT Large',
+  grover_dna: 'GROVER DNA',
+  evo2_7b: 'Evo 2 7B',
+  dnabert2: 'DNABERT-2 117M',
+  evo1_7b: 'Evo 1 7B',
 };
 
 /** Baselines that involve no pretraining, highlighted wherever they win. */

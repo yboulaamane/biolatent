@@ -30,11 +30,6 @@ import subprocess
 import sys
 
 import numpy as np
-from rdkit import Chem, RDLogger
-from rdkit.Chem import AllChem, Descriptors
-from rdkit.ML.Descriptors import MoleculeDescriptors
-
-RDLogger.DisableLog("rdApp.*")
 
 EMB_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "embeddings")
 os.makedirs(EMB_DIR, exist_ok=True)
@@ -51,6 +46,18 @@ UNIMOL_ENV = os.environ.get(
 GRAPH_ENV = os.environ.get(
     "BIOLATENT_GRAPH_PYTHON",
     os.path.expanduser("~/biolatent_graph_env/bin/python"),
+)
+MULTIMOLECULE_ENV = os.environ.get(
+    "BIOLATENT_MULTIMOLECULE_PYTHON",
+    os.path.expanduser("~/biolatent_multimolecule_env/bin/python"),
+)
+UNIREP_ENV = os.environ.get(
+    "BIOLATENT_UNIREP_PYTHON",
+    os.path.expanduser("~/biolatent_unirep_env/bin/python"),
+)
+ESMC_ENV = os.environ.get(
+    "BIOLATENT_ESMC_PYTHON",
+    os.path.expanduser("~/biolatent_esmc_env/bin/python"),
 )
 
 # ---------------------------------------------------------------------------
@@ -105,7 +112,8 @@ MODEL_REGISTRY = {
                    "checkpoint_sha256": ("93bc4f02ea8847cd44fa21ec3f65600ff"
                                          "2f4a7ae6d3a85e8519a5bcc56afc20a"),
                    "supported_tasks": ["BBBP", "BACE", "ESOL",
-                                       "Lipophilicity", "CYP3A4"],
+                                       "Lipophilicity", "CYP3A4",
+                                       "LINCS_L1000"],
                    "interpreter": GRAPH_ENV,
                    "label": "MolCLR GIN (encoder feature)"},
     "grover_base": {"kind": "grover", "modality": "molecule", "dim": 3200,
@@ -129,6 +137,11 @@ MODEL_REGISTRY = {
     "kmer3_protein": {"kind": "kmer", "modality": "protein", "k": 3,
                       "label": "3-mer frequency"},
     # --- proteins: pretrained language models ---
+    "unirep_1900": {"kind": "unirep", "modality": "protein", "dim": 1900,
+                    "checkpoint": "jax-unirep bundled UniRef50 weights",
+                    "revision": "jax-unirep-3.0.0",
+                    "interpreter": UNIREP_ENV,
+                    "label": "UniRep 1900-unit"},
     "esm2_8m":   {"kind": "hf", "modality": "protein",
                   "checkpoint": "facebook/esm2_t6_8M_UR50D",
                   "revision": "c731040fcd8d73dceaa04b0a8e6329b345b0f5df",
@@ -145,6 +158,35 @@ MODEL_REGISTRY = {
                   "checkpoint": "facebook/esm2_t33_650M_UR50D",
                   "revision": "08e4846e537177426273712802403f7ba8261b6c",
                   "label": "ESM-2 650M"},
+    "esm1v_650m": {"kind": "hf", "modality": "protein",
+                    "checkpoint": "facebook/esm1v_t33_650M_UR90S_1",
+                    "revision": "8bfdb1892536cc77bd0760b9c25ddced2cd0b4c8",
+                    "label": "ESM-1v 650M"},
+    "proteinbert": {"kind": "hf", "modality": "protein",
+                    "checkpoint": "multimolecule/proteinbert",
+                    "revision": "d462d5c059e083678c182f161096c64987b8b863",
+                    "register_multimolecule": True,
+                    "interpreter": MULTIMOLECULE_ENV,
+                    "label": "ProteinBERT"},
+    "carp_640m": {"kind": "hf", "modality": "protein",
+                  "checkpoint": "multimolecule/carp-640m",
+                  "revision": "672cb98418fb703abb3ad704b457d97deea761f4",
+                  "register_multimolecule": True,
+                  "force_float32": True,
+                  "interpreter": MULTIMOLECULE_ENV,
+                  "label": "CARP 640M"},
+    "esmc_300m": {"kind": "esmc", "modality": "protein", "dim": 960,
+                  "checkpoint": "biohub/esmc-300m-2024-12",
+                  "revision": "7f10b20ae75017b2dbc884070e03434515709a8d",
+                  "model_name": "esmc_300m",
+                  "interpreter": ESMC_ENV,
+                  "label": "ESM-C 300M"},
+    "protrek_650m": {"kind": "protrek", "modality": "protein", "dim": 1024,
+                     "checkpoint": "westlake-repl/ProTrek_650M",
+                     "revision": "f2a9d59f333f191fd9268c0f8faf41a1100937c3",
+                     "implementation_revision":
+                         "48715468b8daa08236d05ff3310cd61db1896e94",
+                     "label": "ProTrek 650M sequence encoder"},
     "protbert":  {"kind": "hf", "modality": "protein", "space_tokens": True,
                   "replace_rare_amino_acids": True,
                   "checkpoint": "Rostlab/prot_bert",
@@ -160,6 +202,44 @@ MODEL_REGISTRY = {
                                "revision": "f87b5d7233295242e79c951873d290f4cf992045",
                                "trust_remote_code": True,
                                "label": "Nucleotide Transformer 500M"},
+    "dnabert2": {"kind": "hf", "modality": "genomics",
+                  "checkpoint": "zhihan1996/DNABERT-2-117M",
+                  "revision": "7bce263b15377fc15361f52cfab88f8b586abda0",
+                  "trust_remote_code": True,
+                  "disable_remote_flash_attention": True,
+                  "force_float32": True,
+                  "interpreter": os.path.expanduser(
+                      "~/biolatent_dnabert2_env/bin/python"),
+                  "label": "DNABERT-2 117M"},
+    "caduceus": {"kind": "hf", "modality": "genomics",
+                  "checkpoint": ("kuleshov-group/"
+                                 "caduceus-ps_seqlen-131k_d_model-256_n_layer-16"),
+                  "revision": "d89eeb853136ea64da7feb3d0c8e909771b17ae6",
+                  "trust_remote_code": True,
+                  "label": "Caduceus-PS 131K"},
+    "gena_lm": {"kind": "hf", "modality": "genomics",
+                 "checkpoint": "AIRI-Institute/gena-lm-bert-large-t2t",
+                 "revision": "f997a8a7c1ba5feb6d11de46354a41c51ffe9660",
+                 "trust_remote_code": True,
+                 "hidden_states_output": True,
+                 "label": "GENA-LM BERT Large"},
+    "grover_dna": {"kind": "hf", "modality": "genomics",
+                    "checkpoint": "PoetschLab/GROVER",
+                    "revision": "6b223110f0d6963e849f55bc2a2f3cff0e38c7a4",
+                    "label": "GROVER DNA"},
+    "evo1_7b": {"kind": "evo1", "modality": "genomics",
+                 "checkpoint": "togethercomputer/evo-1-131k-base",
+                 "revision": "78c715ab81852e02ec3b1c7e795dc7250d8c7625",
+                 "interpreter": os.path.expanduser(
+                     "~/biolatent_evo1_env/bin/python"),
+                 "label": "Evo 1 7B"},
+    "evo2_7b": {"kind": "evo2", "modality": "genomics",
+                 "checkpoint": "arcinstitute/evo2_7b",
+                 "revision": "bda0089f92582d5baabf0f22d9fc85f3588f6b58",
+                 "model_name": "evo2_7b",
+                 "interpreter": os.path.expanduser(
+                     "~/biolatent_evo2_env/bin/python"),
+                 "label": "Evo 2 7B"},
     "hyenadna": {"kind": "hf", "modality": "genomics",
                  "checkpoint": "LongSafari/hyenadna-tiny-1k-seqlen-hf",
                  "revision": "e8c1effa8673814e257e627d2e1eda9ea5a373f6",
@@ -182,8 +262,14 @@ def is_applicable(model_id, dataset, modality):
 
 def inference_precision_policy(spec):
     """Human-readable precision policy recorded beside every matrix."""
-    if spec["kind"] in {"unimol", "molclr", "grover"}:
+    if spec["kind"] in {"unimol", "molclr", "grover", "unirep"}:
         return "float32 model inference and output matrix"
+    if spec["kind"] == "esmc":
+        return "official bfloat16 CUDA inference; float32 output matrix"
+    if spec["kind"] == "protrek":
+        return "float16 CUDA inference; float32 output matrix"
+    if spec["kind"] in {"evo1", "evo2"}:
+        return "official bfloat16 inference runtime; float32 output matrix"
     if spec["kind"] != "hf":
         return "not applicable"
     if spec.get("force_float32"):
@@ -194,7 +280,10 @@ def inference_precision_policy(spec):
 # ------------------------------------------------------------ classical
 
 def embed_ecfp4(smiles_list, n_bits=1024, radius=2):
-    from rdkit import DataStructs
+    from rdkit import Chem, DataStructs, RDLogger
+    from rdkit.Chem import AllChem
+
+    RDLogger.DisableLog("rdApp.*")
     out = np.zeros((len(smiles_list), n_bits), dtype=np.float32)
     for i, smi in enumerate(smiles_list):
         mol = Chem.MolFromSmiles(str(smi))
@@ -208,6 +297,11 @@ def embed_ecfp4(smiles_list, n_bits=1024, radius=2):
 
 
 def embed_rdkit2d(smiles_list):
+    from rdkit import Chem, RDLogger
+    from rdkit.Chem import Descriptors
+    from rdkit.ML.Descriptors import MoleculeDescriptors
+
+    RDLogger.DisableLog("rdApp.*")
     names = [x[0] for x in Descriptors._descList]
     calc = MoleculeDescriptors.MolecularDescriptorCalculator(names)
     out = np.zeros((len(smiles_list), len(names)), dtype=np.float32)
@@ -251,9 +345,12 @@ def _file_sha256(path):
 def embed_unimol(smiles_list, spec):
     """Frozen Uni-Mol v1 atom embeddings under the common mean-pooling rule."""
     import torch
+    from rdkit import Chem, RDLogger
     from rdkit.Chem import AllChem as UniMolAllChem
     from unimol_tools import UniMolRepr
     from unimol_tools.weights import get_weight_dir
+
+    RDLogger.DisableLog("rdApp.*")
 
     weight_dir = get_weight_dir()
     weight_path = os.path.join(weight_dir, spec["weight_filename"])
@@ -361,7 +458,25 @@ def _forward_pooled(model, tok, batch, max_len, device, spec):
               return_special_tokens_mask=True)
     enc = {k: v.to(device) for k, v in enc.items()}
     special_mask = enc.pop("special_tokens_mask", None)
-    hidden = model(**enc).last_hidden_state
+    outputs = model(
+        **enc,
+        output_hidden_states=spec.get("hidden_states_output", False),
+    )
+    if spec.get("hidden_states_output"):
+        hidden_states = getattr(outputs, "hidden_states", None)
+        if not hidden_states:
+            raise RuntimeError(
+                f"{spec['checkpoint']} did not return requested hidden states")
+        hidden = hidden_states[-1]
+    elif hasattr(outputs, "last_hidden_state"):
+        hidden = outputs.last_hidden_state
+    elif isinstance(outputs, (tuple, list)) and outputs:
+        # Some pinned remote-code models retain the legacy Transformers tuple
+        # return type even when return_dict is enabled.
+        hidden = outputs[0]
+    else:
+        raise RuntimeError(
+            f"{spec['checkpoint']} did not expose a final hidden state")
 
     mask = enc.get("attention_mask")
     if mask is None:
@@ -421,6 +536,20 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
     restored to input order afterwards.
     """
     import torch
+    if spec.get("register_multimolecule"):
+        # Registers MultiMolecule's parity-checked ProteinBERT/CARP model types
+        # with the Transformers auto classes in this isolated environment.
+        # When this file is executed directly, ``benchmark/datasets.py`` would
+        # otherwise shadow Hugging Face's ``datasets`` package during import.
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        original_path = list(sys.path)
+        try:
+            sys.path[:] = [entry for entry in sys.path
+                           if os.path.abspath(entry or os.getcwd()) !=
+                           script_directory]
+            import multimolecule  # noqa: F401
+        finally:
+            sys.path[:] = original_path
     from transformers import AutoModel, AutoTokenizer
 
     inference_seed = spec.get("inference_seed", 42)
@@ -437,6 +566,16 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
 
     tok = AutoTokenizer.from_pretrained(spec["checkpoint"], **kw)
     model = AutoModel.from_pretrained(spec["checkpoint"], torch_dtype=dtype, **kw)
+    if spec.get("disable_remote_flash_attention"):
+        # DNABERT-2's pinned remote implementation imports a Triton kernel that
+        # is incompatible with Picard's Triton build. Its own documented
+        # PyTorch attention fallback is mathematically equivalent at inference.
+        module = sys.modules.get(model.__class__.__module__)
+        if module is None or not hasattr(module, "flash_attn_qkvpacked_func"):
+            raise RuntimeError(
+                f"{spec['checkpoint']}: cannot locate the pinned attention "
+                "implementation to select its PyTorch fallback")
+        module.flash_attn_qkvpacked_func = None
     # ``torch_dtype`` controls checkpoint parameters but not necessarily
     # floating buffers created by remote model code. MoLFormer's random-feature
     # projection is one such buffer; cast the complete module so its attention
@@ -498,6 +637,338 @@ def embed_hf(sequences, spec, modality, token_budget=2048, progress_every=5000):
     return np.vstack(pooled_by_index).astype(np.float32), stats
 
 
+def embed_unirep(sequences, spec, batch_size=32, progress_every=1000):
+    """Return the canonical average hidden state from frozen UniRep 1900.
+
+    Sequences are grouped by exact post-truncation length because the reference
+    JAX implementation does not mask padding. Small chunks cap host/device
+    memory while preserving the published ``h_avg`` representation exactly.
+    """
+    from jax_unirep.featurize import rep_same_lengths
+    from jax_unirep.models import load_model
+
+    prepared = [str(value).upper()[:RAW_MAX["protein"]]
+                for value in sequences]
+    groups = {}
+    for index, sequence in enumerate(prepared):
+        groups.setdefault(len(sequence), []).append(index)
+
+    model = load_model(paper_weights=1900)
+    rows = [None] * len(prepared)
+    done = 0
+    for length in sorted(groups):
+        indices = groups[length]
+        for start in range(0, len(indices), batch_size):
+            batch_indices = indices[start:start + batch_size]
+            h_avg, _h_final, _c_final = rep_same_lengths(
+                [prepared[index] for index in batch_indices], model)
+            for index, row in zip(batch_indices, h_avg):
+                rows[index] = row
+            previous, done = done, done + len(batch_indices)
+            if done // progress_every > previous // progress_every:
+                print(f"      {done}/{len(prepared)}", flush=True)
+
+    return np.vstack(rows).astype(np.float32), {
+        "inference_device_type": "JAX default device",
+        "inference_parameter_dtype": "float32",
+        "embedding_layer": "published UniRep average hidden state (h_avg)",
+        "n_tokenized_inputs_truncated": int(sum(
+            len(str(value)) > RAW_MAX["protein"] for value in sequences)),
+        "maximum_untruncated_token_length": int(max(
+            (len(str(value)) for value in sequences), default=0)),
+    }
+
+
+def embed_esmc(sequences, spec, token_budget=2048, progress_every=5000):
+    """Mean-pool the pinned ESM-C 300M final residue representations."""
+    from pathlib import Path
+
+    import torch
+    from huggingface_hub import snapshot_download
+    import esm.pretrained as esm_pretrained
+    from esm.models.esmc import ESMC
+
+    if not torch.cuda.is_available():
+        raise RuntimeError("ESM-C benchmark requires a CUDA allocation")
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    device = torch.device("cuda")
+
+    snapshot = snapshot_download(
+        repo_id=spec["checkpoint"], revision=spec["revision"])
+    # The official loader otherwise resolves the repository's moving default
+    # branch. Route it to the exact snapshot recorded in the sidecar metadata.
+    esm_pretrained.data_root = lambda _model: Path(snapshot)
+    model = ESMC.from_pretrained(spec["model_name"], device=device).eval()
+
+    prepared = [str(value).upper()[:RAW_MAX["protein"]]
+                for value in sequences]
+    order = sorted(range(len(prepared)), key=lambda index: len(prepared[index]))
+    rows = [None] * len(prepared)
+    done = 0
+    try:
+        with torch.no_grad():
+            for indices in _token_budget_batches(
+                    order, prepared, MAX_LEN["protein"], token_budget):
+                texts = [prepared[index] for index in indices]
+                tokens = model._tokenize(texts)
+                attention = tokens != model.tokenizer.pad_token_id
+                output = model(sequence_tokens=tokens, sequence_id=attention)
+                hidden = output.embeddings
+                keep = attention.clone()
+                for token_id in model.tokenizer.all_special_ids:
+                    keep &= tokens != token_id
+                weights = keep.unsqueeze(-1).to(hidden.dtype)
+                pooled = ((hidden * weights).sum(1)
+                          / weights.sum(1).clamp(min=1)).float().cpu().numpy()
+                for index, row in zip(indices, pooled):
+                    rows[index] = row
+                previous, done = done, done + len(indices)
+                if done // progress_every > previous // progress_every:
+                    print(f"      {done}/{len(prepared)}", flush=True)
+    finally:
+        del model
+        torch.cuda.empty_cache()
+
+    return np.vstack(rows).astype(np.float32), {
+        "inference_device_type": "cuda",
+        "inference_parameter_dtype": "torch.bfloat16",
+        "embedding_layer": "ESM-C final residue representations",
+        "n_tokenized_inputs_truncated": int(sum(
+            len(str(value)) > RAW_MAX["protein"] for value in sequences)),
+        "maximum_untruncated_token_length": int(max(
+            (len(str(value)) for value in sequences), default=0)),
+    }
+
+
+def embed_protrek(sequences, spec, token_budget=1536, progress_every=5000):
+    """Run ProTrek's frozen sequence tower and official CLS projection."""
+    import torch
+    from huggingface_hub import snapshot_download
+    from torch.nn.functional import normalize
+    from transformers import EsmConfig, EsmForMaskedLM, EsmTokenizer
+
+    if not torch.cuda.is_available():
+        raise RuntimeError("ProTrek benchmark requires a CUDA allocation")
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    device = torch.device("cuda")
+    snapshot = snapshot_download(
+        repo_id=spec["checkpoint"], revision=spec["revision"])
+    protein_config = os.path.join(snapshot, "esm2_t33_650M_UR50D")
+    checkpoint_path = os.path.join(snapshot, "ProTrek_650M.pt")
+
+    config = EsmConfig.from_pretrained(protein_config)
+    backbone = EsmForMaskedLM(config)
+    # Match the pinned ProTrek ProteinEncoder definition exactly. These heads
+    # are removed before its checkpoint is loaded and do not contribute to the
+    # sequence representation.
+    backbone.esm.contact_head = None
+    if config.position_embedding_type == "rotary":
+        backbone.esm.embeddings.position_embeddings = None
+    projection = torch.nn.Linear(config.hidden_size, spec["dim"])
+    checkpoint = torch.load(checkpoint_path, map_location="cpu",
+                            weights_only=False)
+    weights = checkpoint.get("model", checkpoint)
+    # The official model stores a ParameterList as temperature, protein tower,
+    # text tower, and structure tower. ProteinEncoder is therefore prefix 1.
+    protein_weights = {
+        key[2:]: value for key, value in weights.items()
+        if key.startswith("1.")
+    }
+    # Older Transformers versions persisted this deterministic arange buffer;
+    # current versions regenerate it and therefore do not expose it in the
+    # state dict. It is not learned checkpoint information.
+    protein_weights.pop("model.esm.embeddings.position_ids", None)
+    expected = {f"model.{key}" for key in backbone.state_dict()}
+    expected.update({f"out.{key}" for key in projection.state_dict()})
+    if set(protein_weights) != expected:
+        missing = sorted(expected - set(protein_weights))
+        extra = sorted(set(protein_weights) - expected)
+        raise RuntimeError(
+            "ProTrek sequence-tower checkpoint mismatch: "
+            f"missing={missing}, extra={extra}")
+    backbone.load_state_dict({
+        key[len("model."):]: value for key, value in protein_weights.items()
+        if key.startswith("model.")
+    })
+    projection.load_state_dict({
+        key[len("out."):]: value for key, value in protein_weights.items()
+        if key.startswith("out.")
+    })
+    del checkpoint, weights, protein_weights
+
+    dtype = torch.float16
+    backbone.eval().to(device=device, dtype=dtype)
+    projection.eval().to(device=device, dtype=dtype)
+    tokenizer = EsmTokenizer.from_pretrained(protein_config)
+    prepared = [str(value).upper()[:RAW_MAX["protein"]]
+                for value in sequences]
+    order = sorted(range(len(prepared)), key=lambda index: len(prepared[index]))
+    rows = [None] * len(prepared)
+    done = 0
+    try:
+        with torch.no_grad():
+            for indices in _token_budget_batches(
+                    order, prepared, MAX_LEN["protein"], token_budget):
+                encoded = tokenizer(
+                    [prepared[index] for index in indices],
+                    return_tensors="pt", padding=True, truncation=True,
+                    max_length=MAX_LEN["protein"])
+                encoded = {key: value.to(device)
+                           for key, value in encoded.items()}
+                hidden = backbone.esm(**encoded).last_hidden_state
+                pooled = normalize(projection(hidden[:, 0, :]), dim=-1)
+                pooled = pooled.float().cpu().numpy()
+                for index, row in zip(indices, pooled):
+                    rows[index] = row
+                previous, done = done, done + len(indices)
+                if done // progress_every > previous // progress_every:
+                    print(f"      {done}/{len(prepared)}", flush=True)
+    finally:
+        del backbone, projection
+        torch.cuda.empty_cache()
+
+    return np.vstack(rows).astype(np.float32), {
+        "inference_device_type": "cuda",
+        "inference_parameter_dtype": "torch.float16",
+        "embedding_layer": "official ProTrek CLS projection, L2 normalized",
+        "implementation_revision": spec["implementation_revision"],
+        "n_tokenized_inputs_truncated": int(sum(
+            len(str(value)) > RAW_MAX["protein"] for value in sequences)),
+        "maximum_untruncated_token_length": int(max(
+            (len(str(value)) for value in sequences), default=0)),
+    }
+
+
+def embed_evo1(sequences, spec, token_budget=1536, progress_every=1000):
+    """Mean-pool Evo 1's final normalized contextual states.
+
+    The Hugging Face wrapper exposes logits but not hidden states. A forward
+    hook on the final backbone norm captures the representation immediately
+    before the tied vocabulary projection, preserving the same final-layer,
+    mean-pooling rule used for the encoder models.
+    """
+    import torch
+    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    device = "cuda"
+    kw = {"revision": spec["revision"], "trust_remote_code": True}
+    config = AutoConfig.from_pretrained(spec["checkpoint"], **kw)
+    config.use_cache = False
+    tokenizer = AutoTokenizer.from_pretrained(spec["checkpoint"], **kw)
+    model = AutoModelForCausalLM.from_pretrained(
+        spec["checkpoint"], config=config, torch_dtype=torch.bfloat16, **kw)
+    model.eval().to(device)
+
+    raw = [str(value)[:RAW_MAX["genomics"]] for value in sequences]
+    order = sorted(range(len(raw)), key=lambda index: len(raw[index]))
+    pooled_by_index = [None] * len(raw)
+    captured = []
+
+    def capture_final_norm(_module, _inputs, output):
+        captured.append(output.detach())
+
+    handle = model.backbone.norm.register_forward_hook(capture_final_norm)
+    done = 0
+    try:
+        with torch.no_grad():
+            for indices in _token_budget_batches(
+                    order, raw, MAX_LEN["genomics"], token_budget):
+                texts = [raw[index] for index in indices]
+                use_padding = tokenizer.pad_token_id is not None
+                if not use_padding and len({len(text) for text in texts}) != 1:
+                    raise RuntimeError(
+                        "Evo 1 has no padding token; batching therefore "
+                        "requires equal-length sequences")
+                encoded = tokenizer(
+                    texts, return_tensors="pt", padding=use_padding,
+                    truncation=True, max_length=MAX_LEN["genomics"],
+                    return_special_tokens_mask=True)
+                encoded = {key: value.to(device)
+                           for key, value in encoded.items()}
+                special = encoded.pop("special_tokens_mask", None)
+                # Evo's byte tokenizer emits segment identifiers for
+                # Transformers compatibility, but StripedHyena has no segment
+                # embeddings and its forward method intentionally omits them.
+                encoded.pop("token_type_ids", None)
+                captured.clear()
+                model(**encoded, use_cache=False)
+                if len(captured) != 1:
+                    raise RuntimeError(
+                        f"Evo 1 final norm hook fired {len(captured)} times")
+                hidden = captured[0]
+                mask = encoded.get("attention_mask")
+                if mask is None:
+                    mask = torch.ones(hidden.shape[:2], device=device)
+                if special is not None and special.shape == mask.shape:
+                    mask = mask * (1 - special.to(mask.dtype))
+                mask = mask.unsqueeze(-1).to(hidden.dtype)
+                pooled = ((hidden * mask).sum(1)
+                          / mask.sum(1).clamp(min=1)).float().cpu().numpy()
+                for index, row in zip(indices, pooled):
+                    pooled_by_index[index] = row
+                done += len(indices)
+                if done % progress_every < len(indices):
+                    print(f"      {done}/{len(raw)}", flush=True)
+    finally:
+        handle.remove()
+        del model
+        torch.cuda.empty_cache()
+
+    return np.vstack(pooled_by_index).astype(np.float32), {
+        "inference_device_type": device,
+        "inference_parameter_dtype": "torch.bfloat16",
+        "embedding_layer": "backbone.norm output before vocabulary projection",
+        "n_tokenized_inputs_truncated": int(sum(
+            len(value) > RAW_MAX["genomics"] for value in sequences)),
+        "maximum_untruncated_token_length": int(max(
+            (len(str(value)) for value in sequences), default=0)),
+    }
+
+
+def embed_evo2(sequences, spec, progress_every=250):
+    """Mean-pool Evo 2's final normalized contextual states.
+
+    Evo 2's official 7B configuration supports one sequence per forward pass.
+    Its public embedding interface can hook named layers; ``norm`` is the final
+    representation before the vocabulary projection and is therefore the
+    architecture-matched counterpart of an encoder's last hidden state.
+    """
+    import torch
+    from evo2 import Evo2
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    model = Evo2(spec["model_name"])
+    device = next(model.model.parameters()).device
+    rows = []
+    for index, value in enumerate(sequences, start=1):
+        text = str(value)[:RAW_MAX["genomics"]]
+        input_ids = torch.tensor(
+            model.tokenizer.tokenize(text), dtype=torch.int,
+        ).unsqueeze(0).to(device)
+        _logits, embeddings = model(
+            input_ids, return_embeddings=True, layer_names=["norm"])
+        hidden = embeddings["norm"]
+        rows.append(hidden.mean(dim=1).float().cpu().numpy()[0])
+        if index % progress_every == 0:
+            print(f"      {index}/{len(sequences)}", flush=True)
+    del model
+    torch.cuda.empty_cache()
+    return np.vstack(rows).astype(np.float32), {
+        "inference_device_type": "cuda",
+        "inference_parameter_dtype": "official Evo 2 bfloat16 policy",
+        "embedding_layer": "final norm output before vocabulary projection",
+        "n_tokenized_inputs_truncated": int(sum(
+            len(str(value)) > RAW_MAX["genomics"] for value in sequences)),
+        "maximum_untruncated_token_length": int(max(
+            (len(str(value)) for value in sequences), default=0)),
+    }
+
+
 # ------------------------------------------------------------------ driver
 
 def generate(model_id, dataset_name, inputs, modality, force=False,
@@ -525,6 +996,7 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         if os.path.exists(meta_path):
             with open(meta_path) as fh:
                 meta = json.load(fh)
+        expected_policy = inference_precision_policy(spec)
         content_matches = (
             cached.shape[0] == len(inputs)
             and meta.get("input_sha256") == input_sha256
@@ -537,15 +1009,9 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
                  or meta.get("rare_amino_acid_mapping") == "UZOB->X")
             and ("inference_seed" not in spec
                  or meta.get("inference_seed") == spec["inference_seed"])
+            and meta.get("inference_precision_policy") == expected_policy
         )
         if content_matches:
-            expected_policy = inference_precision_policy(spec)
-            if meta.get("inference_precision_policy") != expected_policy:
-                meta["inference_precision_policy"] = expected_policy
-                temporary = f"{meta_path}.{os.getpid()}.tmp"
-                with open(temporary, "w") as fh:
-                    json.dump(meta, fh, indent=2)
-                os.replace(temporary, meta_path)
             return cached
         print(f"      stale cache for {model_id}/{dataset_name}; regenerating",
               flush=True)
@@ -553,7 +1019,8 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
     kind = spec["kind"]
     extra_meta = {}
 
-    if kind in {"hf", "unimol", "molclr", "grover"} and isolate:
+    if kind in {"hf", "unimol", "molclr", "grover", "evo1", "evo2",
+                "unirep", "esmc", "protrek"} and isolate:
         interpreter = spec.get("interpreter", sys.executable)
         if not os.path.exists(interpreter):
             raise RuntimeError(
@@ -563,9 +1030,21 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
                    model_id, dataset_name]
         if force:
             command.append("--force")
+        child_env = {**os.environ, "PYTHONPATH": ""}
+        environment_root = os.path.dirname(os.path.dirname(
+            os.path.abspath(interpreter)))
+        environment_libraries = [
+            os.path.join(environment_root, "lib"),
+            os.path.join(environment_root, "targets", "x86_64-linux", "lib"),
+        ]
+        library_path = [path for path in environment_libraries
+                        if os.path.isdir(path)]
+        if child_env.get("LD_LIBRARY_PATH"):
+            library_path.append(child_env["LD_LIBRARY_PATH"])
+        child_env["LD_LIBRARY_PATH"] = os.pathsep.join(library_path)
         subprocess.run(
             command,
-            check=True, env={**os.environ, "PYTHONPATH": ""},
+            check=True, env=child_env,
         )
         if not os.path.exists(path):
             raise RuntimeError(
@@ -580,6 +1059,16 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         mat = embed_kmer(inputs, spec["k"], modality)
     elif kind == "hf":
         mat, extra_meta = embed_hf(inputs, spec, modality)
+    elif kind == "unirep":
+        mat, extra_meta = embed_unirep(inputs, spec)
+    elif kind == "esmc":
+        mat, extra_meta = embed_esmc(inputs, spec)
+    elif kind == "protrek":
+        mat, extra_meta = embed_protrek(inputs, spec)
+    elif kind == "evo1":
+        mat, extra_meta = embed_evo1(inputs, spec)
+    elif kind == "evo2":
+        mat, extra_meta = embed_evo2(inputs, spec)
     elif kind == "unimol":
         mat, extra_meta = embed_unimol(inputs, spec)
     elif kind == "molclr":
@@ -598,18 +1087,38 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
 
     np.save(path, mat)
     runtime = None
-    if kind in {"hf", "unimol", "molclr", "grover"}:
+    if kind in {"hf", "unimol", "molclr", "grover", "evo1", "evo2",
+                "unirep", "esmc", "protrek"}:
         import torch
         runtime = {"python": platform.python_version(),
                    "torch": torch.__version__}
-        if kind == "hf":
+        if kind in {"hf", "evo1"}:
             import transformers
             runtime["transformers"] = transformers.__version__
+            if spec.get("register_multimolecule"):
+                runtime["multimolecule"] = importlib.metadata.version(
+                    "multimolecule")
+        elif kind == "evo2":
+            runtime["evo2"] = importlib.metadata.version("evo2")
         elif kind == "unimol":
             from rdkit import rdBase
             runtime.update({
                 "unimol_tools": importlib.metadata.version("unimol_tools"),
                 "rdkit": rdBase.rdkitVersion,
+            })
+        elif kind == "unirep":
+            runtime.update({
+                "jax": importlib.metadata.version("jax"),
+                "jax_unirep": importlib.metadata.version("jax-unirep"),
+            })
+        elif kind == "esmc":
+            runtime.update({
+                "esm": importlib.metadata.version("esm"),
+            })
+        elif kind == "protrek":
+            import transformers
+            runtime.update({
+                "transformers": transformers.__version__,
             })
         else:
             from rdkit import rdBase
@@ -633,6 +1142,14 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
         "pooling": (
             "mean over attention-mask tokens with tokenizer special tokens excluded"
             if kind == "hf" else
+            "mean over final normalized contextual states"
+            if kind in {"evo1", "evo2"} else
+            "published average hidden state over the protein sequence (h_avg)"
+            if kind == "unirep" else
+            "mean over final residue representations with special tokens excluded"
+            if kind == "esmc" else
+            "official projected CLS representation with L2 normalization"
+            if kind == "protrek" else
             "mean over Uni-Mol atom vectors with tokenizer special vectors excluded"
             if kind == "unimol" else
             "official mean atom pooling before the contrastive projection head"
@@ -640,12 +1157,18 @@ def generate(model_id, dataset_name, inputs, modality, force=False,
             "official concatenated atom-view and bond-view mean readouts"
             if kind == "grover" else "n/a"),
         "max_token_length_including_special_tokens": (
-            MAX_LEN[modality] if kind == "hf" else None),
+            MAX_LEN[modality]
+            if kind in {"hf", "evo1", "evo2", "unirep", "esmc", "protrek"}
+            else None),
         "raw_character_limit_before_tokenisation": (
-            RAW_MAX[modality] if kind == "hf" else None),
+            RAW_MAX[modality]
+            if kind in {"hf", "evo1", "evo2", "unirep", "esmc", "protrek"}
+            else None),
         "n_raw_inputs_truncated": (int(sum(
             RAW_MAX[modality] is not None and len(str(value)) > RAW_MAX[modality]
-            for value in inputs)) if kind == "hf" and RAW_MAX[modality] is not None
+            for value in inputs))
+            if kind in {"hf", "evo1", "evo2", "unirep", "esmc", "protrek"}
+            and RAW_MAX[modality] is not None
             else None),
         "input_sha256": input_sha256,
         "inference_seed": spec.get("inference_seed"),
@@ -664,9 +1187,26 @@ if __name__ == "__main__":
     # Entry point for the isolated per-model embedding run invoked by
     # generate(). Loads one dataset, embeds it with one model, writes the cache.
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from benchmark.datasets import load_benchmark_dataset
-
     _model_id, _dataset = sys.argv[1], sys.argv[2]
-    _data = load_benchmark_dataset(_dataset)
+    if _dataset == "LINCS_L1000":
+        import pandas as pd
+        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        _compound_path = os.path.join(
+            _root, "data", "lincs_l1000", "compounds.csv")
+        if not os.path.exists(_compound_path):
+            raise FileNotFoundError(
+                "Prepare LINCS first with benchmark/prepare_lincs_l1000.py")
+        _compounds = pd.read_csv(_compound_path).sort_values("compound_index")
+        if not np.array_equal(
+                _compounds["compound_index"].to_numpy(),
+                np.arange(len(_compounds))):
+            raise RuntimeError("LINCS compound indices are not contiguous")
+        _data = {
+            "inputs": _compounds["canonical_smiles"].astype(str).tolist(),
+            "modality": "molecule",
+        }
+    else:
+        from benchmark.datasets import load_benchmark_dataset
+        _data = load_benchmark_dataset(_dataset)
     generate(_model_id, _dataset, _data["inputs"], _data["modality"],
              force="--force" in sys.argv[3:], isolate=False)

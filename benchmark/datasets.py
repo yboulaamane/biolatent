@@ -29,10 +29,6 @@ from collections import defaultdict
 
 import numpy as np
 import pandas as pd
-from rdkit import Chem, RDLogger
-from rdkit.Chem.Scaffolds import MurckoScaffold
-
-RDLogger.DisableLog("rdApp.*")
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "benchmark_datasets")
 
@@ -105,6 +101,10 @@ PUBLISHED_SPLIT_LABEL = {
 
 def get_scaffold(smiles):
     """Bemis-Murcko scaffold of a SMILES string, '' if unparseable."""
+    from rdkit import Chem, RDLogger
+    from rdkit.Chem.Scaffolds import MurckoScaffold
+
+    RDLogger.DisableLog("rdApp.*")
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
@@ -193,6 +193,9 @@ def load_benchmark_dataset(name):
     task_type = TASK_TYPE[name]
 
     if modality == "molecule":
+        from rdkit import Chem, RDLogger
+
+        RDLogger.DisableLog("rdApp.*")
         # Validate with RDKit but retain source SMILES as the model input.
         # Canonicalising MoleculeNet collapses distinct source rows (including
         # salts or stereoisomers) and can create identical inputs with

@@ -58,6 +58,12 @@ DECLARED_CORPORA = {
     "esm2_150m": ["uniref50"], "esm2_650m": ["uniref50"],
     "protbert": ["uniref100"],
     "nucleotide_transformer": ["human_ref_genome"],
+    "dnabert2": ["human_ref_genome"],
+    "caduceus": ["human_ref_genome"],
+    "gena_lm": ["human_ref_genome"],
+    "grover_dna": ["human_ref_genome"],
+    "evo1_7b": ["opengenome_prokaryotic"],
+    "evo2_7b": ["human_ref_genome"],
     "hyenadna": ["human_ref_genome"],
 }
 

@@ -59,7 +59,7 @@ The final release command is:
 python benchmark/validate_release.py --full-hash
 ```
 
-It passed on 2026-09-20 with `Validated 9 tasks and 68 cells.` The validator
+The expanded release passed on 2026-11-05 with `Validated 9 tasks and 86 cells.` The validator
 also recomputed the ranked metric from every saved prediction bundle and
 confirmed agreement with both the paired-inference report and the measured
 benchmark table.

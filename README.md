@@ -18,17 +18,19 @@ BioLatent began as a provenance-aware registry of representations and results re
 
 ### Measured release snapshot
 
-The benchmark snapshot was validated against its source data on 2026-09-20 and prepared as version 1.1.0. It contains **9 tasks, 18 representations, and 68 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The final Zenodo DOI will be added after the versioned data deposit is published.
+The expanded benchmark snapshot was validated against its source data and saved predictions on 2026-11-05. The registry contains **50 representations**, while the controlled benchmark contains **9 tasks, 30 distinct representations, and 86 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The final Zenodo DOI will be added after the versioned data deposit is published.
 
 | Modality | Tasks | Measured cells | Study-wide resolved/eligible comparisons |
 |---|---:|---:|---:|
 | Molecules | 6 | 53 | 14 of 47 |
-| Proteins | 2 | 12 | 5 of 5; 5 Fluorescence comparisons descriptive |
-| Genomics | 1 | 3 | 0 of 2 |
+| Proteins | 2 | 24 | 11 of 11; 11 Fluorescence comparisons descriptive |
+| Genomics | 1 | 9 | 3 of 8 |
 
-“Resolved” means that an eligible paired comparison with the validation-selected reference survived Holm correction across all 54 formal comparisons. Molecules are resampled by Bemis–Murcko scaffold and DeepLoc by MMseqs2 homology cluster. The five Fluorescence comparisons are descriptive because the related test variants form one connected component at the prespecified homology threshold. Unresolved does not mean equivalent, and scores from different metrics are not comparable. See [`STUDY.md`](STUDY.md) for the complete results and interpretation.
+“Resolved” means that an eligible paired comparison with the validation-selected reference survived Holm correction across all 66 formal comparisons. Molecules are resampled by Bemis–Murcko scaffold and DeepLoc by MMseqs2 homology cluster. The 11 Fluorescence comparisons are descriptive because the related test variants form one connected component at the prespecified homology threshold. Unresolved does not mean equivalent, and scores from different metrics are not comparable. See [`STUDY.md`](STUDY.md) for the complete results and interpretation.
 
 The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer-XL, Uni-Mol v1, MolCLR GIN, and GROVER Base/Large. MolCLR is intentionally N/A on ClinTox because its official featurizer cannot represent every structure; no molecule was removed or rewritten to force that cell. Supervised task-trained systems such as standard Chemprop and ChemXTree are outside the frozen-representation estimand, while Graphormer is deferred until its legacy official stack can be reproduced without approximation.
+
+The expanded protein roster adds ESM-1v, ESM-C, UniRep, ProteinBERT, CARP, and the ProTrek sequence encoder to the original 3-mer, ESM-2, and ProtBERT panel. The expanded promoter roster adds Caduceus, GENA-LM, GROVER, Evo 2, DNABERT-2, and Evo 1 to the 5-mer, Nucleotide Transformer, and HyenaDNA panel.
 
 ### Key Features
 1. **Interactive Registry**: Browse, filter, and search representations by modality, licensing, pretraining sizes, and compute requirements.
