@@ -1,7 +1,0 @@
-analysis,task,task_type,fraction,geometry_metric,performance_metric,n_cells,spearman_rho,unadjusted_p_value,holm_p_value
-label_efficiency,BACE,classification,0.1,endpoint_coherence,mean_score,9,0.0833333333333333,0.831214097710308,1.0
-label_efficiency,BBBP,classification,0.1,endpoint_coherence,mean_score,9,0.7333333333333334,0.0245541500714697,1.0
-label_efficiency,CYP3A4,classification,0.1,endpoint_coherence,mean_score,9,0.4166666666666666,0.2645860467474963,1.0
-label_efficiency,ClinTox,multilabel,0.1,endpoint_coherence,mean_score,8,0.8333333333333335,0.0101755401234567,0.4986014660493808
-label_efficiency,ESOL,regression,0.1,endpoint_coherence,mean_score,9,0.7666666666666667,0.015944016578974,0.7653127957907535
-label_efficiency,Lipophilicity,regression,0.1,endpoint_coherence,mean_score,9,0.65,0.0580730580171486,1.0
