@@ -1,0 +1,49 @@
+task,corpus,measure,n_flagged,fraction,basis
+BBBP,zinc,exact_identity,0,0.0,canonical SMILES identity
+BBBP,zinc,near_duplicate,0,0.0,ECFP4 Tanimoto >= 0.9
+BBBP,zinc,shared_scaffold,62,0.3024,Murcko scaffold identity
+BBBP,zinc,any_proxy_hit,62,0.3024,union of the three proxies
+BBBP,pubchem,exact_identity,0,0.0,canonical SMILES identity
+BBBP,pubchem,near_duplicate,7,0.0341,ECFP4 Tanimoto >= 0.9
+BBBP,pubchem,shared_scaffold,91,0.4439,Murcko scaffold identity
+BBBP,pubchem,any_proxy_hit,91,0.4439,union of the three proxies
+ClinTox,zinc,exact_identity,0,0.0,canonical SMILES identity
+ClinTox,zinc,near_duplicate,5,0.0338,ECFP4 Tanimoto >= 0.9
+ClinTox,zinc,shared_scaffold,47,0.3176,Murcko scaffold identity
+ClinTox,zinc,any_proxy_hit,47,0.3176,union of the three proxies
+ClinTox,pubchem,exact_identity,0,0.0,canonical SMILES identity
+ClinTox,pubchem,near_duplicate,6,0.0405,ECFP4 Tanimoto >= 0.9
+ClinTox,pubchem,shared_scaffold,64,0.4324,Murcko scaffold identity
+ClinTox,pubchem,any_proxy_hit,64,0.4324,union of the three proxies
+BACE,zinc,exact_identity,0,0.0,canonical SMILES identity
+BACE,zinc,near_duplicate,0,0.0,ECFP4 Tanimoto >= 0.9
+BACE,zinc,shared_scaffold,2,0.0132,Murcko scaffold identity
+BACE,zinc,any_proxy_hit,2,0.0132,union of the three proxies
+BACE,pubchem,exact_identity,0,0.0,canonical SMILES identity
+BACE,pubchem,near_duplicate,0,0.0,ECFP4 Tanimoto >= 0.9
+BACE,pubchem,shared_scaffold,4,0.0263,Murcko scaffold identity
+BACE,pubchem,any_proxy_hit,4,0.0263,union of the three proxies
+ESOL,zinc,exact_identity,0,0.0,canonical SMILES identity
+ESOL,zinc,near_duplicate,0,0.0,ECFP4 Tanimoto >= 0.9
+ESOL,zinc,shared_scaffold,55,0.4825,Murcko scaffold identity
+ESOL,zinc,any_proxy_hit,55,0.4825,union of the three proxies
+ESOL,pubchem,exact_identity,0,0.0,canonical SMILES identity
+ESOL,pubchem,near_duplicate,13,0.114,ECFP4 Tanimoto >= 0.9
+ESOL,pubchem,shared_scaffold,98,0.8596,Murcko scaffold identity
+ESOL,pubchem,any_proxy_hit,98,0.8596,union of the three proxies
+Lipophilicity,zinc,exact_identity,0,0.0,canonical SMILES identity
+Lipophilicity,zinc,near_duplicate,1,0.0024,ECFP4 Tanimoto >= 0.9
+Lipophilicity,zinc,shared_scaffold,96,0.2286,Murcko scaffold identity
+Lipophilicity,zinc,any_proxy_hit,96,0.2286,union of the three proxies
+Lipophilicity,pubchem,exact_identity,1,0.0024,canonical SMILES identity
+Lipophilicity,pubchem,near_duplicate,4,0.0095,ECFP4 Tanimoto >= 0.9
+Lipophilicity,pubchem,shared_scaffold,163,0.3881,Murcko scaffold identity
+Lipophilicity,pubchem,any_proxy_hit,163,0.3881,union of the three proxies
+CYP3A4,zinc,exact_identity,0,0.0,canonical SMILES identity
+CYP3A4,zinc,near_duplicate,2,0.0294,ECFP4 Tanimoto >= 0.9
+CYP3A4,zinc,shared_scaffold,28,0.4118,Murcko scaffold identity
+CYP3A4,zinc,any_proxy_hit,28,0.4118,union of the three proxies
+CYP3A4,pubchem,exact_identity,0,0.0,canonical SMILES identity
+CYP3A4,pubchem,near_duplicate,2,0.0294,ECFP4 Tanimoto >= 0.9
+CYP3A4,pubchem,shared_scaffold,50,0.7353,Murcko scaffold identity
+CYP3A4,pubchem,any_proxy_hit,50,0.7353,union of the three proxies

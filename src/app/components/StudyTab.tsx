@@ -171,7 +171,7 @@ function TaskCard({ task }: { task: string }) {
                 ? <>Differences and intervals are descriptive: {paired.inference_note}</>
                 : <>Difference intervals use paired {paired.resampling_unit.toLowerCase()} bootstrap
                   ({paired.n_boot.toLocaleString()} resamples); p-values use{' '}
-                  {paired.n_permutations.toLocaleString()} paired randomisations with study-wide
+                  {paired.n_permutations.toLocaleString()} paired randomizations with study-wide
                   Holm correction. {paired.inference_note}</>}
             </>
             : <>No paired comparison available for this task.</>}
@@ -590,11 +590,11 @@ export default function StudyTab() {
             <p>
               The measured results were generated under one prespecified procedure rather than
               transcribed from papers. Each compatible representation was calculated once and
-              evaluated with the same standardised linear model, regularisation search, folds and seed.
+              evaluated with the same standardized linear model, regularization search, folds and seed.
               The comparison method was chosen using validation data before the test set was examined.
             </p>
             <p style={{ marginTop: '0.6rem' }}>
-              Difference intervals use paired cluster bootstrap, p-values use paired randomisation,
+              Difference intervals use paired cluster bootstrap, p-values use paired randomization,
               and eligible comparisons are adjusted together using Holm correction. Molecular tests
               resample Bemis–Murcko scaffolds and DeepLoc resamples MMseqs2 homology clusters.
               Fluorescence is descriptive because its test variants do not form independent clusters

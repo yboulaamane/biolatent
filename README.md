@@ -3,6 +3,7 @@
 An open-access registry, compatibility filter, and interactive benchmark dashboard for chemical and biological vector representations.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**Zenodo DOI:** to be added after the final versioned data deposit is published.
 
 <img width="1862" height="976" alt="biolatent" src="https://github.com/user-attachments/assets/3bf8c24e-dd89-487d-8247-f41ed61815d3" />
 
@@ -14,11 +15,13 @@ In computer-aided drug discovery and computational biology, the landscape of fou
 
 **BioLatent** is a unified, provenance-aware index cataloging representations across five primary modalities: **Small Molecules**, **Proteins**, **Complexes**, **Chemical Reactions**, and **Nucleic Acids (DNA/RNA)**.
 
-BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalogue but cannot be pooled into a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. The two layers are connected through a descriptive analysis restricted to records with the same named representation family, endpoint, and metric; remaining protocol differences are retained explicitly and prevent causal attribution to any single design choice.
+BioLatent began as a provenance-aware registry of representations and results reported in the literature. Those records showed that values assigned to the same endpoint often came from different datasets, splits, predictive models, and tuning procedures. They are useful as a catalog but cannot be pooled into a controlled ranking. The later **Measured Benchmark** addresses this limitation by recomputing compatible frozen representations under one prespecified protocol. It reports uncertainty, validation-selected paired comparisons, split sensitivity, and pretraining input-exposure proxies. The two layers are connected through a descriptive analysis restricted to records with the same named representation family, endpoint, and metric; remaining protocol differences are retained explicitly and prevent causal attribution to any single design choice.
 
 ### Measured release snapshot
 
-The expanded benchmark snapshot was validated against its source data and saved predictions on 2026-11-05. The registry contains **50 representations**, while the controlled benchmark contains **9 tasks, 30 distinct representations, and 86 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The final Zenodo DOI will be added after the versioned data deposit is published.
+The expanded benchmark snapshot was validated against its source data and saved predictions on 2026-11-05. Together with the prespecified label-efficiency and chemical-space analyses, it forms release 1.3.0. The registry contains **50 representations**, while the controlled benchmark contains **9 tasks, 30 distinct representations, and 86 compatible model-task cells**. Every task uses an externally published dataset; missing or incompatible cells are never imputed. The final Zenodo DOI will be added after the versioned data deposit is published.
+
+The online registry is a living catalog and may include source-verified representation metadata added after the frozen 1.3.0 paper snapshot. Such catalog additions do not enter the measured benchmark unless a compatible adapter and complete benchmark run are released separately.
 
 | Modality | Tasks | Measured cells | Study-wide resolved/eligible comparisons |
 |---|---:|---:|---:|
@@ -30,15 +33,17 @@ The expanded benchmark snapshot was validated against its source data and saved 
 
 The molecular roster is ECFP4, RDKit2D, ChemBERTa-77M, ChemBERTa-ZINC, MoLFormer-XL, Uni-Mol v1, MolCLR GIN, and GROVER Base/Large. MolCLR is intentionally N/A on ClinTox because its official featurizer cannot represent every structure; no molecule was removed or rewritten to force that cell. Supervised task-trained systems such as standard Chemprop and ChemXTree are outside the frozen-representation estimand, while Graphormer is deferred until its legacy official stack can be reproduced without approximation.
 
-The expanded protein roster adds ESM-1v, ESM-C, UniRep, ProteinBERT, CARP, and the ProTrek sequence encoder to the original 3-mer, ESM-2, and ProtBERT panel. The expanded promoter roster adds Caduceus, GENA-LM, GROVER, Evo 2, DNABERT-2, and Evo 1 to the 5-mer, Nucleotide Transformer, and HyenaDNA panel.
+The expanded protein roster adds ESM-1v, ESM-C, UniRep, ProteinBERT, CARP, and the ProTrek sequence encoder to the original 3-mer, ESM-2, and ProtBERT panel. The expanded promoter roster adds Caduceus, GENA-LM, GROVER DNA, Evo 2, DNABERT-2, and Evo 1 to the 5-mer, Nucleotide Transformer, and HyenaDNA panel.
+
+The secondary label-efficiency analysis asks a practical question: **do frozen representations remain useful when labels are scarce, and can their chemical neighborhoods explain the response?** Performance fell in all 68 cells at 10% labels. Averaging ten equivalent SMILES views improved all six molecular regression cases but usually harmed classification. The response tracked whether endpoint-relevant neighborhoods were preserved, showing that SMILES augmentation is an endpoint-specific choice rather than a universal improvement. No encoder was fine-tuned in this analysis.
 
 ### Key Features
 1. **Interactive Registry**: Browse, filter, and search representations by modality, licensing, pretraining sizes, and compute requirements.
-2. **Compatibility Finder**: An objective catalog filter for modality, available input representation, and declared compute profile. It covers molecules, proteins, complexes, nucleic acids, and reactions; distinguishes catalogued inputs from structures derived from SMILES; and explains why each result matched. Results are alphabetical rather than ranked and must be validated on the user’s endpoint.
+2. **Compatibility Finder**: An objective catalog filter for modality, available input representation, and declared compute profile. It covers molecules, proteins, complexes, nucleic acids, and reactions; distinguishes cataloged inputs from structures derived from SMILES; and explains why each result matched. Results are alphabetical rather than ranked and must be validated on the user’s endpoint.
 3. **Interactive Literature Chart**: A log-scale SVG scatter plot mapping embedding dimensions against selected literature-reported benchmarks. These heterogeneous values are descriptive and separate from the measured study.
 4. **Curated Methods & Citations**: Collapsible details providing direct links to primary literature papers (e.g. TDC, MoleculeNet, FLIP).
 5. **Programmatic JSON API**: Exposes query-parameter filters to fetch representation metadata dynamically (e.g. `/api/representations?modality=protein`).
-6. **Reproducible Measured Study**: Imports public JSON artefacts produced by the benchmark scripts, with checkpoint revisions, dataset hashes, pooling, truncation, and software versions recorded in `results/run_manifest.json`.
+6. **Reproducible Measured Study**: Imports public JSON artifacts produced by the benchmark scripts, with checkpoint revisions, dataset hashes, pooling, truncation, and software versions recorded in `results/run_manifest.json`.
 7. **Audited Data Provenance**: Every measured task was compared with a fresh upstream copy, and every literature row carries source-level provenance. See [`DATA_PROVENANCE_AUDIT.md`](DATA_PROVENANCE_AUDIT.md).
 8. **Reviewable Community Submissions**: The website prepares a structured GitHub issue. A repository workflow validates the metadata, builds the site, and opens a pull request for curator review.
 
@@ -166,13 +171,19 @@ python benchmark/paired_test.py
 python benchmark/run_leakage.py --sample 200000
 python benchmark/resolution_analysis.py
 python benchmark/split_sensitivity.py
+python benchmark/sample_efficiency.py
+python benchmark/summarize_sample_efficiency.py
+python benchmark/chemical_space.py
 python benchmark/run_study.py --refresh-metadata
 python benchmark/validate_release.py --full-hash
 python scripts/build_literature_comparison.py
 python paper/generate_figures.py
+python paper/generate_secondary_figures.py
 python paper/generate_manuscript.py
 python paper/build_zenodo_archive.py
 ```
+
+The committed secondary-analysis outputs include the complete label-fraction results and the randomized-SMILES comparison. Recreating the latter from scratch first requires generating the ten-view mean embedding for each of the three SMILES encoders and six molecular tasks with `benchmark/smiles_augmentation.py`, then running `benchmark/sample_efficiency.py` with the corresponding matrix template and `smiles_mean10` variant. The original test sets remain fixed and alternative SMILES are averaged to one vector per molecule, so they are never treated as extra labeled observations.
 
 The figure generator writes publication-resolution PNG and editable SVG panels to `paper/figures/`, their plotted source values to `paper/figure_data/`, and complete legends to `paper/FIGURE_LEGENDS.md`. Figure 1 is maintained in the editable Draw.io source `paper/figures/figure1_study_design.drawio`; the generator checks its displayed release totals and preserves its PNG and SVG exports. The final manuscript is written to `paper/BioLatent_methods_revised.docx`. If the optional local `BioLatent_methods.docx` template is present it supplies the house style; a clean clone falls back to a standard Word document. The final command creates a versioned, checksum-verified Zenodo deposit under `dist/`; raw third-party datasets and embedding matrices are deliberately excluded and remain reproducible from their pinned sources.
 
@@ -191,7 +202,7 @@ Registry metadata are descriptive catalog fields, not empirical quality or clini
 * **Artifact availability** records whether code and/or weights are linked; it is not a reproducibility score.
 * **Compute profile** is the declared CPU, GPU, or mixed execution category, not a runtime guarantee.
 * **Reported benchmarks** retain a source link and row-level provenance note. Heterogeneous values are not pooled; the committed descriptive analysis matches only records with the same named representation family, endpoint, and metric.
-* **Compatibility Finder** filters by modality, available input, and compute profile. It identifies catalogued or explicitly derivable input compatibility, lists matches alphabetically, and does not claim an optimal model.
+* **Compatibility Finder** filters by modality, available input, and compute profile. It identifies cataloged or explicitly derivable input compatibility, lists matches alphabetically, and does not claim an optimal model.
 
 ---
 
@@ -201,12 +212,12 @@ If you use BioLatent in your research, please cite:
 
 ```bibtex
 @misc{boulaamane2026biolatent,
-  title={BioLatent: A Standardised Benchmark of Frozen Molecular Representations with Protein and Genomic Extensions},
-  author={Boulaamane, Yassir},
+  title={BioLatent: A Registry and Standardized Benchmark for Molecular and Biological Representations},
+  author={Boulaamane, Yassir and Fernandez, Michael and Baker, Christopher M. and Talmann, Lea and Maréchal, Jean-Didier},
   year={2026},
-  version={1.1.0},
+  version={1.3.0},
   publisher={Zenodo},
-  note={Zenodo DOI to be added with the final versioned data deposit},
+  note={Zenodo DOI to be added after the final versioned data deposit},
   url={https://github.com/yboulaamane/biolatent}
 }
 ```

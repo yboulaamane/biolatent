@@ -1,0 +1,69 @@
+task,model_id,model_label,primary_score,secondary_full_score,difference,absolute_difference
+BACE,chemberta_77m,ChemBERTa-2 77M MLM,0.8391,0.8393,0.000200000000000089,0.000200000000000089
+BACE,chemberta_zinc,ChemBERTa ZINC base,0.8265,0.8267,0.00019999999999997797,0.00019999999999997797
+BACE,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.8904,0.8904,0.0,0.0
+BACE,grover_base,GROVER Base (both fingerprint),0.885,0.885,0.0,0.0
+BACE,grover_large,GROVER Large (both fingerprint),0.8817,0.8817,0.0,0.0
+BACE,molclr_gin,MolCLR GIN (encoder feature),0.8203,0.8208,0.0004999999999999449,0.0004999999999999449
+BACE,molformer_xl,MoLFormer-XL,0.8102,0.8102,0.0,0.0
+BACE,rdkit2d,RDKit 2D descriptors,0.8315,0.8315,0.0,0.0
+BACE,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.8156,0.8156,0.0,0.0
+BBBP,chemberta_77m,ChemBERTa-2 77M MLM,0.9538,0.9538,0.0,0.0
+BBBP,chemberta_zinc,ChemBERTa ZINC base,0.9713,0.9714,9.999999999998899e-05,9.999999999998899e-05
+BBBP,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.9141,0.9141,0.0,0.0
+BBBP,grover_base,GROVER Base (both fingerprint),0.9182,0.9182,0.0,0.0
+BBBP,grover_large,GROVER Large (both fingerprint),0.934,0.934,0.0,0.0
+BBBP,molclr_gin,MolCLR GIN (encoder feature),0.8839,0.8839,0.0,0.0
+BBBP,molformer_xl,MoLFormer-XL,0.9541,0.9541,0.0,0.0
+BBBP,rdkit2d,RDKit 2D descriptors,0.9227,0.9227,0.0,0.0
+BBBP,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.909,0.909,0.0,0.0
+CYP3A4,chemberta_77m,ChemBERTa-2 77M MLM,0.7285,0.7281,-0.00040000000000006697,0.00040000000000006697
+CYP3A4,chemberta_zinc,ChemBERTa ZINC base,0.6579,0.6579,0.0,0.0
+CYP3A4,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.6838,0.6838,0.0,0.0
+CYP3A4,grover_base,GROVER Base (both fingerprint),0.614,0.614,0.0,0.0
+CYP3A4,grover_large,GROVER Large (both fingerprint),0.6579,0.6579,0.0,0.0
+CYP3A4,molclr_gin,MolCLR GIN (encoder feature),0.6702,0.6702,0.0,0.0
+CYP3A4,molformer_xl,MoLFormer-XL,0.6518,0.6518,0.0,0.0
+CYP3A4,rdkit2d,RDKit 2D descriptors,0.6873,0.6873,0.0,0.0
+CYP3A4,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.5772,0.5772,0.0,0.0
+ClinTox,chemberta_77m,ChemBERTa-2 77M MLM,0.9751,0.9751,0.0,0.0
+ClinTox,chemberta_zinc,ChemBERTa ZINC base,0.9851,0.9851,0.0,0.0
+ClinTox,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.8482,0.8484,0.000200000000000089,0.000200000000000089
+ClinTox,grover_base,GROVER Base (both fingerprint),0.8879,0.8879,0.0,0.0
+ClinTox,grover_large,GROVER Large (both fingerprint),0.8889,0.8889,0.0,0.0
+ClinTox,molformer_xl,MoLFormer-XL,0.9718,0.9718,0.0,0.0
+ClinTox,rdkit2d,RDKit 2D descriptors,0.8529,0.8524,-0.0004999999999999449,0.0004999999999999449
+ClinTox,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.6755,0.6755,0.0,0.0
+DeepLoc,esm2_150m,ESM-2 150M,0.8799,0.8799,0.0,0.0
+DeepLoc,esm2_35m,ESM-2 35M,0.8666,0.8665,-9.999999999998899e-05,9.999999999998899e-05
+DeepLoc,esm2_650m,ESM-2 650M,0.8924,0.8924,0.0,0.0
+DeepLoc,esm2_8m,ESM-2 8M,0.8464,0.8464,0.0,0.0
+DeepLoc,kmer3_protein,3-mer frequency,0.7169,0.7169,0.0,0.0
+DeepLoc,protbert,ProtBERT,0.8614,0.8614,0.0,0.0
+ESOL,chemberta_77m,ChemBERTa-2 77M MLM,0.8469,0.8469,0.0,0.0
+ESOL,chemberta_zinc,ChemBERTa ZINC base,0.8428,0.8431,0.00029999999999996696,0.00029999999999996696
+ESOL,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.6161,0.6161,0.0,0.0
+ESOL,grover_base,GROVER Base (both fingerprint),0.9128,0.9128,0.0,0.0
+ESOL,grover_large,GROVER Large (both fingerprint),0.9153,0.9153,0.0,0.0
+ESOL,molclr_gin,MolCLR GIN (encoder feature),0.6052,0.6052,0.0,0.0
+ESOL,molformer_xl,MoLFormer-XL,0.8928,0.893,0.00019999999999997797,0.00019999999999997797
+ESOL,rdkit2d,RDKit 2D descriptors,0.9049,0.9049,0.0,0.0
+ESOL,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.8906,0.8906,0.0,0.0
+Fluorescence,esm2_150m,ESM-2 150M,0.5843,0.5843,0.0,0.0
+Fluorescence,esm2_35m,ESM-2 35M,0.5936,0.5936,0.0,0.0
+Fluorescence,esm2_650m,ESM-2 650M,0.6133,0.6134,9.999999999998899e-05,9.999999999998899e-05
+Fluorescence,esm2_8m,ESM-2 8M,0.5733,0.5733,0.0,0.0
+Fluorescence,kmer3_protein,3-mer frequency,0.6739,0.6739,0.0,0.0
+Fluorescence,protbert,ProtBERT,0.6622,0.6622,0.0,0.0
+Lipophilicity,chemberta_77m,ChemBERTa-2 77M MLM,0.6029,0.603,9.999999999998899e-05,9.999999999998899e-05
+Lipophilicity,chemberta_zinc,ChemBERTa ZINC base,0.5483,0.5481,-0.00019999999999997797,0.00019999999999997797
+Lipophilicity,ecfp4,"ECFP4 (Morgan, r=2, 1024 bits)",0.5868,0.5868,0.0,0.0
+Lipophilicity,grover_base,GROVER Base (both fingerprint),0.7811,0.7811,0.0,0.0
+Lipophilicity,grover_large,GROVER Large (both fingerprint),0.7787,0.7787,0.0,0.0
+Lipophilicity,molclr_gin,MolCLR GIN (encoder feature),0.5863,0.5863,0.0,0.0
+Lipophilicity,molformer_xl,MoLFormer-XL,0.5988,0.5988,0.0,0.0
+Lipophilicity,rdkit2d,RDKit 2D descriptors,0.673,0.6729,-9.999999999998899e-05,9.999999999998899e-05
+Lipophilicity,unimol_v1,Uni-Mol v1 84M (mean atom pooling),0.6055,0.6055,0.0,0.0
+Promoters,hyenadna,HyenaDNA tiny,0.9382,0.9382,0.0,0.0
+Promoters,kmer5_dna,5-mer frequency,0.9304,0.9304,0.0,0.0
+Promoters,nucleotide_transformer,Nucleotide Transformer 500M,0.9363,0.9363,0.0,0.0

@@ -1,8 +1,10 @@
 """Fail-fast integrity checks for a public BioLatent study release."""
 
 import argparse
+import csv
 import hashlib
 import json
+import math
 import os
 import sys
 
@@ -22,9 +24,69 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def read_result(name):
     path = os.path.join(ROOT, "results", name)
     if not os.path.exists(path):
-        raise AssertionError(f"missing public artefact: {path}")
+        raise AssertionError(f"missing public artifact: {path}")
     with open(path) as handle:
         return json.load(handle)
+
+
+def read_csv(name):
+    path = os.path.join(ROOT, "results", name)
+    if not os.path.exists(path):
+        raise AssertionError(f"missing public artifact: {path}")
+    with open(path, newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def validate_secondary_analyses():
+    """Check completeness and internal consistency of the exploratory panels."""
+    efficiency = read_result("sample_efficiency.json")
+    assert efficiency["schema_version"] == 1
+    assert efficiency["fractions"] == [0.1, 0.25, 0.5, 1.0]
+    seeds = efficiency["seeds"]
+    assert len(seeds) == 10 and len(set(seeds)) == 10
+
+    records = efficiency["records"]
+    keys = {
+        (row["task"], row["model_id"], row["variant"],
+         float(row["fraction"]), int(row["seed"]))
+        for row in records
+    }
+    assert len(keys) == len(records), "duplicate label-efficiency records"
+    cells = {
+        (row["task"], row["model_id"], row["variant"])
+        for row in records
+    }
+    canonical = {cell for cell in cells if cell[2] == "canonical"}
+    augmented = {cell for cell in cells if cell[2] == "smiles_mean10"}
+    assert len(canonical) == 68
+    assert len(augmented) == 18
+    expected_fraction_seed = {
+        (fraction, seed)
+        for fraction in (0.1, 0.25, 0.5)
+        for seed in seeds
+    } | {(1.0, seeds[0])}
+    for cell in cells:
+        observed = {
+            (float(row["fraction"]), int(row["seed"]))
+            for row in records
+            if (row["task"], row["model_id"], row["variant"]) == cell
+        }
+        assert observed == expected_fraction_seed, \
+            f"incomplete label-efficiency cell: {cell}"
+    for row in records:
+        assert math.isfinite(float(row["score"]))
+        assert int(row["n_train"]) > 0 and int(row["n_test"]) > 0
+
+    reproduction = read_csv("sample_efficiency_reproduction.csv")
+    assert len(reproduction) == 68
+    assert max(float(row["absolute_difference"]) for row in reproduction) \
+        <= 0.0005 + 1e-12
+    assert len(read_csv("sample_efficiency_summary.csv")) == 344
+    assert len(read_csv("smiles_augmentation_summary.csv")) == 72
+    assert len(read_csv("smiles_view_invariance.csv")) == 18
+    assert len(read_csv("chemical_space_neighborhoods.csv")) == 213
+    assert len(read_csv("chemical_space_mapping_summary.csv")) == 9
+    assert len(read_csv("chemical_space_correlations.csv")) == 90
 
 
 def file_hash(path):
@@ -106,6 +168,7 @@ def main(full_hash=False):
     resolution = read_result("resolution_curves.json")
     sequence_clusters = read_result("sequence_clusters.json")
     split_diagnostics = read_result("split_diagnostics.json")
+    validate_secondary_analyses()
     assert set(results) == set(ALL_DATASETS)
     assert set(paired) == set(ALL_DATASETS)
     assert set(exposure["tasks"]) == set(ALL_DATASETS)

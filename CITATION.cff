@@ -1,12 +1,24 @@
 cff-version: 1.2.0
-message: "If you use the BioLatent benchmark, please cite this data release."
-title: "BioLatent: A Standardised Benchmark of Frozen Molecular Representations with Protein and Genomic Extensions"
+message: "If you use the BioLatent registry or measured benchmark, please cite this data release."
+title: "BioLatent: A Registry and Standardized Benchmark for Molecular and Biological Representations"
 type: dataset
-version: 1.1.0
-date-released: 2026-09-20
+version: 1.3.0
+date-released: 2026-11-05
 authors:
   - family-names: Boulaamane
     given-names: Yassir
+    affiliation: "InSiliChem, Departament de Química, Universitat Autònoma de Barcelona, 08193, Bellaterra (Barcelona), Spain"
+  - family-names: Fernandez
+    given-names: Michael
+    affiliation: "Syngenta, Jealott's Hill International Research Centre, Bracknell, RG42 6EY, UK"
+  - family-names: Baker
+    given-names: Christopher M.
+    affiliation: "Syngenta, Jealott's Hill International Research Centre, Bracknell, RG42 6EY, UK"
+  - family-names: Talmann
+    given-names: Lea
+    affiliation: "Syngenta Crop Protection, Schaffhauserstrasse 101, 4332 Stein, Switzerland"
+  - family-names: Maréchal
+    given-names: Jean-Didier
     affiliation: "InSiliChem, Departament de Química, Universitat Autònoma de Barcelona, 08193, Bellaterra (Barcelona), Spain"
 repository-code: "https://github.com/yboulaamane/biolatent"
 url: "https://github.com/yboulaamane/biolatent"

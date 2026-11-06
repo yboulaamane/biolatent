@@ -62,7 +62,8 @@ python benchmark/validate_release.py --full-hash
 The expanded release passed on 2026-11-05 with `Validated 9 tasks and 86 cells.` The validator
 also recomputed the ranked metric from every saved prediction bundle and
 confirmed agreement with both the paired-inference report and the measured
-benchmark table.
+benchmark table. It also checks the completeness and numerical reproducibility
+of the label-efficiency, randomized-SMILES and chemical-space analyses.
 
 ## Why the measured benchmark is not synthetic
 

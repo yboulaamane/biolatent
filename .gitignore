@@ -73,9 +73,14 @@ BioLatent Model Input-*.png
 run_*.log
 /logs/
 /results/*.lock
+/results/sample_efficiency_records/
 /results/slurm/
 /dist/
+/activations_debug.log
 
-# Local coding-assistant configuration is never part of a BioLatent release.
-/.claude/
-/.codex/
+# Cluster-specific launchers contain local scheduler paths and are not part of
+# the portable public reproduction workflow.
+/benchmark/slurm_*.sbatch
+
+# Local bridge used to apply updates to the author's private Word source.
+/paper/update_expanded_submission_docs.py

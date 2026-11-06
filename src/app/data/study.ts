@@ -2,7 +2,7 @@
  * Measured frozen-embedding study — typed view over the committed result files.
  *
  * The result JSON files are imported from `results/` rather than copied into
- * `src/`, so the page and the manuscript are rendered from the same artefacts
+ * `src/`, so the page and the manuscript are rendered from the same artifacts
  * the evaluation suite writes. Nothing here restates a number; every value is
  * read from disk at build time.
  *

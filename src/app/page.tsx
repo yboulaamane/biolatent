@@ -280,7 +280,7 @@ export default function Home() {
       }
 
       // Embedding dimension is not a compute requirement. Only entries
-      // explicitly catalogued as CPU-compatible pass the local CPU filter.
+      // explicitly cataloged as CPU-compatible pass the local CPU filter.
       if (wizardAnswers.resourceBudget === 'Low (Local CPU)' && emb.computeProfile !== 'cpu') {
         return false;
       }
@@ -732,7 +732,7 @@ export default function Home() {
                     </button>
                     <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Prepared molecular graph')}>
                       <span className="wizard-option-title">Prepared molecular graphs</span>
-                      <span className="wizard-option-desc">Restrict results to methods catalogued with atom-bond graphs as their model input.</span>
+                      <span className="wizard-option-desc">Restrict results to methods cataloged with atom-bond graphs as their model input.</span>
                     </button>
                     <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', '3D coordinates')}>
                       <span className="wizard-option-title">3D Conformers</span>
@@ -747,7 +747,7 @@ export default function Home() {
                     </button>
                     <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('inputType', 'Sequence')}>
                       <span className="wizard-option-title">Sequence-based input</span>
-                      <span className="wizard-option-desc">Sequence or string inputs for catalogued interaction representations.</span>
+                      <span className="wizard-option-desc">Sequence or string inputs for cataloged interaction representations.</span>
                     </button>
                   </>
                 ) : wizardAnswers.modality === 'Nucleic_acid' ? (
@@ -790,7 +790,7 @@ export default function Home() {
               <div className="wizard-option-grid">
                 <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'Low (Local CPU)')}>
                   <span className="wizard-option-title">Local CPU</span>
-                  <span className="wizard-option-desc">Show only entries explicitly catalogued as CPU-compatible. Runtime still depends on input count, length and software version.</span>
+                  <span className="wizard-option-desc">Show only entries explicitly cataloged as CPU-compatible. Runtime still depends on input count, length and software version.</span>
                 </button>
                 <button type="button" className="wizard-option-card" onClick={() => selectWizardOption('resourceBudget', 'No restriction')}>
                   <span className="wizard-option-title">No Compute Restriction</span>

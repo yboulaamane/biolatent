@@ -112,8 +112,7 @@ MODEL_REGISTRY = {
                    "checkpoint_sha256": ("93bc4f02ea8847cd44fa21ec3f65600ff"
                                          "2f4a7ae6d3a85e8519a5bcc56afc20a"),
                    "supported_tasks": ["BBBP", "BACE", "ESOL",
-                                       "Lipophilicity", "CYP3A4",
-                                       "LINCS_L1000"],
+                                       "Lipophilicity", "CYP3A4"],
                    "interpreter": GRAPH_ENV,
                    "label": "MolCLR GIN (encoder feature)"},
     "grover_base": {"kind": "grover", "modality": "molecule", "dim": 3200,
@@ -1188,25 +1187,7 @@ if __name__ == "__main__":
     # generate(). Loads one dataset, embeds it with one model, writes the cache.
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     _model_id, _dataset = sys.argv[1], sys.argv[2]
-    if _dataset == "LINCS_L1000":
-        import pandas as pd
-        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        _compound_path = os.path.join(
-            _root, "data", "lincs_l1000", "compounds.csv")
-        if not os.path.exists(_compound_path):
-            raise FileNotFoundError(
-                "Prepare LINCS first with benchmark/prepare_lincs_l1000.py")
-        _compounds = pd.read_csv(_compound_path).sort_values("compound_index")
-        if not np.array_equal(
-                _compounds["compound_index"].to_numpy(),
-                np.arange(len(_compounds))):
-            raise RuntimeError("LINCS compound indices are not contiguous")
-        _data = {
-            "inputs": _compounds["canonical_smiles"].astype(str).tolist(),
-            "modality": "molecule",
-        }
-    else:
-        from benchmark.datasets import load_benchmark_dataset
-        _data = load_benchmark_dataset(_dataset)
+    from benchmark.datasets import load_benchmark_dataset
+    _data = load_benchmark_dataset(_dataset)
     generate(_model_id, _dataset, _data["inputs"], _data["modality"],
              force="--force" in sys.argv[3:], isolate=False)
